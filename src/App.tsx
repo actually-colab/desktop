@@ -8,8 +8,7 @@ import 'ace-builds/src-noconflict/theme-xcode';
 import 'ace-builds/src-noconflict/ext-language_tools';
 
 const Editor = () => {
-  const [code1, setCode1] = React.useState<string>('');
-  const [code2, setCode2] = React.useState<string>('');
+  const [code, setCode] = React.useState<string>('');
 
   const editorOptions = {
     enableBasicAutocompletion: true,
@@ -22,16 +21,8 @@ const Editor = () => {
         name="ace-editor-1"
         mode="python"
         theme="xcode"
-        value={code1}
-        onChange={(newValue) => setCode1(newValue)}
-        setOptions={editorOptions}
-      />
-      <AceEditor
-        name="ace-editor-2"
-        mode="python"
-        theme="xcode"
-        value={code2}
-        onChange={(newValue) => setCode2(newValue)}
+        value={code}
+        onChange={(newValue) => setCode(newValue)}
         setOptions={editorOptions}
       />
     </div>
