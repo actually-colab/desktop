@@ -253,6 +253,7 @@
     "electron-updater": "^4.3.4",
     "history": "^5.0.0",
     "react": "^17.0.1",
+    "react-ace": "^9.2.1",
     "react-dom": "^17.0.1",
     "react-router-dom": "^5.2.0",
     "regenerator-runtime": "^0.13.5",

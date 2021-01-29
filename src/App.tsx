@@ -1,41 +1,39 @@
 import React from 'react';
+import AceEditor from 'react-ace';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
-import icon from '../assets/icon.svg';
 import './App.global.css';
 
-const Hello = () => {
+import 'ace-builds/src-noconflict/mode-python';
+import 'ace-builds/src-noconflict/theme-xcode';
+import 'ace-builds/src-noconflict/ext-language_tools';
+
+const Editor = () => {
+  const [code1, setCode1] = React.useState<string>('');
+  const [code2, setCode2] = React.useState<string>('');
+
+  const editorOptions = {
+    enableBasicAutocompletion: true,
+    enableLiveAutocompletion: true,
+  };
+
   return (
     <div>
-      <div className="Hello">
-        <img width="200px" alt="icon" src={icon} />
-      </div>
-      <h1>electron-react-boilerplate</h1>
-      <div className="Hello">
-        <a
-          href="https://electron-react-boilerplate.js.org/"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <button type="button">
-            <span role="img" aria-label="books">
-              📚
-            </span>
-            Read our docs
-          </button>
-        </a>
-        <a
-          href="https://github.com/sponsors/electron-react-boilerplate"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <button type="button">
-            <span role="img" aria-label="books">
-              🙏
-            </span>
-            Donate
-          </button>
-        </a>
-      </div>
+      <AceEditor
+        name="ace-editor-1"
+        mode="python"
+        theme="xcode"
+        value={code1}
+        onChange={(newValue) => setCode1(newValue)}
+        setOptions={editorOptions}
+      />
+      <AceEditor
+        name="ace-editor-2"
+        mode="python"
+        theme="xcode"
+        value={code2}
+        onChange={(newValue) => setCode2(newValue)}
+        setOptions={editorOptions}
+      />
     </div>
   );
 };
@@ -44,7 +42,7 @@ export default function App() {
   return (
     <Router>
       <Switch>
-        <Route path="/" component={Hello} />
+        <Route path="/" component={Editor} />
       </Switch>
     </Router>
   );
