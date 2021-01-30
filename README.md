@@ -4,6 +4,12 @@ Electron React Boilerplate uses <a href="https://electron.atom.io/">Electron</a>
 
 ## Starting Development
 
+Start the kernel gateway:
+
+```bash
+jupyter kernelgateway --KernelGatewayApp.allow_origin="*"
+```
+
 Start the app in the `dev` environment:
 
 ```bash
