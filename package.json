@@ -186,6 +186,7 @@
     "@types/react-router-dom": "^5.1.6",
     "@types/react-test-renderer": "^16.9.3",
     "@types/webpack-env": "^1.15.2",
+    "@types/ws": "^7.4.0",
     "@typescript-eslint/eslint-plugin": "^4.8.1",
     "@typescript-eslint/parser": "^4.8.1",
     "babel-eslint": "^10.1.0",
@@ -252,12 +253,16 @@
     "electron-log": "^4.2.4",
     "electron-updater": "^4.3.4",
     "history": "^5.0.0",
+    "jupyter-js-services": "^0.21.1",
+    "python-shell": "^2.0.3",
     "react": "^17.0.1",
     "react-ace": "^9.2.1",
     "react-dom": "^17.0.1",
     "react-router-dom": "^5.2.0",
     "regenerator-runtime": "^0.13.5",
-    "source-map-support": "^0.5.19"
+    "source-map-support": "^0.5.19",
+    "ws": "^7.4.2",
+    "xmlhttprequest": "^1.8.0"
   },
   "devEngines": {
     "node": ">=10.x",
