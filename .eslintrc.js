@@ -8,6 +8,7 @@ module.exports = {
     'no-console': 'off',
     'no-underscore-dangle': 'off',
     'react/prop-types': 'off',
+    'react/no-array-index-key': 'off',
   },
   parserOptions: {
     ecmaVersion: 2020,
