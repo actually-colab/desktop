@@ -6703,7 +6703,7 @@ hyphenate-style-name@^1.0.2:
   resolved "https://registry.yarnpkg.com/hyphenate-style-name/-/hyphenate-style-name-1.0.4.tgz#691879af8e220aea5750e8827db4ef62a54e361d"
   integrity sha512-ygGZLjmXfPHj+ZWh6LwbC37l43MhfztxetbFCoYTM2VjkIUpeHgSNn7QIyVFj7YQ1Wl9Cbw5sholVJPzWvC2MQ==
 
-icon-gen@^2.0.0:
+icon-gen@^2.0.0, icon-gen@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/icon-gen/-/icon-gen-2.1.0.tgz#401642b68d7c79316a8e6729bcf3fdfcdb71bdfa"
   integrity sha512-rqIVvq9MJ8X7wnJW0NO8Eau/+5RWV7AH6L5vEt/U5Ajv5WefdDNDxGwJhGokyHuyBWeX7JqRMQ03tG0gAco4Eg==
