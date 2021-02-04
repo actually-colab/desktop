@@ -27,7 +27,7 @@ export const installKernelGateway = async () => {
  * Start the kernel gateway with CORS allowing cross-origin requests
  */
 export const startKernelGateway = async () => {
-  const { stdout, stderr } = await execWithPromise('jupyter kernelgateway --KernelGatewayApp.allow_origin="*"');
+  const { stdout, stderr } = await execWithPromise('jupyter kernelgateway');
 
   if (stderr) {
     console.error(stderr);

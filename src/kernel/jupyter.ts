@@ -7,11 +7,15 @@ global.XMLHttpRequest = xmlhttprequest.XMLHttpRequest;
 const gatewayUrl = 'http://localhost:8888';
 const gatewayWsUrl = 'ws://localhost:8888';
 
-/**
- * Connect to the python3 kernel
- */
 export const connectToKernel = async (): Promise<
-  { success: true; kernel: IKernel } | { success: false; error: Error }
+  | {
+      success: true;
+      kernel: IKernel;
+    }
+  | {
+      success: false;
+      error: Error;
+    }
 > => {
   try {
     const kernelSpecs = await Kernel.getSpecs({
@@ -52,9 +56,6 @@ export const connectToKernel = async (): Promise<
   }
 };
 
-/**
- * Execute arbitrary code against the kernel
- */
 export const executeCode = (kernel: IKernel, code: string) =>
   new Promise<KernelMessage.IIOPubMessage[]>((resolve) => {
     console.log('Running code', code);
