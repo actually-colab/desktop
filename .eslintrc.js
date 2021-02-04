@@ -11,6 +11,7 @@ module.exports = {
     'no-nested-ternary': 'off',
     'react/prop-types': 'off',
     'react/no-array-index-key': 'off',
+    'react/jsx-fragments': 'off',
   },
   parserOptions: {
     ecmaVersion: 2020,
