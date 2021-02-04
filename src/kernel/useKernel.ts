@@ -1,26 +1,25 @@
 import React from 'react';
-import { IKernel } from 'jupyter-js-services';
-import { connectToKernel } from './jupyter';
+import { useDispatch, useSelector } from 'react-redux';
+
+import { ReduxState } from '../redux';
+import { _editor } from '../redux/actions';
 
 /**
  * Hook to connect to a kernel
  */
 const useKernel = () => {
-  const [kernel, setKernel] = React.useState<IKernel | null>(null);
+  const isConnectingToKernel = useSelector((state: ReduxState) => state.editor.isConnectingToKernel);
+  const connectToKernelErrorMessage = useSelector((state: ReduxState) => state.editor.connectToKernelErrorMessage);
+  const kernel = useSelector((state: ReduxState) => state.editor.kernel);
 
-  const connect = React.useCallback(async () => {
-    const res = await connectToKernel();
-
-    if (res.success) {
-      setKernel(res.kernel);
-    }
-  }, []);
+  const dispatch = useDispatch();
+  const dispatchConnectToKernel = React.useCallback(() => dispatch(_editor.connectToKernel()), [dispatch]);
 
   React.useEffect(() => {
-    if (kernel === null) {
-      connect();
+    if (!isConnectingToKernel && connectToKernelErrorMessage === '' && kernel === null) {
+      dispatchConnectToKernel();
     }
-  }, [connect, kernel]);
+  }, [connectToKernelErrorMessage, dispatchConnectToKernel, isConnectingToKernel, kernel]);
 
   return kernel;
 };
