@@ -1,7 +1,7 @@
 {
-  "name": "electron-react-boilerplate",
-  "productName": "ElectronReact",
-  "description": "Electron application boilerplate based on React, React Router, Webpack, React Fast Refresh for rapid application development",
+  "name": "actually-colab",
+  "productName": "Actually Colab",
+  "description": "Because Google Colab isn't actually collaborative",
   "scripts": {
     "build": "concurrently \"yarn build:main\" \"yarn build:renderer\"",
     "build:main": "cross-env NODE_ENV=production webpack --config ./.erb/configs/webpack.config.main.prod.babel.js",
@@ -30,8 +30,8 @@
     ]
   },
   "build": {
-    "productName": "ElectronReact",
-    "appId": "org.erb.ElectronReact",
+    "productName": "Actually Colab",
+    "appId": "com.actuallycolab.desktop",
     "files": [
       "dist/",
       "node_modules/",
@@ -86,34 +86,34 @@
     ],
     "publish": {
       "provider": "github",
-      "owner": "electron-react-boilerplate",
-      "repo": "electron-react-boilerplate"
+      "owner": "actually-colab",
+      "repo": "desktop"
     }
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/electron-react-boilerplate/electron-react-boilerplate.git"
+    "url": "git+https://github.com/actually-colab/desktop.git"
   },
   "author": {
-    "name": "Electron React Boilerplate Maintainers",
-    "email": "electronreactboilerplate@gmail.com",
-    "url": "https://electron-react-boilerplate.js.org"
+    "name": "Jeff Taylor-Chang & Bailey Tincher",
+    "email": "jeff@jefftc.com",
+    "url": "https://github.com/actually-colab"
   },
   "contributors": [
     {
-      "name": "Amila Welihinda",
-      "email": "amilajack@gmail.com",
-      "url": "https://github.com/amilajack"
+      "name": "Jeff Taylor-Chang",
+      "email": "jeff@jefftc.com",
+      "url": "https://github.com/jtaylorchang"
     },
     {
-      "name": "John Tran",
-      "email": "jptran318@gmail.com",
-      "url": "https://github.com/jooohhn"
+      "name": "Bailey Tincher",
+      "email": "btincher99@gmail.com",
+      "url": "https://github.com/baileytincher"
     }
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/electron-react-boilerplate/electron-react-boilerplate/issues"
+    "url": "https://github.com/actually-colab/desktop/issues"
   },
   "keywords": [
     "electron",
@@ -126,7 +126,7 @@
     "hot",
     "reload"
   ],
-  "homepage": "https://github.com/electron-react-boilerplate/electron-react-boilerplate#readme",
+  "homepage": "https://github.com/actually-colab/desktop",
   "jest": {
     "testURL": "http://localhost/",
     "moduleNameMapper": {
