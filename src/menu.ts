@@ -45,14 +45,14 @@ export default class MenuBuilder {
       label: 'Actually Colab',
       submenu: [
         {
-          label: 'About ElectronReact',
+          label: 'About Actually Colab',
           selector: 'orderFrontStandardAboutPanel:',
         },
         { type: 'separator' },
         { label: 'Services', submenu: [] },
         { type: 'separator' },
         {
-          label: 'Hide ElectronReact',
+          label: 'Hide Actually Colab',
           accelerator: 'Command+H',
           selector: 'hide:',
         },
