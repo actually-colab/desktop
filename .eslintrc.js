@@ -8,6 +8,7 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'off',
     'no-console': 'off',
     'no-underscore-dangle': 'off',
+    'no-nested-ternary': 'off',
     'react/prop-types': 'off',
     'react/no-array-index-key': 'off',
   },
