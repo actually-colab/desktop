@@ -1,16 +1,14 @@
 import React from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
-import './App.global.css';
 
-const Editor = () => {
-  return <div />;
-};
+import './App.global.css';
+import EditorPage from './pages/EditorPage';
 
 export default function App() {
   return (
     <Router>
       <Switch>
-        <Route path="/" component={Editor} />
+        <Route path="/" component={EditorPage} />
       </Switch>
     </Router>
   );
