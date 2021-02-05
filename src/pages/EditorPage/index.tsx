@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, css } from 'aphrodite';
 import { Placeholder } from 'rsuite';
 
-import { palette } from '../../constants/theme';
+import { palette, spacing } from '../../constants/theme';
 
 import EditorHeader from './EditorHeader';
 import LeftSidebar from './LeftSidebar';
@@ -29,8 +29,8 @@ const styles = StyleSheet.create({
   },
   editableArea: {
     flex: 1,
-    padding: 16,
-    overflowY: 'scroll',
+    padding: spacing.DEFAULT,
+    overflowY: 'auto',
   },
 });
 
