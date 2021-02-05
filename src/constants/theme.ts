@@ -2,4 +2,12 @@ export const palette = {
   BASE: 'rgb(15, 19, 26)',
   BASE_FADED: '#1a1d24',
   BASE_BORDER: '#444952',
+  CHARCOAL: '#383F51',
+  GRAY: '#8C8A93',
+  OLD_LAVENDER: '#896978',
+  LIGHT_LAVENDER: '#DDDBF1',
+  LIGHT_BROWN: '#D1BEB0',
+  ERROR: '#F52F57',
+  WARNING: '#FFBC42',
+  SUCCESS: '#62C370',
 };

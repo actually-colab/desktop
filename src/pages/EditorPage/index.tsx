@@ -1,59 +1,54 @@
 import React from 'react';
 import { StyleSheet, css } from 'aphrodite';
-import { Dropdown } from 'rsuite';
+import { Placeholder } from 'rsuite';
 
-import EditorSidebar from './EditorSidebar';
 import { palette } from '../../constants/theme';
-import { Header } from '../../components';
+
+import EditorHeader from './EditorHeader';
+import LeftSidebar from './LeftSidebar';
+import RightSidebar from './RightSidebar';
 
 const styles = StyleSheet.create({
   container: {
     display: 'flex',
     flex: 1,
     flexDirection: 'column',
-  },
-  header: {
-    paddingRight: 8,
-    display: 'flex',
-    flexDirection: 'row',
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+    overflow: 'hidden',
   },
   page: {
     display: 'flex',
     flex: 1,
+    overflow: 'hidden',
   },
   editableAreaContainer: {
     display: 'flex',
     flex: 1,
     backgroundColor: palette.BASE,
+    flexDirection: 'column',
+    overflow: 'hidden',
+  },
+  editableArea: {
+    flex: 1,
+    padding: 16,
+    overflowY: 'scroll',
   },
 });
 
 const EditorPage: React.FC = () => {
-  const [tempKernelSelection, setTempKernelSelection] = React.useState<string>('Select Kernel');
   return (
     <div className={css(styles.container)}>
-      <Header>
-        <div className={css(styles.header)}>
-          <Dropdown
-            title={tempKernelSelection}
-            activeKey={tempKernelSelection}
-            size="sm"
-            placement="bottomEnd"
-            onSelect={(eventKey) => setTempKernelSelection(eventKey)}
-          >
-            <Dropdown.Item eventKey="localhost">localhost</Dropdown.Item>
-            <Dropdown.Item eventKey="Some User">Some User</Dropdown.Item>
-          </Dropdown>
-        </div>
-      </Header>
+      <EditorHeader />
 
       <div className={css(styles.page)}>
-        <EditorSidebar />
+        <LeftSidebar />
 
-        <div className={css(styles.editableAreaContainer)} />
+        <div className={css(styles.editableAreaContainer)}>
+          <div className={css(styles.editableArea)}>
+            <Placeholder.Paragraph rows={30} active />
+          </div>
+        </div>
+
+        <RightSidebar />
       </div>
     </div>
   );

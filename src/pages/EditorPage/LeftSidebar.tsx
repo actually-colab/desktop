@@ -7,6 +7,7 @@ const styles = StyleSheet.create({
     width: 250,
     display: 'flex',
     flexDirection: 'column',
+    '-webkit-user-select': 'none',
   },
   titleContainer: {
     marginTop: 8,
@@ -21,7 +22,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const EditorSidebar: React.FC = () => {
+const LeftSidebar: React.FC = () => {
   return (
     <div className={css(styles.container)}>
       <Sidenav defaultOpenKeys={['projects']} style={{ flexGrow: 1 }}>
@@ -42,4 +43,4 @@ const EditorSidebar: React.FC = () => {
   );
 };
 
-export default EditorSidebar;
+export default LeftSidebar;
