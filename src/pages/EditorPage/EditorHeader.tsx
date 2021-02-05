@@ -1,9 +1,13 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import { Dropdown } from 'rsuite';
 
 import { Header, StatusIndicator } from '../../components';
+import { StatusIndicatorProps } from '../../components/StatusIndicator';
 import { palette } from '../../constants/theme';
+import { ReduxState } from '../../redux';
+import useKernelStatus from '../../kernel/useKernelStatus';
 
 const styles = StyleSheet.create({
   header: {
@@ -21,8 +25,35 @@ const styles = StyleSheet.create({
 });
 
 const EditorHeader: React.FC = () => {
-  const [kernelStatus, setKernelStatus] = React.useState<'Offline' | 'Error' | 'Busy' | 'Idle'>('Offline');
-  const [tempKernelSelection, setTempKernelSelection] = React.useState<string>('');
+  const localKernelStatus = useKernelStatus();
+  const connectToKernelErrorMessage = useSelector((state: ReduxState) => state.editor.connectToKernelErrorMessage);
+
+  const [tempKernelSelection, setTempKernelSelection] = React.useState<string>('localhost');
+
+  const kernelStatus = React.useMemo(() => (tempKernelSelection === 'localhost' ? localKernelStatus : 'Offline'), [
+    localKernelStatus,
+    tempKernelSelection,
+  ]);
+
+  const statusColor = React.useMemo(
+    () =>
+      kernelStatus === 'Error'
+        ? palette.ERROR
+        : kernelStatus === 'Busy'
+        ? palette.WARNING
+        : kernelStatus === 'Idle'
+        ? palette.SUCCESS
+        : palette.GRAY,
+    [kernelStatus]
+  );
+
+  const statusTooltip = React.useMemo<StatusIndicatorProps['tooltipOptions']>(
+    () => ({
+      placement: 'bottomEnd',
+      text: kernelStatus === 'Error' ? `Error: ${connectToKernelErrorMessage}` : kernelStatus,
+    }),
+    [connectToKernelErrorMessage, kernelStatus]
+  );
 
   return (
     <Header>
@@ -31,25 +62,10 @@ const EditorHeader: React.FC = () => {
           title={
             <div className={css(styles.kernelContainer)}>
               {tempKernelSelection !== '' && (
-                <StatusIndicator
-                  textPlacement="right"
-                  color={
-                    kernelStatus === 'Error'
-                      ? palette.ERROR
-                      : kernelStatus === 'Busy'
-                      ? palette.WARNING
-                      : kernelStatus === 'Idle'
-                      ? palette.SUCCESS
-                      : palette.GRAY
-                  }
-                  tooltipOptions={{
-                    placement: 'bottomEnd',
-                    text: kernelStatus,
-                  }}
-                />
+                <StatusIndicator textPlacement="right" color={statusColor} tooltipOptions={statusTooltip} />
               )}
 
-              {tempKernelSelection === '' ? 'Select Kernel' : tempKernelSelection}
+              {tempKernelSelection}
             </div>
           }
           activeKey={tempKernelSelection}
@@ -58,7 +74,6 @@ const EditorHeader: React.FC = () => {
           onSelect={(eventKey) => setTempKernelSelection(eventKey)}
         >
           <Dropdown.Item eventKey="localhost">localhost</Dropdown.Item>
-          <Dropdown.Item eventKey="Some User">Some User</Dropdown.Item>
         </Dropdown>
       </div>
     </Header>

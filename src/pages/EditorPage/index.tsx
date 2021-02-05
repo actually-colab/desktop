@@ -3,6 +3,7 @@ import { StyleSheet, css } from 'aphrodite';
 import { Placeholder } from 'rsuite';
 
 import { palette, spacing } from '../../constants/theme';
+import useKernel from '../../kernel/useKernel';
 
 import EditorHeader from './EditorHeader';
 import LeftSidebar from './LeftSidebar';
@@ -35,6 +36,8 @@ const styles = StyleSheet.create({
 });
 
 const EditorPage: React.FC = () => {
+  const kernel = useKernel();
+
   return (
     <div className={css(styles.container)}>
       <EditorHeader />

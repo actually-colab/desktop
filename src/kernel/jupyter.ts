@@ -1,6 +1,6 @@
 // @ts-ignore
 import xmlhttprequest from 'xmlhttprequest';
-import { IKernel, Kernel, KernelMessage } from 'jupyter-js-services';
+import { IKernel, Kernel } from 'jupyter-js-services';
 
 global.XMLHttpRequest = xmlhttprequest.XMLHttpRequest;
 
@@ -14,7 +14,9 @@ export const connectToKernel = async (): Promise<
     }
   | {
       success: false;
-      error: Error;
+      error: {
+        message: string;
+      };
     }
 > => {
   try {
@@ -42,7 +44,9 @@ export const connectToKernel = async (): Promise<
 
       return {
         success: false,
-        error,
+        error: {
+          message: error?.xhr?.statusText?.message ?? 'Unknown error',
+        },
       };
     }
   } catch (error) {
@@ -51,26 +55,9 @@ export const connectToKernel = async (): Promise<
 
     return {
       success: false,
-      error,
+      error: {
+        message: error?.xhr?.statusText?.message ?? 'Unknown error',
+      },
     };
   }
 };
-
-export const executeCode = (kernel: IKernel, code: string) =>
-  new Promise<KernelMessage.IIOPubMessage[]>((resolve) => {
-    console.log('Running code', code);
-    const output: KernelMessage.IIOPubMessage[] = [];
-
-    const future = kernel.execute({
-      code,
-    });
-
-    future.onIOPub = (msg) => {
-      output.push(msg);
-    };
-
-    future.onDone = () => {
-      console.log(output);
-      resolve(output);
-    };
-  });

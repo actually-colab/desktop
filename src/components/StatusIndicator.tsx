@@ -1,7 +1,7 @@
 import React from 'react';
 import { Badge, Tooltip, Whisper, WhisperProps } from 'rsuite';
 
-const StatusIndicator: React.FC<{
+export type StatusIndicatorProps = {
   color?: string;
   content?: string;
   textPlacement?: 'left' | 'right';
@@ -9,7 +9,9 @@ const StatusIndicator: React.FC<{
     placement: WhisperProps['placement'];
     text: string;
   };
-}> = ({ color, content, textPlacement, tooltipOptions }) => {
+};
+
+const StatusIndicator: React.FC<StatusIndicatorProps> = ({ color, content, textPlacement, tooltipOptions }) => {
   const StatusBadge = (
     <div>
       <Badge
