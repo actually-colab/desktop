@@ -1,3 +1,4 @@
 import Header from './Header';
+import StatusIndicator from './StatusIndicator';
 
-export { Header };
+export { Header, StatusIndicator };
