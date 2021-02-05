@@ -39,8 +39,26 @@ const SidebarButton: React.FC<{
       <IconButton
         appearance="subtle"
         size="md"
-        icon={<Icon icon={icon} style={color && !disabled && !loading ? { color } : undefined} />}
-        active={active}
+        style={{ borderRadius: 0 }}
+        icon={
+          <Icon
+            icon={icon}
+            style={
+              !loading
+                ? active
+                  ? {
+                      color: 'white',
+                      backgroundColor: palette.BASE_FADED,
+                    }
+                  : color
+                  ? {
+                      color: disabled ? `${color}60` : color,
+                    }
+                  : undefined
+                : undefined
+            }
+          />
+        }
         disabled={disabled || loading}
         loading={loading}
         onClick={onClick}
@@ -66,8 +84,20 @@ const RightSidebar: React.FC = () => {
   return (
     <div className={css(styles.container)}>
       <div className={css(styles.navContainer)}>
-        <SidebarButton icon="play" color={palette.SUCCESS} tooltipText="Run Cell" onClick={() => console.log('TODO')} />
-        <SidebarButton icon="stop" color={palette.ERROR} tooltipText="Stop Cell" onClick={() => console.log('TODO')} />
+        <SidebarButton
+          icon="play"
+          color={palette.SUCCESS}
+          tooltipText="Run Cell"
+          disabled
+          onClick={() => console.log('TODO')}
+        />
+        <SidebarButton
+          icon="stop"
+          color={palette.ERROR}
+          tooltipText="Stop Cell"
+          disabled
+          onClick={() => console.log('TODO')}
+        />
 
         <Divider style={{ marginTop: 0, marginBottom: 0 }} />
 
