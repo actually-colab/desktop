@@ -1,7 +1,8 @@
 import React from 'react';
-import { StyleSheet, css } from 'aphrodite';
 import { Placeholder } from 'rsuite';
+import { StyleSheet, css } from 'aphrodite';
 
+import AceImports from '../../utils/AceImports';
 import { palette, spacing } from '../../constants/theme';
 import useKernel from '../../kernel/useKernel';
 
@@ -39,21 +40,25 @@ const EditorPage: React.FC = () => {
   const kernel = useKernel();
 
   return (
-    <div className={css(styles.container)}>
-      <EditorHeader />
+    <React.Fragment>
+      {AceImports}
 
-      <div className={css(styles.page)}>
-        <LeftSidebar />
+      <div className={css(styles.container)}>
+        <EditorHeader />
 
-        <div className={css(styles.editableAreaContainer)}>
-          <div className={css(styles.editableArea)}>
-            <Placeholder.Paragraph rows={30} active />
+        <div className={css(styles.page)}>
+          <LeftSidebar />
+
+          <div className={css(styles.editableAreaContainer)}>
+            <div className={css(styles.editableArea)}>
+              <Placeholder.Paragraph rows={30} active />
+            </div>
           </div>
-        </div>
 
-        <RightSidebar />
+          <RightSidebar />
+        </div>
       </div>
-    </div>
+    </React.Fragment>
   );
 };
 
