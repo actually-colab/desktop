@@ -9,6 +9,7 @@ import useKernel from '../../kernel/useKernel';
 import EditorHeader from './EditorHeader';
 import LeftSidebar from './LeftSidebar';
 import RightSidebar from './RightSidebar';
+import { CodeCell } from '../../components';
 
 const styles = StyleSheet.create({
   container: {
@@ -39,6 +40,16 @@ const styles = StyleSheet.create({
 const EditorPage: React.FC = () => {
   const kernel = useKernel();
 
+  const [active, setActive] = React.useState<boolean>(false);
+  const [code, setCode] = React.useState<string>(`def fib(n):
+    if n <= 1:
+        return n
+
+    return n * fib(n - 1)
+
+for i in range(8):
+    print fib(i)`);
+
   return (
     <React.Fragment>
       {AceImports}
@@ -51,7 +62,18 @@ const EditorPage: React.FC = () => {
 
           <div className={css(styles.editableAreaContainer)}>
             <div className={css(styles.editableArea)}>
-              <Placeholder.Paragraph rows={30} active />
+              <CodeCell
+                cell={{
+                  active,
+                  code,
+                  _id: 'some-editor',
+                  runIndex: 0,
+                  output: [],
+                }}
+                onFocus={(_id) => setActive(true)}
+                onBlur={(_id) => setActive(false)}
+                onChange={(_id, newValue) => setCode(newValue)}
+              />
             </div>
           </div>
 
