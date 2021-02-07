@@ -1,22 +1,33 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import { Dropdown } from 'rsuite';
+import { Avatar, Dropdown, Tooltip, Whisper } from 'rsuite';
 
-import { Header, StatusIndicator } from '../../components';
+import { ColoredIconButton, Header, StatusIndicator } from '../../components';
 import { StatusIndicatorProps } from '../../components/StatusIndicator';
-import { palette } from '../../constants/theme';
+import { palette, spacing } from '../../constants/theme';
 import { ReduxState } from '../../redux';
 import useKernelStatus from '../../kernel/useKernelStatus';
 
 const styles = StyleSheet.create({
   header: {
+    paddingLeft: 220,
     paddingRight: 8,
     display: 'flex',
     flexDirection: 'row',
     flex: 1,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  headerNoDrag: {
+    display: 'flex',
+    flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'center',
+    '-webkit-app-region': 'no-drag',
+  },
+  avatars: {
+    marginRight: spacing.DEFAULT / 2,
   },
   kernelContainer: {
     display: 'flex',
@@ -58,23 +69,57 @@ const EditorHeader: React.FC = () => {
   return (
     <Header>
       <div className={css(styles.header)}>
-        <Dropdown
-          title={
-            <div className={css(styles.kernelContainer)}>
-              {tempKernelSelection !== '' && (
-                <StatusIndicator textPlacement="right" color={statusColor} tooltipOptions={statusTooltip} />
-              )}
+        <div className={css(styles.headerNoDrag)}>
+          <ColoredIconButton
+            icon="play"
+            color={palette.SUCCESS}
+            tooltipText="Run the current cell"
+            tooltipDirection="bottom"
+            onClick={() => console.log('TODO')}
+          />
+          <ColoredIconButton
+            icon="stop"
+            color={palette.ERROR}
+            tooltipText="Interrupt the kernel"
+            tooltipDirection="bottom"
+            onClick={() => console.log('TODO')}
+          />
+          <ColoredIconButton
+            icon="plus"
+            tooltipText="Create a new cell"
+            tooltipDirection="bottom"
+            onClick={() => console.log('TODO')}
+          />
+        </div>
 
-              {tempKernelSelection}
-            </div>
-          }
-          activeKey={tempKernelSelection}
-          size="sm"
-          placement="bottomEnd"
-          onSelect={(eventKey) => setTempKernelSelection(eventKey)}
-        >
-          <Dropdown.Item eventKey="localhost">localhost</Dropdown.Item>
-        </Dropdown>
+        <div className={css(styles.headerNoDrag)}>
+          <div className={css(styles.avatars)}>
+            <Whisper placement="bottomEnd" trigger="hover" delay={500} speaker={<Tooltip>Bailey Tincher</Tooltip>}>
+              <Avatar size="sm" circle>
+                BT
+              </Avatar>
+            </Whisper>
+          </div>
+
+          <Dropdown
+            appearance="subtle"
+            size="md"
+            placement="bottomEnd"
+            title={
+              <div className={css(styles.kernelContainer)}>
+                {tempKernelSelection !== '' && (
+                  <StatusIndicator textPlacement="right" color={statusColor} tooltipOptions={statusTooltip} />
+                )}
+
+                {tempKernelSelection}
+              </div>
+            }
+            activeKey={tempKernelSelection}
+            onSelect={(eventKey) => setTempKernelSelection(eventKey)}
+          >
+            <Dropdown.Item eventKey="localhost">localhost</Dropdown.Item>
+          </Dropdown>
+        </div>
       </div>
     </Header>
   );

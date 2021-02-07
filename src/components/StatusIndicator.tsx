@@ -30,7 +30,7 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({ color, content, textP
   }
 
   return (
-    <Whisper placement={tooltipOptions.placement} speaker={<Tooltip>{tooltipOptions.text}</Tooltip>}>
+    <Whisper placement={tooltipOptions.placement} delay={500} speaker={<Tooltip>{tooltipOptions.text}</Tooltip>}>
       {StatusBadge}
     </Whisper>
   );

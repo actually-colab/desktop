@@ -1,25 +1,36 @@
 import React from 'react';
 import { StyleSheet, css } from 'aphrodite';
-import { Dropdown, Icon, Nav, Sidenav } from 'rsuite';
+import { Button, Dropdown, Icon, Input, InputGroup, Nav, Sidenav } from 'rsuite';
+
+import { palette, spacing } from '../../constants/theme';
 
 const styles = StyleSheet.create({
   container: {
-    width: 250,
+    width: 220,
     display: 'flex',
     flexDirection: 'column',
     '-webkit-user-select': 'none',
   },
   titleContainer: {
-    marginTop: 8,
+    marginLeft: 20,
+    marginRight: 20,
+    marginBottom: spacing.DEFAULT,
   },
   title: {
-    marginLeft: 20,
+    marginBottom: spacing.DEFAULT,
     fontSize: 20,
     fontWeight: 'bold',
-    background: '-webkit-linear-gradient(top left, #E27686, #E2CC52)',
+    background: '-webkit-linear-gradient(top left, #f55673, #E2CC52)',
     '-webkit-background-clip': 'text',
     '-webkit-text-fill-color': 'transparent',
   },
+  iconButtonText: {
+    marginLeft: spacing.DEFAULT / 2,
+  },
+  newProjectContainer: {
+    marginBottom: spacing.DEFAULT,
+  },
+  searchContainer: {},
 });
 
 const LeftSidebar: React.FC = () => {
@@ -28,7 +39,24 @@ const LeftSidebar: React.FC = () => {
       <Sidenav activeKey="projects-some-id" defaultOpenKeys={['projects']} style={{ flexGrow: 1 }}>
         <Sidenav.Header>
           <div className={css(styles.titleContainer)}>
-            <span className={css(styles.title)}>actually colab</span>
+            <p className={css(styles.title)}>actually colab</p>
+
+            <div className={css(styles.newProjectContainer)}>
+              <Button appearance="primary" size="lg" block>
+                <Icon icon="edit" size="lg" />
+                <span className={css(styles.iconButtonText)}>New project</span>
+              </Button>
+            </div>
+
+            <div className={css(styles.searchContainer)}>
+              <InputGroup>
+                <Input style={{ backgroundColor: palette.BASE_FADED }} size="lg" placeholder="Search projects" />
+
+                <InputGroup.Addon>
+                  <Icon icon="search" />
+                </InputGroup.Addon>
+              </InputGroup>
+            </div>
           </div>
         </Sidenav.Header>
         <Sidenav.Body>

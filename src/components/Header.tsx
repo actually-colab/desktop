@@ -7,11 +7,10 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     width: '100%',
-    height: 36,
+    height: 42,
     backgroundColor: palette.BASE_FADED,
     '-webkit-app-region': 'drag',
     '-webkit-user-select': 'none',
-    paddingLeft: 72,
   },
 });
 

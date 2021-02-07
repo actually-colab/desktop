@@ -45,7 +45,7 @@ const CodeCell: React.FC<{
         style={{ width: '100%' }}
         name={cell._id}
         mode="python"
-        theme="one_dark"
+        theme="xcode"
         setOptions={cell.active ? editorOptionsActive : editorOptionsInactive}
         minLines={1}
         maxLines={Infinity}
@@ -53,16 +53,6 @@ const CodeCell: React.FC<{
         onFocus={handleFocus}
         onBlur={handleBlur}
         onChange={handleChange}
-        markers={[
-          {
-            startRow: 4,
-            endRow: 4,
-            startCol: 8,
-            endCol: 9,
-            className: 'user-marker',
-            type: 'text',
-          },
-        ]}
       />
     </div>
   );

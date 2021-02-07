@@ -1,8 +1,9 @@
 import React from 'react';
 import { StyleSheet, css } from 'aphrodite';
-import { Divider, Icon, IconButton, IconProps, Placeholder, Tooltip, Whisper } from 'rsuite';
+import { Placeholder } from 'rsuite';
 
 import { palette, spacing } from '../../constants/theme';
+import { ColoredIconButton } from '../../components';
 
 const styles = StyleSheet.create({
   container: {
@@ -15,6 +16,11 @@ const styles = StyleSheet.create({
   navContainer: {
     display: 'flex',
     flexDirection: 'column',
+    justifyContent: 'space-between',
+  },
+  menuButtons: {
+    display: 'flex',
+    flexDirection: 'column',
   },
   pane: {
     width: 250,
@@ -24,48 +30,6 @@ const styles = StyleSheet.create({
     overflowY: 'auto',
   },
 });
-
-const SidebarButton: React.FC<{
-  icon: IconProps['icon'];
-  color?: string;
-  tooltipText: string;
-  active?: boolean;
-  disabled?: boolean;
-  loading?: boolean;
-  onClick(): void;
-}> = ({ tooltipText, icon, color, active = false, disabled = false, loading = false, onClick }) => {
-  return (
-    <Whisper placement="left" trigger="hover" speaker={<Tooltip>{tooltipText}</Tooltip>}>
-      <IconButton
-        appearance="subtle"
-        size="md"
-        style={{ borderRadius: 0 }}
-        icon={
-          <Icon
-            icon={icon}
-            style={
-              !loading
-                ? active
-                  ? {
-                      color: 'white',
-                      backgroundColor: palette.BASE_FADED,
-                    }
-                  : color
-                  ? {
-                      color: disabled ? `${color}60` : color,
-                    }
-                  : undefined
-                : undefined
-            }
-          />
-        }
-        disabled={disabled || loading}
-        loading={loading}
-        onClick={onClick}
-      />
-    </Whisper>
-  );
-};
 
 const RightSidebar: React.FC = () => {
   const [visibleMenu, setVisibleMenu] = React.useState<string>('');
@@ -84,47 +48,44 @@ const RightSidebar: React.FC = () => {
   return (
     <div className={css(styles.container)}>
       <div className={css(styles.navContainer)}>
-        <SidebarButton
-          icon="play"
-          color={palette.SUCCESS}
-          tooltipText="Run Cell"
-          disabled
-          onClick={() => console.log('TODO')}
-        />
-        <SidebarButton
-          icon="stop"
-          color={palette.ERROR}
-          tooltipText="Stop Cell"
-          disabled
-          onClick={() => console.log('TODO')}
-        />
-        <SidebarButton icon="plus-square" tooltipText="New Cell" onClick={() => console.log('TODO')} />
+        <div className={css(styles.menuButtons)}>
+          <ColoredIconButton
+            active={visibleMenu === 'Collaborators'}
+            icon="group"
+            tooltipText="Collaborators"
+            tooltipDirection="left"
+            onClick={() => openMenu('Collaborators')}
+          />
+          <ColoredIconButton
+            active={visibleMenu === 'Kernel Logs'}
+            icon="tasks"
+            tooltipText="Kernel Logs"
+            tooltipDirection="left"
+            onClick={() => openMenu('Kernel Logs')}
+          />
+          <ColoredIconButton
+            active={visibleMenu === 'Downloads'}
+            icon="download"
+            tooltipText="Downloads"
+            tooltipDirection="left"
+            onClick={() => openMenu('Downloads')}
+          />
+          <ColoredIconButton
+            active={visibleMenu === 'Settings'}
+            icon="gear-circle"
+            tooltipText="Settings"
+            tooltipDirection="left"
+            onClick={() => openMenu('Settings')}
+          />
+        </div>
 
-        <Divider style={{ marginTop: 0, marginBottom: 0 }} />
-
-        <SidebarButton
-          active={visibleMenu === 'Collaborators'}
-          icon="group"
-          tooltipText="Collaborators"
-          onClick={() => openMenu('Collaborators')}
-        />
-        <SidebarButton
-          active={visibleMenu === 'Kernel Logs'}
-          icon="tasks"
-          tooltipText="Kernel Logs"
-          onClick={() => openMenu('Kernel Logs')}
-        />
-        <SidebarButton
-          active={visibleMenu === 'Downloads'}
-          icon="download"
-          tooltipText="Downloads"
-          onClick={() => openMenu('Downloads')}
-        />
-        <SidebarButton
-          active={visibleMenu === 'Settings'}
-          icon="gear-circle"
-          tooltipText="Settings"
-          onClick={() => openMenu('Settings')}
+        <ColoredIconButton
+          size="lg"
+          icon="arrow-right-line"
+          tooltipText="Hide menu"
+          tooltipDirection="left"
+          disabled={visibleMenu === ''}
+          onClick={() => setVisibleMenu('')}
         />
       </div>
 
