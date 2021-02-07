@@ -4,9 +4,16 @@ import AceEditor from 'react-ace';
 
 import { EditorCell } from '../kernel/types';
 import { editorOptionsActive, editorOptionsInactive } from '../constants/editorOptions';
+import { palette } from '../constants/theme';
 
 const styles = StyleSheet.create({
   container: {
+    width: '100%',
+    borderStyle: 'solid',
+    borderWidth: 1,
+    borderColor: palette.BASE_BORDER,
+  },
+  editor: {
     width: '100%',
   },
 });
