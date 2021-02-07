@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
 const LeftSidebar: React.FC = () => {
   return (
     <div className={css(styles.container)}>
-      <Sidenav defaultOpenKeys={['projects']} style={{ flexGrow: 1 }}>
+      <Sidenav activeKey="projects-some-id" defaultOpenKeys={['projects']} style={{ flexGrow: 1 }}>
         <Sidenav.Header>
           <div className={css(styles.titleContainer)}>
             <span className={css(styles.title)}>actually colab</span>
@@ -34,7 +34,7 @@ const LeftSidebar: React.FC = () => {
         <Sidenav.Body>
           <Nav>
             <Dropdown eventKey="projects" title="Projects" icon={<Icon icon="code" />}>
-              <Dropdown.Item>Example Project</Dropdown.Item>
+              <Dropdown.Item eventKey="projects-some-id">Example Project</Dropdown.Item>
             </Dropdown>
           </Nav>
         </Sidenav.Body>

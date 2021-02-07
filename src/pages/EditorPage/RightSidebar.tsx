@@ -98,6 +98,7 @@ const RightSidebar: React.FC = () => {
           disabled
           onClick={() => console.log('TODO')}
         />
+        <SidebarButton icon="plus-square" tooltipText="New Cell" onClick={() => console.log('TODO')} />
 
         <Divider style={{ marginTop: 0, marginBottom: 0 }} />
 
