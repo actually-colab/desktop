@@ -1,16 +1,19 @@
-const editorOptions = {
+import { IAceOptions } from 'react-ace';
+
+const editorOptions: IAceOptions = {
+  printMargin: false,
   enableBasicAutocompletion: true,
   enableLiveAutocompletion: true,
 };
 
-export const editorOptionsActive = {
+export const editorOptionsActive: IAceOptions = {
   ...editorOptions,
   readOnly: false,
   highlightActiveLine: true,
   highlightGutterLine: true,
 };
 
-export const editorOptionsInactive = {
+export const editorOptionsInactive: IAceOptions = {
   ...editorOptions,
   readOnly: true,
   highlightActiveLine: false,
