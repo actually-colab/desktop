@@ -53,6 +53,16 @@ const CodeCell: React.FC<{
         onFocus={handleFocus}
         onBlur={handleBlur}
         onChange={handleChange}
+        markers={[
+          {
+            startRow: 4,
+            endRow: 4,
+            startCol: 8,
+            endCol: 9,
+            className: 'user-marker',
+            type: 'text',
+          },
+        ]}
       />
     </div>
   );

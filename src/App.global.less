@@ -18,3 +18,24 @@ body {
 .ace_hidden-cursors {
   opacity: 0;
 }
+
+.user-marker {
+  position: absolute;
+  width: 1px !important;
+  background-color: @base-color;
+}
+
+.user-marker::before {
+  content: '';
+  position: absolute;
+  left: -2px;
+  top: -2px;
+  width: 5px;
+  height: 5px;
+  background-color: @base-color;
+}
+
+.user-marker-selection {
+  position: absolute;
+  background-color: @base-color;
+}
