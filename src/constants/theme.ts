@@ -1,5 +1,6 @@
 export const palette = {
   PRIMARY: '#f55673',
+  PRIMARY_LIGHT: '#F5EBED',
   BASE: '#FFFFFF',
   BASE_FADED: '#F7F7FA',
   BASE_BORDER: '#DBE6F1',
