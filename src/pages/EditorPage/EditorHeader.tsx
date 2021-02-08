@@ -11,7 +11,7 @@ import useKernelStatus from '../../kernel/useKernelStatus';
 
 const styles = StyleSheet.create({
   header: {
-    paddingLeft: 220,
+    paddingLeft: 263,
     paddingRight: 4,
     display: 'flex',
     flexDirection: 'row',

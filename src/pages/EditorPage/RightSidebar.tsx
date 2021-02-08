@@ -72,8 +72,8 @@ const RightSidebar: React.FC = () => {
           />
           <ColoredIconButton
             active={visibleMenu === 'Settings'}
-            icon="gear-circle"
-            tooltipText="Settings"
+            icon="wrench"
+            tooltipText="Project Settings"
             tooltipDirection="left"
             onClick={() => openMenu('Settings')}
           />
