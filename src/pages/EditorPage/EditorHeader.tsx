@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import { Avatar, Dropdown, Tooltip, Whisper } from 'rsuite';
+import { Avatar, Badge, Dropdown, Tooltip, Whisper } from 'rsuite';
 
 import { ColoredIconButton, Header, PopoverDropdown, StatusIndicator } from '../../components';
 import { StatusIndicatorProps } from '../../components/StatusIndicator';
@@ -27,6 +27,7 @@ const styles = StyleSheet.create({
     '-webkit-app-region': 'no-drag',
   },
   avatars: {
+    position: 'relative',
     marginRight: spacing.DEFAULT / 2,
   },
 });
@@ -95,10 +96,11 @@ const EditorHeader: React.FC = () => {
         <div className={css(styles.headerNoDrag)}>
           <div className={css(styles.avatars)}>
             <Whisper placement="bottomEnd" trigger="hover" delay={500} speaker={<Tooltip>Bailey Tincher</Tooltip>}>
-              <Avatar size="sm" circle>
+              <Avatar style={{ background: palette.OLD_LAVENDER }} size="sm" circle>
                 BT
               </Avatar>
             </Whisper>
+            <Badge style={{ position: 'absolute', bottom: 0, right: 0, background: palette.SUCCESS }} />
           </div>
 
           <PopoverDropdown

@@ -10,6 +10,8 @@
 @dropdown-link-active-color: @btn-primary-color;
 @sidenav-default-active-font-color: @btn-primary-color;
 
+@user-1: #896978;
+
 body {
   height: 100vh;
 }
@@ -23,23 +25,18 @@ body {
   opacity: 0;
 }
 
-.user-marker {
+.user-marker-1 {
   position: absolute;
   width: 1px !important;
-  background-color: @base-color;
+  background-color: @user-1;
 }
 
-.user-marker::before {
+.user-marker-1::before {
   content: '';
   position: absolute;
   left: -2px;
   top: -2px;
   width: 5px;
   height: 5px;
-  background-color: @base-color;
-}
-
-.user-marker-selection {
-  position: absolute;
   background-color: @base-color;
 }

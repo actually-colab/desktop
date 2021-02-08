@@ -47,6 +47,9 @@ const styles = StyleSheet.create({
   categoryActive: {
     borderLeftColor: palette.PRIMARY,
   },
+  avatar: {
+    position: 'relative',
+  },
   bodyContainer: {
     width: 220,
     paddingLeft: spacing.DEFAULT,
@@ -105,10 +108,12 @@ const LeftSidebar: React.FC = () => {
               <IconButton size="lg" icon={<Icon icon="cog" />} />
             </div>
 
-            <Avatar style={{ background: palette.CHARCOAL }} size="sm" circle>
-              JT
-            </Avatar>
-            <Badge style={{ position: 'absolute', bottom: 9, left: 31, background: palette.SUCCESS }} />
+            <div className={css(styles.avatar)}>
+              <Avatar style={{ background: palette.CHARCOAL }} size="sm" circle>
+                JT
+              </Avatar>
+              <Badge style={{ position: 'absolute', bottom: 0, right: 0, background: palette.SUCCESS }} />
+            </div>
           </div>
         </div>
 
