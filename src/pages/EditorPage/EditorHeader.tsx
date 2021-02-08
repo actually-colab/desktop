@@ -1,7 +1,8 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import { Avatar, Dropdown, Tooltip, Whisper } from 'rsuite';
+import { Avatar, Button, Dropdown, Icon, Popover, Tooltip, Whisper } from 'rsuite';
+import { WhisperInstance } from 'rsuite/lib/Whisper';
 
 import { ColoredIconButton, Header, StatusIndicator } from '../../components';
 import { StatusIndicatorProps } from '../../components/StatusIndicator';
@@ -32,6 +33,10 @@ const styles = StyleSheet.create({
   kernelContainer: {
     display: 'flex',
     flexDirection: 'row',
+    alignItems: 'center',
+  },
+  dropdownIcon: {
+    marginLeft: spacing.DEFAULT / 2,
   },
 });
 
@@ -39,6 +44,7 @@ const EditorHeader: React.FC = () => {
   const localKernelStatus = useKernelStatus();
   const connectToKernelErrorMessage = useSelector((state: ReduxState) => state.editor.connectToKernelErrorMessage);
 
+  const kernelMenuRef = React.createRef<WhisperInstance>();
   const [tempKernelSelection, setTempKernelSelection] = React.useState<string>('localhost');
 
   const kernelStatus = React.useMemo(() => (tempKernelSelection === 'localhost' ? localKernelStatus : 'Offline'), [
@@ -64,6 +70,14 @@ const EditorHeader: React.FC = () => {
       text: kernelStatus === 'Error' ? `Error: ${connectToKernelErrorMessage}` : kernelStatus,
     }),
     [connectToKernelErrorMessage, kernelStatus]
+  );
+
+  const handleKernelSelect = React.useCallback(
+    (eventKey: string) => {
+      setTempKernelSelection(eventKey);
+      kernelMenuRef.current?.close();
+    },
+    [kernelMenuRef]
   );
 
   return (
@@ -101,24 +115,32 @@ const EditorHeader: React.FC = () => {
             </Whisper>
           </div>
 
-          <Dropdown
-            appearance="subtle"
-            size="md"
+          <Whisper
             placement="bottomEnd"
-            title={
+            trigger="click"
+            ref={kernelMenuRef}
+            speaker={
+              <Popover full>
+                <Dropdown.Menu activeKey={tempKernelSelection} onSelect={handleKernelSelect}>
+                  <Dropdown.Item eventKey="localhost">localhost</Dropdown.Item>
+                </Dropdown.Menu>
+              </Popover>
+            }
+          >
+            <Button appearance="subtle" size="md">
               <div className={css(styles.kernelContainer)}>
                 {tempKernelSelection !== '' && (
                   <StatusIndicator textPlacement="right" color={statusColor} tooltipOptions={statusTooltip} />
                 )}
 
                 {tempKernelSelection}
+
+                <div className={css(styles.dropdownIcon)}>
+                  <Icon icon="arrow-down-line" />
+                </div>
               </div>
-            }
-            activeKey={tempKernelSelection}
-            onSelect={(eventKey) => setTempKernelSelection(eventKey)}
-          >
-            <Dropdown.Item eventKey="localhost">localhost</Dropdown.Item>
-          </Dropdown>
+            </Button>
+          </Whisper>
         </div>
       </div>
     </Header>
