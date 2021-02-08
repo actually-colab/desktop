@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, css } from 'aphrodite';
-import { Button, Dropdown, Icon, Popover, Whisper, WhisperProps } from 'rsuite';
+import { Button, ButtonProps, Dropdown, Icon, Popover, Whisper, WhisperProps } from 'rsuite';
 import { WhisperInstance } from 'rsuite/lib/Whisper';
 
 import { spacing } from '../constants/theme';
@@ -20,6 +20,7 @@ export type PopoverDropdownProps = {
   placement: WhisperProps['placement'];
   activeKey?: string;
   buttonContent: React.ReactNode;
+  buttonProps?: ButtonProps;
   onSelect?(eventKey: string): void;
 };
 
@@ -27,6 +28,10 @@ const PopoverDropdown: React.FC<PopoverDropdownProps> = ({
   placement = 'bottomEnd',
   activeKey,
   buttonContent,
+  buttonProps = {
+    appearance: 'subtle',
+    size: 'md',
+  },
   onSelect,
   children,
 }) => {
@@ -53,7 +58,7 @@ const PopoverDropdown: React.FC<PopoverDropdownProps> = ({
         </Popover>
       }
     >
-      <Button appearance="subtle" size="md">
+      <Button {...buttonProps}>
         <div className={css(styles.buttonContent)}>
           {buttonContent}
 
