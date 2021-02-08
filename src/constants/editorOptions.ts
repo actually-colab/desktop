@@ -1,6 +1,7 @@
 import { IAceOptions } from 'react-ace';
 
 const editorOptions: IAceOptions = {
+  showFoldWidgets: false,
   printMargin: false,
   enableBasicAutocompletion: true,
   enableLiveAutocompletion: true,
