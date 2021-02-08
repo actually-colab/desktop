@@ -96,16 +96,19 @@ const LeftSidebar: React.FC = () => {
         <div className={css(styles.categoryContainer)}>
           <div className={css(styles.mainPanelCategories)}>
             <div className={css([styles.category, styles.categoryActive])}>
-              <IconButton style={{ color: palette.PRIMARY }} size="lg" icon={<Icon icon="pencil" />} />
+              <IconButton style={{ color: palette.PRIMARY }} size="lg" icon={<Icon icon="edit" />} />
             </div>
             <div className={css(styles.category)}>
-              <IconButton size="lg" icon={<Icon icon="user-plus" />} />
+              <IconButton size="lg" icon={<Icon icon="realtime" />} />
+            </div>
+            <div className={css(styles.category)}>
+              <IconButton size="lg" icon={<Icon icon="peoples" />} />
             </div>
           </div>
 
           <div className={css(styles.endPanelCategories)}>
             <div className={css(styles.category)}>
-              <IconButton size="lg" icon={<Icon icon="cog" />} />
+              <IconButton size="lg" icon={<Icon icon="gear" />} />
             </div>
 
             <div className={css(styles.avatar)}>
