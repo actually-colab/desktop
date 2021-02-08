@@ -30,7 +30,7 @@ const ColoredIconButton: React.FC<ColoredIconButtonProps> = ({
     <IconButton
       appearance="subtle"
       size={size}
-      style={{ borderRadius: 0, userSelect: 'auto' }}
+      style={{ borderRadius: 0 }}
       icon={
         <Icon
           icon={icon}

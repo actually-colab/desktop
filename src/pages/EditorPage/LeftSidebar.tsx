@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, css } from 'aphrodite';
-import { Avatar, Badge, Button, Dropdown, Icon, IconButton, Input, InputGroup, Nav, Sidenav } from 'rsuite';
+import { Avatar, Badge, Button, Icon, IconButton, IconProps, Input, InputGroup } from 'rsuite';
 
 import { palette, spacing } from '../../constants/theme';
 
@@ -79,6 +79,30 @@ const styles = StyleSheet.create({
   searchContainer: {},
 });
 
+const CategoryButton: React.FC<{
+  icon: IconProps['icon'];
+  menuKey: string;
+  activeMenuKey: string;
+  onSelect(menu: string): void;
+}> = ({ icon, menuKey, activeMenuKey, onSelect }) => {
+  const isActive = menuKey === activeMenuKey;
+
+  return (
+    <div className={css(isActive ? [styles.category, styles.categoryActive] : styles.category)}>
+      <IconButton
+        style={{
+          color: isActive ? palette.PRIMARY : palette.CHARCOAL,
+          borderRadius: 0,
+          backgroundColor: palette.BASE_FADED,
+        }}
+        size="lg"
+        icon={<Icon icon={icon} />}
+        onClick={() => onSelect(menuKey)}
+      />
+    </div>
+  );
+};
+
 const LeftSidebar: React.FC = () => {
   const projects = [
     {
@@ -86,6 +110,19 @@ const LeftSidebar: React.FC = () => {
       name: 'Example Project',
     },
   ];
+
+  const [activeMenuKey, setActiveMenuKey] = React.useState<'' | 'projects' | 'kernel' | 'follow' | 'settings'>(
+    'projects'
+  );
+
+  const handleCategorySelect = React.useCallback(
+    (menuKey: typeof activeMenuKey) => {
+      if (activeMenuKey !== menuKey) {
+        setActiveMenuKey(menuKey);
+      }
+    },
+    [activeMenuKey]
+  );
 
   return (
     <div className={css(styles.container)}>
@@ -95,21 +132,33 @@ const LeftSidebar: React.FC = () => {
       <div className={css(styles.panel)}>
         <div className={css(styles.categoryContainer)}>
           <div className={css(styles.mainPanelCategories)}>
-            <div className={css([styles.category, styles.categoryActive])}>
-              <IconButton style={{ color: palette.PRIMARY }} size="lg" icon={<Icon icon="edit" />} />
-            </div>
-            <div className={css(styles.category)}>
-              <IconButton size="lg" icon={<Icon icon="realtime" />} />
-            </div>
-            <div className={css(styles.category)}>
-              <IconButton size="lg" icon={<Icon icon="peoples" />} />
-            </div>
+            <CategoryButton
+              icon="edit"
+              menuKey="projects"
+              activeMenuKey={activeMenuKey}
+              onSelect={handleCategorySelect}
+            />
+            <CategoryButton
+              icon="related-map"
+              menuKey="kernel"
+              activeMenuKey={activeMenuKey}
+              onSelect={handleCategorySelect}
+            />
+            <CategoryButton
+              icon="peoples"
+              menuKey="follow"
+              activeMenuKey={activeMenuKey}
+              onSelect={handleCategorySelect}
+            />
           </div>
 
           <div className={css(styles.endPanelCategories)}>
-            <div className={css(styles.category)}>
-              <IconButton size="lg" icon={<Icon icon="gear" />} />
-            </div>
+            <CategoryButton
+              icon="gear"
+              menuKey="settings"
+              activeMenuKey={activeMenuKey}
+              onSelect={handleCategorySelect}
+            />
 
             <div className={css(styles.avatar)}>
               <Avatar style={{ background: palette.CHARCOAL }} size="sm" circle>
