@@ -20,14 +20,13 @@ export type PopoverDropdownProps = {
   placement: WhisperProps['placement'];
   activeKey?: string;
   buttonContent: React.ReactNode;
-  onSelect(eventKey: string): void;
+  onSelect?(eventKey: string): void;
 };
 
 const PopoverDropdown: React.FC<PopoverDropdownProps> = ({
   placement = 'bottomEnd',
   activeKey,
   buttonContent,
-
   onSelect,
   children,
 }) => {
@@ -35,7 +34,7 @@ const PopoverDropdown: React.FC<PopoverDropdownProps> = ({
 
   const handleSelect = React.useCallback(
     (eventKey: string) => {
-      onSelect(eventKey);
+      onSelect?.(eventKey);
       whisperRef.current?.close();
     },
     [onSelect, whisperRef]
