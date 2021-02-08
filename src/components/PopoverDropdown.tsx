@@ -6,6 +6,9 @@ import { WhisperInstance } from 'rsuite/lib/Whisper';
 import { spacing } from '../constants/theme';
 
 const styles = StyleSheet.create({
+  buttonContentContainer: {
+    display: 'inline-block',
+  },
   buttonContent: {
     display: 'flex',
     flexDirection: 'row',
@@ -28,10 +31,7 @@ const PopoverDropdown: React.FC<PopoverDropdownProps> = ({
   placement = 'bottomEnd',
   activeKey,
   buttonContent,
-  buttonProps = {
-    appearance: 'subtle',
-    size: 'md',
-  },
+  buttonProps = {},
   onSelect,
   children,
 }) => {
@@ -58,12 +58,21 @@ const PopoverDropdown: React.FC<PopoverDropdownProps> = ({
         </Popover>
       }
     >
-      <Button {...buttonProps}>
-        <div className={css(styles.buttonContent)}>
-          {buttonContent}
+      <Button
+        {...{
+          appearance: 'subtle',
+          size: 'md',
+          style: { alignSelf: 'flex-start' },
+          ...buttonProps,
+        }}
+      >
+        <div className={css(styles.buttonContentContainer)}>
+          <div className={css(styles.buttonContent)}>
+            {buttonContent}
 
-          <div className={css(styles.dropdownIcon)}>
-            <Icon icon="arrow-down-line" />
+            <div className={css(styles.dropdownIcon)}>
+              <Icon icon="arrow-down-line" />
+            </div>
           </div>
         </div>
       </Button>

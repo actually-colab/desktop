@@ -146,14 +146,14 @@ const LeftSidebar: React.FC = () => {
               onSelect={handleCategorySelect}
             />
             <CategoryButton
-              icon="related-map"
-              menuKey="kernel"
+              icon="peoples"
+              menuKey="follow"
               activeMenuKey={activeMenuKey}
               onSelect={handleCategorySelect}
             />
             <CategoryButton
-              icon="peoples"
-              menuKey="follow"
+              icon="related-map"
+              menuKey="kernel"
               activeMenuKey={activeMenuKey}
               onSelect={handleCategorySelect}
             />
@@ -197,9 +197,11 @@ const LeftSidebar: React.FC = () => {
               </div>
 
               <PopoverDropdown
-                placement="bottomStart"
+                placement="rightStart"
                 buttonContent={<span className={css(styles.sortText)}>Sort by name</span>}
-                buttonProps={{ appearance: 'subtle', size: 'md', ripple: false }}
+                buttonProps={{
+                  ripple: false,
+                }}
               >
                 <Dropdown.Item>Sort by name</Dropdown.Item>
               </PopoverDropdown>
