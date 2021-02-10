@@ -1,6 +1,18 @@
 import React from 'react';
 import { StyleSheet, css } from 'aphrodite';
-import { Avatar, Badge, Button, Dropdown, Icon, IconButton, IconProps, Input, InputGroup } from 'rsuite';
+import {
+  Avatar,
+  Badge,
+  Button,
+  Dropdown,
+  Icon,
+  IconButton,
+  IconProps,
+  Input,
+  InputGroup,
+  Tooltip,
+  Whisper,
+} from 'rsuite';
 
 import { palette, spacing } from '../../constants/theme';
 import { PopoverDropdown } from '../../components';
@@ -88,25 +100,28 @@ const styles = StyleSheet.create({
 
 const CategoryButton: React.FC<{
   icon: IconProps['icon'];
+  tooltipText: string;
   menuKey: string;
   activeMenuKey: string;
   onSelect(menu: string): void;
-}> = ({ icon, menuKey, activeMenuKey, onSelect }) => {
+}> = ({ icon, tooltipText, menuKey, activeMenuKey, onSelect }) => {
   const isActive = menuKey === activeMenuKey;
 
   return (
-    <div className={css(isActive ? [styles.category, styles.categoryActive] : styles.category)}>
-      <IconButton
-        style={{
-          color: isActive ? palette.PRIMARY : palette.CHARCOAL,
-          borderRadius: 0,
-          backgroundColor: palette.BASE_FADED,
-        }}
-        size="lg"
-        icon={<Icon icon={icon} />}
-        onClick={() => onSelect(menuKey)}
-      />
-    </div>
+    <Whisper placement="right" trigger="hover" delay={500} speaker={<Tooltip>{tooltipText}</Tooltip>}>
+      <div className={css(isActive ? [styles.category, styles.categoryActive] : styles.category)}>
+        <IconButton
+          style={{
+            color: isActive ? palette.PRIMARY : palette.CHARCOAL,
+            borderRadius: 0,
+            backgroundColor: palette.BASE_FADED,
+          }}
+          size="lg"
+          icon={<Icon icon={icon} />}
+          onClick={() => onSelect(menuKey)}
+        />
+      </div>
+    </Whisper>
   );
 };
 
@@ -141,18 +156,21 @@ const LeftSidebar: React.FC = () => {
           <div className={css(styles.mainPanelCategories)}>
             <CategoryButton
               icon="edit"
+              tooltipText="Projects"
               menuKey="projects"
               activeMenuKey={activeMenuKey}
               onSelect={handleCategorySelect}
             />
             <CategoryButton
               icon="peoples"
+              tooltipText="Contacts"
               menuKey="follow"
               activeMenuKey={activeMenuKey}
               onSelect={handleCategorySelect}
             />
             <CategoryButton
               icon="related-map"
+              tooltipText="Kernel"
               menuKey="kernel"
               activeMenuKey={activeMenuKey}
               onSelect={handleCategorySelect}
@@ -162,6 +180,7 @@ const LeftSidebar: React.FC = () => {
           <div className={css(styles.endPanelCategories)}>
             <CategoryButton
               icon="gear"
+              tooltipText="Settings"
               menuKey="settings"
               activeMenuKey={activeMenuKey}
               onSelect={handleCategorySelect}
