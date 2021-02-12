@@ -1,10 +1,10 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import { Avatar, Badge, Dropdown, Tooltip, Whisper } from 'rsuite';
+import { Dropdown } from 'rsuite';
 
 import { palette, spacing } from '../../../constants/theme';
-import { ColoredIconButton, Header, PopoverDropdown, StatusIndicator } from '../../../components';
+import { ColoredIconButton, Header, PopoverDropdown, StatusIndicator, UserAvatar } from '../../../components';
 import { StatusIndicatorProps } from '../../../components/StatusIndicator';
 import { ReduxState } from '../../../redux';
 import useKernelStatus from '../../../kernel/useKernelStatus';
@@ -26,8 +26,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     '-webkit-app-region': 'no-drag',
   },
-  avatars: {
-    position: 'relative',
+  avatarsContainer: {},
+  avatar: {
     marginRight: spacing.DEFAULT / 2,
   },
 });
@@ -94,19 +94,18 @@ const EditorHeader: React.FC = () => {
         </div>
 
         <div className={css(styles.headerNoDrag)}>
-          <div className={css(styles.avatars)}>
-            <Whisper
-              placement="bottomEnd"
-              trigger="hover"
-              delayShow={1000}
-              delayHide={400}
-              speaker={<Tooltip>Bailey Tincher</Tooltip>}
-            >
-              <Avatar style={{ background: palette.OLD_LAVENDER }} size="sm" circle>
-                BT
-              </Avatar>
-            </Whisper>
-            <Badge style={{ position: 'absolute', bottom: 0, right: 0, background: palette.SUCCESS }} />
+          <div className={css(styles.avatarsContainer)}>
+            <div className={css(styles.avatar)}>
+              <UserAvatar
+                placement="bottomEnd"
+                user={{
+                  _id: '',
+                  name: 'Bailey Tincher',
+                  email: 'btincher99@gmail.com',
+                }}
+                statusColor={palette.SUCCESS}
+              />
+            </div>
           </div>
 
           <PopoverDropdown
