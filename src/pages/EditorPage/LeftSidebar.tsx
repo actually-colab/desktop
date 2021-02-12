@@ -108,7 +108,13 @@ const CategoryButton: React.FC<{
   const isActive = menuKey === activeMenuKey;
 
   return (
-    <Whisper placement="right" trigger="hover" delay={500} speaker={<Tooltip>{tooltipText}</Tooltip>}>
+    <Whisper
+      placement="right"
+      trigger="hover"
+      delayShow={1000}
+      delayHide={400}
+      speaker={<Tooltip>{tooltipText}</Tooltip>}
+    >
       <div className={css(isActive ? [styles.category, styles.categoryActive] : styles.category)}>
         <IconButton
           style={{

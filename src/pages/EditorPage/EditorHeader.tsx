@@ -95,7 +95,13 @@ const EditorHeader: React.FC = () => {
 
         <div className={css(styles.headerNoDrag)}>
           <div className={css(styles.avatars)}>
-            <Whisper placement="bottomEnd" trigger="hover" delay={500} speaker={<Tooltip>Bailey Tincher</Tooltip>}>
+            <Whisper
+              placement="bottomEnd"
+              trigger="hover"
+              delayShow={1000}
+              delayHide={400}
+              speaker={<Tooltip>Bailey Tincher</Tooltip>}
+            >
               <Avatar style={{ background: palette.OLD_LAVENDER }} size="sm" circle>
                 BT
               </Avatar>

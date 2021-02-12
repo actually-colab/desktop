@@ -61,7 +61,13 @@ const ColoredIconButton: React.FC<ColoredIconButtonProps> = ({
   }
 
   return (
-    <Whisper placement={tooltipDirection} trigger="hover" delay={500} speaker={<Tooltip>{tooltipText}</Tooltip>}>
+    <Whisper
+      placement={tooltipDirection}
+      trigger="hover"
+      delayShow={1000}
+      delayHide={400}
+      speaker={<Tooltip>{tooltipText}</Tooltip>}
+    >
       {ButtonContent}
     </Whisper>
   );
