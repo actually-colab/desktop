@@ -10,7 +10,7 @@ import {
   EXECUTE_CODE_SUCCESS,
   RECEIVE_KERNEL_MESSAGE,
   UPDATE_CELL_CODE,
-} from './types/editor';
+} from '../types/redux/editor';
 
 export interface EditorState {
   isConnectingToKernel: boolean;
