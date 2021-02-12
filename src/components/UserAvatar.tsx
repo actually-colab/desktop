@@ -16,7 +16,7 @@ const UserAvatar: React.FC<{
   placement?: WhisperProps['placement'];
   userColor?: string;
   statusColor?: string;
-  title?: string;
+  title?: React.ReactNode;
 }> = ({ user, placement, userColor = palette.OLD_LAVENDER, statusColor, title, children }) => {
   const userInitials = React.useMemo(() => {
     const piecesOfName = user.name.split(' ');
