@@ -1,14 +1,11 @@
 import React from 'react';
-import { Placeholder } from 'rsuite';
 import { StyleSheet, css } from 'aphrodite';
 
 import AceImports from '../../utils/AceImports';
 import { palette, spacing } from '../../constants/theme';
 import useKernel from '../../kernel/useKernel';
 
-import EditorHeader from './EditorHeader';
-import LeftSidebar from './LeftSidebar';
-import RightSidebar from './RightSidebar';
+import { EditorHeader, LeftSidebar, RightSidebar } from './components';
 import { CodeCell } from '../../components';
 
 const styles = StyleSheet.create({
@@ -37,18 +34,20 @@ const styles = StyleSheet.create({
   },
 });
 
-const EditorPage: React.FC = () => {
-  const kernel = useKernel();
-
-  const [active, setActive] = React.useState<boolean>(false);
-  const [code, setCode] = React.useState<string>(`def fib(n):
+const fibCode = `def fib(n):
     if n <= 1:
         return n
 
     return n * fib(n - 1)
 
 for i in range(8):
-    print fib(i)`);
+    print fib(i)`;
+
+const EditorPage: React.FC = () => {
+  const kernel = useKernel();
+
+  const [active, setActive] = React.useState<boolean>(false);
+  const [code, setCode] = React.useState<string>(fibCode);
 
   return (
     <React.Fragment>

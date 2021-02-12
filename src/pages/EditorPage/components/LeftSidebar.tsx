@@ -14,8 +14,8 @@ import {
   Whisper,
 } from 'rsuite';
 
-import { palette, spacing } from '../../constants/theme';
-import { PopoverDropdown } from '../../components';
+import { palette, spacing } from '../../../constants/theme';
+import { PopoverDropdown } from '../../../components';
 
 const styles = StyleSheet.create({
   container: {

@@ -2,8 +2,8 @@ import React from 'react';
 import { StyleSheet, css } from 'aphrodite';
 import { Placeholder } from 'rsuite';
 
-import { palette, spacing } from '../../constants/theme';
-import { ColoredIconButton } from '../../components';
+import { palette, spacing } from '../../../constants/theme';
+import { ColoredIconButton } from '../../../components';
 
 const styles = StyleSheet.create({
   container: {

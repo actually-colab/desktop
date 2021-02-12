@@ -3,11 +3,11 @@ import { useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import { Avatar, Badge, Dropdown, Tooltip, Whisper } from 'rsuite';
 
-import { ColoredIconButton, Header, PopoverDropdown, StatusIndicator } from '../../components';
-import { StatusIndicatorProps } from '../../components/StatusIndicator';
-import { palette, spacing } from '../../constants/theme';
-import { ReduxState } from '../../redux';
-import useKernelStatus from '../../kernel/useKernelStatus';
+import { palette, spacing } from '../../../constants/theme';
+import { ColoredIconButton, Header, PopoverDropdown, StatusIndicator } from '../../../components';
+import { StatusIndicatorProps } from '../../../components/StatusIndicator';
+import { ReduxState } from '../../../redux';
+import useKernelStatus from '../../../kernel/useKernelStatus';
 
 const styles = StyleSheet.create({
   header: {
