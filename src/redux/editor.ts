@@ -1,5 +1,5 @@
 import { IKernel } from 'jupyter-js-services';
-import { EditorCell } from '../types/kernel';
+
 import {
   CONNECT_TO_KERNEL_FAILURE,
   CONNECT_TO_KERNEL_START,
@@ -11,6 +11,7 @@ import {
   RECEIVE_KERNEL_MESSAGE,
   UPDATE_CELL_CODE,
 } from '../types/redux/editor';
+import { EditorCell } from '../types/notebook';
 
 export interface EditorState {
   isConnectingToKernel: boolean;
@@ -33,15 +34,7 @@ const initialState: EditorState = {
 
   executionCount: 0,
   kernel: null,
-  cells: [
-    {
-      _id: 'some-uuuid',
-      runIndex: -1,
-      active: false,
-      code: '',
-      output: [],
-    },
-  ],
+  cells: [],
 };
 
 const reducer = (state = initialState, action: EditorActionTypes): EditorState => {

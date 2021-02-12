@@ -1,4 +1,5 @@
 import { IKernel } from 'jupyter-js-services';
+
 import {
   CONNECT_TO_KERNEL_FAILURE,
   CONNECT_TO_KERNEL_START,
@@ -11,8 +12,8 @@ import {
   RECEIVE_KERNEL_MESSAGE,
   UPDATE_CELL_CODE,
 } from '../../types/redux/editor';
+import { EditorCell, KernelOutput } from '../../types/notebook';
 import * as jupyter from '../../kernel/jupyter';
-import { EditorCell, KernelOutput } from '../../types/kernel';
 
 const connectToKernelStart = (): EditorActionTypes => ({
   type: CONNECT_TO_KERNEL_START,

@@ -34,20 +34,11 @@ const styles = StyleSheet.create({
   },
 });
 
-const fibCode = `def fib(n):
-    if n <= 1:
-        return n
-
-    return n * fib(n - 1)
-
-for i in range(8):
-    print fib(i)`;
-
 const EditorPage: React.FC = () => {
   const kernel = useKernel();
 
   const [active, setActive] = React.useState<boolean>(false);
-  const [code, setCode] = React.useState<string>(fibCode);
+  const [code, setCode] = React.useState<string>('');
 
   return (
     <React.Fragment>

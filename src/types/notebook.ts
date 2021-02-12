@@ -22,3 +22,11 @@ export type EditorCell = {
   code: string;
   output: KernelOutput[];
 };
+
+export type Notebook = {
+  _id: string;
+  name: string;
+  collaborators: string[];
+  readOnly: boolean;
+  cells: EditorCell[];
+};
