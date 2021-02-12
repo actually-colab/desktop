@@ -2,7 +2,7 @@ import { IKernel } from 'jupyter-js-services';
 import { Action } from 'redux';
 import { ThunkAction } from 'redux-thunk';
 
-import { KernelOutput } from '../../kernel/types';
+import { KernelOutput } from '../../types/kernel';
 
 export const CONNECT_TO_KERNEL_START = 'CONNECT_TO_KERNEL_START';
 export const CONNECT_TO_KERNEL_SUCCESS = 'CONNECT_TO_KERNEL_SUCCESS';

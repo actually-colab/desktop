@@ -1,5 +1,5 @@
 import { IKernel } from 'jupyter-js-services';
-import { EditorCell } from '../kernel/types';
+import { EditorCell } from '../types/kernel';
 import {
   CONNECT_TO_KERNEL_FAILURE,
   CONNECT_TO_KERNEL_START,

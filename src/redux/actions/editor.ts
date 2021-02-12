@@ -12,7 +12,7 @@ import {
   UPDATE_CELL_CODE,
 } from '../types/editor';
 import * as jupyter from '../../kernel/jupyter';
-import { EditorCell, KernelOutput } from '../../kernel/types';
+import { EditorCell, KernelOutput } from '../../types/kernel';
 
 const connectToKernelStart = (): EditorActionTypes => ({
   type: CONNECT_TO_KERNEL_START,

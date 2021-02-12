@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, css } from 'aphrodite';
 import AceEditor from 'react-ace';
 
-import { EditorCell } from '../kernel/types';
+import { EditorCell } from '../types/kernel';
 import { editorOptionsActive, editorOptionsInactive } from '../constants/editorOptions';
 import { palette } from '../constants/theme';
 
