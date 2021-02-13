@@ -9,7 +9,7 @@ import store from './redux';
 import { EditorPage } from './pages';
 import { extractLoginData } from './utils/redirect';
 
-ipcRenderer.on('login-success', (event, data: { url: string }) => {
+ipcRenderer.on('login-success', (_, data: { url: string }) => {
   const loginResponse = extractLoginData(data.url);
 
   console.log(loginResponse);

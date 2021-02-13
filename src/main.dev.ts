@@ -63,8 +63,11 @@ const createWindow = async () => {
 
   mainWindow = new BrowserWindow({
     show: false,
+    minWidth: 960,
+    minHeight: 840,
     width: 1280,
     height: 840,
+    title: 'Actually Colab',
     titleBarStyle: 'hiddenInset',
     icon: getAssetPath('icon.png'),
     webPreferences: {
@@ -130,9 +133,7 @@ app.on('activate', () => {
 app.setAsDefaultProtocolClient('actuallycolab');
 
 // MacOS specific. Use process.argv for Windows and Linux
-app.on('open-url', (event, url) => {
-  console.log('Main Process', { url });
-
+app.on('open-url', (_, url) => {
   mainWindow?.webContents.send('login-success', {
     url,
   });
