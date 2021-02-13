@@ -9,6 +9,7 @@ module.exports = {
     'no-console': 'off',
     'no-underscore-dangle': 'off',
     'no-nested-ternary': 'off',
+    'no-restricted-syntax': 'off',
     'react/prop-types': 'off',
     'react/no-array-index-key': 'off',
     'react/jsx-fragments': 'off',

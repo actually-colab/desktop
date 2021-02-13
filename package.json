@@ -52,6 +52,12 @@
       "entitlementsInherit": "assets/entitlements.mac.plist",
       "gatekeeperAssess": false
     },
+    "protocols": {
+      "name": "actuallycolab-protocol",
+      "schemes": [
+        "actuallycolab"
+      ]
+    },
     "dmg": {
       "contents": [
         {

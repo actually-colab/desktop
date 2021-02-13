@@ -125,3 +125,15 @@ app.on('activate', () => {
   // dock icon is clicked and there are no other windows open.
   if (mainWindow === null) createWindow();
 });
+
+// Register to handle redirect requests
+app.setAsDefaultProtocolClient('actuallycolab');
+
+// MacOS specific. Use process.argv for Windows and Linux
+app.on('open-url', (event, url) => {
+  console.log('Main Process', { url });
+
+  mainWindow?.webContents.send('login-success', {
+    url,
+  });
+});
