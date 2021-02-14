@@ -2,7 +2,7 @@ import { ipcRenderer, IpcRendererEvent } from 'electron';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import { Button } from 'rsuite';
+import { Button, Icon } from 'rsuite';
 
 import { spacing } from '../../constants/theme';
 import { _auth } from '../../redux/actions';
@@ -52,6 +52,9 @@ const styles = StyleSheet.create({
   },
   signInButton: {
     marginTop: spacing.DEFAULT,
+  },
+  signInText: {
+    marginRight: spacing.DEFAULT / 2,
   },
 });
 
@@ -106,7 +109,8 @@ const AuthPage: React.FC = () => {
                 loading={isSigningIn}
                 disabled={isSigningIn}
               >
-                Sign in with your browser
+                <span className={css(styles.signInText)}>Sign in with your browser</span>
+                <Icon icon="external-link" />
               </Button>
             </div>
           </div>
