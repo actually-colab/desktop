@@ -1,9 +1,21 @@
+import { shell } from 'electron';
+
 export const PROTOCOL_STEM = 'actuallycolab://';
+export const BASE_REDIRECT_URI =
+  process.env.NODE_ENV === 'development' ? 'http://localhost:4000' : 'https://actuallycolab.org';
+export const AUTH_REDIRECT_URI = `${BASE_REDIRECT_URI}/login`;
 
 export type LoginRedirectResponse = {
   token: string;
   email: string;
   name: string;
+};
+
+/**
+ * Open the authentication page in the user's default browser
+ */
+export const openLoginPage = () => {
+  shell.openExternal(AUTH_REDIRECT_URI);
 };
 
 /**
