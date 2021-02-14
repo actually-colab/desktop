@@ -1,4 +1,3 @@
-import { ipcRenderer } from 'electron';
 import React from 'react';
 import { Provider, useDispatch, useSelector } from 'react-redux';
 import { BrowserRouter as Router, Switch, Route, useHistory, useLocation } from 'react-router-dom';
@@ -7,14 +6,7 @@ import { StyleSheet, css } from 'aphrodite';
 import './App.global.less';
 import store, { ReduxState } from './redux';
 import { _auth } from './redux/actions';
-import { extractLoginData } from './utils/redirect';
 import { AuthPage, EditorPage } from './pages';
-
-ipcRenderer.on('login-success', (_, data: { url: string }) => {
-  const loginResponse = extractLoginData(data.url);
-
-  console.log(loginResponse);
-});
 
 const EntryPoint: React.FC = () => {
   const history = useHistory();

@@ -1,11 +1,14 @@
+import { ipcRenderer, IpcRendererEvent } from 'electron';
 import React from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import { Button } from 'rsuite';
 
 import { spacing } from '../../constants/theme';
 import { _auth } from '../../redux/actions';
+import { extractLoginData, LoginRedirectResponse } from '../../utils/redirect';
 import { Header } from '../../components';
+import { ReduxState } from '../../redux';
 
 const styles = StyleSheet.create({
   container: {
@@ -53,9 +56,36 @@ const styles = StyleSheet.create({
 });
 
 const AuthPage: React.FC = () => {
-  const dispatch = useDispatch();
+  const isSigningIn = useSelector((state: ReduxState) => state.auth.isSigningIn);
 
+  const dispatch = useDispatch();
   const dispatchOpenAuthRedirect = React.useCallback(() => dispatch(_auth.openAuthRedirect()), [dispatch]);
+  const dispatchAuthRedirectSignIn = React.useCallback(
+    (payload: LoginRedirectResponse) => dispatch(_auth.authRedirectSignIn(payload)),
+    [dispatch]
+  );
+  const dispatchAuthRedirectFailure = React.useCallback(
+    (errorMessage: string) => dispatch(_auth.authRedirectFailure(errorMessage)),
+    [dispatch]
+  );
+
+  React.useEffect(() => {
+    const listener = (_: IpcRendererEvent, data?: { url: string }) => {
+      const loginResponse = data?.url ? extractLoginData(data.url) : null;
+
+      if (loginResponse) {
+        dispatchAuthRedirectSignIn(loginResponse);
+      } else {
+        dispatchAuthRedirectFailure('Could not sign in!');
+      }
+    };
+
+    ipcRenderer.on('login-success', listener);
+
+    return () => {
+      ipcRenderer.removeListener('login-success', listener);
+    };
+  }, [dispatchAuthRedirectFailure, dispatchAuthRedirectSignIn]);
 
   return (
     <div className={css(styles.container)}>
@@ -68,7 +98,12 @@ const AuthPage: React.FC = () => {
             <p className={css(styles.subtitle)}>built by jeff taylor-chang and bailey tincher</p>
 
             <div className={css(styles.signInButton)}>
-              <Button appearance="primary" onClick={dispatchOpenAuthRedirect}>
+              <Button
+                appearance="primary"
+                onClick={dispatchOpenAuthRedirect}
+                loading={isSigningIn}
+                disabled={isSigningIn}
+              >
                 Sign in with your browser
               </Button>
             </div>

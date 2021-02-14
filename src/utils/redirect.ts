@@ -21,7 +21,7 @@ export const openLoginPage = () => {
 /**
  * Given a redirect from the login page, extract the payload into an object
  */
-export const extractLoginData = (url: string): Partial<LoginRedirectResponse> | null => {
+export const extractLoginData = (url: string): LoginRedirectResponse | null => {
   try {
     const attributes = url.substring(url.indexOf(PROTOCOL_STEM) + PROTOCOL_STEM.length).split('&');
 
@@ -35,10 +35,16 @@ export const extractLoginData = (url: string): Partial<LoginRedirectResponse> | 
       }
     }
 
-    return payload;
+    if (payload.token && payload.email) {
+      return {
+        token: payload.token,
+        email: payload.email,
+        name: payload.name ?? 'John Doe',
+      };
+    }
   } catch (error) {
     console.error(error);
-
-    return null;
   }
+
+  return null;
 };

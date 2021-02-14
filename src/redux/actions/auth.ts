@@ -12,6 +12,7 @@ import {
   SIGN_OUT_SUCCESS,
 } from '../../types/redux/auth';
 import { User } from '../../types/user';
+import { displayError } from '../../utils/ipc';
 import { LoginRedirectResponse, openLoginPage } from '../../utils/redirect';
 
 const loadSessionSuccess = (token: string): AuthActionTypes => ({
@@ -52,12 +53,16 @@ const authRedirectSuccess = (payload: LoginRedirectResponse): AuthActionTypes =>
 /**
  * Handle failure of auth redirect
  */
-export const authRedirectFailure = (errorMessage: string): AuthActionTypes => ({
-  type: AUTH_REDIRECT_FAILURE,
-  error: {
-    message: errorMessage,
-  },
-});
+export const authRedirectFailure = (errorMessage: string): AuthActionTypes => {
+  displayError(errorMessage);
+
+  return {
+    type: AUTH_REDIRECT_FAILURE,
+    error: {
+      message: errorMessage,
+    },
+  };
+};
 
 /**
  * Trigger an auth redirect page to open
@@ -78,12 +83,16 @@ const signInSuccess = (user: User, token: string): AuthActionTypes => ({
   token,
 });
 
-const signInFailure = (errorMessage: string): AuthActionTypes => ({
-  type: SIGN_IN_FAILURE,
-  error: {
-    message: errorMessage,
-  },
-});
+const signInFailure = (errorMessage: string): AuthActionTypes => {
+  displayError(errorMessage);
+
+  return {
+    type: SIGN_IN_FAILURE,
+    error: {
+      message: errorMessage,
+    },
+  };
+};
 
 /**
  * Sign in with the auth redirect payload
