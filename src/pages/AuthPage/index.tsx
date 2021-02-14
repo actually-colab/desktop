@@ -73,6 +73,8 @@ const AuthPage: React.FC = () => {
     const listener = (_: IpcRendererEvent, data?: { url: string }) => {
       const loginResponse = data?.url ? extractLoginData(data.url) : null;
 
+      console.log('Redirect response', loginResponse);
+
       if (loginResponse) {
         dispatchAuthRedirectSignIn(loginResponse);
       } else {

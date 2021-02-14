@@ -7,8 +7,6 @@ export const AUTH_REDIRECT_URI = `${BASE_REDIRECT_URI}/login`;
 
 export type LoginRedirectResponse = {
   token: string;
-  email: string;
-  name: string;
 };
 
 /**
@@ -30,16 +28,14 @@ export const extractLoginData = (url: string): LoginRedirectResponse | null => {
     for (const attribute of attributes) {
       const [key, value] = attribute.split('=');
 
-      if (key === 'token' || key === 'email' || key === 'name') {
+      if (key === 'token') {
         payload[key] = decodeURIComponent(value);
       }
     }
 
-    if (payload.token && payload.email) {
+    if (payload.token) {
       return {
         token: payload.token,
-        email: payload.email,
-        name: payload.name ?? 'John Doe',
       };
     }
   } catch (error) {
