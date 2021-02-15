@@ -15,6 +15,52 @@ import { User } from '../../types/user';
 import { displayError } from '../../utils/ipc';
 import { LoginRedirectResponse, openLoginPage } from '../../utils/redirect';
 
+const signInStart = (): AuthActionTypes => ({
+  type: SIGN_IN_START,
+});
+
+const signInSuccess = (user: User, token: string): AuthActionTypes => {
+  localStorage.setItem('token', token);
+
+  return {
+    type: SIGN_IN_SUCCESS,
+    user,
+    token,
+  };
+};
+
+const signInFailure = (errorMessage: string): AuthActionTypes => {
+  displayError(errorMessage);
+
+  return {
+    type: SIGN_IN_FAILURE,
+    error: {
+      message: errorMessage,
+    },
+  };
+};
+
+/**
+ * Sign in with the given session token
+ *
+ * Intended for signing in from cached session, or signing in from an ID token
+ */
+export const signIn = (token: string): AuthAsyncActionTypes => async (dispatch) => {
+  dispatch(signInStart());
+
+  // TODO: sign in
+  dispatch(
+    signInSuccess(
+      {
+        _id: 'test',
+        name: 'Jeff Taylor-Chang',
+        email: 'test@test.com',
+      },
+      token
+    )
+  );
+};
+
 const loadSessionSuccess = (token: string): AuthActionTypes => ({
   type: LOAD_SESSION_SUCCESS,
   token,
@@ -34,8 +80,7 @@ export const loadSession = (): AuthAsyncActionTypes => async (dispatch) => {
 
   if (token) {
     dispatch(loadSessionSuccess(token));
-
-    // TODO: sign in
+    dispatch(signIn(token));
   } else {
     dispatch(loadSessionFailure());
   }
@@ -73,27 +118,6 @@ export const openAuthRedirect = (): AuthAsyncActionTypes => async (dispatch) => 
   openLoginPage();
 };
 
-const signInStart = (): AuthActionTypes => ({
-  type: SIGN_IN_START,
-});
-
-const signInSuccess = (user: User, token: string): AuthActionTypes => ({
-  type: SIGN_IN_SUCCESS,
-  user,
-  token,
-});
-
-const signInFailure = (errorMessage: string): AuthActionTypes => {
-  displayError(errorMessage);
-
-  return {
-    type: SIGN_IN_FAILURE,
-    error: {
-      message: errorMessage,
-    },
-  };
-};
-
 /**
  * Sign in with the auth redirect payload
  */
@@ -101,25 +125,7 @@ export const authRedirectSignIn = (payload: LoginRedirectResponse): AuthAsyncAct
   dispatch(authRedirectSuccess(payload));
 
   // TODO: sign in
-};
-
-/**
- * Sign in with the given session token
- */
-export const signIn = (token: string): AuthAsyncActionTypes => async (dispatch) => {
-  dispatch(signInStart());
-
-  // TODO: sign in
-  dispatch(
-    signInSuccess(
-      {
-        _id: 'test',
-        name: 'Jeff Taylor-Chang',
-        email: 'test@test.com',
-      },
-      'TEST'
-    )
-  );
+  dispatch(signIn(payload.token));
 };
 
 const signOutSuccess = (): AuthActionTypes => ({
