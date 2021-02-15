@@ -1,13 +1,14 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import { Dropdown } from 'rsuite';
 
 import { palette, spacing } from '../../../constants/theme';
-import { ColoredIconButton, Header, PopoverDropdown, StatusIndicator, UserAvatar } from '../../../components';
-import { StatusIndicatorProps } from '../../../components/StatusIndicator';
 import { ReduxState } from '../../../redux';
 import useKernelStatus from '../../../kernel/useKernelStatus';
+import { ColoredIconButton, Header, PopoverDropdown, StatusIndicator, UserAvatar } from '../../../components';
+import { StatusIndicatorProps } from '../../../components/StatusIndicator';
+import { _editor } from '../../../redux/actions';
 
 const styles = StyleSheet.create({
   header: {
@@ -34,7 +35,12 @@ const styles = StyleSheet.create({
 
 const EditorHeader: React.FC = () => {
   const localKernelStatus = useKernelStatus();
+
   const connectToKernelErrorMessage = useSelector((state: ReduxState) => state.editor.connectToKernelErrorMessage);
+  const isAddingCell = useSelector((state: ReduxState) => state.editor.isAddingCell);
+  const isEditingCell = useSelector((state: ReduxState) => state.editor.isEditingCell);
+  const isExecutingCode = useSelector((state: ReduxState) => state.editor.isExecutingCode);
+  const activeCellId = useSelector((state: ReduxState) => state.editor.activeCellId);
 
   const [tempKernelSelection, setTempKernelSelection] = React.useState<string>('localhost');
 
@@ -63,6 +69,15 @@ const EditorHeader: React.FC = () => {
     [connectToKernelErrorMessage, kernelStatus]
   );
 
+  const isStable = React.useMemo(() => !(isAddingCell || isEditingCell || isExecutingCode), [
+    isAddingCell,
+    isEditingCell,
+    isExecutingCode,
+  ]);
+
+  const dispatch = useDispatch();
+  const dispatchAddCell = React.useCallback((index: number) => dispatch(_editor.addCell(index)), [dispatch]);
+
   const handleKernelSelect = React.useCallback((eventKey: string) => {
     setTempKernelSelection(eventKey);
   }, []);
@@ -76,6 +91,8 @@ const EditorHeader: React.FC = () => {
             color={palette.SUCCESS}
             tooltipText="Run the current cell"
             tooltipDirection="bottom"
+            loading={isExecutingCode}
+            disabled={!isStable || activeCellId === ''}
             onClick={() => console.log('TODO')}
           />
           <ColoredIconButton
@@ -83,13 +100,16 @@ const EditorHeader: React.FC = () => {
             color={palette.ERROR}
             tooltipText="Interrupt the kernel"
             tooltipDirection="bottom"
+            disabled={!isExecutingCode}
             onClick={() => console.log('TODO')}
           />
           <ColoredIconButton
             icon="plus"
             tooltipText="Create a new cell"
             tooltipDirection="bottom"
-            onClick={() => console.log('TODO')}
+            loading={isAddingCell}
+            disabled={!isStable}
+            onClick={() => dispatchAddCell(-1)}
           />
         </div>
 
@@ -101,7 +121,7 @@ const EditorHeader: React.FC = () => {
                 user={{
                   _id: '',
                   name: 'Bailey Tincher',
-                  email: 'btincher99@gmail.com',
+                  email: 'test@test.com',
                 }}
                 statusColor={palette.SUCCESS}
               />

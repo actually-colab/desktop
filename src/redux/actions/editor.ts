@@ -1,11 +1,18 @@
 import { IKernel } from 'jupyter-js-services';
+import { v4 as uuid } from 'uuid';
 
 import {
+  ADD_CELL_FAILURE,
+  ADD_CELL_START,
+  ADD_CELL_SUCCESS,
   CONNECT_TO_KERNEL_FAILURE,
   CONNECT_TO_KERNEL_START,
   CONNECT_TO_KERNEL_SUCCESS,
   EditorActionTypes,
   EditorAsyncActionTypes,
+  EDIT_CELL_FAILURE,
+  EDIT_CELL_START,
+  EDIT_CELL_SUCCESS,
   EXECUTE_CODE_FAILURE,
   EXECUTE_CODE_START,
   EXECUTE_CODE_SUCCESS,
@@ -14,6 +21,7 @@ import {
 } from '../../types/redux/editor';
 import { EditorCell, KernelOutput } from '../../types/notebook';
 import * as jupyter from '../../kernel/jupyter';
+import { displayError } from '../../utils/ipc';
 
 const connectToKernelStart = (): EditorActionTypes => ({
   type: CONNECT_TO_KERNEL_START,
@@ -44,6 +52,68 @@ export const connectToKernel = (): EditorAsyncActionTypes => async (dispatch) =>
   } else {
     dispatch(connectToKernelFailure(res.error.message));
   }
+};
+
+const addCellStart = (): EditorActionTypes => ({
+  type: ADD_CELL_START,
+});
+
+const addCellSuccess = (cellId: string, index: number): EditorActionTypes => ({
+  type: ADD_CELL_SUCCESS,
+  cellId,
+  index,
+});
+
+const addCellFailure = (errorMessage: string): EditorActionTypes => {
+  displayError(errorMessage);
+
+  return {
+    type: ADD_CELL_FAILURE,
+    error: {
+      message: errorMessage,
+    },
+  };
+};
+
+/**
+ * Try to create a new cell at a given index. Use -1 to add to the end
+ */
+export const addCell = (index: number): EditorAsyncActionTypes => async (dispatch) => {
+  dispatch(addCellStart());
+
+  // TODO: make request
+  dispatch(addCellSuccess(`change-me-${uuid()}`, index));
+};
+
+const editCellStart = (): EditorActionTypes => ({
+  type: EDIT_CELL_START,
+});
+
+const editCellSuccess = (cellId: string, changes: Partial<EditorCell>): EditorActionTypes => ({
+  type: EDIT_CELL_SUCCESS,
+  cellId,
+  changes,
+});
+
+const editCellFailure = (errorMessage: string): EditorActionTypes => {
+  displayError(errorMessage);
+
+  return {
+    type: EDIT_CELL_FAILURE,
+    error: {
+      message: errorMessage,
+    },
+  };
+};
+
+/**
+ * Edit a cell locally and make a debounced socket request to update it remotely
+ */
+export const editCell = (cellId: string, changes: Partial<EditorCell>): EditorAsyncActionTypes => async (dispatch) => {
+  dispatch(editCellStart());
+
+  // TODO: make debounced request
+  dispatch(editCellSuccess(cellId, changes));
 };
 
 const executeCodeStart = (cellId: string): EditorActionTypes => ({
