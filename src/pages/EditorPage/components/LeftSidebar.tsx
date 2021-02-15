@@ -1,7 +1,9 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import { Button, Dropdown, Icon, IconButton, IconProps, Input, InputGroup, Tooltip, Whisper } from 'rsuite';
 
+import { ReduxState } from '../../../redux';
 import { palette, spacing } from '../../../constants/theme';
 import { PopoverDropdown, UserAvatar } from '../../../components';
 
@@ -126,6 +128,7 @@ const CategoryButton: React.FC<{
 };
 
 const LeftSidebar: React.FC = () => {
+  const user = useSelector((state: ReduxState) => state.auth.user);
   const projects = [
     {
       _id: 'some-id',
@@ -186,35 +189,33 @@ const LeftSidebar: React.FC = () => {
               onSelect={handleCategorySelect}
             />
 
-            <UserAvatar
-              placement="rightEnd"
-              user={{
-                _id: '',
-                name: 'Jeff Taylor-Chang',
-                email: 'jeff@jefftc.com',
-              }}
-              userColor={palette.CHARCOAL}
-              statusColor={palette.SUCCESS}
-              title={
-                <div className={css(styles.profilePopoverTitle)}>
-                  <span>Jeff Taylor-Chang</span>
-                  <IconButton
-                    style={{ marginLeft: spacing.DEFAULT }}
-                    appearance="subtle"
-                    icon={<Icon icon="pencil" />}
-                    disabled={activeMenuKey === 'settings'}
-                    onClick={() => setActiveMenuKey('settings')}
-                  />
+            {user !== null && (
+              <UserAvatar
+                placement="rightEnd"
+                user={user}
+                userColor={palette.CHARCOAL}
+                statusColor={palette.SUCCESS}
+                title={
+                  <div className={css(styles.profilePopoverTitle)}>
+                    <span>Jeff Taylor-Chang</span>
+                    <IconButton
+                      style={{ marginLeft: spacing.DEFAULT }}
+                      appearance="subtle"
+                      icon={<Icon icon="pencil" />}
+                      disabled={activeMenuKey === 'settings'}
+                      onClick={() => setActiveMenuKey('settings')}
+                    />
+                  </div>
+                }
+              >
+                <div className={css(styles.profilePopoverContent)}>
+                  <span>test@test.com</span>
+                  <Button style={{ marginTop: spacing.DEFAULT }} onClick={() => console.log('TODO')}>
+                    <Icon icon="sign-out" /> Logout
+                  </Button>
                 </div>
-              }
-            >
-              <div className={css(styles.profilePopoverContent)}>
-                <span>jeff@jefftc.com</span>
-                <Button style={{ marginTop: spacing.DEFAULT }} onClick={() => console.log('TODO')}>
-                  <Icon icon="sign-out" /> Logout
-                </Button>
-              </div>
-            </UserAvatar>
+              </UserAvatar>
+            )}
           </div>
         </div>
 

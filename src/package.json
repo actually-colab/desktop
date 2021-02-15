@@ -6,7 +6,6 @@
   "main": "./main.prod.js",
   "author": {
     "name": "Jeff Taylor-Chang & Bailey Tincher",
-    "email": "jeff@jefftc.com",
     "url": "https://github.com/actually-colab"
   },
   "scripts": {

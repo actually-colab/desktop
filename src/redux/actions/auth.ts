@@ -110,6 +110,16 @@ export const signIn = (token: string): AuthAsyncActionTypes => async (dispatch) 
   dispatch(signInStart());
 
   // TODO: sign in
+  dispatch(
+    signInSuccess(
+      {
+        _id: 'test',
+        name: 'Jeff Taylor-Chang',
+        email: 'test@test.com',
+      },
+      'TEST'
+    )
+  );
 };
 
 const signOutSuccess = (): AuthActionTypes => ({

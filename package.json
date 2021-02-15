@@ -103,18 +103,15 @@
   },
   "author": {
     "name": "Jeff Taylor-Chang & Bailey Tincher",
-    "email": "jeff@jefftc.com",
     "url": "https://github.com/actually-colab"
   },
   "contributors": [
     {
       "name": "Jeff Taylor-Chang",
-      "email": "jeff@jefftc.com",
       "url": "https://github.com/jtaylorchang"
     },
     {
       "name": "Bailey Tincher",
-      "email": "btincher99@gmail.com",
       "url": "https://github.com/baileytincher"
     }
   ],
