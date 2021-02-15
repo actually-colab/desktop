@@ -23,6 +23,8 @@ export type KernelOutput =
 
 export type EditorCell = {
   _id: string;
+  language: 'py' | 'md';
+  editing: boolean;
   runIndex: number;
   active: boolean;
   code: string;

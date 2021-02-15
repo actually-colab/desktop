@@ -44,7 +44,7 @@ const CodeCell: React.FC<{
       <AceEditor
         style={{ width: '100%' }}
         name={cell._id}
-        mode="python"
+        mode={cell.language === 'md' ? 'markdown' : 'python'}
         theme="xcode"
         setOptions={cell.active ? editorOptionsActive : editorOptionsInactive}
         minLines={1}

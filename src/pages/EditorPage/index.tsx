@@ -57,8 +57,9 @@ const EditorPage: React.FC = () => {
                   active,
                   code,
                   _id: 'some-editor',
+                  language: 'py',
+                  editing: false,
                   runIndex: 0,
-                  output: [],
                 }}
                 onFocus={(_id) => setActive(true)}
                 onBlur={(_id) => setActive(false)}

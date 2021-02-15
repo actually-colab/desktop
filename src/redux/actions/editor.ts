@@ -31,6 +31,9 @@ const connectToKernelFailure = (errorMessage: string): EditorActionTypes => ({
   },
 });
 
+/**
+ * Attempt to connect to the jupyter kernel gateway. In the future this can also hook into the hidden renderer
+ */
 export const connectToKernel = (): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(connectToKernelStart());
 
@@ -67,7 +70,14 @@ const receiveKernelMessage = (cellId: string, message: KernelOutput): EditorActi
   message,
 });
 
+/**
+ * Run code against the kernel and asynchronously process kernel messages
+ */
 export const executeCode = (kernel: IKernel, cell: EditorCell): EditorAsyncActionTypes => async (dispatch) => {
+  if (cell.language !== 'py') {
+    return;
+  }
+
   dispatch(executeCodeStart(cell._id));
 
   const future = kernel.execute({
