@@ -1,6 +1,9 @@
 export type KernelOutput =
   | {
       _id: string;
+      cellId: string;
+      runIndex: number;
+      messageIndex: number;
       name: 'stdout';
       data: {
         text: string;
@@ -8,6 +11,9 @@ export type KernelOutput =
     }
   | {
       _id: string;
+      cellId: string;
+      runIndex: number;
+      messageIndex: number;
       name: 'display_data';
       data: {
         text?: string;
@@ -20,7 +26,6 @@ export type EditorCell = {
   runIndex: number;
   active: boolean;
   code: string;
-  output: KernelOutput[];
 };
 
 export type Notebook = {

@@ -11,7 +11,7 @@ import {
   RECEIVE_KERNEL_MESSAGE,
   UPDATE_CELL_CODE,
 } from '../types/redux/editor';
-import { EditorCell } from '../types/notebook';
+import { EditorCell, KernelOutput } from '../types/notebook';
 
 export interface EditorState {
   isConnectingToKernel: boolean;
@@ -23,6 +23,7 @@ export interface EditorState {
   executionCount: number;
   kernel: IKernel | null;
   cells: EditorCell[];
+  outputs: KernelOutput[];
 }
 
 const initialState: EditorState = {
@@ -35,6 +36,7 @@ const initialState: EditorState = {
   executionCount: 0,
   kernel: null,
   cells: [],
+  outputs: [],
 };
 
 const reducer = (state = initialState, action: EditorActionTypes): EditorState => {
@@ -104,14 +106,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
     case RECEIVE_KERNEL_MESSAGE:
       return {
         ...state,
-        cells: state.cells.map((cell) =>
-          cell._id === action.cellId
-            ? {
-                ...cell,
-                output: [...cell.output, action.message],
-              }
-            : cell
-        ),
+        outputs: [...state.outputs, action.message],
       };
     case UPDATE_CELL_CODE:
       return {

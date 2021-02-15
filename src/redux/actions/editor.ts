@@ -74,21 +74,36 @@ export const executeCode = (kernel: IKernel, cell: EditorCell): EditorAsyncActio
     code: cell.code,
   });
 
+  let runIndex = -1;
+  let messageIndex = 0;
+  const messageQueue: KernelOutput[] = [];
+
   future.onIOPub = (message) => {
     let kernelOutput: KernelOutput | null = null;
 
     try {
-      if (message.content.name === 'stdout') {
+      if (message.content.execution_count !== undefined) {
+        // execution metadata
+        runIndex = message.content.execution_count as number;
+      } else if (message.content.name === 'stdout') {
+        // regular text stream
         kernelOutput = {
           _id: message.header.msg_id,
+          cellId: cell._id,
+          runIndex: -1,
+          messageIndex,
           name: 'stdout',
           data: {
             text: message.content.text as string,
           },
         };
       } else if (message.header.msg_type === 'display_data') {
+        // image content
         kernelOutput = {
           _id: message.header.msg_id,
+          cellId: cell._id,
+          runIndex: -1,
+          messageIndex,
           name: 'display_data',
           data: {
             text: (message.content.data as any)['text/plain'],
@@ -101,7 +116,30 @@ export const executeCode = (kernel: IKernel, cell: EditorCell): EditorAsyncActio
     }
 
     if (kernelOutput !== null) {
-      dispatch(receiveKernelMessage(cell._id, kernelOutput));
+      messageIndex++;
+
+      if (runIndex !== -1) {
+        // No need to queue
+        dispatch(
+          receiveKernelMessage(cell._id, {
+            ...kernelOutput,
+            runIndex,
+          })
+        );
+      } else {
+        // Store messages until execution count message is received
+        messageQueue.push(kernelOutput);
+      }
+    } else if (runIndex !== -1 && messageQueue.length > 0) {
+      // process any messages in queue
+      for (const oldMessage of messageQueue) {
+        dispatch(
+          receiveKernelMessage(cell._id, {
+            ...oldMessage,
+            runIndex,
+          })
+        );
+      }
     }
   };
 

@@ -10,6 +10,7 @@ module.exports = {
     'no-underscore-dangle': 'off',
     'no-nested-ternary': 'off',
     'no-restricted-syntax': 'off',
+    'no-plusplus': 'off',
     'react/prop-types': 'off',
     'react/no-array-index-key': 'off',
     'react/jsx-fragments': 'off',
