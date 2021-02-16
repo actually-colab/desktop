@@ -1,25 +1,26 @@
+type BaseKernelOutput<Name, Data> = {
+  _id: string;
+  cellId: string;
+  runIndex: number;
+  messageIndex: number;
+  name: Name;
+  data: Data;
+};
+
 export type KernelOutput =
-  | {
-      _id: string;
-      cellId: string;
-      runIndex: number;
-      messageIndex: number;
-      name: 'stdout';
-      data: {
+  | BaseKernelOutput<
+      'stdout',
+      {
         text: string;
-      };
-    }
-  | {
-      _id: string;
-      cellId: string;
-      runIndex: number;
-      messageIndex: number;
-      name: 'display_data';
-      data: {
+      }
+    >
+  | BaseKernelOutput<
+      'display_data',
+      {
         text?: string;
         image?: string;
-      };
-    };
+      }
+    >;
 
 export type EditorCell = {
   _id: string;
