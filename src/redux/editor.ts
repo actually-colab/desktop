@@ -30,7 +30,8 @@ export interface EditorState {
   isExecutingCode: boolean;
   executeCodeErrorMessage: string;
 
-  activeCellId: string;
+  lockedCellId: string;
+  lockedCells: string[];
   executionCount: number;
   kernel: IKernel | null;
   cells: EditorCell[];
@@ -47,7 +48,8 @@ const initialState: EditorState = {
   isExecutingCode: false,
   executeCodeErrorMessage: '',
 
-  activeCellId: '',
+  lockedCellId: '',
+  lockedCells: [],
   executionCount: 0,
   kernel: null,
   cells: [],

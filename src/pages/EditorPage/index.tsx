@@ -1,14 +1,12 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 
 import AceImports from '../../utils/AceImports';
 import { palette, spacing } from '../../constants/theme';
-import { EditorCell } from '../../types/notebook';
 import { ReduxState } from '../../redux';
-import { _editor } from '../../redux/actions';
 import useKernel from '../../kernel/useKernel';
-import { CodeCell } from '../../components';
+import { Cell } from '../../components';
 
 import { EditorHeader, LeftSidebar, RightSidebar } from './components';
 
@@ -43,12 +41,6 @@ const EditorPage: React.FC = () => {
 
   const cells = useSelector((state: ReduxState) => state.editor.cells);
 
-  const dispatch = useDispatch();
-  const dispatchEditCell = React.useCallback(
-    (cellId: string, changes: Partial<EditorCell>) => dispatch(_editor.editCell(cellId, changes)),
-    [dispatch]
-  );
-
   return (
     <React.Fragment>
       {AceImports}
@@ -62,27 +54,7 @@ const EditorPage: React.FC = () => {
           <div className={css(styles.editableAreaContainer)}>
             <div className={css(styles.editableArea)}>
               {cells.map((cell) => (
-                <CodeCell
-                  key={cell._id}
-                  cell={cell}
-                  onFocus={(_id) => {
-                    // TODO: lock
-                    dispatchEditCell(_id, {
-                      active: true,
-                    });
-                  }}
-                  onBlur={(_id) => {
-                    // TODO: unlock
-                    dispatchEditCell(_id, {
-                      active: false,
-                    });
-                  }}
-                  onChange={(_id, newValue) =>
-                    dispatchEditCell(_id, {
-                      code: newValue,
-                    })
-                  }
-                />
+                <Cell key={cell._id} cell={cell} />
               ))}
             </div>
           </div>
