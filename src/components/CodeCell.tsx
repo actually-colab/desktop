@@ -13,7 +13,12 @@ const styles = StyleSheet.create({
     width: '100%',
     borderStyle: 'solid',
     borderWidth: 1,
+  },
+  containerBlurred: {
     borderColor: palette.BASE_BORDER,
+  },
+  containerFocused: {
+    borderColor: palette.PRIMARY,
   },
   editor: {
     width: '100%',
@@ -46,7 +51,7 @@ const CodeCell: React.FC<{
   );
 
   return (
-    <div className={css(styles.container)}>
+    <div className={css([styles.container, isEditable ? styles.containerFocused : styles.containerBlurred])}>
       <AceEditor
         style={{ width: '100%' }}
         name={cell.cell_id}
