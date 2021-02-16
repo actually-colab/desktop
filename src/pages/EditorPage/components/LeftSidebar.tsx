@@ -1,9 +1,10 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import { Button, Dropdown, Icon, IconButton, IconProps, Input, InputGroup, Tooltip, Whisper } from 'rsuite';
 
 import { ReduxState } from '../../../redux';
+import { _auth } from '../../../redux/actions';
 import { palette, spacing } from '../../../constants/theme';
 import { PopoverDropdown, UserAvatar } from '../../../components';
 
@@ -140,6 +141,9 @@ const LeftSidebar: React.FC = () => {
     'projects'
   );
 
+  const dispatch = useDispatch();
+  const dispatchSignOut = React.useCallback(() => dispatch(_auth.signOut()), [dispatch]);
+
   const handleCategorySelect = React.useCallback(
     (menuKey: typeof activeMenuKey) => {
       if (activeMenuKey !== menuKey) {
@@ -210,7 +214,7 @@ const LeftSidebar: React.FC = () => {
               >
                 <div className={css(styles.profilePopoverContent)}>
                   <span>jeff@test.com</span>
-                  <Button style={{ marginTop: spacing.DEFAULT }} onClick={() => console.log('TODO')}>
+                  <Button style={{ marginTop: spacing.DEFAULT }} onClick={dispatchSignOut}>
                     <Icon icon="sign-out" /> Logout
                   </Button>
                 </div>

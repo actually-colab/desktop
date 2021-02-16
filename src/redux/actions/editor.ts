@@ -8,6 +8,9 @@ import {
   CONNECT_TO_KERNEL_FAILURE,
   CONNECT_TO_KERNEL_START,
   CONNECT_TO_KERNEL_SUCCESS,
+  DELETE_CELL_FAILURE,
+  DELETE_CELL_START,
+  DELETE_CELL_SUCCESS,
   EditorActionTypes,
   EditorAsyncActionTypes,
   EDIT_CELL_FAILURE,
@@ -16,7 +19,13 @@ import {
   EXECUTE_CODE_FAILURE,
   EXECUTE_CODE_START,
   EXECUTE_CODE_SUCCESS,
+  LOCK_CELL_FAILURE,
+  LOCK_CELL_START,
+  LOCK_CELL_SUCCESS,
   RECEIVE_KERNEL_MESSAGE,
+  UNLOCK_CELL_FAILURE,
+  UNLOCK_CELL_START,
+  UNLOCK_CELL_SUCCESS,
   UPDATE_CELL_CODE,
 } from '../../types/redux/editor';
 import { EditorCell, KernelOutput } from '../../types/notebook';
@@ -54,13 +63,78 @@ export const connectToKernel = (): EditorAsyncActionTypes => async (dispatch) =>
   }
 };
 
+const lockCellStart = (): EditorActionTypes => ({
+  type: LOCK_CELL_START,
+});
+
+const lockCellSuccess = (isMe: boolean, uid: string, cell_id: string): EditorActionTypes => ({
+  type: LOCK_CELL_SUCCESS,
+  isMe,
+  uid,
+  cell_id,
+});
+
+const lockCellFailure = (errorMessage: string): EditorActionTypes => {
+  displayError(errorMessage);
+
+  return {
+    type: LOCK_CELL_FAILURE,
+    error: {
+      message: errorMessage,
+    },
+  };
+};
+
+/**
+ * Try to lock a given cell
+ */
+export const lockCell = (cell_id: string): EditorAsyncActionTypes => async (dispatch) => {
+  dispatch(lockCellStart());
+
+  // TODO: make request
+  dispatch(lockCellSuccess(true, 'jeff@test.com', cell_id));
+};
+
+const unlockCellStart = (): EditorActionTypes => ({
+  type: UNLOCK_CELL_START,
+});
+
+const unlockCellSuccess = (isMe: boolean, uid: string, cell_id: string): EditorActionTypes => ({
+  type: UNLOCK_CELL_SUCCESS,
+  isMe,
+  uid,
+  cell_id,
+});
+
+const unlockCellFailure = (errorMessage: string) => {
+  displayError(errorMessage);
+
+  return {
+    type: UNLOCK_CELL_FAILURE,
+    error: {
+      message: errorMessage,
+    },
+  };
+};
+
+/**
+ * Try to unlock the given cell
+ */
+export const unlockCell = (cell_id: string): EditorAsyncActionTypes => async (dispatch) => {
+  dispatch(unlockCellStart());
+
+  // TODO: make request
+  dispatch(unlockCellSuccess(true, 'jeff@test.com', cell_id));
+};
+
 const addCellStart = (): EditorActionTypes => ({
   type: ADD_CELL_START,
 });
 
-const addCellSuccess = (cellId: string, index: number): EditorActionTypes => ({
+const addCellSuccess = (isMe: boolean, cell_id: string, index: number): EditorActionTypes => ({
   type: ADD_CELL_SUCCESS,
-  cellId,
+  isMe,
+  cell_id,
   index,
 });
 
@@ -82,16 +156,48 @@ export const addCell = (index: number): EditorAsyncActionTypes => async (dispatc
   dispatch(addCellStart());
 
   // TODO: make request
-  dispatch(addCellSuccess(`change-me-${uuid()}`, index));
+  dispatch(addCellSuccess(true, `TODO-${uuid()}`, index));
+};
+
+const deleteCellStart = (): EditorActionTypes => ({
+  type: DELETE_CELL_START,
+});
+
+const deleteCellSuccess = (isMe: boolean, cell_id: string): EditorActionTypes => ({
+  type: DELETE_CELL_SUCCESS,
+  isMe,
+  cell_id,
+});
+
+const deleteCellFailure = (errorMessage: string): EditorActionTypes => {
+  displayError(errorMessage);
+
+  return {
+    type: DELETE_CELL_FAILURE,
+    error: {
+      message: errorMessage,
+    },
+  };
+};
+
+/**
+ * Try to delete a given cell
+ */
+export const deleteCell = (cell_id: string): EditorAsyncActionTypes => async (dispatch) => {
+  dispatch(deleteCellStart());
+
+  // TODO: make request
+  dispatch(deleteCellSuccess(true, cell_id));
 };
 
 const editCellStart = (): EditorActionTypes => ({
   type: EDIT_CELL_START,
 });
 
-const editCellSuccess = (cellId: string, changes: Partial<EditorCell>): EditorActionTypes => ({
+const editCellSuccess = (isMe: boolean, cell_id: string, changes: Partial<EditorCell>): EditorActionTypes => ({
   type: EDIT_CELL_SUCCESS,
-  cellId,
+  isMe,
+  cell_id,
   changes,
 });
 
@@ -109,34 +215,34 @@ const editCellFailure = (errorMessage: string): EditorActionTypes => {
 /**
  * Edit a cell locally and make a debounced socket request to update it remotely
  */
-export const editCell = (cellId: string, changes: Partial<EditorCell>): EditorAsyncActionTypes => async (dispatch) => {
+export const editCell = (cell_id: string, changes: Partial<EditorCell>): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(editCellStart());
 
   // TODO: make debounced request
-  dispatch(editCellSuccess(cellId, changes));
+  dispatch(editCellSuccess(true, cell_id, changes));
 };
 
-const executeCodeStart = (cellId: string): EditorActionTypes => ({
+const executeCodeStart = (cell_id: string): EditorActionTypes => ({
   type: EXECUTE_CODE_START,
-  cellId,
+  cell_id,
 });
 
-const executeCodeSuccess = (cellId: string): EditorActionTypes => ({
+const executeCodeSuccess = (cell_id: string): EditorActionTypes => ({
   type: EXECUTE_CODE_SUCCESS,
-  cellId,
+  cell_id,
 });
 
-const executeCodeFailure = (cellId: string, errorMessage: string): EditorActionTypes => ({
+const executeCodeFailure = (cell_id: string, errorMessage: string): EditorActionTypes => ({
   type: EXECUTE_CODE_FAILURE,
-  cellId,
+  cell_id,
   error: {
     message: errorMessage,
   },
 });
 
-const receiveKernelMessage = (cellId: string, message: KernelOutput): EditorActionTypes => ({
+const receiveKernelMessage = (cell_id: string, message: KernelOutput): EditorActionTypes => ({
   type: RECEIVE_KERNEL_MESSAGE,
-  cellId,
+  cell_id,
   message,
 });
 
@@ -234,8 +340,8 @@ export const executeCode = (kernel: IKernel, cell: EditorCell): EditorAsyncActio
   dispatch(executeCodeSuccess(cell.cell_id));
 };
 
-export const updateCellCode = (cellId: string, code: string): EditorActionTypes => ({
+export const updateCellCode = (cell_id: string, code: string): EditorActionTypes => ({
   type: UPDATE_CELL_CODE,
-  cellId,
+  cell_id,
   code,
 });

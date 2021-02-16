@@ -7,6 +7,9 @@ import {
   CONNECT_TO_KERNEL_FAILURE,
   CONNECT_TO_KERNEL_START,
   CONNECT_TO_KERNEL_SUCCESS,
+  DELETE_CELL_FAILURE,
+  DELETE_CELL_START,
+  DELETE_CELL_SUCCESS,
   EditorActionTypes,
   EDIT_CELL_FAILURE,
   EDIT_CELL_START,
@@ -14,24 +17,33 @@ import {
   EXECUTE_CODE_FAILURE,
   EXECUTE_CODE_START,
   EXECUTE_CODE_SUCCESS,
+  LOCK_CELL_FAILURE,
+  LOCK_CELL_START,
+  LOCK_CELL_SUCCESS,
   RECEIVE_KERNEL_MESSAGE,
+  UNLOCK_CELL_FAILURE,
+  UNLOCK_CELL_START,
+  UNLOCK_CELL_SUCCESS,
   UPDATE_CELL_CODE,
 } from '../types/redux/editor';
-import { EditorCell, KernelOutput } from '../types/notebook';
+import { EditorCell, KernelOutput, Lock } from '../types/notebook';
 import { BASE_CELL } from '../constants/notebook';
 
 export interface EditorState {
   isConnectingToKernel: boolean;
   connectToKernelErrorMessage: string;
 
+  isLockingCell: boolean;
+  isUnlockingCell: boolean;
   isAddingCell: boolean;
+  isDeletingCell: boolean;
   isEditingCell: boolean;
 
   isExecutingCode: boolean;
   executeCodeErrorMessage: string;
 
   lockedCellId: string;
-  lockedCells: string[];
+  lockedCells: Lock[];
   executionCount: number;
   kernel: IKernel | null;
   cells: EditorCell[];
@@ -42,7 +54,10 @@ const initialState: EditorState = {
   isConnectingToKernel: false,
   connectToKernelErrorMessage: '',
 
+  isLockingCell: false,
+  isUnlockingCell: false,
   isAddingCell: false,
+  isDeletingCell: false,
   isEditingCell: false,
 
   isExecutingCode: false,
@@ -77,6 +92,46 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         isConnectingToKernel: false,
         connectToKernelErrorMessage: action.error.message,
       };
+    case LOCK_CELL_START:
+      return {
+        ...state,
+        isLockingCell: true,
+      };
+    case LOCK_CELL_SUCCESS:
+      return {
+        ...state,
+        isLockingCell: action.isMe ? false : state.isLockingCell,
+        lockedCellId: action.isMe ? action.cell_id : state.lockedCellId,
+        lockedCells: [
+          ...state.lockedCells,
+          {
+            uid: action.uid,
+            cell_id: action.cell_id,
+          },
+        ],
+      };
+    case LOCK_CELL_FAILURE:
+      return {
+        ...state,
+        isLockingCell: false,
+      };
+    case UNLOCK_CELL_START:
+      return {
+        ...state,
+        isUnlockingCell: true,
+      };
+    case UNLOCK_CELL_SUCCESS:
+      return {
+        ...state,
+        isUnlockingCell: action.isMe ? false : state.isUnlockingCell,
+        lockedCellId: action.isMe ? '' : state.lockedCellId,
+        lockedCells: state.lockedCells.filter((cell) => cell.cell_id !== action.cell_id),
+      };
+    case UNLOCK_CELL_FAILURE:
+      return {
+        ...state,
+        isUnlockingCell: false,
+      };
     case ADD_CELL_START:
       return {
         ...state,
@@ -87,12 +142,12 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
 
       newCells.splice(action.index === -1 ? newCells.length - 1 : action.index, 0, {
         ...BASE_CELL,
-        cell_id: action.cellId,
+        cell_id: action.cell_id,
       });
 
       return {
         ...state,
-        isAddingCell: false,
+        isAddingCell: action.isMe ? false : state.isAddingCell,
         cells: newCells,
       };
     }
@@ -100,6 +155,22 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
       return {
         ...state,
         isAddingCell: false,
+      };
+    case DELETE_CELL_START:
+      return {
+        ...state,
+        isDeletingCell: true,
+      };
+    case DELETE_CELL_SUCCESS:
+      return {
+        ...state,
+        isDeletingCell: action.isMe ? false : state.isDeletingCell,
+        cells: state.cells.filter((cell) => cell.cell_id !== action.cell_id),
+      };
+    case DELETE_CELL_FAILURE:
+      return {
+        ...state,
+        isDeletingCell: false,
       };
     case EDIT_CELL_START:
       return {
@@ -109,9 +180,9 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
     case EDIT_CELL_SUCCESS:
       return {
         ...state,
-        isEditingCell: false,
+        isEditingCell: action.isMe ? false : state.isDeletingCell,
         cells: state.cells.map((cell) =>
-          cell.cell_id === action.cellId
+          cell.cell_id === action.cell_id
             ? {
                 ...cell,
                 ...action.changes,
@@ -130,7 +201,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         isExecutingCode: true,
         executionCount: state.executionCount + 1,
         cells: state.cells.map((cell) =>
-          cell.cell_id === action.cellId
+          cell.cell_id === action.cell_id
             ? {
                 ...cell,
                 active: true,
@@ -144,7 +215,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...state,
         isExecutingCode: false,
         cells: state.cells.map((cell) =>
-          cell.cell_id === action.cellId
+          cell.cell_id === action.cell_id
             ? {
                 ...cell,
                 active: false,
@@ -158,7 +229,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         isExecutingCode: false,
         executeCodeErrorMessage: action.error.message,
         cells: state.cells.map((cell) =>
-          cell.cell_id === action.cellId
+          cell.cell_id === action.cell_id
             ? {
                 ...cell,
                 active: false,
@@ -175,7 +246,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
       return {
         ...state,
         cells: state.cells.map((cell) =>
-          cell.cell_id === action.cellId
+          cell.cell_id === action.cell_id
             ? {
                 ...cell,
                 code: action.code,

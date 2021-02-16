@@ -5,6 +5,5 @@ export const BASE_CELL: EditorCell = {
   language: 'py',
   editing: false,
   runIndex: -1,
-  active: false,
   code: '',
 };

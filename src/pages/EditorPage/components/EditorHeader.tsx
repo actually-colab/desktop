@@ -38,6 +38,7 @@ const EditorHeader: React.FC = () => {
 
   const connectToKernelErrorMessage = useSelector((state: ReduxState) => state.editor.connectToKernelErrorMessage);
   const isAddingCell = useSelector((state: ReduxState) => state.editor.isAddingCell);
+  const isDeletingCell = useSelector((state: ReduxState) => state.editor.isDeletingCell);
   const isEditingCell = useSelector((state: ReduxState) => state.editor.isEditingCell);
   const isExecutingCode = useSelector((state: ReduxState) => state.editor.isExecutingCode);
   const lockedCellId = useSelector((state: ReduxState) => state.editor.lockedCellId);
@@ -77,6 +78,10 @@ const EditorHeader: React.FC = () => {
 
   const dispatch = useDispatch();
   const dispatchAddCell = React.useCallback((index: number) => dispatch(_editor.addCell(index)), [dispatch]);
+  const dispatchDeleteCell = React.useCallback(() => dispatch(_editor.deleteCell(lockedCellId)), [
+    dispatch,
+    lockedCellId,
+  ]);
 
   const handleKernelSelect = React.useCallback((eventKey: string) => {
     setTempKernelSelection(eventKey);
@@ -110,6 +115,14 @@ const EditorHeader: React.FC = () => {
             loading={isAddingCell}
             disabled={!isStable}
             onClick={() => dispatchAddCell(-1)}
+          />
+          <ColoredIconButton
+            icon="trash2"
+            tooltipText="Delete the current cell"
+            tooltipDirection="bottom"
+            loading={isDeletingCell}
+            disabled={!isStable || lockedCellId === ''}
+            onClick={dispatchDeleteCell}
           />
         </div>
 

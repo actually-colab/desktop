@@ -7,18 +7,24 @@ import { EditorCell, KernelOutput } from '../notebook';
 export const CONNECT_TO_KERNEL_START = 'CONNECT_TO_KERNEL_START';
 export const CONNECT_TO_KERNEL_SUCCESS = 'CONNECT_TO_KERNEL_SUCCESS';
 export const CONNECT_TO_KERNEL_FAILURE = 'CONNECT_TO_KERNEL_FAILURE';
+export const LOCK_CELL_START = 'LOCK_CELL_START';
+export const LOCK_CELL_SUCCESS = 'LOCK_CELL_SUCCESS';
+export const LOCK_CELL_FAILURE = 'LOCK_CELL_FAILURE';
+export const UNLOCK_CELL_START = 'UNLOCK_CELL_START';
+export const UNLOCK_CELL_SUCCESS = 'UNLOCK_CELL_SUCCESS';
+export const UNLOCK_CELL_FAILURE = 'UNLOCK_CELL_FAILURE';
 export const ADD_CELL_START = 'ADD_CELL_START';
 export const ADD_CELL_SUCCESS = 'ADD_CELL_SUCCESS';
 export const ADD_CELL_FAILURE = 'ADD_CELL_FAILURE';
-export const EDIT_CELL_START = 'EDIT_CELL_START';
-export const EDIT_CELL_SUCCESS = 'EDIT_CELL_SUCCESS';
-export const EDIT_CELL_FAILURE = 'EDIT_CELL_FAILURE';
 export const DELETE_CELL_START = 'DELETE_CELL_START';
 export const DELETE_CELL_SUCCESS = 'DELETE_CELL_SUCCESS';
 export const DELETE_CELL_FAILURE = 'DELETE_CELL_FAILURE';
 export const MOVE_CELL_START = 'MOVE_CELL_START';
 export const MOVE_CELL_SUCCESS = 'MOVE_CELL_SUCCESS';
 export const MOVE_CELL_FAILURE = 'MOVE_CELL_FAILURE';
+export const EDIT_CELL_START = 'EDIT_CELL_START';
+export const EDIT_CELL_SUCCESS = 'EDIT_CELL_SUCCESS';
+export const EDIT_CELL_FAILURE = 'EDIT_CELL_FAILURE';
 export const EXECUTE_CODE_START = 'EXECUTE_CODE_START';
 export const EXECUTE_CODE_SUCCESS = 'EXECUTE_CODE_SUCCESS';
 export const EXECUTE_CODE_FAILURE = 'EXECUTE_CODE_FAILURE';
@@ -45,32 +51,49 @@ type ConnectToKernelFailureAction = {
   type: typeof CONNECT_TO_KERNEL_FAILURE;
 } & ActionError;
 
+type LockCellStartAction = {
+  type: typeof LOCK_CELL_START;
+};
+
+type LockCellSuccessAction = {
+  type: typeof LOCK_CELL_SUCCESS;
+  isMe: boolean;
+  uid: string;
+  cell_id: string;
+};
+
+type LockCellFailureAction = {
+  type: typeof LOCK_CELL_FAILURE;
+} & ActionError;
+
+type UnlockCellStartAction = {
+  type: typeof UNLOCK_CELL_START;
+};
+
+type UnlockCellSuccessAction = {
+  type: typeof UNLOCK_CELL_SUCCESS;
+  isMe: boolean;
+  uid: string;
+  cell_id: string;
+};
+
+type UnlockCellFailureAction = {
+  type: typeof UNLOCK_CELL_FAILURE;
+} & ActionError;
+
 type AddCellStartAction = {
   type: typeof ADD_CELL_START;
 };
 
 type AddCellSuccessAction = {
   type: typeof ADD_CELL_SUCCESS;
-  cellId: string;
+  isMe: boolean;
+  cell_id: string;
   index: number;
 };
 
 type AddCellFailureAction = {
   type: typeof ADD_CELL_FAILURE;
-} & ActionError;
-
-type EditCellStartAction = {
-  type: typeof EDIT_CELL_START;
-};
-
-type EditCellSuccessAction = {
-  type: typeof EDIT_CELL_SUCCESS;
-  cellId: string;
-  changes: Partial<EditorCell>;
-};
-
-type EditCellFailureAction = {
-  type: typeof EDIT_CELL_FAILURE;
 } & ActionError;
 
 type DeleteCellStartAction = {
@@ -79,7 +102,8 @@ type DeleteCellStartAction = {
 
 type DeleteCellSuccessAction = {
   type: typeof DELETE_CELL_SUCCESS;
-  cellId: string;
+  isMe: boolean;
+  cell_id: string;
 };
 
 type DeleteCellFailureAction = {
@@ -92,7 +116,7 @@ type MoveCellStartAction = {
 
 type MoveCellSuccessAction = {
   type: typeof MOVE_CELL_SUCCESS;
-  cellId: string;
+  cell_id: string;
   index: number;
 };
 
@@ -100,30 +124,45 @@ type MoveCellFailureAction = {
   type: typeof MOVE_CELL_FAILURE;
 } & ActionError;
 
+type EditCellStartAction = {
+  type: typeof EDIT_CELL_START;
+};
+
+type EditCellSuccessAction = {
+  type: typeof EDIT_CELL_SUCCESS;
+  isMe: boolean;
+  cell_id: string;
+  changes: Partial<EditorCell>;
+};
+
+type EditCellFailureAction = {
+  type: typeof EDIT_CELL_FAILURE;
+} & ActionError;
+
 type ExecuteCodeStartAction = {
   type: typeof EXECUTE_CODE_START;
-  cellId: string;
+  cell_id: string;
 };
 
 type ExecuteCodeSuccessAction = {
   type: typeof EXECUTE_CODE_SUCCESS;
-  cellId: string;
+  cell_id: string;
 };
 
 type ExecuteCodeFailureAction = {
   type: typeof EXECUTE_CODE_FAILURE;
-  cellId: string;
+  cell_id: string;
 } & ActionError;
 
 type ReceiveKernelMessageAction = {
   type: typeof RECEIVE_KERNEL_MESSAGE;
-  cellId: string;
+  cell_id: string;
   message: KernelOutput;
 };
 
 type UpdateCellCodeAction = {
   type: typeof UPDATE_CELL_CODE;
-  cellId: string;
+  cell_id: string;
   code: string;
 };
 
@@ -131,18 +170,24 @@ export type EditorActionTypes =
   | ConnectToKernelStartAction
   | ConnectToKernelSuccessAction
   | ConnectToKernelFailureAction
+  | LockCellStartAction
+  | LockCellSuccessAction
+  | LockCellFailureAction
+  | UnlockCellStartAction
+  | UnlockCellSuccessAction
+  | UnlockCellFailureAction
   | AddCellStartAction
   | AddCellSuccessAction
   | AddCellFailureAction
-  | EditCellStartAction
-  | EditCellSuccessAction
-  | EditCellFailureAction
   | DeleteCellStartAction
   | DeleteCellSuccessAction
   | DeleteCellFailureAction
   | MoveCellStartAction
   | MoveCellSuccessAction
   | MoveCellFailureAction
+  | EditCellStartAction
+  | EditCellSuccessAction
+  | EditCellFailureAction
   | ExecuteCodeStartAction
   | ExecuteCodeSuccessAction
   | ExecuteCodeFailureAction

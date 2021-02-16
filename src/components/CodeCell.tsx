@@ -1,7 +1,9 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import AceEditor from 'react-ace';
 
+import { ReduxState } from '../redux';
 import { EditorCell } from '../types/notebook';
 import { editorOptionsActive, editorOptionsInactive } from '../constants/editorOptions';
 import { palette } from '../constants/theme';
@@ -24,6 +26,10 @@ const CodeCell: React.FC<{
   onBlur(cell_id: string): void;
   onChange(cell_id: string, newValue: string): void;
 }> = ({ cell, onFocus, onBlur, onChange }) => {
+  const lockedCellId = useSelector((state: ReduxState) => state.editor.lockedCellId);
+
+  const isEditable = React.useMemo(() => lockedCellId === cell.cell_id, [cell.cell_id, lockedCellId]);
+
   const handleFocus = React.useCallback(() => {
     onFocus(cell.cell_id);
   }, [cell.cell_id, onFocus]);
@@ -46,7 +52,7 @@ const CodeCell: React.FC<{
         name={cell.cell_id}
         mode={cell.language === 'md' ? 'markdown' : 'python'}
         theme="xcode"
-        setOptions={cell.active ? editorOptionsActive : editorOptionsInactive}
+        setOptions={isEditable ? editorOptionsActive : editorOptionsInactive}
         minLines={1}
         maxLines={Infinity}
         value={cell.code}

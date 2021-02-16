@@ -30,8 +30,12 @@ export type EditorCell = {
   language: 'py' | 'md';
   editing: boolean;
   runIndex: number;
-  active: boolean;
   code: string;
+};
+
+export type Lock = {
+  uid: string;
+  cell_id: string;
 };
 
 export type Notebook = {
