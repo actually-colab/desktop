@@ -125,7 +125,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...state,
         isUnlockingCell: action.isMe ? false : state.isUnlockingCell,
         lockedCellId: action.isMe ? '' : state.lockedCellId,
-        lockedCells: state.lockedCells.filter((cell) => cell.cell_id !== action.cell_id),
+        lockedCells: state.lockedCells.filter((lock) => lock.cell_id !== action.cell_id),
       };
     case UNLOCK_CELL_FAILURE:
       return {
@@ -165,6 +165,8 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
       return {
         ...state,
         isDeletingCell: action.isMe ? false : state.isDeletingCell,
+        lockedCellId: action.isMe ? '' : state.lockedCellId,
+        lockedCells: state.lockedCells.filter((lock) => lock.cell_id !== action.cell_id),
         cells: state.cells.filter((cell) => cell.cell_id !== action.cell_id),
       };
     case DELETE_CELL_FAILURE:

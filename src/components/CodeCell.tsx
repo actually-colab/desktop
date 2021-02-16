@@ -22,8 +22,8 @@ const styles = StyleSheet.create({
 
 const CodeCell: React.FC<{
   cell: EditorCell;
-  onFocus(cell_id: string): void;
-  onBlur(cell_id: string): void;
+  onFocus?(cell_id: string): void;
+  onBlur?(cell_id: string): void;
   onChange(cell_id: string, newValue: string): void;
 }> = ({ cell, onFocus, onBlur, onChange }) => {
   const lockedCellId = useSelector((state: ReduxState) => state.editor.lockedCellId);
@@ -31,11 +31,11 @@ const CodeCell: React.FC<{
   const isEditable = React.useMemo(() => lockedCellId === cell.cell_id, [cell.cell_id, lockedCellId]);
 
   const handleFocus = React.useCallback(() => {
-    onFocus(cell.cell_id);
+    onFocus?.(cell.cell_id);
   }, [cell.cell_id, onFocus]);
 
   const handleBlur = React.useCallback(() => {
-    onBlur(cell.cell_id);
+    onBlur?.(cell.cell_id);
   }, [cell.cell_id, onBlur]);
 
   const handleChange = React.useCallback(

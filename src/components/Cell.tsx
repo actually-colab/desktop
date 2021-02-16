@@ -36,9 +36,12 @@ const styles = StyleSheet.create({
 const Cell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
   const user = useSelector((state: ReduxState) => state.auth.user);
   const lockedCellId = useSelector((state: ReduxState) => state.editor.lockedCellId);
+  const lockedCells = useSelector((state: ReduxState) => state.editor.lockedCells);
 
-  const hasLock = React.useMemo(() => lockedCellId === cell.cell_id, [cell.cell_id, lockedCellId]);
-  const lockOwner = 'TODO';
+  const lock = React.useMemo(() => lockedCells.find((lockedCell) => lockedCell.cell_id === cell.cell_id), [
+    cell.cell_id,
+    lockedCells,
+  ]);
 
   const dispatch = useDispatch();
   const dispatchLockCell = React.useCallback(() => dispatch(_editor.lockCell(cell.cell_id)), [cell.cell_id, dispatch]);
@@ -69,7 +72,7 @@ const Cell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
       </div>
 
       <div className={css(styles.content)}>
-        <CodeCell cell={cell} onFocus={dispatchLockCell} onBlur={dispatchUnlockCell} onChange={onChange} />
+        <CodeCell cell={cell} onFocus={dispatchLockCell} onChange={onChange} />
         <OutputCell cell={cell} uid={user?.uid} />
       </div>
     </div>
