@@ -1,7 +1,7 @@
 import { EditorCell } from '../types/notebook';
 
 export const BASE_CELL: EditorCell = {
-  _id: '',
+  cell_id: '',
   language: 'py',
   editing: false,
   runIndex: -1,

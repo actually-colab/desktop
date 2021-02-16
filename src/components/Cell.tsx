@@ -26,25 +26,25 @@ const Cell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
 
   const onFocus = React.useCallback(() => {
     // TODO: require lock
-    dispatchEditCell(cell._id, {
+    dispatchEditCell(cell.cell_id, {
       active: true,
     });
-  }, [cell._id, dispatchEditCell]);
+  }, [cell.cell_id, dispatchEditCell]);
 
   const onBlur = React.useCallback(() => {
     // TODO: unlock
-    dispatchEditCell(cell._id, {
+    dispatchEditCell(cell.cell_id, {
       active: false,
     });
-  }, [cell._id, dispatchEditCell]);
+  }, [cell.cell_id, dispatchEditCell]);
 
   const onChange = React.useCallback(
     (_: string, newValue: string) => {
-      dispatchEditCell(cell._id, {
+      dispatchEditCell(cell.cell_id, {
         code: newValue,
       });
     },
-    [cell._id, dispatchEditCell]
+    [cell.cell_id, dispatchEditCell]
   );
 
   return (

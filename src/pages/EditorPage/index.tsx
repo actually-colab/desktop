@@ -54,7 +54,7 @@ const EditorPage: React.FC = () => {
           <div className={css(styles.editableAreaContainer)}>
             <div className={css(styles.editableArea)}>
               {cells.map((cell) => (
-                <Cell key={cell._id} cell={cell} />
+                <Cell key={cell.cell_id} cell={cell} />
               ))}
             </div>
           </div>

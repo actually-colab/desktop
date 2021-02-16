@@ -148,7 +148,7 @@ export const executeCode = (kernel: IKernel, cell: EditorCell): EditorAsyncActio
     return;
   }
 
-  dispatch(executeCodeStart(cell._id));
+  dispatch(executeCodeStart(cell.cell_id));
 
   const future = kernel.execute({
     code: cell.code,
@@ -168,8 +168,9 @@ export const executeCode = (kernel: IKernel, cell: EditorCell): EditorAsyncActio
       } else if (message.content.name === 'stdout') {
         // regular text stream
         kernelOutput = {
-          _id: message.header.msg_id,
-          cellId: cell._id,
+          uid: 'TODO',
+          output_id: message.header.msg_id,
+          cell_id: cell.cell_id,
           runIndex: -1,
           messageIndex,
           name: 'stdout',
@@ -180,8 +181,9 @@ export const executeCode = (kernel: IKernel, cell: EditorCell): EditorAsyncActio
       } else if (message.header.msg_type === 'display_data') {
         // image content
         kernelOutput = {
-          _id: message.header.msg_id,
-          cellId: cell._id,
+          uid: 'TODO',
+          output_id: message.header.msg_id,
+          cell_id: cell.cell_id,
           runIndex: -1,
           messageIndex,
           name: 'display_data',
@@ -201,7 +203,7 @@ export const executeCode = (kernel: IKernel, cell: EditorCell): EditorAsyncActio
       if (runIndex !== -1) {
         // No need to queue
         dispatch(
-          receiveKernelMessage(cell._id, {
+          receiveKernelMessage(cell.cell_id, {
             ...kernelOutput,
             runIndex,
           })
@@ -214,7 +216,7 @@ export const executeCode = (kernel: IKernel, cell: EditorCell): EditorAsyncActio
       // process any messages in queue
       for (const oldMessage of messageQueue) {
         dispatch(
-          receiveKernelMessage(cell._id, {
+          receiveKernelMessage(cell.cell_id, {
             ...oldMessage,
             runIndex,
           })
@@ -229,7 +231,7 @@ export const executeCode = (kernel: IKernel, cell: EditorCell): EditorAsyncActio
     };
   });
 
-  dispatch(executeCodeSuccess(cell._id));
+  dispatch(executeCodeSuccess(cell.cell_id));
 };
 
 export const updateCellCode = (cellId: string, code: string): EditorActionTypes => ({

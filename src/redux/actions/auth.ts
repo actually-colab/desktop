@@ -52,9 +52,8 @@ export const signIn = (token: string): AuthAsyncActionTypes => async (dispatch) 
   dispatch(
     signInSuccess(
       {
-        _id: 'test',
+        uid: 'jeff@test.com',
         name: 'Jeff Taylor-Chang',
-        email: 'test@test.com',
       },
       token
     )

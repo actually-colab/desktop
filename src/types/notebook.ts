@@ -1,6 +1,9 @@
+import { User } from './user';
+
 type BaseKernelOutput<Name, Data> = {
-  _id: string;
-  cellId: string;
+  uid: string;
+  output_id: string;
+  cell_id: string;
   runIndex: number;
   messageIndex: number;
   name: Name;
@@ -23,7 +26,7 @@ export type KernelOutput =
     >;
 
 export type EditorCell = {
-  _id: string;
+  cell_id: string;
   language: 'py' | 'md';
   editing: boolean;
   runIndex: number;
@@ -32,9 +35,9 @@ export type EditorCell = {
 };
 
 export type Notebook = {
-  _id: string;
+  nb_id: string;
   name: string;
-  collaborators: string[];
-  readOnly: boolean;
+  user: User[];
+  access_level: 'Full Access' | 'Read Only';
   cells: EditorCell[];
 };

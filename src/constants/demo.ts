@@ -1,25 +1,24 @@
 import { Notebook } from '../types/notebook';
 
+import { BASE_CELL } from './notebook';
+
 export const exampleProject: Notebook = {
-  _id: 'demo',
+  nb_id: 'demo',
   name: 'Example Project',
-  collaborators: [],
-  readOnly: true,
+  user: [],
+  access_level: 'Read Only',
   cells: [
     {
-      _id: '0',
-      runIndex: -1,
-      active: false,
+      ...BASE_CELL,
+      cell_id: '0',
       code: `import numpy as np
 import matplotlib.pyplot as plt
 %matplotlib inline
 # The above magic allows you to render your graphs`,
-      output: [],
     },
     {
-      _id: '1',
-      runIndex: -1,
-      active: false,
+      ...BASE_CELL,
+      cell_id: '1',
       code: `def fib(n):
     """
     A recursive implementation of finding the nth number in the fibonacci sequence
@@ -28,25 +27,20 @@ import matplotlib.pyplot as plt
         return n
 
     return fib(n - 1) + fib(n - 2)`,
-      output: [],
     },
     {
-      _id: '2',
-      runIndex: -1,
-      active: false,
+      ...BASE_CELL,
+      cell_id: '2',
       code: `xpoints = np.array([1, 8])
 ypoints = np.array([fib(i) for i in range(10)])
 
 print(xpoints)
 print(ypoints)`,
-      output: [],
     },
     {
-      _id: '3',
-      runIndex: -1,
-      active: false,
+      ...BASE_CELL,
+      cell_id: '3',
       code: `plt.plot(xpoints, ypoints)`,
-      output: [],
     },
   ],
 };

@@ -20,30 +20,30 @@ const styles = StyleSheet.create({
 
 const CodeCell: React.FC<{
   cell: EditorCell;
-  onFocus(_id: string): void;
-  onBlur(_id: string): void;
-  onChange(_id: string, newValue: string): void;
+  onFocus(cell_id: string): void;
+  onBlur(cell_id: string): void;
+  onChange(cell_id: string, newValue: string): void;
 }> = ({ cell, onFocus, onBlur, onChange }) => {
   const handleFocus = React.useCallback(() => {
-    onFocus(cell._id);
-  }, [cell._id, onFocus]);
+    onFocus(cell.cell_id);
+  }, [cell.cell_id, onFocus]);
 
   const handleBlur = React.useCallback(() => {
-    onBlur(cell._id);
-  }, [cell._id, onBlur]);
+    onBlur(cell.cell_id);
+  }, [cell.cell_id, onBlur]);
 
   const handleChange = React.useCallback(
     (newValue: string) => {
-      onChange(cell._id, newValue);
+      onChange(cell.cell_id, newValue);
     },
-    [cell._id, onChange]
+    [cell.cell_id, onChange]
   );
 
   return (
     <div className={css(styles.container)}>
       <AceEditor
         style={{ width: '100%' }}
-        name={cell._id}
+        name={cell.cell_id}
         mode={cell.language === 'md' ? 'markdown' : 'python'}
         theme="xcode"
         setOptions={cell.active ? editorOptionsActive : editorOptionsInactive}

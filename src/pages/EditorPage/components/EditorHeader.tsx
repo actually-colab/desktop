@@ -40,7 +40,7 @@ const EditorHeader: React.FC = () => {
   const isAddingCell = useSelector((state: ReduxState) => state.editor.isAddingCell);
   const isEditingCell = useSelector((state: ReduxState) => state.editor.isEditingCell);
   const isExecutingCode = useSelector((state: ReduxState) => state.editor.isExecutingCode);
-  const activeCellId = useSelector((state: ReduxState) => state.editor.activeCellId);
+  const lockedCellId = useSelector((state: ReduxState) => state.editor.lockedCellId);
 
   const [tempKernelSelection, setTempKernelSelection] = React.useState<string>('localhost');
 
@@ -92,7 +92,7 @@ const EditorHeader: React.FC = () => {
             tooltipText="Run the current cell"
             tooltipDirection="bottom"
             loading={isExecutingCode}
-            disabled={!isStable || activeCellId === ''}
+            disabled={!isStable || lockedCellId === ''}
             onClick={() => console.log('TODO')}
           />
           <ColoredIconButton
@@ -119,9 +119,8 @@ const EditorHeader: React.FC = () => {
               <UserAvatar
                 placement="bottomEnd"
                 user={{
-                  _id: '',
+                  uid: 'bailey@test.com',
                   name: 'Bailey Tincher',
-                  email: 'test@test.com',
                 }}
                 statusColor={palette.SUCCESS}
               />

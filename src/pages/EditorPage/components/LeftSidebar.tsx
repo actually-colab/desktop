@@ -209,7 +209,7 @@ const LeftSidebar: React.FC = () => {
                 }
               >
                 <div className={css(styles.profilePopoverContent)}>
-                  <span>test@test.com</span>
+                  <span>jeff@test.com</span>
                   <Button style={{ marginTop: spacing.DEFAULT }} onClick={() => console.log('TODO')}>
                     <Icon icon="sign-out" /> Logout
                   </Button>

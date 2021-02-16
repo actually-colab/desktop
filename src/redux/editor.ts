@@ -87,7 +87,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
 
       newCells.splice(action.index === -1 ? newCells.length - 1 : action.index, 0, {
         ...BASE_CELL,
-        _id: action.cellId,
+        cell_id: action.cellId,
       });
 
       return {
@@ -111,7 +111,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...state,
         isEditingCell: false,
         cells: state.cells.map((cell) =>
-          cell._id === action.cellId
+          cell.cell_id === action.cellId
             ? {
                 ...cell,
                 ...action.changes,
@@ -130,7 +130,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         isExecutingCode: true,
         executionCount: state.executionCount + 1,
         cells: state.cells.map((cell) =>
-          cell._id === action.cellId
+          cell.cell_id === action.cellId
             ? {
                 ...cell,
                 active: true,
@@ -144,7 +144,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...state,
         isExecutingCode: false,
         cells: state.cells.map((cell) =>
-          cell._id === action.cellId
+          cell.cell_id === action.cellId
             ? {
                 ...cell,
                 active: false,
@@ -158,7 +158,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         isExecutingCode: false,
         executeCodeErrorMessage: action.error.message,
         cells: state.cells.map((cell) =>
-          cell._id === action.cellId
+          cell.cell_id === action.cellId
             ? {
                 ...cell,
                 active: false,
@@ -175,7 +175,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
       return {
         ...state,
         cells: state.cells.map((cell) =>
-          cell._id === action.cellId
+          cell.cell_id === action.cellId
             ? {
                 ...cell,
                 code: action.code,
