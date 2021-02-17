@@ -13,6 +13,7 @@ export const palette = {
   LIGHT_LAVENDER: '#DDDBF1',
   LIGHT_BROWN: '#D1BEB0',
   DEEP_SEA: '#111342',
+  ALMOST_BLACK: '#1E1E24',
   ERROR: '#F52F57',
   WARNING: '#FFBC42',
   SUCCESS: '#62C370',

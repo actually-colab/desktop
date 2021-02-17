@@ -253,6 +253,7 @@ const LeftSidebar: React.FC = () => {
                 }}
               >
                 <Dropdown.Item>Sort by name</Dropdown.Item>
+                <Dropdown.Item>Sort by edited</Dropdown.Item>
               </PopoverDropdown>
 
               {projects.map((project) => (
