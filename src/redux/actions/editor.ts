@@ -301,6 +301,21 @@ export const executeCode = (kernel: IKernel, cell: EditorCell): EditorAsyncActio
             image: (message.content.data as any)['image/png'],
           },
         };
+      } else if (message.header.msg_type === 'error') {
+        // error
+        kernelOutput = {
+          uid: 'jeff@test.com',
+          output_id: message.header.msg_id,
+          cell_id: cell.cell_id,
+          runIndex: -1,
+          messageIndex,
+          name: 'stderr',
+          data: {
+            ename: message.content.ename as string,
+            evalue: message.content.evalue as string,
+            traceback: message.content.traceback as string[],
+          },
+        };
       }
     } catch (error) {
       console.error(error);

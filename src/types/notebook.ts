@@ -23,6 +23,14 @@ export type KernelOutput =
         text?: string;
         image?: string;
       }
+    >
+  | BaseKernelOutput<
+      'stderr',
+      {
+        ename: string;
+        evalue: string;
+        traceback: string[];
+      }
     >;
 
 export type EditorCell = {

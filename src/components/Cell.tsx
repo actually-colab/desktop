@@ -178,6 +178,7 @@ const Cell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
             />
           )}
         </div>
+
         <OutputCell cell={cell} uid={user?.uid} />
       </div>
     </div>
