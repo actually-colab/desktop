@@ -248,12 +248,13 @@ const LeftSidebar: React.FC = () => {
               <PopoverDropdown
                 placement="rightStart"
                 buttonContent={<span className={css(styles.sortText)}>Sort by name</span>}
+                activeKey="name"
                 buttonProps={{
                   ripple: false,
                 }}
               >
-                <Dropdown.Item>Sort by name</Dropdown.Item>
-                <Dropdown.Item>Sort by edited</Dropdown.Item>
+                <Dropdown.Item eventKey="name">Sort by name</Dropdown.Item>
+                <Dropdown.Item eventKey="edited">Sort by edited</Dropdown.Item>
               </PopoverDropdown>
 
               {projects.map((project) => (
