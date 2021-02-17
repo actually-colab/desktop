@@ -4,17 +4,19 @@
 
 ## Starting Development
 
-Start the kernel gateway:
+1. Start the kernel gateway:
 
-```bash
-jupyter kernelgateway --KernelGatewayApp.allow_origin="*"
-```
+   ```bash
+   jupyter kernelgateway --KernelGatewayApp.allow_origin="*"
+   ```
 
-Start the app in the `dev` environment:
+2. Start the website locally to sign in (see: `www` repo)
 
-```bash
-yarn start
-```
+3. Start the app in the `dev` environment:
+
+   ```bash
+   yarn start
+   ```
 
 ## Packaging for Production
 
