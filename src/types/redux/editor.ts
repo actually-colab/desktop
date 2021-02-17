@@ -147,6 +147,7 @@ type ExecuteCodeStartAction = {
 type ExecuteCodeSuccessAction = {
   type: typeof EXECUTE_CODE_SUCCESS;
   cell_id: string;
+  runIndex: number;
 };
 
 type ExecuteCodeFailureAction = {

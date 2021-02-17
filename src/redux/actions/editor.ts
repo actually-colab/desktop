@@ -227,9 +227,10 @@ const executeCodeStart = (cell_id: string): EditorActionTypes => ({
   cell_id,
 });
 
-const executeCodeSuccess = (cell_id: string): EditorActionTypes => ({
+const executeCodeSuccess = (cell_id: string, runIndex: number): EditorActionTypes => ({
   type: EXECUTE_CODE_SUCCESS,
   cell_id,
+  runIndex,
 });
 
 const executeCodeFailure = (cell_id: string, errorMessage: string): EditorActionTypes => ({
@@ -266,6 +267,8 @@ export const executeCode = (kernel: IKernel, cell: EditorCell): EditorAsyncActio
 
   future.onIOPub = (message) => {
     let kernelOutput: KernelOutput | null = null;
+
+    console.log(message);
 
     try {
       if (message.content.execution_count !== undefined) {
@@ -337,7 +340,7 @@ export const executeCode = (kernel: IKernel, cell: EditorCell): EditorAsyncActio
     };
   });
 
-  dispatch(executeCodeSuccess(cell.cell_id));
+  dispatch(executeCodeSuccess(cell.cell_id, runIndex));
 };
 
 export const updateCellCode = (cell_id: string, code: string): EditorActionTypes => ({

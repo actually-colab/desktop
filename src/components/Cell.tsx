@@ -12,6 +12,7 @@ import CodeCell from './CodeCell';
 import OutputCell from './OutputCell';
 import ColoredIconButton from './ColoredIconButton';
 import IconTextButton from './IconTextButton';
+import useKernelStatus from '../kernel/useKernelStatus';
 
 const styles = StyleSheet.create({
   container: {
@@ -75,11 +76,15 @@ const styles = StyleSheet.create({
 });
 
 const Cell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
+  const kernelStatus = useKernelStatus();
+
   const user = useSelector((state: ReduxState) => state.auth.user);
+  const kernel = useSelector((state: ReduxState) => state.editor.kernel);
   const lockedCellId = useSelector((state: ReduxState) => state.editor.lockedCellId);
   const lockedCells = useSelector((state: ReduxState) => state.editor.lockedCells);
   const isLockingCell = useSelector((state: ReduxState) => state.editor.isLockingCell);
   const isUnlockingCell = useSelector((state: ReduxState) => state.editor.isUnlockingCell);
+  const runningCellId = useSelector((state: ReduxState) => state.editor.runningCellId);
 
   const lock = React.useMemo(() => lockedCells.find((lockedCell) => lockedCell.cell_id === cell.cell_id) ?? null, [
     cell.cell_id,
@@ -101,6 +106,10 @@ const Cell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
   const dispatchEditCell = React.useCallback(
     (cell_id: string, changes: Partial<EditorCell>) => dispatch(_editor.editCell(cell_id, changes)),
     [dispatch]
+  );
+  const dispatchExecuteCode = React.useCallback(
+    () => kernel !== null && cell.language === 'py' && dispatch(_editor.executeCode(kernel, cell)),
+    [cell, dispatch, kernel]
   );
 
   const onChange = React.useCallback(
@@ -130,7 +139,14 @@ const Cell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
         </div>
 
         <div className={css(styles.cellToolbar)}>
-          <ColoredIconButton icon="play" color={palette.SUCCESS} size="xs" onClick={() => {}} />
+          <ColoredIconButton
+            icon="play"
+            color={palette.SUCCESS}
+            size="xs"
+            loading={runningCellId === cell.cell_id}
+            disabled={kernelStatus !== 'Idle'}
+            onClick={dispatchExecuteCode}
+          />
 
           {ownsLock ? (
             <IconTextButton

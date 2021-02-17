@@ -45,6 +45,7 @@ export interface EditorState {
   lockedCellId: string;
   lockedCells: Lock[];
   executionCount: number;
+  runningCellId: string;
   kernel: IKernel | null;
   cells: EditorCell[];
   outputs: KernelOutput[];
@@ -66,6 +67,7 @@ const initialState: EditorState = {
   lockedCellId: '',
   lockedCells: [],
   executionCount: 0,
+  runningCellId: '',
   kernel: null,
   cells: [],
   outputs: [],
@@ -201,26 +203,19 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
       return {
         ...state,
         isExecutingCode: true,
-        executionCount: state.executionCount + 1,
-        cells: state.cells.map((cell) =>
-          cell.cell_id === action.cell_id
-            ? {
-                ...cell,
-                active: true,
-                runIndex: state.executionCount + 1,
-              }
-            : cell
-        ),
+        runningCellId: action.cell_id,
       };
     case EXECUTE_CODE_SUCCESS:
       return {
         ...state,
         isExecutingCode: false,
+        runningCellId: '',
+        executionCount: action.runIndex,
         cells: state.cells.map((cell) =>
           cell.cell_id === action.cell_id
             ? {
                 ...cell,
-                active: false,
+                runIndex: action.runIndex,
               }
             : cell
         ),
@@ -229,15 +224,8 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
       return {
         ...state,
         isExecutingCode: false,
+        runningCellId: '',
         executeCodeErrorMessage: action.error.message,
-        cells: state.cells.map((cell) =>
-          cell.cell_id === action.cell_id
-            ? {
-                ...cell,
-                active: false,
-              }
-            : cell
-        ),
       };
     case RECEIVE_KERNEL_MESSAGE:
       return {
