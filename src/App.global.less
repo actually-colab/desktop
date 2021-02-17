@@ -16,11 +16,13 @@
 
 body {
   height: 100vh;
+  overflow: hidden;
 }
 
 #root {
   height: 100vh;
   display: flex;
+  overflow: hidden;
 }
 
 .ace_hidden-cursors {
@@ -41,4 +43,8 @@ body {
   width: 5px;
   height: 5px;
   background-color: @base-color;
+}
+
+code {
+  white-space: pre;
 }

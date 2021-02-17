@@ -16,7 +16,6 @@ import useKernelStatus from '../kernel/useKernelStatus';
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: spacing.DEFAULT,
     paddingTop: spacing.DEFAULT,
     paddingRight: spacing.DEFAULT,
     display: 'flex',
@@ -50,6 +49,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    minWidth: 0, // Allow it to be smaller than the content
   },
   codeContainer: {
     pointerEvents: 'auto',

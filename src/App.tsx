@@ -43,6 +43,7 @@ const EntryPoint: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    minWidth: 0, // Allow it to be smaller than the content
     display: 'flex',
     flexDirection: 'column',
   },
