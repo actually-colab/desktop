@@ -31,7 +31,7 @@ import matplotlib.pyplot as plt
     {
       ...BASE_CELL,
       cell_id: '2',
-      code: `xpoints = np.array([1, 8])
+      code: `xpoints = np.arange(0, 10)
 ypoints = np.array([fib(i) for i in range(10)])
 
 print(xpoints)
