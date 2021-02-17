@@ -3,6 +3,7 @@ import { IAceOptions } from 'react-ace';
 const editorOptions: IAceOptions = {
   showFoldWidgets: false,
   printMargin: false,
+  highlightActiveLine: false,
   enableBasicAutocompletion: true,
   enableLiveAutocompletion: true,
 };
@@ -10,13 +11,11 @@ const editorOptions: IAceOptions = {
 export const editorOptionsActive: IAceOptions = {
   ...editorOptions,
   readOnly: false,
-  highlightActiveLine: true,
   highlightGutterLine: true,
 };
 
 export const editorOptionsInactive: IAceOptions = {
   ...editorOptions,
   readOnly: true,
-  highlightActiveLine: false,
   highlightGutterLine: false,
 };
