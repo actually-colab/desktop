@@ -18,18 +18,24 @@ const styles = StyleSheet.create({
     marginBottom: spacing.DEFAULT,
     paddingTop: spacing.DEFAULT,
     paddingRight: spacing.DEFAULT,
+    borderLeftStyle: 'solid',
+    borderLeftWidth: 3,
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'flex-start',
   },
   containerLocked: {
     opacity: 1,
+    borderLeftColor: palette.LIGHT_LAVENDER,
+    backgroundColor: palette.BASE_FADED,
   },
   containerUnlocked: {
     opacity: 1,
+    borderLeftColor: palette.BASE,
   },
   containerLockUnavailable: {
     opacity: 0.7,
+    borderLeftColor: palette.BASE,
   },
   controls: {
     marginTop: -3,

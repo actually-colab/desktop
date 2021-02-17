@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import { Dropdown } from 'rsuite';
+import { Divider, Dropdown } from 'rsuite';
 
 import { palette, spacing } from '../../../constants/theme';
 import { ReduxState } from '../../../redux';
@@ -70,8 +70,9 @@ const EditorHeader: React.FC = () => {
     [connectToKernelErrorMessage, kernelStatus]
   );
 
-  const isStable = React.useMemo(() => !(isAddingCell || isEditingCell || isExecutingCode), [
+  const isStable = React.useMemo(() => !(isAddingCell || isDeletingCell || isEditingCell || isExecutingCode), [
     isAddingCell,
+    isDeletingCell,
     isEditingCell,
     isExecutingCode,
   ]);
@@ -92,22 +93,22 @@ const EditorHeader: React.FC = () => {
       <div className={css(styles.header)}>
         <div className={css(styles.headerNoDrag)}>
           <ColoredIconButton
-            icon="play"
-            color={palette.SUCCESS}
-            tooltipText="Run the current cell"
+            icon="step-forward"
+            tooltipText="Run the next cell"
             tooltipDirection="bottom"
             loading={isExecutingCode}
-            disabled={!isStable || lockedCellId === ''}
+            disabled={!isStable}
             onClick={() => console.log('TODO')}
           />
           <ColoredIconButton
             icon="stop"
-            color={palette.ERROR}
             tooltipText="Interrupt the kernel"
             tooltipDirection="bottom"
-            disabled={!isExecutingCode}
             onClick={() => console.log('TODO')}
           />
+
+          <Divider vertical />
+
           <ColoredIconButton
             icon="plus"
             tooltipText="Create a new cell"
