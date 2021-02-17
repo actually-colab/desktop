@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import { Button, Icon, IconProps } from 'rsuite';
+import { Icon } from 'rsuite';
 
 import { ReduxState } from '../redux';
 import { _editor } from '../redux/actions';
@@ -11,6 +11,7 @@ import { palette, spacing } from '../constants/theme';
 import CodeCell from './CodeCell';
 import OutputCell from './OutputCell';
 import ColoredIconButton from './ColoredIconButton';
+import IconTextButton from './IconTextButton';
 
 const styles = StyleSheet.create({
   container: {
@@ -55,31 +56,15 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
   },
+  lockOwnerContainer: {
+    paddingLeft: 8,
+    color: palette.GRAY,
+  },
+  lockOwnerText: {
+    marginLeft: 4,
+    fontSize: 12,
+  },
 });
-
-const IconTextButton: React.FC<{
-  icon: IconProps['icon'];
-  text: string;
-  bgColor?: string;
-  color?: string;
-  loading: boolean;
-  disabled: boolean;
-  onClick(): void;
-}> = ({ icon, text, bgColor, color, loading, disabled, onClick }) => {
-  return (
-    <Button
-      style={bgColor !== undefined ? { backgroundColor: bgColor } : undefined}
-      size="xs"
-      appearance="subtle"
-      loading={loading}
-      disabled={disabled}
-      onClick={onClick}
-    >
-      <Icon icon={icon} style={!loading && !disabled ? { color } : undefined} />
-      <span style={!loading && !disabled ? { marginLeft: 4, color } : { marginLeft: 4 }}>{text}</span>
-    </Button>
-  );
-};
 
 const Cell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
   const user = useSelector((state: ReduxState) => state.auth.user);
@@ -142,19 +127,28 @@ const Cell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
               icon="unlock-alt"
               text="Unlock"
               bgColor="transparent"
+              tooltipText="Allow others to edit"
+              tooltipDirection="bottom"
               color={palette.PRIMARY}
               loading={isUnlockingCell}
               disabled={false}
               onClick={dispatchUnlockCell}
             />
+          ) : lock !== null ? (
+            <div className={css(styles.lockOwnerContainer)}>
+              <Icon icon="pencil" />
+              <span className={css(styles.lockOwnerText)}>Bailey Tincher</span>
+            </div>
           ) : (
             <IconTextButton
               icon="lock"
               text="Lock"
               bgColor="transparent"
+              tooltipText="Lock for editing"
+              tooltipDirection="bottom"
               color={palette.GRAY}
               loading={isLockingCell}
-              disabled={lockedCellId !== '' || lock !== null}
+              disabled={lockedCellId !== ''}
               onClick={dispatchLockCell}
             />
           )}
