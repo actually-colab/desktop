@@ -55,9 +55,12 @@ const styles = StyleSheet.create({
     pointerEvents: 'auto',
     opacity: 1,
   },
+  codeContainerLockInUse: {
+    opacity: 0.6,
+  },
   codeContainerLockedByOtherUser: {
     pointerEvents: 'none',
-    opacity: 0.7,
+    opacity: 0.6,
   },
   cellToolbar: {
     display: 'flex',
@@ -133,7 +136,14 @@ const Cell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
 
       <div className={css(styles.content)}>
         <div
-          className={css([styles.codeContainer, lockedByOtherUser ? styles.codeContainerLockedByOtherUser : undefined])}
+          className={css([
+            styles.codeContainer,
+            lockedByOtherUser
+              ? styles.codeContainerLockedByOtherUser
+              : !ownsLock && !canLock
+              ? styles.codeContainerLockInUse
+              : undefined,
+          ])}
         >
           <CodeCell cell={cell} onFocus={dispatchLockCell} onChange={onChange} />
         </div>
