@@ -17,7 +17,7 @@ const UserAvatar: React.FC<{
   userColor?: string;
   statusColor?: string;
   title?: React.ReactNode;
-}> = ({ user, placement, userColor = palette.OLD_LAVENDER, statusColor, title, children }) => {
+}> = ({ user, placement, userColor = palette.TANGERINE, statusColor, title, children }) => {
   const userInitials = React.useMemo(() => {
     const piecesOfName = user.name.split(' ');
 

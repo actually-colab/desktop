@@ -274,7 +274,7 @@ export const executeCode = (kernel: IKernel, cell: EditorCell): EditorAsyncActio
       } else if (message.content.name === 'stdout') {
         // regular text stream
         kernelOutput = {
-          uid: 'TODO',
+          uid: 'jeff@test.com', // TODO
           output_id: message.header.msg_id,
           cell_id: cell.cell_id,
           runIndex: -1,
@@ -287,7 +287,7 @@ export const executeCode = (kernel: IKernel, cell: EditorCell): EditorAsyncActio
       } else if (message.header.msg_type === 'display_data') {
         // image content
         kernelOutput = {
-          uid: 'TODO',
+          uid: 'jeff@test.com', // TODO
           output_id: message.header.msg_id,
           cell_id: cell.cell_id,
           runIndex: -1,

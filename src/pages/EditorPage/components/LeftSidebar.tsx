@@ -201,7 +201,8 @@ const LeftSidebar: React.FC = () => {
                 statusColor={palette.SUCCESS}
                 title={
                   <div className={css(styles.profilePopoverTitle)}>
-                    <span>Jeff Taylor-Chang</span>
+                    <span>{user.name}</span>
+
                     <IconButton
                       style={{ marginLeft: spacing.DEFAULT }}
                       appearance="subtle"
@@ -213,7 +214,8 @@ const LeftSidebar: React.FC = () => {
                 }
               >
                 <div className={css(styles.profilePopoverContent)}>
-                  <span>jeff@test.com</span>
+                  <span>{user.uid}</span>
+
                   <Button style={{ marginTop: spacing.DEFAULT }} onClick={dispatchSignOut}>
                     <Icon icon="sign-out" /> Logout
                   </Button>

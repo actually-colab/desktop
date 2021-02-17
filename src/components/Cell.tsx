@@ -18,24 +18,18 @@ const styles = StyleSheet.create({
     marginBottom: spacing.DEFAULT,
     paddingTop: spacing.DEFAULT,
     paddingRight: spacing.DEFAULT,
-    borderLeftStyle: 'solid',
-    borderLeftWidth: 3,
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'flex-start',
+    backgroundColor: palette.BASE,
+    borderLeftStyle: 'solid',
+    borderLeftWidth: 3,
+    borderLeftColor: palette.BASE,
+    opacity: 1,
   },
   containerLocked: {
-    opacity: 1,
     borderLeftColor: palette.LIGHT_LAVENDER,
     backgroundColor: palette.BASE_FADED,
-  },
-  containerUnlocked: {
-    opacity: 1,
-    borderLeftColor: palette.BASE,
-  },
-  containerLockUnavailable: {
-    opacity: 0.7,
-    borderLeftColor: palette.BASE,
   },
   controls: {
     marginTop: -3,
@@ -55,6 +49,14 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  codeContainer: {
+    pointerEvents: 'auto',
+    opacity: 1,
+  },
+  codeContainerLockedByOtherUser: {
+    pointerEvents: 'none',
+    opacity: 0.7,
   },
   cellToolbar: {
     display: 'flex',
@@ -84,6 +86,8 @@ const Cell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
     lockedCells,
   ]);
   const ownsLock = React.useMemo(() => lock?.uid === user?.uid, [lock?.uid, user?.uid]);
+  const lockedByOtherUser = React.useMemo(() => !ownsLock && lock !== null, [lock, ownsLock]);
+  const canLock = React.useMemo(() => lock === null && lockedCellId === '', [lock, lockedCellId]);
 
   const dispatch = useDispatch();
   const dispatchLockCell = React.useCallback(
@@ -109,12 +113,7 @@ const Cell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
   );
 
   return (
-    <div
-      className={css([
-        styles.container,
-        ownsLock ? styles.containerLocked : lock !== null ? styles.containerLockUnavailable : styles.containerUnlocked,
-      ])}
-    >
+    <div className={css([styles.container, ownsLock ? styles.containerLocked : undefined])}>
       <div className={css(styles.controls)}>
         <div className={css(styles.runIndexContainer)}>
           <span>[</span>
@@ -124,7 +123,12 @@ const Cell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
       </div>
 
       <div className={css(styles.content)}>
-        <CodeCell cell={cell} onFocus={dispatchLockCell} onChange={onChange} />
+        <div
+          className={css([styles.codeContainer, lockedByOtherUser ? styles.codeContainerLockedByOtherUser : undefined])}
+        >
+          <CodeCell cell={cell} onFocus={dispatchLockCell} onChange={onChange} />
+        </div>
+
         <div className={css(styles.cellToolbar)}>
           <ColoredIconButton icon="play" color={palette.SUCCESS} size="xs" onClick={() => {}} />
 
@@ -137,7 +141,6 @@ const Cell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
               tooltipDirection="bottom"
               color={palette.PRIMARY}
               loading={isUnlockingCell}
-              disabled={false}
               onClick={dispatchUnlockCell}
             />
           ) : lock !== null ? (
@@ -154,7 +157,7 @@ const Cell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
               tooltipDirection="bottom"
               color={palette.GRAY}
               loading={isLockingCell}
-              disabled={lockedCellId !== ''}
+              disabled={!canLock}
               onClick={dispatchLockCell}
             />
           )}
