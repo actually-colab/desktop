@@ -142,7 +142,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
     case ADD_CELL_SUCCESS: {
       const newCells = [...state.cells];
 
-      newCells.splice(action.index === -1 ? newCells.length - 1 : action.index, 0, {
+      newCells.splice(action.index === -1 ? newCells.length : action.index, 0, {
         ...BASE_CELL,
         cell_id: action.cell_id,
       });
