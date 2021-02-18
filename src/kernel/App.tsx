@@ -5,7 +5,6 @@ import { sendKernelProcessToMain } from './utils/ipc';
 
 const EntryPoint: React.FC = () => {
   const kernelProcess = React.useRef<ChildProcessWithoutNullStreams | null>(null);
-  const [pid, setPid] = React.useState<number>(-1);
   const [kernelError, setKernelError] = React.useState<string>('');
 
   React.useEffect(() => {
@@ -43,7 +42,6 @@ const EntryPoint: React.FC = () => {
   return (
     <div>
       <pre>process_pid: {kernelProcess.current?.pid}</pre>
-      <pre>state_pid: {pid}</pre>
       <pre>error: {kernelError}</pre>
     </div>
   );
