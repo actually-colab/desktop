@@ -129,6 +129,15 @@ const createWindow = async () => {
     app.quit();
   });
 
+  kernelWindow.on('close', (event) => {
+    if (process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true') {
+      // Prevent closing the kernel window completely since it can't be reopened
+      if (mainWindow) {
+        event.preventDefault();
+      }
+    }
+  });
+
   kernelWindow.on('closed', () => {
     kernelWindow = null;
   });
