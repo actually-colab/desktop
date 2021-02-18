@@ -17,6 +17,7 @@ import {
   EXECUTE_CODE_FAILURE,
   EXECUTE_CODE_START,
   EXECUTE_CODE_SUCCESS,
+  KERNEL_PROCESS_START,
   LOCK_CELL_FAILURE,
   LOCK_CELL_START,
   LOCK_CELL_SUCCESS,
@@ -46,6 +47,7 @@ export interface EditorState {
   lockedCells: Lock[];
   executionCount: number;
   runningCellId: string;
+  kernelPid: number;
   kernel: IKernel | null;
   cells: EditorCell[];
   outputs: KernelOutput[];
@@ -68,6 +70,7 @@ const initialState: EditorState = {
   lockedCells: [],
   executionCount: 0,
   runningCellId: '',
+  kernelPid: -1,
   kernel: null,
   cells: [],
   outputs: [],
@@ -75,6 +78,11 @@ const initialState: EditorState = {
 
 const reducer = (state = initialState, action: EditorActionTypes): EditorState => {
   switch (action.type) {
+    case KERNEL_PROCESS_START:
+      return {
+        ...state,
+        kernelPid: action.pid,
+      };
     case CONNECT_TO_KERNEL_START:
       return {
         ...state,

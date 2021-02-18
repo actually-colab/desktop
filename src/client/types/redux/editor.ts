@@ -4,6 +4,7 @@ import { ThunkAction } from 'redux-thunk';
 
 import { EditorCell, KernelOutput } from '../notebook';
 
+export const KERNEL_PROCESS_START = 'KERNEL_PROCESS_START';
 export const CONNECT_TO_KERNEL_START = 'CONNECT_TO_KERNEL_START';
 export const CONNECT_TO_KERNEL_SUCCESS = 'CONNECT_TO_KERNEL_SUCCESS';
 export const CONNECT_TO_KERNEL_FAILURE = 'CONNECT_TO_KERNEL_FAILURE';
@@ -36,6 +37,11 @@ type ActionError = {
   error: {
     message: string;
   };
+};
+
+type KernelProcessStartAction = {
+  type: typeof KERNEL_PROCESS_START;
+  pid: number;
 };
 
 type ConnectToKernelStartAction = {
@@ -168,6 +174,7 @@ type UpdateCellCodeAction = {
 };
 
 export type EditorActionTypes =
+  | KernelProcessStartAction
   | ConnectToKernelStartAction
   | ConnectToKernelSuccessAction
   | ConnectToKernelFailureAction

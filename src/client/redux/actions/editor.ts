@@ -19,6 +19,7 @@ import {
   EXECUTE_CODE_FAILURE,
   EXECUTE_CODE_START,
   EXECUTE_CODE_SUCCESS,
+  KERNEL_PROCESS_START,
   LOCK_CELL_FAILURE,
   LOCK_CELL_START,
   LOCK_CELL_SUCCESS,
@@ -31,6 +32,14 @@ import {
 import { EditorCell, KernelOutput } from '../../types/notebook';
 import * as jupyter from '../../kernel/jupyter';
 import { displayError } from '../../utils/ipc';
+
+/**
+ * Handle the kernel process starting with a PID
+ */
+export const kernelProcessStart = (pid: number): EditorActionTypes => ({
+  type: KERNEL_PROCESS_START,
+  pid,
+});
 
 const connectToKernelStart = (): EditorActionTypes => ({
   type: CONNECT_TO_KERNEL_START,

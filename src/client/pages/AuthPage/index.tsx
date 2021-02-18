@@ -4,6 +4,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import { Button, Icon } from 'rsuite';
 
+import { IpcLoginPayload, IPC_LOGIN_CHANNEL } from '../../../shared/types/ipc';
+
 import { spacing } from '../../constants/theme';
 import { _auth } from '../../redux/actions';
 import { extractLoginData, LoginRedirectResponse } from '../../utils/redirect';
@@ -73,8 +75,12 @@ const AuthPage: React.FC = () => {
   );
 
   React.useEffect(() => {
-    const listener = (_: IpcRendererEvent, data?: { url: string }) => {
-      const loginResponse = data?.url ? extractLoginData(data.url) : null;
+    const listener = (_: IpcRendererEvent, data: IpcLoginPayload) => {
+      let loginResponse: LoginRedirectResponse | null = null;
+
+      if (data.type === 'success') {
+        loginResponse = extractLoginData(data.url);
+      }
 
       console.log('Redirect response', loginResponse);
 
@@ -85,10 +91,10 @@ const AuthPage: React.FC = () => {
       }
     };
 
-    ipcRenderer.on('login-success', listener);
+    ipcRenderer.on(IPC_LOGIN_CHANNEL, listener);
 
     return () => {
-      ipcRenderer.removeListener('login-success', listener);
+      ipcRenderer.removeListener(IPC_LOGIN_CHANNEL, listener);
     };
   }, [dispatchAuthRedirectFailure, dispatchAuthRedirectSignIn]);
 

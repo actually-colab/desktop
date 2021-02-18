@@ -37,11 +37,14 @@ export default merge(baseConfig, {
 
   target: 'electron-renderer',
 
-  entry: ['core-js', 'regenerator-runtime/runtime', require.resolve('../../src/index.tsx')],
+  entry: {
+    client: ['core-js', 'regenerator-runtime/runtime', require.resolve('../../src/client/index.tsx')],
+    kernel: ['core-js', 'regenerator-runtime/runtime', require.resolve('../../src/kernel/index.tsx')],
+  },
 
   output: {
     publicPath: `http://localhost:${port}/dist/`,
-    filename: 'renderer.dev.js',
+    filename: '[name].renderer.dev.js',
   },
 
   module: {

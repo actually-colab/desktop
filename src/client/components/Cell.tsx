@@ -128,9 +128,9 @@ const Cell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
     <div className={css([styles.container, ownsLock ? styles.containerLocked : undefined])}>
       <div className={css(styles.controls)}>
         <div className={css(styles.runIndexContainer)}>
-          <span>[</span>
-          <span className={css(styles.runIndex)}>{cell.runIndex === -1 ? '' : cell.runIndex}</span>
-          <span>]</span>
+          <code>[</code>
+          <code className={css(styles.runIndex)}>{cell.runIndex === -1 ? '' : cell.runIndex}</code>
+          <code>]</code>
         </div>
       </div>
 

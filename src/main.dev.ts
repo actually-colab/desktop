@@ -14,7 +14,11 @@ import path from 'path';
 import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+import treeKill from 'tree-kill';
+
 import MenuBuilder from './menu';
+import { IpcKernelProcessPayload, IPC_KERNEL_PROCESS_CHANNEL } from './shared/types/ipc';
+import { sendKernelProcessToClient, sendLoginToClient } from './main/utils/ipc';
 
 export default class AppUpdater {
   constructor() {
@@ -25,6 +29,11 @@ export default class AppUpdater {
 }
 
 let mainWindow: BrowserWindow | null = null;
+let kernelWindow: BrowserWindow | null = null;
+/**
+ * Track the kernel gateway process
+ */
+let kernelPid = -1;
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -75,7 +84,18 @@ const createWindow = async () => {
     },
   });
 
-  mainWindow.loadURL(`file://${__dirname}/index.html`);
+  kernelWindow = new BrowserWindow({
+    show: false,
+    width: 480,
+    height: 840,
+    title: 'Kernel [hidden in prod]',
+    webPreferences: {
+      nodeIntegration: true,
+    },
+  });
+
+  mainWindow.loadURL(`file://${__dirname}/client/index.html`);
+  kernelWindow.loadURL(`file://${__dirname}/kernel/index.html`);
 
   // @TODO: Use 'ready-to-show' event
   //        https://github.com/electron/electron/blob/master/docs/api/browser-window.md#using-ready-to-show-event
@@ -91,8 +111,26 @@ const createWindow = async () => {
     }
   });
 
+  kernelWindow.webContents.on('did-finish-load', () => {
+    if (!kernelWindow) {
+      throw new Error('"kernelWindow" is not defined');
+    }
+
+    if (process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true') {
+      // Only show the kernel window in development so console logs are available
+      kernelWindow.show();
+    }
+  });
+
   mainWindow.on('closed', () => {
     mainWindow = null;
+
+    // Quit if the main window is closed
+    app.quit();
+  });
+
+  kernelWindow.on('closed', () => {
+    kernelWindow = null;
   });
 
   const menuBuilder = new MenuBuilder(mainWindow);
@@ -116,8 +154,32 @@ const createWindow = async () => {
 app.on('window-all-closed', () => {
   // Respect the OSX convention of having the application in memory even
   // after all windows have been closed
-  if (process.platform !== 'darwin') {
-    app.quit();
+  // Ignore quit to safely exit
+});
+
+app.on('before-quit', (event) => {
+  if (kernelPid !== -1) {
+    // Wait for the kernel to close
+    event.preventDefault();
+
+    // Attempt to kill the kernel
+    console.log('Tree killing', kernelPid);
+    treeKill(kernelPid, 'SIGINT', (err) => {
+      if (!err) {
+        // Can safely exit
+        console.log('Safely killed', kernelPid);
+        kernelPid = -1;
+        app.quit();
+        return;
+      }
+
+      // SIGKILL if SIGINT fails
+      treeKill(kernelPid, 'SIGKILL', () => {
+        console.log('Dangerously killed', kernelPid);
+        kernelPid = -1;
+        app.quit();
+      });
+    });
   }
 });
 
@@ -134,11 +196,11 @@ app.setAsDefaultProtocolClient('actuallycolab');
 
 // MacOS specific. Use process.argv for Windows and Linux
 app.on('open-url', (_, url) => {
-  mainWindow?.webContents.send('login-success', {
-    url,
-  });
+  // Handle the login URI
+  sendLoginToClient(mainWindow, { type: 'success', url });
 });
 
+// Handle UI dialogs
 ipcMain.on(
   'display-dialog',
   (_, data?: { type: 'message'; message: string } | { type: 'error'; errorMessage: string }) => {
@@ -153,3 +215,35 @@ ipcMain.on(
     }
   }
 );
+
+// Handle kernel process messages
+ipcMain.on(IPC_KERNEL_PROCESS_CHANNEL, (_, data: IpcKernelProcessPayload) => {
+  switch (data.type) {
+    case 'ready':
+      console.log('Client is ready', kernelPid);
+
+      if (kernelPid !== -1) {
+        sendKernelProcessToClient(mainWindow, {
+          type: 'start',
+          pid: kernelPid,
+        });
+      }
+
+      return;
+    case 'start':
+      console.log('Received kernel PID', data.pid);
+      kernelPid = data.pid;
+      break;
+    case 'end':
+      console.log('Quitting all processes');
+      kernelPid = -1;
+      break;
+    case 'stdout':
+      break;
+    default:
+      break;
+  }
+
+  // Forward the kernel payload to the client window
+  sendKernelProcessToClient(mainWindow, data);
+});
