@@ -14,8 +14,22 @@ const EntryPoint: React.FC = () => {
         // Spawn the kernel gateway
         kernelProcess.current = spawn('jupyter', ['kernelgateway', '--KernelGatewayApp.allow_origin="*"']);
 
+        kernelProcess.current.stdout.setEncoding('utf-8');
         kernelProcess.current.stdout.on('data', (message) => {
-          console.log(message);
+          console.log('stdout', message);
+          sendKernelProcessToMain({
+            type: 'stdout',
+            message,
+          });
+        });
+
+        kernelProcess.current.stderr.setEncoding('utf-8');
+        kernelProcess.current.stderr.on('data', (message) => {
+          console.log('stderr', message);
+          sendKernelProcessToMain({
+            type: 'stdout',
+            message,
+          });
         });
 
         // Notify main process the kernel is ready

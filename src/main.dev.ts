@@ -34,6 +34,8 @@ let kernelWindow: BrowserWindow | null = null;
  * Track the kernel gateway process
  */
 let kernelPid = -1;
+let isClientReady = false;
+const messageQueue: string[] = [];
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -231,6 +233,8 @@ ipcMain.on(IPC_KERNEL_PROCESS_CHANNEL, (_, data: IpcKernelProcessPayload) => {
     case 'ready':
       console.log('Client is ready', kernelPid);
 
+      isClientReady = true;
+
       if (kernelPid !== -1) {
         sendKernelProcessToClient(mainWindow, {
           type: 'start',
@@ -238,21 +242,45 @@ ipcMain.on(IPC_KERNEL_PROCESS_CHANNEL, (_, data: IpcKernelProcessPayload) => {
         });
       }
 
-      return;
+      break;
     case 'start':
       console.log('Received kernel PID', data.pid);
       kernelPid = data.pid;
+
+      if (isClientReady) {
+        sendKernelProcessToClient(mainWindow, data);
+      }
       break;
     case 'end':
       console.log('Quitting all processes');
       kernelPid = -1;
+
+      sendKernelProcessToClient(mainWindow, data);
       break;
     case 'stdout':
+      console.log('Received stdout', data.message);
+
+      if (isClientReady) {
+        if (messageQueue.length > 0) {
+          // Empty the message queue
+          for (const message of messageQueue) {
+            sendKernelProcessToClient(mainWindow, {
+              type: 'stdout',
+              message,
+            });
+          }
+        }
+
+        sendKernelProcessToClient(mainWindow, {
+          type: 'stdout',
+          message: data.message,
+        });
+      } else {
+        // Save the message until the client is ready to receive it
+        messageQueue.push(data.message);
+      }
       break;
     default:
       break;
   }
-
-  // Forward the kernel payload to the client window
-  sendKernelProcessToClient(mainWindow, data);
 });

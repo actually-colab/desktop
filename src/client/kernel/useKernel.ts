@@ -25,24 +25,29 @@ const useKernel = () => {
 
   React.useEffect(() => {
     // Notify main that client is ready to connect
-    console.log('Notifying main process client is ready');
-    sendKernelProcessToMain({
-      type: 'ready',
-    });
+    if (kernelPid === -1) {
+      console.log('Notifying main process client is ready');
+      sendKernelProcessToMain({
+        type: 'ready',
+      });
+    }
 
     const listener = (_: IpcRendererEvent, data: IpcKernelProcessPayload) => {
       switch (data.type) {
         case 'start':
-          console.log('Received kernel PID', data.pid);
+          console.log('Received kernel process id', data);
 
           if ((data.pid ?? -1) !== -1) {
             dispatchKernelProcessStart(data.pid);
           }
           break;
         case 'end':
-          console.log('Kernel was killed', data.pid);
+          console.log('Kernel process was killed', data);
 
           dispatchKernelProcessStart(-1);
+          break;
+        case 'stdout':
+          console.log('Received kernel process stdout', data);
           break;
         default:
           break;
@@ -54,7 +59,7 @@ const useKernel = () => {
     return () => {
       ipcRenderer.removeListener(IPC_KERNEL_PROCESS_CHANNEL, listener);
     };
-  }, [dispatchConnectToKernel, dispatchKernelProcessStart]);
+  }, [dispatchConnectToKernel, dispatchKernelProcessStart, kernelPid]);
 
   React.useEffect(() => {
     if (kernelPid !== -1 && !isConnectingToKernel && connectToKernelErrorMessage === '' && kernel === null) {
