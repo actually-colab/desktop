@@ -19,7 +19,6 @@ const EntryPoint: React.FC = () => {
 
         // Notify main process the kernel is ready
         console.log('Kernel gateway started', kernelProcess.current.pid);
-        setPid(kernelProcess.current.pid);
         sendKernelProcessToMain({
           type: 'start',
           pid: kernelProcess.current.pid,
