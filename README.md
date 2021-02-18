@@ -18,6 +18,14 @@
    yarn start
    ```
 
+## Debugging Prod
+
+To run the production package with devtools and a visible kernel window:
+
+```bash
+yarn cross-env DEBUG_PROD=true yarn package
+```
+
 ## Packaging for Production
 
 To package apps for the local platform:
