@@ -78,11 +78,20 @@ const initialState: EditorState = {
 
 const reducer = (state = initialState, action: EditorActionTypes): EditorState => {
   switch (action.type) {
-    case KERNEL_PROCESS_START:
+    case KERNEL_PROCESS_START: {
+      if (state.kernelPid !== -1 && action.pid !== -1) {
+        // Don't process duplicate starts
+        return state;
+      }
+
       return {
         ...state,
         kernelPid: action.pid,
+        isConnectingToKernel: false,
+        connectToKernelErrorMessage: '',
+        kernel: null,
       };
+    }
     case CONNECT_TO_KERNEL_START:
       return {
         ...state,

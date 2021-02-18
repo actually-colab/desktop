@@ -5,6 +5,7 @@ import { sendKernelProcessToMain } from './utils/ipc';
 
 const EntryPoint: React.FC = () => {
   const kernelProcess = React.useRef<ChildProcessWithoutNullStreams | null>(null);
+  const [pid, setPid] = React.useState<number>(-1);
   const [kernelError, setKernelError] = React.useState<string>('');
 
   React.useEffect(() => {
@@ -19,6 +20,8 @@ const EntryPoint: React.FC = () => {
 
         // Notify main process the kernel is ready
         console.log('Kernel gateway started', kernelProcess.current.pid);
+
+        setPid(kernelProcess.current.pid);
         sendKernelProcessToMain({
           type: 'start',
           pid: kernelProcess.current.pid,
@@ -29,6 +32,7 @@ const EntryPoint: React.FC = () => {
           console.log('Kernel gateway closed');
           sendKernelProcessToMain({
             type: 'end',
+            pid: kernelProcess.current?.pid ?? -1,
           });
         });
       } catch (error) {
@@ -40,7 +44,7 @@ const EntryPoint: React.FC = () => {
 
   return (
     <div>
-      <pre>process_pid: {kernelProcess.current?.pid}</pre>
+      <pre>state_pid: {pid}</pre>
       <pre>error: {kernelError}</pre>
     </div>
   );

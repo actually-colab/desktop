@@ -39,6 +39,11 @@ const useKernel = () => {
             dispatchKernelProcessStart(data.pid);
           }
           break;
+        case 'end':
+          console.log('Kernel was killed', data.pid);
+
+          dispatchKernelProcessStart(-1);
+          break;
         default:
           break;
       }

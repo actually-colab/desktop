@@ -9,6 +9,7 @@ type IpcKernelProcessStart = {
 
 type IpcKernelProcessEnd = {
   type: 'end';
+  pid: number;
 };
 
 type IpcKernelProcessStdout = {
