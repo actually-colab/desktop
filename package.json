@@ -292,7 +292,7 @@
     "yarn": ">=1.21.3"
   },
   "collective": {
-    "url": ""
+    "url": "https://www.patreon.com/actuallycolab"
   },
   "browserslist": [],
   "prettier": {
