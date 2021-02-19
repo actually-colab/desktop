@@ -125,7 +125,7 @@ const Cell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
   );
 
   return (
-    <div className={css([styles.container, ownsLock ? styles.containerLocked : undefined])}>
+    <div className={css(styles.container, ownsLock && styles.containerLocked)}>
       <div className={css(styles.controls)}>
         <div className={css(styles.runIndexContainer)}>
           <code>[</code>
@@ -136,14 +136,14 @@ const Cell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
 
       <div className={css(styles.content)}>
         <div
-          className={css([
+          className={css(
             styles.codeContainer,
             lockedByOtherUser
               ? styles.codeContainerLockedByOtherUser
               : !ownsLock && !canLock
               ? styles.codeContainerLockInUse
-              : undefined,
-          ])}
+              : undefined
+          )}
         >
           <CodeCell cell={cell} onFocus={dispatchLockCell} onChange={onChange} />
         </div>

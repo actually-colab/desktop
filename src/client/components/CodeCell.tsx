@@ -51,7 +51,7 @@ const CodeCell: React.FC<{
   );
 
   return (
-    <div className={css([styles.container, isEditable ? styles.containerFocused : styles.containerBlurred])}>
+    <div className={css(styles.container, isEditable ? styles.containerFocused : styles.containerBlurred)}>
       <AceEditor
         style={{ width: '100%' }}
         name={cell.cell_id}
