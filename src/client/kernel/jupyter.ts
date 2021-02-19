@@ -1,8 +1,4 @@
-// @ts-ignore
-import xmlhttprequest from 'xmlhttprequest';
 import { IKernel, Kernel } from 'jupyter-js-services';
-
-global.XMLHttpRequest = xmlhttprequest.XMLHttpRequest;
 
 const gatewayUrl = 'http://localhost:8888';
 const gatewayWsUrl = 'ws://localhost:8888';
