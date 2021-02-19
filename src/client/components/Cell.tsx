@@ -99,20 +99,21 @@ const Cell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
 
   const dispatch = useDispatch();
   const dispatchLockCell = React.useCallback(
-    () => lockedCellId === '' && lock === null && dispatch(_editor.lockCell(cell.cell_id)),
-    [cell.cell_id, dispatch, lock, lockedCellId]
+    () => lockedCellId === '' && lock === null && user !== null && dispatch(_editor.lockCell(user, cell.cell_id)),
+    [cell.cell_id, dispatch, lock, lockedCellId, user]
   );
-  const dispatchUnlockCell = React.useCallback(() => dispatch(_editor.unlockCell(cell.cell_id)), [
-    cell.cell_id,
-    dispatch,
-  ]);
+  const dispatchUnlockCell = React.useCallback(
+    () => user !== null && dispatch(_editor.unlockCell(user, cell.cell_id)),
+    [cell.cell_id, dispatch, user]
+  );
   const dispatchEditCell = React.useCallback(
     (cell_id: EditorCell['cell_id'], changes: Partial<EditorCell>) => dispatch(_editor.editCell(cell_id, changes)),
     [dispatch]
   );
   const dispatchExecuteCode = React.useCallback(
-    () => kernel !== null && cell.language === 'py' && dispatch(_editor.executeCode(kernel, cell)),
-    [cell, dispatch, kernel]
+    () =>
+      kernel !== null && cell.language === 'py' && user !== null && dispatch(_editor.executeCode(user, kernel, cell)),
+    [cell, dispatch, kernel, user]
   );
 
   const onChange = React.useCallback(

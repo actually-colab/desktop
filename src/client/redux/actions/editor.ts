@@ -98,11 +98,11 @@ const lockCellFailure = (errorMessage: string): EditorActionTypes => {
 /**
  * Try to lock a given cell
  */
-export const lockCell = (cell_id: EditorCell['cell_id']): EditorAsyncActionTypes => async (dispatch) => {
+export const lockCell = (user: User, cell_id: EditorCell['cell_id']): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(lockCellStart());
 
   // TODO: make request
-  dispatch(lockCellSuccess(true, 0, cell_id));
+  dispatch(lockCellSuccess(true, user.uid, cell_id));
 };
 
 const unlockCellStart = (): EditorActionTypes => ({
@@ -130,11 +130,11 @@ const unlockCellFailure = (errorMessage: string) => {
 /**
  * Try to unlock the given cell
  */
-export const unlockCell = (cell_id: EditorCell['cell_id']): EditorAsyncActionTypes => async (dispatch) => {
+export const unlockCell = (user: User, cell_id: EditorCell['cell_id']): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(unlockCellStart());
 
   // TODO: make request
-  dispatch(unlockCellSuccess(true, 0, cell_id));
+  dispatch(unlockCellSuccess(true, user.uid, cell_id));
 };
 
 const addCellStart = (): EditorActionTypes => ({
@@ -267,7 +267,9 @@ const receiveKernelMessage = (cell_id: EditorCell['cell_id'], message: KernelOut
 /**
  * Run code against the kernel and asynchronously process kernel messages
  */
-export const executeCode = (kernel: IKernel, cell: EditorCell): EditorAsyncActionTypes => async (dispatch) => {
+export const executeCode = (user: User, kernel: IKernel, cell: EditorCell): EditorAsyncActionTypes => async (
+  dispatch
+) => {
   if (cell.language !== 'py') {
     return;
   }
@@ -294,7 +296,7 @@ export const executeCode = (kernel: IKernel, cell: EditorCell): EditorAsyncActio
       } else if (message.content.name === 'stdout') {
         // regular text stream
         kernelOutput = {
-          uid: 0, // TODO
+          uid: user.uid, // TODO
           output_id: message.header.msg_id,
           cell_id: cell.cell_id,
           runIndex: -1,
@@ -307,7 +309,7 @@ export const executeCode = (kernel: IKernel, cell: EditorCell): EditorAsyncActio
       } else if (message.header.msg_type === 'display_data') {
         // image content
         kernelOutput = {
-          uid: 0, // TODO
+          uid: user.uid, // TODO
           output_id: message.header.msg_id,
           cell_id: cell.cell_id,
           runIndex: -1,
@@ -321,7 +323,7 @@ export const executeCode = (kernel: IKernel, cell: EditorCell): EditorAsyncActio
       } else if (message.header.msg_type === 'error') {
         // error
         kernelOutput = {
-          uid: 0,
+          uid: user.uid,
           output_id: message.header.msg_id,
           cell_id: cell.cell_id,
           runIndex: -1,

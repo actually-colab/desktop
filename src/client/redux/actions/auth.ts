@@ -52,19 +52,11 @@ export const signIn = (token: string): AuthAsyncActionTypes => async (dispatch) 
 
   // TODO: sign in
   try {
-    console.log(devLogin);
-    // const user = await devLogin('jeff@test.com', 'Jeff Taylor-Chang');
+    const user = await devLogin('jeff@test.com', 'Jeff Taylor-Chang');
 
-    dispatch(
-      signInSuccess(
-        {
-          uid: 0,
-          name: 'Jeff Taylor-Chang',
-          email: 'jeff@test.com',
-        },
-        'TEST'
-      )
-    );
+    console.log('Signed in', user);
+
+    dispatch(signInSuccess(user, 'TEST'));
   } catch (error) {
     console.error(error);
     dispatch(signInFailure(error.message));
