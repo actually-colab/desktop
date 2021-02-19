@@ -4,6 +4,7 @@ import { StyleSheet, css } from 'aphrodite';
 import Ansi from 'ansi-to-react';
 
 import { ReduxState } from '../redux';
+import { User } from '../types/user';
 import { EditorCell } from '../types/notebook';
 import { spacing } from '../constants/theme';
 import { sortOutputByMessageIndex } from '../utils/notebook';
@@ -18,7 +19,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const OutputCell: React.FC<{ cell: EditorCell; uid?: string }> = ({ cell, uid }) => {
+const OutputCell: React.FC<{ cell: EditorCell; uid?: User['uid'] }> = ({ cell, uid }) => {
   const outputs = useSelector((state: ReduxState) => state.editor.outputs);
 
   const cellOutputs = React.useMemo(

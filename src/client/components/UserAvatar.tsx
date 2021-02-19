@@ -35,7 +35,7 @@ const UserAvatar: React.FC<{
       enterable
       speaker={
         <Popover title={title !== undefined ? title : user.name}>
-          {children !== undefined ? children : user.uid}
+          {children !== undefined ? children : user.email}
         </Popover>
       }
     >

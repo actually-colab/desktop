@@ -1,8 +1,5 @@
-/**
- * uid is email
- */
 export type User = {
-  uid: string;
+  uid: number;
   name: string;
-  access_level?: string;
+  email: string;
 };

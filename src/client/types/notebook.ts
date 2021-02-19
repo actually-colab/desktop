@@ -1,9 +1,9 @@
 import { User } from './user';
 
 type BaseKernelOutput<Name, Data> = {
-  uid: string;
+  uid: User['uid'];
   output_id: string;
-  cell_id: string;
+  cell_id: EditorCell['cell_id'];
   runIndex: number;
   messageIndex: number;
   name: Name;
@@ -42,14 +42,20 @@ export type EditorCell = {
 };
 
 export type Lock = {
-  uid: string;
-  cell_id: string;
+  uid: User['uid'];
+  cell_id: EditorCell['cell_id'];
+};
+
+export type NotebookAccessLevel = {
+  nb_id: Notebook['nb_id'];
+  uid: User['uid'];
+  access_level: 'Full Access' | 'Read Only';
 };
 
 export type Notebook = {
-  nb_id: string;
+  nb_id: number;
   name: string;
-  user: User[];
+  users: (User & { access_level: NotebookAccessLevel['access_level'] })[];
   access_level: 'Full Access' | 'Read Only';
   cells: EditorCell[];
 };

@@ -1,3 +1,5 @@
+import { devLogin } from '@actually-colab/editor-client';
+
 import {
   AuthActionTypes,
   AuthAsyncActionTypes,
@@ -49,15 +51,24 @@ export const signIn = (token: string): AuthAsyncActionTypes => async (dispatch) 
   dispatch(signInStart());
 
   // TODO: sign in
-  dispatch(
-    signInSuccess(
-      {
-        uid: 'jeff@test.com', // TODO
-        name: 'Jeff Taylor-Chang',
-      },
-      token
-    )
-  );
+  try {
+    console.log(devLogin);
+    // const user = await devLogin('jeff@test.com', 'Jeff Taylor-Chang');
+
+    dispatch(
+      signInSuccess(
+        {
+          uid: 0,
+          name: 'Jeff Taylor-Chang',
+          email: 'jeff@test.com',
+        },
+        'TEST'
+      )
+    );
+  } catch (error) {
+    console.error(error);
+    dispatch(signInFailure(error.message));
+  }
 };
 
 const loadSessionSuccess = (token: string): AuthActionTypes => ({

@@ -27,9 +27,9 @@ const styles = StyleSheet.create({
 
 const CodeCell: React.FC<{
   cell: EditorCell;
-  onFocus?(cell_id: string): void;
-  onBlur?(cell_id: string): void;
-  onChange(cell_id: string, newValue: string): void;
+  onFocus?(cell_id: EditorCell['cell_id']): void;
+  onBlur?(cell_id: EditorCell['cell_id']): void;
+  onChange(cell_id: EditorCell['cell_id'], newValue: string): void;
 }> = ({ cell, onFocus, onBlur, onChange }) => {
   const lockedCellId = useSelector((state: ReduxState) => state.editor.lockedCellId);
 

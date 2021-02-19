@@ -133,8 +133,9 @@ const EditorHeader: React.FC = () => {
               <UserAvatar
                 placement="bottomEnd"
                 user={{
-                  uid: 'bailey@test.com', // TODO
+                  uid: 1, // TODO
                   name: 'Bailey Tincher',
+                  email: 'bailey@test.com',
                 }}
                 statusColor={palette.SUCCESS}
               />

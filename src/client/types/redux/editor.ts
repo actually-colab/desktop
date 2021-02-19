@@ -2,6 +2,7 @@ import { IKernel } from 'jupyter-js-services';
 import { Action } from 'redux';
 import { ThunkAction } from 'redux-thunk';
 
+import { User } from '../user';
 import { EditorCell, KernelOutput } from '../notebook';
 
 export const KERNEL_PROCESS_START = 'KERNEL_PROCESS_START';
@@ -64,8 +65,8 @@ type LockCellStartAction = {
 type LockCellSuccessAction = {
   type: typeof LOCK_CELL_SUCCESS;
   isMe: boolean;
-  uid: string;
-  cell_id: string;
+  uid: User['uid'];
+  cell_id: EditorCell['cell_id'];
 };
 
 type LockCellFailureAction = {
@@ -79,8 +80,8 @@ type UnlockCellStartAction = {
 type UnlockCellSuccessAction = {
   type: typeof UNLOCK_CELL_SUCCESS;
   isMe: boolean;
-  uid: string;
-  cell_id: string;
+  uid: User['uid'];
+  cell_id: EditorCell['cell_id'];
 };
 
 type UnlockCellFailureAction = {
@@ -94,7 +95,7 @@ type AddCellStartAction = {
 type AddCellSuccessAction = {
   type: typeof ADD_CELL_SUCCESS;
   isMe: boolean;
-  cell_id: string;
+  cell_id: EditorCell['cell_id'];
   index: number;
 };
 
@@ -109,7 +110,7 @@ type DeleteCellStartAction = {
 type DeleteCellSuccessAction = {
   type: typeof DELETE_CELL_SUCCESS;
   isMe: boolean;
-  cell_id: string;
+  cell_id: EditorCell['cell_id'];
 };
 
 type DeleteCellFailureAction = {
@@ -122,7 +123,7 @@ type MoveCellStartAction = {
 
 type MoveCellSuccessAction = {
   type: typeof MOVE_CELL_SUCCESS;
-  cell_id: string;
+  cell_id: EditorCell['cell_id'];
   index: number;
 };
 
@@ -137,7 +138,7 @@ type EditCellStartAction = {
 type EditCellSuccessAction = {
   type: typeof EDIT_CELL_SUCCESS;
   isMe: boolean;
-  cell_id: string;
+  cell_id: EditorCell['cell_id'];
   changes: Partial<EditorCell>;
 };
 
@@ -147,29 +148,29 @@ type EditCellFailureAction = {
 
 type ExecuteCodeStartAction = {
   type: typeof EXECUTE_CODE_START;
-  cell_id: string;
+  cell_id: EditorCell['cell_id'];
 };
 
 type ExecuteCodeSuccessAction = {
   type: typeof EXECUTE_CODE_SUCCESS;
-  cell_id: string;
+  cell_id: EditorCell['cell_id'];
   runIndex: number;
 };
 
 type ExecuteCodeFailureAction = {
   type: typeof EXECUTE_CODE_FAILURE;
-  cell_id: string;
+  cell_id: EditorCell['cell_id'];
 } & ActionError;
 
 type ReceiveKernelMessageAction = {
   type: typeof RECEIVE_KERNEL_MESSAGE;
-  cell_id: string;
+  cell_id: EditorCell['cell_id'];
   message: KernelOutput;
 };
 
 type UpdateCellCodeAction = {
   type: typeof UPDATE_CELL_CODE;
-  cell_id: string;
+  cell_id: EditorCell['cell_id'];
   code: string;
 };
 

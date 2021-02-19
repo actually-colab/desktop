@@ -107,7 +107,7 @@ const Cell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
     dispatch,
   ]);
   const dispatchEditCell = React.useCallback(
-    (cell_id: string, changes: Partial<EditorCell>) => dispatch(_editor.editCell(cell_id, changes)),
+    (cell_id: EditorCell['cell_id'], changes: Partial<EditorCell>) => dispatch(_editor.editCell(cell_id, changes)),
     [dispatch]
   );
   const dispatchExecuteCode = React.useCallback(

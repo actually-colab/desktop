@@ -214,7 +214,7 @@ const LeftSidebar: React.FC = () => {
                 }
               >
                 <div className={css(styles.profilePopoverContent)}>
-                  <span>{user.uid}</span>
+                  <span>{user.email}</span>
 
                   <Button style={{ marginTop: spacing.DEFAULT }} onClick={dispatchSignOut}>
                     <Icon icon="sign-out" /> Logout

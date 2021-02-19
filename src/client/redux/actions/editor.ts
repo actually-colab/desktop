@@ -29,6 +29,7 @@ import {
   UNLOCK_CELL_SUCCESS,
   UPDATE_CELL_CODE,
 } from '../../types/redux/editor';
+import { User } from '../../types/user';
 import { EditorCell, KernelOutput } from '../../types/notebook';
 import * as jupyter from '../../kernel/jupyter';
 import { displayError } from '../../utils/ipc';
@@ -76,7 +77,7 @@ const lockCellStart = (): EditorActionTypes => ({
   type: LOCK_CELL_START,
 });
 
-const lockCellSuccess = (isMe: boolean, uid: string, cell_id: string): EditorActionTypes => ({
+const lockCellSuccess = (isMe: boolean, uid: User['uid'], cell_id: EditorCell['cell_id']): EditorActionTypes => ({
   type: LOCK_CELL_SUCCESS,
   isMe,
   uid,
@@ -97,18 +98,18 @@ const lockCellFailure = (errorMessage: string): EditorActionTypes => {
 /**
  * Try to lock a given cell
  */
-export const lockCell = (cell_id: string): EditorAsyncActionTypes => async (dispatch) => {
+export const lockCell = (cell_id: EditorCell['cell_id']): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(lockCellStart());
 
   // TODO: make request
-  dispatch(lockCellSuccess(true, 'jeff@test.com', cell_id));
+  dispatch(lockCellSuccess(true, 0, cell_id));
 };
 
 const unlockCellStart = (): EditorActionTypes => ({
   type: UNLOCK_CELL_START,
 });
 
-const unlockCellSuccess = (isMe: boolean, uid: string, cell_id: string): EditorActionTypes => ({
+const unlockCellSuccess = (isMe: boolean, uid: User['uid'], cell_id: EditorCell['cell_id']): EditorActionTypes => ({
   type: UNLOCK_CELL_SUCCESS,
   isMe,
   uid,
@@ -129,18 +130,18 @@ const unlockCellFailure = (errorMessage: string) => {
 /**
  * Try to unlock the given cell
  */
-export const unlockCell = (cell_id: string): EditorAsyncActionTypes => async (dispatch) => {
+export const unlockCell = (cell_id: EditorCell['cell_id']): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(unlockCellStart());
 
   // TODO: make request
-  dispatch(unlockCellSuccess(true, 'jeff@test.com', cell_id));
+  dispatch(unlockCellSuccess(true, 0, cell_id));
 };
 
 const addCellStart = (): EditorActionTypes => ({
   type: ADD_CELL_START,
 });
 
-const addCellSuccess = (isMe: boolean, cell_id: string, index: number): EditorActionTypes => ({
+const addCellSuccess = (isMe: boolean, cell_id: EditorCell['cell_id'], index: number): EditorActionTypes => ({
   type: ADD_CELL_SUCCESS,
   isMe,
   cell_id,
@@ -172,7 +173,7 @@ const deleteCellStart = (): EditorActionTypes => ({
   type: DELETE_CELL_START,
 });
 
-const deleteCellSuccess = (isMe: boolean, cell_id: string): EditorActionTypes => ({
+const deleteCellSuccess = (isMe: boolean, cell_id: EditorCell['cell_id']): EditorActionTypes => ({
   type: DELETE_CELL_SUCCESS,
   isMe,
   cell_id,
@@ -192,7 +193,7 @@ const deleteCellFailure = (errorMessage: string): EditorActionTypes => {
 /**
  * Try to delete a given cell
  */
-export const deleteCell = (cell_id: string): EditorAsyncActionTypes => async (dispatch) => {
+export const deleteCell = (cell_id: EditorCell['cell_id']): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(deleteCellStart());
 
   // TODO: make request
@@ -203,7 +204,11 @@ const editCellStart = (): EditorActionTypes => ({
   type: EDIT_CELL_START,
 });
 
-const editCellSuccess = (isMe: boolean, cell_id: string, changes: Partial<EditorCell>): EditorActionTypes => ({
+const editCellSuccess = (
+  isMe: boolean,
+  cell_id: EditorCell['cell_id'],
+  changes: Partial<EditorCell>
+): EditorActionTypes => ({
   type: EDIT_CELL_SUCCESS,
   isMe,
   cell_id,
@@ -224,25 +229,28 @@ const editCellFailure = (errorMessage: string): EditorActionTypes => {
 /**
  * Edit a cell locally and make a debounced socket request to update it remotely
  */
-export const editCell = (cell_id: string, changes: Partial<EditorCell>): EditorAsyncActionTypes => async (dispatch) => {
+export const editCell = (
+  cell_id: EditorCell['cell_id'],
+  changes: Partial<EditorCell>
+): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(editCellStart());
 
   // TODO: make debounced request
   dispatch(editCellSuccess(true, cell_id, changes));
 };
 
-const executeCodeStart = (cell_id: string): EditorActionTypes => ({
+const executeCodeStart = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
   type: EXECUTE_CODE_START,
   cell_id,
 });
 
-const executeCodeSuccess = (cell_id: string, runIndex: number): EditorActionTypes => ({
+const executeCodeSuccess = (cell_id: EditorCell['cell_id'], runIndex: number): EditorActionTypes => ({
   type: EXECUTE_CODE_SUCCESS,
   cell_id,
   runIndex,
 });
 
-const executeCodeFailure = (cell_id: string, errorMessage: string): EditorActionTypes => ({
+const executeCodeFailure = (cell_id: EditorCell['cell_id'], errorMessage: string): EditorActionTypes => ({
   type: EXECUTE_CODE_FAILURE,
   cell_id,
   error: {
@@ -250,7 +258,7 @@ const executeCodeFailure = (cell_id: string, errorMessage: string): EditorAction
   },
 });
 
-const receiveKernelMessage = (cell_id: string, message: KernelOutput): EditorActionTypes => ({
+const receiveKernelMessage = (cell_id: EditorCell['cell_id'], message: KernelOutput): EditorActionTypes => ({
   type: RECEIVE_KERNEL_MESSAGE,
   cell_id,
   message,
@@ -286,7 +294,7 @@ export const executeCode = (kernel: IKernel, cell: EditorCell): EditorAsyncActio
       } else if (message.content.name === 'stdout') {
         // regular text stream
         kernelOutput = {
-          uid: 'jeff@test.com', // TODO
+          uid: 0, // TODO
           output_id: message.header.msg_id,
           cell_id: cell.cell_id,
           runIndex: -1,
@@ -299,7 +307,7 @@ export const executeCode = (kernel: IKernel, cell: EditorCell): EditorAsyncActio
       } else if (message.header.msg_type === 'display_data') {
         // image content
         kernelOutput = {
-          uid: 'jeff@test.com', // TODO
+          uid: 0, // TODO
           output_id: message.header.msg_id,
           cell_id: cell.cell_id,
           runIndex: -1,
@@ -313,7 +321,7 @@ export const executeCode = (kernel: IKernel, cell: EditorCell): EditorAsyncActio
       } else if (message.header.msg_type === 'error') {
         // error
         kernelOutput = {
-          uid: 'jeff@test.com',
+          uid: 0,
           output_id: message.header.msg_id,
           cell_id: cell.cell_id,
           runIndex: -1,
@@ -367,7 +375,7 @@ export const executeCode = (kernel: IKernel, cell: EditorCell): EditorAsyncActio
   dispatch(executeCodeSuccess(cell.cell_id, runIndex));
 };
 
-export const updateCellCode = (cell_id: string, code: string): EditorActionTypes => ({
+export const updateCellCode = (cell_id: EditorCell['cell_id'], code: string): EditorActionTypes => ({
   type: UPDATE_CELL_CODE,
   cell_id,
   code,
