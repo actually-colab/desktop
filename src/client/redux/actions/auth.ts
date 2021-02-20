@@ -52,7 +52,15 @@ export const signIn = (token: string): AuthAsyncActionTypes => async (dispatch) 
 
   // TODO: sign in
   try {
-    const res = await devLogin('jeff@test.com', 'Jeff Taylor-Chang');
+    // const res = await devLogin('jeff@test.com', 'Jeff Taylor-Chang');
+    const res: { user: User; sessionToken: string } = {
+      user: {
+        uid: 0,
+        name: 'Jeff Taylor-Chang',
+        email: 'jeff@test.com',
+      },
+      sessionToken: 'TEST',
+    };
 
     console.log('Signed in', res);
 

@@ -22,6 +22,7 @@ import {
   LOCK_CELL_START,
   LOCK_CELL_SUCCESS,
   RECEIVE_KERNEL_MESSAGE,
+  SET_KERNEL_GATEWAY,
   UNLOCK_CELL_FAILURE,
   UNLOCK_CELL_START,
   UNLOCK_CELL_SUCCESS,
@@ -47,6 +48,7 @@ export interface EditorState {
   lockedCells: Lock[];
   executionCount: number;
   runningCellId: string;
+  gatewayUri: string;
   kernelPid: number;
   kernel: IKernel | null;
   cells: EditorCell[];
@@ -70,6 +72,7 @@ const initialState: EditorState = {
   lockedCells: [],
   executionCount: 0,
   runningCellId: '',
+  gatewayUri: '',
   kernelPid: -1,
   kernel: null,
   cells: [],
@@ -92,6 +95,11 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         kernel: null,
       };
     }
+    case SET_KERNEL_GATEWAY:
+      return {
+        ...state,
+        gatewayUri: action.uri,
+      };
     case CONNECT_TO_KERNEL_START:
       return {
         ...state,

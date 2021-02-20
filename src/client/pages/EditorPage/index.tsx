@@ -37,33 +37,39 @@ const styles = StyleSheet.create({
 });
 
 const EditorPage: React.FC = () => {
-  const kernel = useKernel();
+  useKernel();
 
   const cells = useSelector((state: ReduxState) => state.editor.cells);
 
   return (
+    <div className={css(styles.container)}>
+      <EditorHeader />
+
+      <div className={css(styles.page)}>
+        <LeftSidebar />
+
+        <div className={css(styles.editableAreaContainer)}>
+          <div className={css(styles.editableArea)}>
+            {cells.map((cell) => (
+              <Cell key={cell.cell_id} cell={cell} />
+            ))}
+          </div>
+        </div>
+
+        <RightSidebar />
+      </div>
+    </div>
+  );
+};
+
+const EditorPageWithImports: React.FC = () => {
+  return (
     <React.Fragment>
       {AceImports}
 
-      <div className={css(styles.container)}>
-        <EditorHeader />
-
-        <div className={css(styles.page)}>
-          <LeftSidebar />
-
-          <div className={css(styles.editableAreaContainer)}>
-            <div className={css(styles.editableArea)}>
-              {cells.map((cell) => (
-                <Cell key={cell.cell_id} cell={cell} />
-              ))}
-            </div>
-          </div>
-
-          <RightSidebar />
-        </div>
-      </div>
+      <EditorPage />
     </React.Fragment>
   );
 };
 
-export default EditorPage;
+export default EditorPageWithImports;

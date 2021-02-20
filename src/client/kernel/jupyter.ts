@@ -1,9 +1,35 @@
 import { IKernel, Kernel } from 'jupyter-js-services';
 
-const gatewayUrl = 'http://localhost:8888';
-const gatewayWsUrl = 'ws://localhost:8888';
+import { GATEWAY_BASE_URI } from '../../shared/constants/jupyter';
 
-export const connectToKernel = async (): Promise<
+const GATEWAY_STEM = `${GATEWAY_BASE_URI}:`;
+
+/**
+ * Get the gateway URI from the kernel message
+ */
+export const extractGatewayUri = (message: string) => {
+  const index = message.indexOf(GATEWAY_STEM);
+
+  if (index >= 0) {
+    return message.substring(index).trim();
+  }
+
+  return '';
+};
+
+/**
+ * Convert the gateway uri to a websocket uri
+ */
+export const getGatewayWebSocketUri = (uri: string) => {
+  return uri.replace('http://', 'ws://');
+};
+
+/**
+ * Connect to the kernel with the given URI
+ */
+export const connectToKernel = async (
+  uri: string
+): Promise<
   | {
       success: true;
       kernel: IKernel;
@@ -17,15 +43,15 @@ export const connectToKernel = async (): Promise<
 > => {
   try {
     const kernelSpecs = await Kernel.getSpecs({
-      baseUrl: gatewayUrl,
+      baseUrl: uri,
     });
 
     console.log('Available kernelspecs', kernelSpecs);
 
     try {
       const kernel = await Kernel.startNew({
-        baseUrl: gatewayUrl,
-        wsUrl: gatewayWsUrl,
+        baseUrl: uri,
+        wsUrl: getGatewayWebSocketUri(uri),
         name: 'python3',
       });
 

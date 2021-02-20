@@ -24,6 +24,7 @@ import {
   LOCK_CELL_START,
   LOCK_CELL_SUCCESS,
   RECEIVE_KERNEL_MESSAGE,
+  SET_KERNEL_GATEWAY,
   UNLOCK_CELL_FAILURE,
   UNLOCK_CELL_START,
   UNLOCK_CELL_SUCCESS,
@@ -40,6 +41,14 @@ import { displayError } from '../../utils/ipc';
 export const kernelProcessStart = (pid: number): EditorActionTypes => ({
   type: KERNEL_PROCESS_START,
   pid,
+});
+
+/**
+ * Set the kernel gateway uri
+ */
+export const setKernelGateway = (uri: string): EditorActionTypes => ({
+  type: SET_KERNEL_GATEWAY,
+  uri,
 });
 
 const connectToKernelStart = (): EditorActionTypes => ({
@@ -61,10 +70,10 @@ const connectToKernelFailure = (errorMessage: string): EditorActionTypes => ({
 /**
  * Attempt to connect to the jupyter kernel gateway. In the future this can also hook into the hidden renderer
  */
-export const connectToKernel = (): EditorAsyncActionTypes => async (dispatch) => {
+export const connectToKernel = (uri: string): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(connectToKernelStart());
 
-  const res = await jupyter.connectToKernel();
+  const res = await jupyter.connectToKernel(uri);
 
   if (res.success) {
     dispatch(connectToKernelSuccess(res.kernel));

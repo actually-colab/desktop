@@ -7,6 +7,7 @@ import { IpcKernelProcessPayload, IPC_KERNEL_PROCESS_CHANNEL } from '../../share
 import { sendKernelProcessToMain } from '../utils/ipc';
 import { ReduxState } from '../redux';
 import { _editor } from '../redux/actions';
+import { extractGatewayUri } from './jupyter';
 
 /**
  * Hook to connect to a kernel
@@ -14,14 +15,49 @@ import { _editor } from '../redux/actions';
 const useKernel = () => {
   const isConnectingToKernel = useSelector((state: ReduxState) => state.editor.isConnectingToKernel);
   const connectToKernelErrorMessage = useSelector((state: ReduxState) => state.editor.connectToKernelErrorMessage);
+  const gatewayUri = useSelector((state: ReduxState) => state.editor.gatewayUri);
   const kernelPid = useSelector((state: ReduxState) => state.editor.kernelPid);
   const kernel = useSelector((state: ReduxState) => state.editor.kernel);
 
   const dispatch = useDispatch();
-  const dispatchKernelProcessStart = React.useCallback((pid: number) => dispatch(_editor.kernelProcessStart(pid)), [
+  const dispatchConnectToKernel = React.useCallback((uri: string) => dispatch(_editor.connectToKernel(uri)), [
     dispatch,
   ]);
-  const dispatchConnectToKernel = React.useCallback(() => dispatch(_editor.connectToKernel()), [dispatch]);
+
+  const ipcKernelListener = React.useCallback(
+    (_: IpcRendererEvent, data: IpcKernelProcessPayload) => {
+      switch (data.type) {
+        case 'start': {
+          console.log('Received kernel process id', data);
+
+          if ((data.pid ?? -1) !== -1) {
+            dispatch(_editor.kernelProcessStart(data.pid));
+          }
+          break;
+        }
+        case 'end':
+          console.log('Kernel process was killed', data);
+
+          dispatch(_editor.kernelProcessStart(-1));
+          break;
+        case 'stdout': {
+          console.log('Received kernel process stdout', data);
+
+          const uri = extractGatewayUri(data.message);
+
+          if (uri) {
+            console.log('Found gateway URI', uri);
+
+            dispatch(_editor.setKernelGateway(uri));
+          }
+          break;
+        }
+        default:
+          break;
+      }
+    },
+    [dispatch]
+  );
 
   React.useEffect(() => {
     // Notify main that client is ready to connect
@@ -32,40 +68,24 @@ const useKernel = () => {
       });
     }
 
-    const listener = (_: IpcRendererEvent, data: IpcKernelProcessPayload) => {
-      switch (data.type) {
-        case 'start':
-          console.log('Received kernel process id', data);
-
-          if ((data.pid ?? -1) !== -1) {
-            dispatchKernelProcessStart(data.pid);
-          }
-          break;
-        case 'end':
-          console.log('Kernel process was killed', data);
-
-          dispatchKernelProcessStart(-1);
-          break;
-        case 'stdout':
-          console.log('Received kernel process stdout', data);
-          break;
-        default:
-          break;
-      }
-    };
-
-    ipcRenderer.on(IPC_KERNEL_PROCESS_CHANNEL, listener);
+    ipcRenderer.on(IPC_KERNEL_PROCESS_CHANNEL, ipcKernelListener);
 
     return () => {
-      ipcRenderer.removeListener(IPC_KERNEL_PROCESS_CHANNEL, listener);
+      ipcRenderer.removeListener(IPC_KERNEL_PROCESS_CHANNEL, ipcKernelListener);
     };
-  }, [dispatchConnectToKernel, dispatchKernelProcessStart, kernelPid]);
+  }, [ipcKernelListener, kernelPid]);
 
   React.useEffect(() => {
-    if (kernelPid !== -1 && !isConnectingToKernel && connectToKernelErrorMessage === '' && kernel === null) {
-      setTimeout(() => dispatchConnectToKernel(), 1000);
+    if (
+      kernelPid !== -1 &&
+      gatewayUri !== '' &&
+      !isConnectingToKernel &&
+      connectToKernelErrorMessage === '' &&
+      kernel === null
+    ) {
+      dispatchConnectToKernel(gatewayUri);
     }
-  }, [connectToKernelErrorMessage, dispatchConnectToKernel, isConnectingToKernel, kernel, kernelPid]);
+  }, [connectToKernelErrorMessage, dispatchConnectToKernel, gatewayUri, isConnectingToKernel, kernel, kernelPid]);
 
   return kernel;
 };
