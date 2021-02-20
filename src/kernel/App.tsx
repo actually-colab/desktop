@@ -1,7 +1,7 @@
 import React from 'react';
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
 
-import { getGatewayVersion } from './system/jupyter';
+import { getGatewayVersion, installGateway } from './system/jupyter';
 import { sendKernelProcessToMain } from './utils/ipc';
 
 const EntryPoint: React.FC = () => {
@@ -16,12 +16,20 @@ const EntryPoint: React.FC = () => {
     }
 
     // Check if the kernel gateway is available
-    const version = await getGatewayVersion();
-    setGatewayVersion(version ?? 'Not Found');
+    let version = await getGatewayVersion();
+    setGatewayVersion(version ?? 'Unknown');
 
     console.log('Kernel gateway version:', version);
 
     if (!version) {
+      version = await installGateway();
+      setGatewayVersion(version ?? 'Install failed');
+
+      console.log('Kernel gateway installed version', version);
+    }
+
+    if (!version) {
+      console.log('Failed to install kernel gateway');
       return;
     }
 

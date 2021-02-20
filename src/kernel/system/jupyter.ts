@@ -12,3 +12,12 @@ export const getGatewayVersion = async (): Promise<string | null> => {
 
   return stdout;
 };
+
+/**
+ * Try to install the kernel gateway and then return the version
+ */
+export const installGateway = async (): Promise<string | null> => {
+  await promiseExec('pip install jupyter_kernel_gateway');
+
+  return getGatewayVersion();
+};
