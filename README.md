@@ -22,8 +22,16 @@ In order to setup this repo, you also must clone the [editor repo](https://githu
 
 1. Clone and setup the `desktop` and `editor` repo with the above directory structure
 2. Start the `editor/server`
-3. Build the `editor/client` via `yarn build`
-4. Install the `desktop` dependencies
+3. Install and build the `editor/client` via `yarn install && yarn build`
+4. Install the `desktop` dependencies via `yarn install`
+
+If the `editor/client` changes, you can install the latest version in the `desktop` repo by running:
+
+```bash
+yarn install:client
+```
+
+This will automatically pull the latest client (assuming proper directory structure), install and build it, remove it from `desktop` and add it back. This complicated process seems to be required from an issue where `yarn install` doesn't pick up the latest build of the local package.
 
 ## Starting Development
 
