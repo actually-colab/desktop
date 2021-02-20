@@ -88,7 +88,7 @@ const createWindow = async () => {
 
   kernelWindow = new BrowserWindow({
     show: false,
-    width: 480,
+    width: 640,
     height: 840,
     title: 'Kernel [hidden in prod]',
     webPreferences: {
