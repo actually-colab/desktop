@@ -291,7 +291,7 @@ const receiveKernelMessage = (cell_id: EditorCell['cell_id'], message: KernelOut
 export const executeCode = (user: User, kernel: IKernel, cell: EditorCell): EditorAsyncActionTypes => async (
   dispatch
 ) => {
-  if (cell.language !== 'py') {
+  if (cell.language !== 'py' || cell.code.trim() === '') {
     return;
   }
 

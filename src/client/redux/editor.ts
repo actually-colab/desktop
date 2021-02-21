@@ -271,7 +271,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
           cell.cell_id === action.cell_id
             ? {
                 ...cell,
-                runIndex: action.runIndex,
+                runIndex: action.runIndex > state.executionCount ? action.runIndex : cell.runIndex,
               }
             : cell
         ),
