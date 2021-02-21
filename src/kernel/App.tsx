@@ -10,6 +10,9 @@ const EntryPoint: React.FC = () => {
   const [pid, setPid] = React.useState<number>(-1);
   const [kernelError, setKernelError] = React.useState<string>('');
 
+  /**
+   * Manage the kernel process main event loop
+   */
   const startKernelProcess = React.useCallback(async () => {
     if (kernelProcess.current !== null) {
       return;
@@ -70,6 +73,9 @@ const EntryPoint: React.FC = () => {
     }
   }, []);
 
+  /**
+   * Manage the kernel process
+   */
   React.useEffect(() => {
     startKernelProcess();
   }, [startKernelProcess]);

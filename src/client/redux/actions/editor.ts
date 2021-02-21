@@ -20,6 +20,7 @@ import {
   EXECUTE_CODE_START,
   EXECUTE_CODE_SUCCESS,
   KERNEL_PROCESS_START,
+  KERNEL_PROCESS_STDOUT,
   LOCK_CELL_FAILURE,
   LOCK_CELL_START,
   LOCK_CELL_SUCCESS,
@@ -41,6 +42,14 @@ import { displayError } from '../../utils/ipc';
 export const kernelProcessStart = (pid: number): EditorActionTypes => ({
   type: KERNEL_PROCESS_START,
   pid,
+});
+
+/**
+ * Handle the kernel process messages to stdout
+ */
+export const kernelProcessStdout = (message: string): EditorActionTypes => ({
+  type: KERNEL_PROCESS_STDOUT,
+  message,
 });
 
 /**

@@ -6,6 +6,7 @@ import { User } from '../user';
 import { EditorCell, KernelOutput } from '../notebook';
 
 export const KERNEL_PROCESS_START = 'KERNEL_PROCESS_START';
+export const KERNEL_PROCESS_STDOUT = 'KERNEL_PROCESS_STDOUT';
 export const SET_KERNEL_GATEWAY = 'SET_KERNEL_GATEWAY';
 export const CONNECT_TO_KERNEL_START = 'CONNECT_TO_KERNEL_START';
 export const CONNECT_TO_KERNEL_SUCCESS = 'CONNECT_TO_KERNEL_SUCCESS';
@@ -44,6 +45,11 @@ type ActionError = {
 type KernelProcessStartAction = {
   type: typeof KERNEL_PROCESS_START;
   pid: number;
+};
+
+type KernelProcessStdoutAction = {
+  type: typeof KERNEL_PROCESS_STDOUT;
+  message: string;
 };
 
 type SetKernelGatewayAction = {
@@ -182,6 +188,7 @@ type UpdateCellCodeAction = {
 
 export type EditorActionTypes =
   | KernelProcessStartAction
+  | KernelProcessStdoutAction
   | SetKernelGatewayAction
   | ConnectToKernelStartAction
   | ConnectToKernelSuccessAction

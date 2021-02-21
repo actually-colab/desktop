@@ -24,6 +24,9 @@ const useKernel = () => {
     dispatch,
   ]);
 
+  /**
+   * Kernel Process IPC listener
+   */
   const ipcKernelListener = React.useCallback(
     (_: IpcRendererEvent, data: IpcKernelProcessPayload) => {
       switch (data.type) {
@@ -31,6 +34,7 @@ const useKernel = () => {
           console.log('Received kernel process id', data);
 
           if ((data.pid ?? -1) !== -1) {
+            // Update the kernel PID
             dispatch(_editor.kernelProcessStart(data.pid));
           }
           break;
@@ -48,8 +52,12 @@ const useKernel = () => {
           if (uri) {
             console.log('Found gateway URI', uri);
 
+            // Update the gateway uri
             dispatch(_editor.setKernelGateway(uri));
           }
+
+          // Log the message to kernel outputs
+          dispatch(_editor.kernelProcessStdout(data.message));
           break;
         }
         default:
@@ -59,6 +67,9 @@ const useKernel = () => {
     [dispatch]
   );
 
+  /**
+   * Manage the kernel process IPC listener
+   */
   React.useEffect(() => {
     // Notify main that client is ready to connect
     if (kernelPid === -1) {
@@ -75,6 +86,9 @@ const useKernel = () => {
     };
   }, [ipcKernelListener, kernelPid]);
 
+  /**
+   * Manage the kernel connection
+   */
   React.useEffect(() => {
     if (
       kernelPid !== -1 &&
