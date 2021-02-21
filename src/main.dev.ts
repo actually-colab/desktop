@@ -34,6 +34,7 @@ let kernelWindow: BrowserWindow | null = null;
  * Track the kernel gateway process
  */
 let kernelPid = -1;
+let gatewayVersion = '';
 let isClientReady = false;
 const messageQueue: StdoutMessage[] = [];
 
@@ -230,31 +231,40 @@ ipcMain.on(
 // Handle kernel process messages
 ipcMain.on(IPC_KERNEL_PROCESS_CHANNEL, (_, data: IpcKernelProcessPayload) => {
   switch (data.type) {
-    case 'ready':
+    case 'ready': {
       console.log('Client is ready', kernelPid);
 
       isClientReady = true;
 
       if (kernelPid !== -1) {
-        sendKernelProcessToClient(mainWindow, data);
+        sendKernelProcessToClient(mainWindow, {
+          type: 'start',
+          pid: kernelPid,
+          version: gatewayVersion,
+        });
       }
 
       break;
-    case 'start':
+    }
+    case 'start': {
       console.log('Received kernel PID', data.pid);
       kernelPid = data.pid;
+      gatewayVersion = data.version;
 
       if (isClientReady) {
         sendKernelProcessToClient(mainWindow, data);
       }
       break;
-    case 'end':
+    }
+    case 'end': {
       console.log('Quitting all processes');
       kernelPid = -1;
+      gatewayVersion = '';
 
       sendKernelProcessToClient(mainWindow, data);
       break;
-    case 'stdout':
+    }
+    case 'stdout': {
       console.log('Received stdout', data.message);
 
       if (isClientReady) {
@@ -274,6 +284,7 @@ ipcMain.on(IPC_KERNEL_PROCESS_CHANNEL, (_, data: IpcKernelProcessPayload) => {
         messageQueue.push(data);
       }
       break;
+    }
     default:
       break;
   }
