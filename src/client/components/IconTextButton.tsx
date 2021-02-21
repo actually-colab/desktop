@@ -1,7 +1,10 @@
 import React from 'react';
 import { Button, ButtonProps, Icon, IconProps, Tooltip, Whisper, WhisperProps } from 'rsuite';
 
-const IconTextButton: React.FC<{
+/**
+ * Props for the IconTextButton component
+ */
+export type IconTextButtonProps = {
   icon: IconProps['icon'];
   text: string;
   size?: ButtonProps['size'];
@@ -12,7 +15,12 @@ const IconTextButton: React.FC<{
   loading?: boolean;
   disabled?: boolean;
   onClick(): void;
-}> = ({
+};
+
+/**
+ * A component to render a button with an icon to the left
+ */
+const IconTextButton: React.FC<IconTextButtonProps> = ({
   icon,
   text,
   size = 'xs',

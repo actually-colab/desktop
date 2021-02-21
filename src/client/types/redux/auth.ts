@@ -60,6 +60,9 @@ type SignOutSuccessAction = {
   type: typeof SIGN_OUT_SUCCESS;
 };
 
+/**
+ * An action for manipulating the auth redux store
+ */
 export type AuthActionTypes =
   | LoadSessionSuccessAction
   | LoadSessionFailureAction
@@ -71,4 +74,7 @@ export type AuthActionTypes =
   | SignInFailureAction
   | SignOutSuccessAction;
 
+/**
+ * An asynchronous action for manipulating the auth redux store
+ */
 export type AuthAsyncActionTypes = ThunkAction<void, unknown, unknown, Action<string>>;

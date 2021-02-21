@@ -14,6 +14,9 @@ const styles = StyleSheet.create({
   },
 });
 
+/**
+ * A draggable header wrapper
+ */
 const Header: React.FC = ({ children }) => {
   return <div className={css(styles.container)}>{children}</div>;
 };

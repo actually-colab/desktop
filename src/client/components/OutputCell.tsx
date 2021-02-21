@@ -19,6 +19,9 @@ const styles = StyleSheet.create({
   },
 });
 
+/**
+ * A component to render the output of a cell
+ */
 const OutputCell: React.FC<{ cell: EditorCell; uid?: User['uid'] }> = ({ cell, uid }) => {
   const outputs = useSelector((state: ReduxState) => state.editor.outputs);
 

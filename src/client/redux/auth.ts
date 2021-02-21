@@ -13,6 +13,9 @@ import {
 import { User } from '../types/user';
 import { LoginRedirectResponse } from '../utils/redirect';
 
+/**
+ * The auth redux state
+ */
 export interface AuthState {
   isSessionLoaded: boolean;
 
@@ -43,6 +46,9 @@ const initialState: AuthState = {
   token: '',
 };
 
+/**
+ * The auth reducer
+ */
 const reducer = (state = initialState, action: AuthActionTypes): AuthState => {
   switch (action.type) {
     case LOAD_SESSION_SUCCESS:

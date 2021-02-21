@@ -55,6 +55,9 @@ const styles = StyleSheet.create({
   },
 });
 
+/**
+ * A key value pair component
+ */
 const KeyValue: React.FC<{ attributeKey: string | React.ReactNode; attributeValue: string | React.ReactNode }> = ({
   attributeKey,
   attributeValue,
@@ -67,6 +70,9 @@ const KeyValue: React.FC<{ attributeKey: string | React.ReactNode; attributeValu
   );
 };
 
+/**
+ * The kernel panel of the left sidebar of the editor page
+ */
 const KernelPanel: React.FC = () => {
   const kernelStatus = useKernelStatus();
   const kernelPid = useSelector((state: ReduxState) => state.editor.kernelPid);

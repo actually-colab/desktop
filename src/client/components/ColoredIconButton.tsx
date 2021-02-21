@@ -3,6 +3,9 @@ import { ButtonProps, Icon, IconButton, IconProps, Tooltip, Whisper, WhisperProp
 
 import { palette } from '../constants/theme';
 
+/**
+ * Props for the ColoredIconButton component
+ */
 export type ColoredIconButtonProps = {
   icon: IconProps['icon'];
   size?: ButtonProps['size'];
@@ -15,6 +18,9 @@ export type ColoredIconButtonProps = {
   onClick(): void;
 };
 
+/**
+ * A component to render a colored icon button with an optional tooltip
+ */
 const ColoredIconButton: React.FC<ColoredIconButtonProps> = ({
   icon,
   tooltipText = '',

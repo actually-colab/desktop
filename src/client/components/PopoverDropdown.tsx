@@ -19,6 +19,9 @@ const styles = StyleSheet.create({
   },
 });
 
+/**
+ * Props for the PopoverDropdown component
+ */
 export type PopoverDropdownProps = {
   placement: WhisperProps['placement'];
   activeKey?: string;
@@ -27,6 +30,9 @@ export type PopoverDropdownProps = {
   onSelect?(eventKey: string): void;
 };
 
+/**
+ * A dropdown that uses a popover instead of the default dropdown. Expects a fragment containing Dropdown.Item's as the children
+ */
 const PopoverDropdown: React.FC<PopoverDropdownProps> = ({
   placement = 'bottomEnd',
   activeKey,

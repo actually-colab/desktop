@@ -1,4 +1,3 @@
-import Cell from './Cell';
 import CodeCell from './CodeCell';
 import ColoredIconButton from './ColoredIconButton';
 import Header from './Header';
@@ -10,7 +9,6 @@ import StatusIndicator from './StatusIndicator';
 import UserAvatar from './UserAvatar';
 
 export {
-  Cell,
   CodeCell,
   ColoredIconButton,
   Header,

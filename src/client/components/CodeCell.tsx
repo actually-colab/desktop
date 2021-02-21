@@ -25,6 +25,9 @@ const styles = StyleSheet.create({
   },
 });
 
+/**
+ * A component to render a code cell with the Ace Editor
+ */
 const CodeCell: React.FC<{
   cell: EditorCell;
   onFocus?(cell_id: EditorCell['cell_id']): void;

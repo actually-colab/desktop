@@ -85,6 +85,9 @@ const styles = StyleSheet.create({
   },
 });
 
+/**
+ * A styled button which indicates what panel is visible
+ */
 const CategoryButton: React.FC<{
   icon: IconProps['icon'];
   tooltipText: string;
@@ -118,6 +121,9 @@ const CategoryButton: React.FC<{
   );
 };
 
+/**
+ * The left sidebar for the editor page
+ */
 const LeftSidebar: React.FC = () => {
   const user = useSelector((state: ReduxState) => state.auth.user);
 

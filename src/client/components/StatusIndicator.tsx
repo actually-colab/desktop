@@ -1,6 +1,9 @@
 import React from 'react';
 import { Badge, Tooltip, Whisper, WhisperProps } from 'rsuite';
 
+/**
+ * Props for the StatusIndicator component
+ */
 export type StatusIndicatorProps = {
   color?: string;
   content?: string;
@@ -11,6 +14,9 @@ export type StatusIndicatorProps = {
   };
 };
 
+/**
+ * A component to render a status indicator with a given color and text with an optional tooltip
+ */
 const StatusIndicator: React.FC<StatusIndicatorProps> = ({ color, content, textPlacement, tooltipOptions }) => {
   const StatusBadge = (
     <div>

@@ -4,6 +4,9 @@ import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
 import { getGatewayVersion, installGateway } from './system/jupyter';
 import { sendKernelProcessToMain } from './utils/ipc';
 
+/**
+ * The kernel process renderer's entry point
+ */
 const EntryPoint: React.FC = () => {
   const kernelProcess = React.useRef<ChildProcessWithoutNullStreams | null>(null);
   const [gatewayVersion, setGatewayVersion] = React.useState<string>('');

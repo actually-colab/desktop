@@ -28,14 +28,29 @@ export default class AppUpdater {
   }
 }
 
+/**
+ * The main client process window
+ */
 let mainWindow: BrowserWindow | null = null;
+/**
+ * The kernel process window
+ */
 let kernelWindow: BrowserWindow | null = null;
 /**
  * Track the kernel gateway process
  */
 let kernelPid = -1;
+/**
+ * The version of the kernel gateway running
+ */
 let gatewayVersion = '';
+/**
+ * A flag for if the client is ready for IPC messages
+ */
 let isClientReady = false;
+/**
+ * A message queue to store stdout messages until the client is ready
+ */
 const messageQueue: StdoutMessage[] = [];
 
 if (process.env.NODE_ENV === 'production') {

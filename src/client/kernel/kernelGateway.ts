@@ -1,13 +1,10 @@
-import { exec } from 'child_process';
-import util from 'util';
-
-const execWithPromise = util.promisify(exec);
+import { promiseExec } from '../../shared/system/process';
 
 /**
  * Install the kernel gateway using pip
  */
 export const installKernelGateway = async () => {
-  const { stdout, stderr } = await execWithPromise('python3 -m pip install jupyter_kernel_gateway');
+  const { stdout, stderr } = await promiseExec('python3 -m pip install jupyter_kernel_gateway');
 
   if (stderr) {
     console.error(stderr);
@@ -27,7 +24,7 @@ export const installKernelGateway = async () => {
  * Start the kernel gateway with CORS allowing cross-origin requests
  */
 export const startKernelGateway = async () => {
-  const { stdout, stderr } = await execWithPromise('jupyter kernelgateway');
+  const { stdout, stderr } = await promiseExec('jupyter kernelgateway');
 
   if (stderr) {
     console.error(stderr);

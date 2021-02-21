@@ -6,7 +6,7 @@ import AceImports from '../../utils/AceImports';
 import { palette, spacing } from '../../constants/theme';
 import { ReduxState } from '../../redux';
 import useKernel from '../../kernel/useKernel';
-import { Cell } from '../../components';
+import { NotebookCell } from '../../components';
 
 import { EditorHeader, LeftSidebar, RightSidebar } from './components';
 
@@ -36,7 +36,11 @@ const styles = StyleSheet.create({
   },
 });
 
+/**
+ * The editor page
+ */
 const EditorPage: React.FC = () => {
+  // Include the kernel manager once
   useKernel();
 
   const cells = useSelector((state: ReduxState) => state.editor.cells);
@@ -51,7 +55,7 @@ const EditorPage: React.FC = () => {
         <div className={css(styles.editableAreaContainer)}>
           <div className={css(styles.editableArea)}>
             {cells.map((cell) => (
-              <Cell key={cell.cell_id} cell={cell} />
+              <NotebookCell key={cell.cell_id} cell={cell} />
             ))}
           </div>
         </div>
@@ -62,6 +66,9 @@ const EditorPage: React.FC = () => {
   );
 };
 
+/**
+ * The editor page with the Ace Imports included
+ */
 const EditorPageWithImports: React.FC = () => {
   return (
     <React.Fragment>

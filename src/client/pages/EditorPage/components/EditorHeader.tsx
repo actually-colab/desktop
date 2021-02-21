@@ -33,6 +33,9 @@ const styles = StyleSheet.create({
   },
 });
 
+/**
+ * The header for the editor page
+ */
 const EditorHeader: React.FC = () => {
   const localKernelStatus = useKernelStatus();
 

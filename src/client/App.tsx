@@ -8,6 +8,9 @@ import store, { ReduxState } from './redux';
 import { _auth } from './redux/actions';
 import { AuthPage, EditorPage } from './pages';
 
+/**
+ * The entry point for the Client renderer process
+ */
 const EntryPoint: React.FC = () => {
   const history = useHistory();
   const location = useLocation();

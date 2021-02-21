@@ -2,10 +2,13 @@ import { Notebook } from '../types/notebook';
 
 import { BASE_CELL } from './notebook';
 
+/**
+ * A demo project
+ */
 export const exampleProject: Notebook = {
-  nb_id: 'demo',
+  nb_id: 0,
   name: 'Example Project',
-  user: [],
+  users: [],
   access_level: 'Read Only',
   cells: [
     {

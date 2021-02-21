@@ -188,6 +188,9 @@ type UpdateCellCodeAction = {
   code: string;
 };
 
+/**
+ * An action for manipulating the editor redux store
+ */
 export type EditorActionTypes =
   | KernelProcessStartAction
   | KernelProcessStdoutAction
@@ -219,4 +222,7 @@ export type EditorActionTypes =
   | ReceiveKernelMessageAction
   | UpdateCellCodeAction;
 
+/**
+ * An asynchronous action for manipulating the editor redux store
+ */
 export type EditorAsyncActionTypes = ThunkAction<void, unknown, unknown, Action<string>>;

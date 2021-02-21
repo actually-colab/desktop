@@ -23,6 +23,9 @@ const styles = StyleSheet.create({
   },
 });
 
+/**
+ * The projects panel for the left sidebar of the editor page
+ */
 const ProjectsPanel: React.FC = () => {
   const projects = useSelector((state: ReduxState) => state.editor.projects);
 

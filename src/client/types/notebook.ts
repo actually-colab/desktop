@@ -10,6 +10,9 @@ type BaseKernelOutput<Name, Data> = {
   data: Data;
 };
 
+/**
+ * An output from the kernel
+ */
 export type KernelOutput =
   | BaseKernelOutput<
       'stdout',
@@ -33,6 +36,9 @@ export type KernelOutput =
       }
     >;
 
+/**
+ * An editor cell in a notebook
+ */
 export type EditorCell = {
   cell_id: string;
   language: 'py' | 'md';
@@ -41,17 +47,26 @@ export type EditorCell = {
   code: string;
 };
 
+/**
+ * A lock that indicates which user owns which cell
+ */
 export type Lock = {
   uid: User['uid'];
   cell_id: EditorCell['cell_id'];
 };
 
+/**
+ * Indicates the access level for a given user on a given notebook
+ */
 export type NotebookAccessLevel = {
   nb_id: Notebook['nb_id'];
   uid: User['uid'];
   access_level: 'Full Access' | 'Read Only';
 };
 
+/**
+ * A notebook
+ */
 export type Notebook = {
   nb_id: number;
   name: string;

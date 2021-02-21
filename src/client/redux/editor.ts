@@ -34,6 +34,9 @@ import {
 import { EditorCell, KernelOutput, Lock, ReducedNotebook } from '../types/notebook';
 import { BASE_CELL } from '../constants/notebook';
 
+/**
+ * The editor redux state
+ */
 export interface EditorState {
   isConnectingToKernel: boolean;
   connectToKernelErrorMessage: string;
@@ -104,6 +107,9 @@ const initialState: EditorState = {
   outputs: [],
 };
 
+/**
+ * The editor reducer
+ */
 const reducer = (state = initialState, action: EditorActionTypes): EditorState => {
   switch (action.type) {
     case KERNEL_PROCESS_START: {

@@ -1,3 +1,6 @@
+/**
+ * The theme color palette
+ */
 export const palette = {
   PRIMARY: '#F55673',
   PRIMARY_LIGHT: '#F5EBED',
@@ -19,6 +22,9 @@ export const palette = {
   SUCCESS: '#62C370',
 };
 
+/**
+ * The theme spacing values
+ */
 export const spacing = {
   DEFAULT: 16,
   pad: (fallback: number, padding: { left?: number; right?: number; top?: number; bottom?: number }) => ({

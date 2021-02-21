@@ -60,22 +60,20 @@ const styles = StyleSheet.create({
   },
 });
 
+/**
+ * The auth page
+ */
 const AuthPage: React.FC = () => {
   const isSigningIn = useSelector((state: ReduxState) => state.auth.isSigningIn);
 
   const dispatch = useDispatch();
   const dispatchOpenAuthRedirect = React.useCallback(() => dispatch(_auth.openAuthRedirect()), [dispatch]);
-  const dispatchAuthRedirectSignIn = React.useCallback(
-    (payload: LoginRedirectResponse) => dispatch(_auth.authRedirectSignIn(payload)),
-    [dispatch]
-  );
-  const dispatchAuthRedirectFailure = React.useCallback(
-    (errorMessage: string) => dispatch(_auth.authRedirectFailure(errorMessage)),
-    [dispatch]
-  );
 
-  React.useEffect(() => {
-    const listener = (_: IpcRendererEvent, data: IpcLoginPayload) => {
+  /**
+   * Login IPC listener
+   */
+  const ipcLoginListener = React.useCallback(
+    (_: IpcRendererEvent, data: IpcLoginPayload) => {
       let loginResponse: LoginRedirectResponse | null = null;
 
       if (data.type === 'success') {
@@ -85,18 +83,24 @@ const AuthPage: React.FC = () => {
       console.log('Redirect response', loginResponse);
 
       if (loginResponse) {
-        dispatchAuthRedirectSignIn(loginResponse);
+        dispatch(_auth.authRedirectSignIn(loginResponse));
       } else {
-        dispatchAuthRedirectFailure('Could not sign in!');
+        dispatch(_auth.authRedirectFailure('Could not find a valid 3rd party sign in!'));
       }
-    };
+    },
+    [dispatch]
+  );
 
-    ipcRenderer.on(IPC_LOGIN_CHANNEL, listener);
+  /**
+   * Manage the login IPC listener
+   */
+  React.useEffect(() => {
+    ipcRenderer.on(IPC_LOGIN_CHANNEL, ipcLoginListener);
 
     return () => {
-      ipcRenderer.removeListener(IPC_LOGIN_CHANNEL, listener);
+      ipcRenderer.removeListener(IPC_LOGIN_CHANNEL, ipcLoginListener);
     };
-  }, [dispatchAuthRedirectFailure, dispatchAuthRedirectSignIn]);
+  }, [ipcLoginListener]);
 
   return (
     <div className={css(styles.container)}>

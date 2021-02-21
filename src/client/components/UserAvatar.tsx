@@ -11,6 +11,9 @@ const styles = StyleSheet.create({
   },
 });
 
+/**
+ * A component for rendering an avatar with a status badge
+ */
 const UserAvatar: React.FC<{
   user: User;
   placement?: WhisperProps['placement'];

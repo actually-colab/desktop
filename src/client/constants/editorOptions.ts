@@ -7,6 +7,9 @@ const editorOptions: IAceOptions = {
   enableLiveAutocompletion: true,
 };
 
+/**
+ * Editor options to use when the cell is being edited
+ */
 export const editorOptionsActive: IAceOptions = {
   ...editorOptions,
   readOnly: false,
@@ -14,6 +17,9 @@ export const editorOptionsActive: IAceOptions = {
   highlightGutterLine: true,
 };
 
+/**
+ * Editor options to use when the cell is inactive
+ */
 export const editorOptionsInactive: IAceOptions = {
   ...editorOptions,
   readOnly: true,

@@ -31,6 +31,9 @@ const styles = StyleSheet.create({
   },
 });
 
+/**
+ * The right sidebar for the editor page
+ */
 const RightSidebar: React.FC = () => {
   const [visibleMenu, setVisibleMenu] = React.useState<string>('');
 
