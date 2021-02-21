@@ -32,6 +32,7 @@ const styles = StyleSheet.create({
     flex: 1,
     display: 'flex',
     flexDirection: 'row',
+    overflowY: 'hidden',
   },
   categoryContainer: {
     width: 46,
@@ -80,6 +81,7 @@ const styles = StyleSheet.create({
     paddingRight: spacing.DEFAULT,
     display: 'flex',
     flexDirection: 'column',
+    overflowY: 'auto',
   },
 });
 
