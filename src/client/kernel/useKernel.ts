@@ -35,15 +35,16 @@ const useKernel = () => {
 
           if ((data.pid ?? -1) !== -1) {
             // Update the kernel PID
-            dispatch(_editor.kernelProcessStart(data.pid));
+            dispatch(_editor.kernelProcessStart(data.pid, data.version));
           }
           break;
         }
-        case 'end':
+        case 'end': {
           console.log('Kernel process was killed', data);
 
-          dispatch(_editor.kernelProcessStart(-1));
+          dispatch(_editor.kernelProcessStart(-1, ''));
           break;
+        }
         case 'stdout': {
           console.log('Received kernel process stdout', data);
 
@@ -57,7 +58,21 @@ const useKernel = () => {
           }
 
           // Log the message to kernel outputs
-          dispatch(_editor.kernelProcessStdout(data.message));
+          const messagePieces = data.message.split('\n');
+
+          for (const piece of messagePieces) {
+            if (piece.startsWith('[')) {
+              dispatch(
+                _editor.kernelProcessStdout({
+                  ...data,
+                  message: piece,
+                })
+              );
+
+              break;
+            }
+          }
+
           break;
         }
         default:

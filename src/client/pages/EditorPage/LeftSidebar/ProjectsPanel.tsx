@@ -1,10 +1,9 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import { Button, Dropdown, Icon, Input, InputGroup } from 'rsuite';
 
 import { ReduxState } from '../../../redux';
-import { _editor } from '../../../redux/actions';
 import { palette, spacing } from '../../../constants/theme';
 import { PopoverDropdown } from '../../../components';
 

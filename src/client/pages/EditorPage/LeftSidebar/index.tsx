@@ -1,3 +1,4 @@
+import KernelPanel from './KernelPanel';
 import ProjectsPanel from './ProjectsPanel';
 
-export { ProjectsPanel };
+export { KernelPanel, ProjectsPanel };

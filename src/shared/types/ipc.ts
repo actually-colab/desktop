@@ -5,6 +5,7 @@ type IpcKernelProcessReady = {
 type IpcKernelProcessStart = {
   type: 'start';
   pid: number;
+  version: string;
 };
 
 type IpcKernelProcessEnd = {
@@ -12,10 +13,15 @@ type IpcKernelProcessEnd = {
   pid: number;
 };
 
+export type StdoutMessage = {
+  id: number;
+  message: string;
+  date: Date;
+};
+
 type IpcKernelProcessStdout = {
   type: 'stdout';
-  message: string;
-};
+} & StdoutMessage;
 
 export const IPC_KERNEL_PROCESS_CHANNEL = 'kernel-process';
 export type IpcKernelProcessPayload =

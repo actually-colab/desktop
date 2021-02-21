@@ -1,6 +1,8 @@
 import { IKernel } from 'jupyter-js-services';
 import { v4 as uuid } from 'uuid';
 
+import { StdoutMessage } from '../../../shared/types/ipc';
+
 import {
   ADD_CELL_FAILURE,
   ADD_CELL_START,
@@ -39,15 +41,16 @@ import { displayError } from '../../utils/ipc';
 /**
  * Handle the kernel process starting with a PID
  */
-export const kernelProcessStart = (pid: number): EditorActionTypes => ({
+export const kernelProcessStart = (pid: number, version: string): EditorActionTypes => ({
   type: KERNEL_PROCESS_START,
   pid,
+  version,
 });
 
 /**
  * Handle the kernel process messages to stdout
  */
-export const kernelProcessStdout = (message: string): EditorActionTypes => ({
+export const kernelProcessStdout = (message: StdoutMessage): EditorActionTypes => ({
   type: KERNEL_PROCESS_STDOUT,
   message,
 });

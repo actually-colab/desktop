@@ -1,5 +1,7 @@
 import { IKernel } from 'jupyter-js-services';
 
+import { StdoutMessage } from '../../shared/types/ipc';
+
 import {
   ADD_CELL_FAILURE,
   ADD_CELL_START,
@@ -52,8 +54,9 @@ export interface EditorState {
   runningCellId: string;
 
   gatewayUri: string;
+  gatewayVersion: string;
   kernelPid: number;
-  kernelStdout: string[];
+  kernelStdout: StdoutMessage[];
   kernel: IKernel | null;
 
   projects: ReducedNotebook[];
@@ -82,6 +85,7 @@ const initialState: EditorState = {
   runningCellId: '',
 
   gatewayUri: '',
+  gatewayVersion: '',
   kernelPid: -1,
   kernelStdout: [],
   kernel: null,
@@ -110,6 +114,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
 
       return {
         ...state,
+        gatewayVersion: action.version,
         kernelPid: action.pid,
         isConnectingToKernel: false,
         connectToKernelErrorMessage: '',
@@ -119,7 +124,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
     case KERNEL_PROCESS_STDOUT:
       return {
         ...state,
-        kernelStdout: [...state.kernelStdout, action.message],
+        kernelStdout: [...state.kernelStdout, action.message].sort((a, b) => a.id - b.id),
       };
     case SET_KERNEL_GATEWAY:
       return {

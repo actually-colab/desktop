@@ -40,14 +40,20 @@ const EntryPoint: React.FC = () => {
       // Spawn the kernel gateway
       kernelProcess.current = spawn('jupyter', ['kernelgateway', '--KernelGatewayApp.allow_origin="*"']);
 
+      let messageId = 0;
+
       kernelProcess.current.stderr.setEncoding('utf-8');
       kernelProcess.current.stderr.on('data', (message: string) => {
         console.log('Kernel:', { message });
 
         sendKernelProcessToMain({
           type: 'stdout',
+          id: messageId,
           message,
+          date: new Date(),
         });
+
+        messageId++;
       });
 
       // Notify main process the kernel is ready
@@ -57,6 +63,7 @@ const EntryPoint: React.FC = () => {
       sendKernelProcessToMain({
         type: 'start',
         pid: kernelProcess.current.pid,
+        version,
       });
 
       kernelProcess.current.on('close', () => {

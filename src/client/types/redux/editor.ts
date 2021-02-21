@@ -4,6 +4,7 @@ import { ThunkAction } from 'redux-thunk';
 
 import { User } from '../user';
 import { EditorCell, KernelOutput } from '../notebook';
+import { StdoutMessage } from '../../../shared/types/ipc';
 
 export const KERNEL_PROCESS_START = 'KERNEL_PROCESS_START';
 export const KERNEL_PROCESS_STDOUT = 'KERNEL_PROCESS_STDOUT';
@@ -45,11 +46,12 @@ type ActionError = {
 type KernelProcessStartAction = {
   type: typeof KERNEL_PROCESS_START;
   pid: number;
+  version: string;
 };
 
 type KernelProcessStdoutAction = {
   type: typeof KERNEL_PROCESS_STDOUT;
-  message: string;
+  message: StdoutMessage;
 };
 
 type SetKernelGatewayAction = {

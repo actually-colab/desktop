@@ -8,7 +8,7 @@ import { _auth } from '../../../redux/actions';
 import { palette, spacing } from '../../../constants/theme';
 import { UserAvatar } from '../../../components';
 
-import { ProjectsPanel } from '../LeftSidebar';
+import { KernelPanel, ProjectsPanel } from '../LeftSidebar';
 
 const styles = StyleSheet.create({
   container: {
@@ -80,7 +80,6 @@ const styles = StyleSheet.create({
     paddingRight: spacing.DEFAULT,
     display: 'flex',
     flexDirection: 'column',
-    '-webkit-user-select': 'none',
   },
 });
 
@@ -209,7 +208,8 @@ const LeftSidebar: React.FC = () => {
         </div>
 
         <div className={css(styles.bodyContainer)}>
-          {activeMenuKey === 'projects' ? <ProjectsPanel /> : <React.Fragment />}
+          {activeMenuKey === 'projects' && <ProjectsPanel />}
+          {activeMenuKey === 'kernel' && <KernelPanel />}
         </div>
       </div>
     </div>

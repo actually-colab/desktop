@@ -17,7 +17,7 @@ import log from 'electron-log';
 import treeKill from 'tree-kill';
 
 import MenuBuilder from './menu';
-import { IpcKernelProcessPayload, IPC_KERNEL_PROCESS_CHANNEL } from './shared/types/ipc';
+import { IpcKernelProcessPayload, IPC_KERNEL_PROCESS_CHANNEL, StdoutMessage } from './shared/types/ipc';
 import { sendKernelProcessToClient, sendLoginToClient } from './main/utils/ipc';
 
 export default class AppUpdater {
@@ -35,7 +35,7 @@ let kernelWindow: BrowserWindow | null = null;
  */
 let kernelPid = -1;
 let isClientReady = false;
-const messageQueue: string[] = [];
+const messageQueue: StdoutMessage[] = [];
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -236,10 +236,7 @@ ipcMain.on(IPC_KERNEL_PROCESS_CHANNEL, (_, data: IpcKernelProcessPayload) => {
       isClientReady = true;
 
       if (kernelPid !== -1) {
-        sendKernelProcessToClient(mainWindow, {
-          type: 'start',
-          pid: kernelPid,
-        });
+        sendKernelProcessToClient(mainWindow, data);
       }
 
       break;
@@ -266,18 +263,15 @@ ipcMain.on(IPC_KERNEL_PROCESS_CHANNEL, (_, data: IpcKernelProcessPayload) => {
           for (const message of messageQueue) {
             sendKernelProcessToClient(mainWindow, {
               type: 'stdout',
-              message,
+              ...message,
             });
           }
         }
 
-        sendKernelProcessToClient(mainWindow, {
-          type: 'stdout',
-          message: data.message,
-        });
+        sendKernelProcessToClient(mainWindow, data);
       } else {
         // Save the message until the client is ready to receive it
-        messageQueue.push(data.message);
+        messageQueue.push(data);
       }
       break;
     default:
