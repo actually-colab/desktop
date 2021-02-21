@@ -59,3 +59,10 @@ export type Notebook = {
   access_level: 'Full Access' | 'Read Only';
   cells: EditorCell[];
 };
+
+/**
+ * Notebooks are separated so the cells are stored in redux on their own
+ */
+export type ReducedNotebook = Omit<Notebook, 'cells'> & {
+  cell_ids: string[];
+};

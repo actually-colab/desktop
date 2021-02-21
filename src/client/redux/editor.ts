@@ -29,7 +29,7 @@ import {
   UNLOCK_CELL_SUCCESS,
   UPDATE_CELL_CODE,
 } from '../types/redux/editor';
-import { EditorCell, KernelOutput, Lock } from '../types/notebook';
+import { EditorCell, KernelOutput, Lock, ReducedNotebook } from '../types/notebook';
 import { BASE_CELL } from '../constants/notebook';
 
 export interface EditorState {
@@ -56,6 +56,8 @@ export interface EditorState {
   kernelStdout: string[];
   kernel: IKernel | null;
 
+  projects: ReducedNotebook[];
+  project: ReducedNotebook | null;
   cells: EditorCell[];
   outputs: KernelOutput[];
 }
@@ -84,6 +86,16 @@ const initialState: EditorState = {
   kernelStdout: [],
   kernel: null,
 
+  projects: [
+    {
+      nb_id: 0,
+      name: 'Example Project',
+      users: [],
+      access_level: 'Full Access',
+      cell_ids: [],
+    },
+  ],
+  project: null,
   cells: [],
   outputs: [],
 };

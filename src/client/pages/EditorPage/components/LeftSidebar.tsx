@@ -1,12 +1,14 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import { Button, Dropdown, Icon, IconButton, IconProps, Input, InputGroup, Tooltip, Whisper } from 'rsuite';
+import { Button, Icon, IconButton, IconProps, Tooltip, Whisper } from 'rsuite';
 
 import { ReduxState } from '../../../redux';
 import { _auth } from '../../../redux/actions';
 import { palette, spacing } from '../../../constants/theme';
-import { PopoverDropdown, UserAvatar } from '../../../components';
+import { UserAvatar } from '../../../components';
+
+import { ProjectsPanel } from '../LeftSidebar';
 
 const styles = StyleSheet.create({
   container: {
@@ -80,19 +82,6 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     '-webkit-user-select': 'none',
   },
-  iconButtonText: {
-    marginLeft: spacing.DEFAULT / 2,
-  },
-  newProjectContainer: {
-    marginBottom: spacing.DEFAULT,
-  },
-  searchContainer: {
-    marginBottom: spacing.DEFAULT,
-  },
-  sortText: {},
-  project: {
-    marginBottom: spacing.DEFAULT / 2,
-  },
 });
 
 const CategoryButton: React.FC<{
@@ -112,7 +101,7 @@ const CategoryButton: React.FC<{
       delayHide={400}
       speaker={<Tooltip>{tooltipText}</Tooltip>}
     >
-      <div className={css(isActive ? [styles.category, styles.categoryActive] : styles.category)}>
+      <div className={css(styles.category, isActive && styles.categoryActive)}>
         <IconButton
           style={{
             color: isActive ? palette.PRIMARY : palette.CHARCOAL,
@@ -130,12 +119,6 @@ const CategoryButton: React.FC<{
 
 const LeftSidebar: React.FC = () => {
   const user = useSelector((state: ReduxState) => state.auth.user);
-  const projects = [
-    {
-      _id: 'some-id',
-      name: 'Example Project',
-    },
-  ];
 
   const [activeMenuKey, setActiveMenuKey] = React.useState<'' | 'projects' | 'kernel' | 'follow' | 'settings'>(
     'projects'
@@ -226,55 +209,7 @@ const LeftSidebar: React.FC = () => {
         </div>
 
         <div className={css(styles.bodyContainer)}>
-          {activeMenuKey === 'projects' ? (
-            <React.Fragment>
-              <div className={css(styles.newProjectContainer)}>
-                <Button appearance="primary" size="lg" block>
-                  <Icon icon="edit" size="lg" />
-                  <span className={css(styles.iconButtonText)}>New project</span>
-                </Button>
-              </div>
-
-              <div className={css(styles.searchContainer)}>
-                <InputGroup>
-                  <Input style={{ backgroundColor: palette.BASE_FADED }} size="lg" placeholder="Search projects" />
-
-                  <InputGroup.Addon>
-                    <Icon icon="search" />
-                  </InputGroup.Addon>
-                </InputGroup>
-              </div>
-
-              <PopoverDropdown
-                placement="rightStart"
-                buttonContent={<span className={css(styles.sortText)}>Sort by name</span>}
-                activeKey="name"
-                buttonProps={{
-                  ripple: false,
-                }}
-              >
-                <Dropdown.Item eventKey="name">Sort by name</Dropdown.Item>
-                <Dropdown.Item eventKey="edited">Sort by edited</Dropdown.Item>
-              </PopoverDropdown>
-
-              {projects.map((project) => (
-                <div key={project._id} className={css(styles.project)}>
-                  <Button
-                    block
-                    style={{
-                      textAlign: 'left',
-                      background: palette.PRIMARY_LIGHT,
-                      color: palette.PRIMARY,
-                    }}
-                  >
-                    {project.name}
-                  </Button>
-                </div>
-              ))}
-            </React.Fragment>
-          ) : (
-            <React.Fragment />
-          )}
+          {activeMenuKey === 'projects' ? <ProjectsPanel /> : <React.Fragment />}
         </div>
       </div>
     </div>
