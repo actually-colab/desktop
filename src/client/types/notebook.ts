@@ -64,5 +64,5 @@ export type Notebook = {
  * Notebooks are separated so the cells are stored in redux on their own
  */
 export type ReducedNotebook = Omit<Notebook, 'cells'> & {
-  cell_ids: string[];
+  cell_ids: EditorCell['cell_id'][];
 };
