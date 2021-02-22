@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import { Divider, Dropdown } from 'rsuite';
+import { Button, Divider, Dropdown, Modal } from 'rsuite';
 
 import { palette, spacing } from '../../../constants/theme';
 import { ReduxState } from '../../../redux';
@@ -47,6 +47,7 @@ const EditorHeader: React.FC = () => {
   const lockedCellId = useSelector((state: ReduxState) => state.editor.lockedCellId);
 
   const [tempKernelSelection, setTempKernelSelection] = React.useState<string>('localhost');
+  const [showDeleteCell, setShowDeleteCell] = React.useState<boolean>(false);
 
   const kernelStatus = React.useMemo(() => (tempKernelSelection === 'localhost' ? localKernelStatus : 'Offline'), [
     localKernelStatus,
@@ -91,6 +92,12 @@ const EditorHeader: React.FC = () => {
     setTempKernelSelection(eventKey);
   }, []);
 
+  React.useEffect(() => {
+    if (lockedCellId === '') {
+      setShowDeleteCell(false);
+    }
+  }, [lockedCellId]);
+
   return (
     <Header>
       <div className={css(styles.header)}>
@@ -126,7 +133,7 @@ const EditorHeader: React.FC = () => {
             tooltipDirection="bottom"
             loading={isDeletingCell}
             disabled={!isStable || lockedCellId === ''}
-            onClick={dispatchDeleteCell}
+            onClick={() => setShowDeleteCell(true)}
           />
         </div>
 
@@ -163,6 +170,21 @@ const EditorHeader: React.FC = () => {
           </PopoverDropdown>
         </div>
       </div>
+
+      <Modal size="xs" show={showDeleteCell} onHide={() => setShowDeleteCell(false)}>
+        <Modal.Header>
+          <Modal.Title>Are you sure you want to delete the cell?</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>You cannot undo this action</Modal.Body>
+        <Modal.Footer>
+          <Button appearance="subtle" onClick={() => setShowDeleteCell(false)}>
+            Cancel
+          </Button>
+          <Button appearance="primary" onClick={dispatchDeleteCell}>
+            Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Header>
   );
 };

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import { Button, Dropdown, Icon, Input, InputGroup } from 'rsuite';
+import { Button, Dropdown, Icon, Input, InputGroup, Modal } from 'rsuite';
 
 import { ReduxState } from '../../../redux';
 import { palette, spacing } from '../../../constants/theme';
@@ -29,10 +29,21 @@ const styles = StyleSheet.create({
 const ProjectsPanel: React.FC = () => {
   const projects = useSelector((state: ReduxState) => state.editor.projects);
 
+  const [showCreateProject, setShowCreateProject] = React.useState<boolean>(false);
+  const [newProjectName, setNewProjectName] = React.useState<string>('');
+
   return (
     <React.Fragment>
       <div className={css(styles.newProjectContainer)}>
-        <Button appearance="primary" size="lg" block>
+        <Button
+          appearance="primary"
+          size="lg"
+          block
+          onClick={() => {
+            setShowCreateProject(true);
+            setNewProjectName('');
+          }}
+        >
           <Icon icon="edit" size="lg" />
           <span className={css(styles.iconButtonText)}>New project</span>
         </Button>
@@ -74,6 +85,25 @@ const ProjectsPanel: React.FC = () => {
           </Button>
         </div>
       ))}
+
+      <Modal size="xs" show={showCreateProject} onHide={() => setShowCreateProject(false)}>
+        <Modal.Header>
+          <Modal.Title>New Project Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Input
+            value={newProjectName}
+            onChange={(value: string) => setNewProjectName(value)}
+            placeholder="Project name"
+          />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button appearance="subtle" onClick={() => setShowCreateProject(false)}>
+            Cancel
+          </Button>
+          <Button appearance="primary">Create</Button>
+        </Modal.Footer>
+      </Modal>
     </React.Fragment>
   );
 };
