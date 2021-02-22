@@ -12,6 +12,7 @@
 @sidenav-default-active-font-color: @btn-primary-color;
 @input-border-focus: @charcoal-color;
 
+@markdown-border-color: #dddddd;
 @user-1: #fb9f89;
 
 body {
@@ -47,4 +48,85 @@ body {
 
 code {
   white-space: pre;
+}
+
+.markdown-container > :first-child {
+  margin-top: 0 !important;
+}
+
+.markdown-container {
+  line-height: normal;
+
+  h1 {
+    font-size: 2em;
+    line-height: 1.25;
+    border-bottom: 1px solid @markdown-border-color;
+    margin-top: 24px;
+    margin-bottom: 16px;
+  }
+
+  h2 {
+    font-size: 1.5em;
+    line-height: 1.25;
+    border-bottom: 1px solid @markdown-border-color;
+    margin-top: 24px;
+    margin-bottom: 16px;
+  }
+
+  h3 {
+    font-size: 1.3em;
+    line-height: 1.25;
+    border-bottom: 1px solid @markdown-border-color;
+    margin-top: 24px;
+    margin-bottom: 16px;
+  }
+
+  h4 {
+    font-size: 1em;
+    line-height: 1.25;
+    border-bottom: 1px solid @markdown-border-color;
+    margin-top: 24px;
+    margin-bottom: 16px;
+  }
+
+  h5 {
+    font-size: 0.8em;
+    line-height: 1.25;
+    border-bottom: 1px solid @markdown-border-color;
+    margin-top: 24px;
+    margin-bottom: 16px;
+  }
+
+  h6 {
+    font-size: 0.7em;
+    line-height: 1.25;
+    border-bottom: 1px solid @markdown-border-color;
+    margin-top: 24px;
+    margin-bottom: 16px;
+  }
+
+  table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 12px;
+    margin-bottom: 12px;
+  }
+
+  td,
+  th {
+    border: 1px solid @markdown-border-color;
+    text-align: left;
+    padding: 8px;
+  }
+
+  tr:nth-child(even) {
+    background-color: @markdown-border-color;
+  }
+
+  code {
+    padding: 0.2em 0.4em;
+    border-radius: 6px;
+    background-color: @markdown-border-color;
+  }
 }

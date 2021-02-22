@@ -9,6 +9,7 @@ import { EditorCell } from '../types/notebook';
 import { palette, spacing } from '../constants/theme';
 
 import CodeCell from './CodeCell';
+import MarkdownCell from './MarkdownCell';
 import OutputCell from './OutputCell';
 import ColoredIconButton from './ColoredIconButton';
 import IconTextButton from './IconTextButton';
@@ -112,8 +113,14 @@ const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
   );
   const dispatchExecuteCode = React.useCallback(
     () =>
-      kernel !== null && cell.language === 'py' && user !== null && dispatch(_editor.executeCode(user, kernel, cell)),
+      kernel !== null && user !== null && cell.language === 'py'
+        ? dispatch(_editor.executeCode(user, kernel, cell))
+        : dispatch(_editor.editCell(cell.cell_id, { rendered: true })),
     [cell, dispatch, kernel, user]
+  );
+  const dispatchEditMarkdownCell = React.useCallback(
+    () => cell.language === 'md' && cell.rendered && dispatch(_editor.editCell(cell.cell_id, { rendered: false })),
+    [cell.cell_id, cell.language, cell.rendered, dispatch]
   );
 
   const onChange = React.useCallback(
@@ -136,18 +143,22 @@ const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
       </div>
 
       <div className={css(styles.content)}>
-        <div
-          className={css(
-            styles.codeContainer,
-            lockedByOtherUser
-              ? styles.codeContainerLockedByOtherUser
-              : !ownsLock && !canLock
-              ? styles.codeContainerLockInUse
-              : undefined
-          )}
-        >
-          <CodeCell cell={cell} onFocus={dispatchLockCell} onChange={onChange} />
-        </div>
+        {cell.language === 'py' || !cell.rendered ? (
+          <div
+            className={css(
+              styles.codeContainer,
+              lockedByOtherUser
+                ? styles.codeContainerLockedByOtherUser
+                : !ownsLock && !canLock
+                ? styles.codeContainerLockInUse
+                : undefined
+            )}
+          >
+            <CodeCell cell={cell} onFocus={dispatchLockCell} onChange={onChange} />
+          </div>
+        ) : (
+          <MarkdownCell cell={cell} onDoubleClick={dispatchEditMarkdownCell} />
+        )}
 
         <div className={css(styles.cellToolbar)}>
           <ColoredIconButton

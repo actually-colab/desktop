@@ -42,7 +42,7 @@ export type KernelOutput =
 export type EditorCell = {
   cell_id: string;
   language: 'py' | 'md';
-  editing: boolean;
+  rendered: boolean;
   runIndex: number;
   code: string;
 };
