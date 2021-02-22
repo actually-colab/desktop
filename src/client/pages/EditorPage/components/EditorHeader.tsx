@@ -5,10 +5,11 @@ import { Button, Divider, Dropdown, Modal } from 'rsuite';
 
 import { palette, spacing } from '../../../constants/theme';
 import { ReduxState } from '../../../redux';
+import { _editor } from '../../../redux/actions';
+import { EditorCell } from '../../../types/notebook';
 import useKernelStatus from '../../../kernel/useKernelStatus';
 import { ColoredIconButton, Header, PopoverDropdown, StatusIndicator, UserAvatar } from '../../../components';
 import { StatusIndicatorProps } from '../../../components/StatusIndicator';
-import { _editor } from '../../../redux/actions';
 
 const styles = StyleSheet.create({
   header: {
@@ -23,7 +24,7 @@ const styles = StyleSheet.create({
   headerNoDrag: {
     display: 'flex',
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
     alignItems: 'center',
     '-webkit-app-region': 'no-drag',
   },
@@ -39,6 +40,7 @@ const styles = StyleSheet.create({
 const EditorHeader: React.FC = () => {
   const localKernelStatus = useKernelStatus();
 
+  const cells = useSelector((state: ReduxState) => state.editor.cells);
   const connectToKernelErrorMessage = useSelector((state: ReduxState) => state.editor.connectToKernelErrorMessage);
   const isAddingCell = useSelector((state: ReduxState) => state.editor.isAddingCell);
   const isDeletingCell = useSelector((state: ReduxState) => state.editor.isDeletingCell);
@@ -48,6 +50,11 @@ const EditorHeader: React.FC = () => {
 
   const [tempKernelSelection, setTempKernelSelection] = React.useState<string>('localhost');
   const [showDeleteCell, setShowDeleteCell] = React.useState<boolean>(false);
+
+  const lockedCell = React.useMemo(() => cells.find((cell) => cell.cell_id === lockedCellId) ?? null, [
+    cells,
+    lockedCellId,
+  ]);
 
   const kernelStatus = React.useMemo(() => (tempKernelSelection === 'localhost' ? localKernelStatus : 'Offline'), [
     localKernelStatus,
@@ -87,6 +94,19 @@ const EditorHeader: React.FC = () => {
     dispatch,
     lockedCellId,
   ]);
+  const dispatchEditCell = React.useCallback(
+    (cell_id: EditorCell['cell_id'], changes: Partial<EditorCell>) => dispatch(_editor.editCell(cell_id, changes)),
+    [dispatch]
+  );
+
+  const handleLanguageSelect = React.useCallback(
+    (eventKey: EditorCell['language']) => {
+      dispatchEditCell(lockedCellId, {
+        language: eventKey,
+      });
+    },
+    [dispatchEditCell, lockedCellId]
+  );
 
   const handleKernelSelect = React.useCallback((eventKey: string) => {
     setTempKernelSelection(eventKey);
@@ -135,6 +155,19 @@ const EditorHeader: React.FC = () => {
             disabled={!isStable || lockedCellId === ''}
             onClick={() => setShowDeleteCell(true)}
           />
+
+          <Divider vertical />
+
+          <PopoverDropdown
+            placement="bottomEnd"
+            activeKey={lockedCell?.language ?? 'py'}
+            buttonProps={{ disabled: lockedCell === null }}
+            buttonContent={lockedCell?.language ?? 'py'}
+            onSelect={handleLanguageSelect}
+          >
+            <Dropdown.Item eventKey="py">python</Dropdown.Item>
+            <Dropdown.Item eventKey="md">markdown</Dropdown.Item>
+          </PopoverDropdown>
         </div>
 
         <div className={css(styles.headerNoDrag)}>

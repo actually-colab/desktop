@@ -52,37 +52,39 @@ const PopoverDropdown: React.FC<PopoverDropdownProps> = ({
   );
 
   return (
-    <Whisper
-      trigger="click"
-      placement={placement}
-      ref={whisperRef}
-      speaker={
-        <Popover full>
-          <Dropdown.Menu activeKey={activeKey} onSelect={handleSelect}>
-            {children}
-          </Dropdown.Menu>
-        </Popover>
-      }
-    >
-      <Button
-        {...{
-          appearance: 'subtle',
-          size: 'md',
-          style: { alignSelf: 'flex-start' },
-          ...buttonProps,
-        }}
+    <div>
+      <Whisper
+        trigger="click"
+        placement={placement}
+        ref={whisperRef}
+        speaker={
+          <Popover full>
+            <Dropdown.Menu activeKey={activeKey} onSelect={handleSelect}>
+              {children}
+            </Dropdown.Menu>
+          </Popover>
+        }
       >
-        <div className={css(styles.buttonContentContainer)}>
-          <div className={css(styles.buttonContent)}>
-            {buttonContent}
+        <Button
+          {...{
+            appearance: 'subtle',
+            size: 'md',
+            style: { alignSelf: 'flex-start' },
+            ...buttonProps,
+          }}
+        >
+          <div className={css(styles.buttonContentContainer)}>
+            <div className={css(styles.buttonContent)}>
+              {buttonContent}
 
-            <div className={css(styles.dropdownIcon)}>
-              <Icon icon="arrow-down-line" />
+              <div className={css(styles.dropdownIcon)}>
+                <Icon icon="arrow-down-line" />
+              </div>
             </div>
           </div>
-        </div>
-      </Button>
-    </Whisper>
+        </Button>
+      </Whisper>
+    </div>
   );
 };
 
