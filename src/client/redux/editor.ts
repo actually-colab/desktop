@@ -3,33 +3,17 @@ import { IKernel } from 'jupyter-js-services';
 import { StdoutMessage } from '../../shared/types/ipc';
 
 import {
-  ADD_CELL_FAILURE,
-  ADD_CELL_START,
-  ADD_CELL_SUCCESS,
-  CONNECT_TO_KERNEL_FAILURE,
-  CONNECT_TO_KERNEL_START,
-  CONNECT_TO_KERNEL_SUCCESS,
-  DELETE_CELL_FAILURE,
-  DELETE_CELL_START,
-  DELETE_CELL_SUCCESS,
+  ADD_CELL,
+  CONNECT_TO_KERNEL,
+  DELETE_CELL,
   EditorActionTypes,
-  EDIT_CELL_FAILURE,
-  EDIT_CELL_START,
-  EDIT_CELL_SUCCESS,
-  EXECUTE_CODE_FAILURE,
-  EXECUTE_CODE_START,
-  EXECUTE_CODE_SUCCESS,
-  KERNEL_PROCESS_START,
-  KERNEL_PROCESS_STDOUT,
-  LOCK_CELL_FAILURE,
-  LOCK_CELL_START,
-  LOCK_CELL_SUCCESS,
-  RECEIVE_KERNEL_MESSAGE,
-  SET_KERNEL_GATEWAY,
-  UNLOCK_CELL_FAILURE,
-  UNLOCK_CELL_START,
-  UNLOCK_CELL_SUCCESS,
-  UPDATE_CELL_CODE,
+  EDIT_CELL,
+  EXECUTE_CODE,
+  KERNEL_GATEWAY,
+  KERNEL_MESSAGE,
+  KERNEL_PROCESS,
+  LOCK_CELL,
+  UNLOCK_CELL,
 } from '../types/redux/editor';
 import { EditorCell, KernelOutput, Lock, ReducedNotebook } from '../types/notebook';
 import { BASE_CELL } from '../constants/notebook';
@@ -112,7 +96,7 @@ const initialState: EditorState = {
  */
 const reducer = (state = initialState, action: EditorActionTypes): EditorState => {
   switch (action.type) {
-    case KERNEL_PROCESS_START: {
+    case KERNEL_PROCESS.START: {
       if (state.kernelPid !== -1 && action.pid !== -1) {
         // Don't process duplicate starts
         return state;
@@ -127,41 +111,41 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         kernel: null,
       };
     }
-    case KERNEL_PROCESS_STDOUT:
+    case KERNEL_PROCESS.STDOUT:
       return {
         ...state,
         kernelStdout: [...state.kernelStdout, action.message].sort((a, b) => a.id - b.id),
       };
-    case SET_KERNEL_GATEWAY:
+    case KERNEL_GATEWAY.SET:
       return {
         ...state,
         gatewayUri: action.uri,
       };
-    case CONNECT_TO_KERNEL_START:
+    case CONNECT_TO_KERNEL.START:
       return {
         ...state,
         isConnectingToKernel: true,
         connectToKernelErrorMessage: '',
         kernel: null,
       };
-    case CONNECT_TO_KERNEL_SUCCESS:
+    case CONNECT_TO_KERNEL.SUCCESS:
       return {
         ...state,
         isConnectingToKernel: false,
         kernel: action.kernel,
       };
-    case CONNECT_TO_KERNEL_FAILURE:
+    case CONNECT_TO_KERNEL.FAILURE:
       return {
         ...state,
         isConnectingToKernel: false,
         connectToKernelErrorMessage: action.error.message,
       };
-    case LOCK_CELL_START:
+    case LOCK_CELL.START:
       return {
         ...state,
         isLockingCell: true,
       };
-    case LOCK_CELL_SUCCESS:
+    case LOCK_CELL.SUCCESS:
       return {
         ...state,
         isLockingCell: action.isMe ? false : state.isLockingCell,
@@ -174,34 +158,34 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
           },
         ],
       };
-    case LOCK_CELL_FAILURE:
+    case LOCK_CELL.FAILURE:
       return {
         ...state,
         isLockingCell: false,
       };
-    case UNLOCK_CELL_START:
+    case UNLOCK_CELL.START:
       return {
         ...state,
         isUnlockingCell: true,
       };
-    case UNLOCK_CELL_SUCCESS:
+    case UNLOCK_CELL.SUCCESS:
       return {
         ...state,
         isUnlockingCell: action.isMe ? false : state.isUnlockingCell,
         lockedCellId: action.isMe ? '' : state.lockedCellId,
         lockedCells: state.lockedCells.filter((lock) => lock.cell_id !== action.cell_id),
       };
-    case UNLOCK_CELL_FAILURE:
+    case UNLOCK_CELL.FAILURE:
       return {
         ...state,
         isUnlockingCell: false,
       };
-    case ADD_CELL_START:
+    case ADD_CELL.START:
       return {
         ...state,
         isAddingCell: true,
       };
-    case ADD_CELL_SUCCESS: {
+    case ADD_CELL.SUCCESS: {
       const newCells = [...state.cells];
 
       newCells.splice(action.index === -1 ? newCells.length : action.index, 0, {
@@ -215,17 +199,17 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         cells: newCells,
       };
     }
-    case ADD_CELL_FAILURE:
+    case ADD_CELL.FAILURE:
       return {
         ...state,
         isAddingCell: false,
       };
-    case DELETE_CELL_START:
+    case DELETE_CELL.START:
       return {
         ...state,
         isDeletingCell: true,
       };
-    case DELETE_CELL_SUCCESS:
+    case DELETE_CELL.SUCCESS:
       return {
         ...state,
         isDeletingCell: action.isMe ? false : state.isDeletingCell,
@@ -233,17 +217,17 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         lockedCells: state.lockedCells.filter((lock) => lock.cell_id !== action.cell_id),
         cells: state.cells.filter((cell) => cell.cell_id !== action.cell_id),
       };
-    case DELETE_CELL_FAILURE:
+    case DELETE_CELL.FAILURE:
       return {
         ...state,
         isDeletingCell: false,
       };
-    case EDIT_CELL_START:
+    case EDIT_CELL.START:
       return {
         ...state,
         isEditingCell: true,
       };
-    case EDIT_CELL_SUCCESS:
+    case EDIT_CELL.SUCCESS:
       return {
         ...state,
         isEditingCell: action.isMe ? false : state.isDeletingCell,
@@ -256,18 +240,18 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
             : cell
         ),
       };
-    case EDIT_CELL_FAILURE:
+    case EDIT_CELL.FAILURE:
       return {
         ...state,
         isEditingCell: false,
       };
-    case EXECUTE_CODE_START:
+    case EXECUTE_CODE.START:
       return {
         ...state,
         isExecutingCode: true,
         runningCellId: action.cell_id,
       };
-    case EXECUTE_CODE_SUCCESS:
+    case EXECUTE_CODE.SUCCESS:
       return {
         ...state,
         isExecutingCode: false,
@@ -282,19 +266,19 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
             : cell
         ),
       };
-    case EXECUTE_CODE_FAILURE:
+    case EXECUTE_CODE.FAILURE:
       return {
         ...state,
         isExecutingCode: false,
         runningCellId: '',
         executeCodeErrorMessage: action.error.message,
       };
-    case RECEIVE_KERNEL_MESSAGE:
+    case KERNEL_MESSAGE.RECEIVE:
       return {
         ...state,
         outputs: [...state.outputs, action.message],
       };
-    case UPDATE_CELL_CODE:
+    case EDIT_CELL.UPDATE_CODE:
       return {
         ...state,
         cells: state.cells.map((cell) =>

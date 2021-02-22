@@ -3,29 +3,24 @@ import { devLogin } from '@actually-colab/editor-client';
 import {
   AuthActionTypes,
   AuthAsyncActionTypes,
-  AUTH_REDIRECT_FAILURE,
-  AUTH_REDIRECT_START,
-  AUTH_REDIRECT_SUCCESS,
-  LOAD_SESSION_FAILURE,
-  LOAD_SESSION_SUCCESS,
-  SIGN_IN_FAILURE,
-  SIGN_IN_START,
-  SIGN_IN_SUCCESS,
-  SIGN_OUT_SUCCESS,
+  AUTH_REDIRECT,
+  LOAD_SESSION,
+  SIGN_IN,
+  SIGN_OUT,
 } from '../../types/redux/auth';
 import { User } from '../../types/user';
 import { displayError } from '../../utils/ipc';
 import { LoginRedirectResponse, openLoginPage } from '../../utils/redirect';
 
 const signInStart = (): AuthActionTypes => ({
-  type: SIGN_IN_START,
+  type: SIGN_IN.START,
 });
 
 const signInSuccess = (user: User, token: string): AuthActionTypes => {
   localStorage.setItem('token', token);
 
   return {
-    type: SIGN_IN_SUCCESS,
+    type: SIGN_IN.SUCCESS,
     user,
     token,
   };
@@ -35,7 +30,7 @@ const signInFailure = (errorMessage: string): AuthActionTypes => {
   displayError(errorMessage);
 
   return {
-    type: SIGN_IN_FAILURE,
+    type: SIGN_IN.FAILURE,
     error: {
       message: errorMessage,
     },
@@ -72,12 +67,12 @@ export const signIn = (token: string): AuthAsyncActionTypes => async (dispatch) 
 };
 
 const loadSessionSuccess = (token: string): AuthActionTypes => ({
-  type: LOAD_SESSION_SUCCESS,
+  type: LOAD_SESSION.SUCCESS,
   token,
 });
 
 const loadSessionFailure = (): AuthActionTypes => ({
-  type: LOAD_SESSION_FAILURE,
+  type: LOAD_SESSION.FAILURE,
 });
 
 /**
@@ -97,11 +92,11 @@ export const loadSession = (): AuthAsyncActionTypes => async (dispatch) => {
 };
 
 const authRedirectStart = (): AuthActionTypes => ({
-  type: AUTH_REDIRECT_START,
+  type: AUTH_REDIRECT.START,
 });
 
 const authRedirectSuccess = (payload: LoginRedirectResponse): AuthActionTypes => ({
-  type: AUTH_REDIRECT_SUCCESS,
+  type: AUTH_REDIRECT.SUCCESS,
   payload,
 });
 
@@ -112,7 +107,7 @@ export const authRedirectFailure = (errorMessage: string): AuthActionTypes => {
   displayError(errorMessage);
 
   return {
-    type: AUTH_REDIRECT_FAILURE,
+    type: AUTH_REDIRECT.FAILURE,
     error: {
       message: errorMessage,
     },
@@ -139,7 +134,7 @@ export const authRedirectSignIn = (payload: LoginRedirectResponse): AuthAsyncAct
 };
 
 const signOutSuccess = (): AuthActionTypes => ({
-  type: SIGN_OUT_SUCCESS,
+  type: SIGN_OUT.SUCCESS,
 });
 
 /**
