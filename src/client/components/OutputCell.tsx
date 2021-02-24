@@ -44,9 +44,11 @@ const OutputCell: React.FC<{ cell: EditorCell; uid?: User['uid'] }> = ({ cell, u
               ) : output.name === 'display_data' ? (
                 <React.Fragment>
                   {output.data.text !== undefined && output.data.text}
+                  {'\n'}
                   {output.data.image !== undefined && (
                     <img src={`data:image/png;base64, ${output.data.image}`} alt="" />
                   )}
+                  {'\n'}
                 </React.Fragment>
               ) : (
                 <React.Fragment>
