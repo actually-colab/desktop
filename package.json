@@ -23,6 +23,8 @@
   "scripts": {
     "start": "concurrently --kill-others \"less-watch-compiler --config less-watcher.config.json\" \"react-scripts start\"",
     "build": "react-scripts build",
+    "build:client": "cd ../editor/client && git pull && yarn install && yarn build",
+    "install:client": "yarn build:client && yarn remove @actually-colab/editor-client && yarn add file:../editor/client",
     "predeploy": "yarn build",
     "deploy": "netlify deploy --prod",
     "test": "react-scripts test",
