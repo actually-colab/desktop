@@ -27,7 +27,7 @@
     "deploy": "netlify deploy --prod",
     "test": "react-scripts test",
     "format": "prettier --config .prettierrc --write \"**/*.{ts,js,tsx,css,html,md}\"",
-    "eslint": "eslint --config ./.eslintrc.json --ext .js,.ts,.jsx,.tsx src/",
+    "lint": "eslint --config ./.eslintrc.json --ext .js,.ts,.jsx,.tsx src/",
     "validate": "npx tsc --noEmit"
   },
   "dependencies": {
