@@ -7,7 +7,7 @@
 This process is started by the kernel hidden renderer process and communicates with the main process via IPC.
 
 ```bash
-jupyter kernelgateway --KernelGatewayApp.allow_origin="*"
+jupyter kernelgateway --KernelGatewayApp.allow_origin="*" --KernelGatewayApp.allow_headers="content-type"
 ```
 
 ### The Editor Client
@@ -42,22 +42,8 @@ This will automatically pull the latest client (assuming proper directory struct
    yarn start
    ```
 
-## Debugging Prod
-
-To run the production package with devtools and a visible kernel window:
+## Deploying to Production
 
 ```bash
-yarn cross-env DEBUG_PROD=true yarn package
+yarn deploy
 ```
-
-## Packaging for Production
-
-To package apps for the local platform:
-
-```bash
-yarn package
-```
-
-## Docs
-
-See [docs and guides here](https://electron-react-boilerplate.js.org/docs/installation)
