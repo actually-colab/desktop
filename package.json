@@ -25,6 +25,7 @@
     "build": "react-scripts build",
     "build:client": "cd ../editor/client && git pull && yarn install && yarn build",
     "install:client": "yarn build:client && yarn remove @actually-colab/editor-client && yarn add file:../editor/client",
+    "postinstall": "husky install",
     "predeploy": "yarn build",
     "deploy": "netlify deploy --prod",
     "test": "react-scripts test",
