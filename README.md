@@ -10,6 +10,11 @@ This process is started by the kernel hidden renderer process and communicates w
 jupyter kernelgateway --KernelGatewayApp.allow_origin="*" --KernelGatewayApp.allow_headers="content-type"
 ```
 
+> Setting the CORS Access-Control-Allow-Origin to `*` is generally a bad practice for security reasons. This will allow any website or malicious agent to execute code against your machine if they know what to look for. Instead, use the following origins depending on if you are in development or production:
+>
+> - Development: `http://localhost:4000`
+> - Production: `https://app.actuallycolab.org`
+
 ### The Editor Client
 
 In order to setup this repo, you also must clone the [editor repo](https://github.com/actually-colab/editor) and have the following directory structure:
