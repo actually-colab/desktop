@@ -3,6 +3,7 @@ import ReduxThunk from 'redux-thunk';
 
 import auth, { AuthState } from './auth';
 import editor, { EditorState } from './editor';
+import ui, { UIState } from './ui';
 
 /**
  * The type of the combined reducer
@@ -10,6 +11,7 @@ import editor, { EditorState } from './editor';
 export type ReduxState = {
   auth: AuthState;
   editor: EditorState;
+  ui: UIState;
 };
 
 /**
@@ -18,6 +20,7 @@ export type ReduxState = {
 export const reducers = combineReducers({
   auth,
   editor,
+  ui,
 });
 
 /**

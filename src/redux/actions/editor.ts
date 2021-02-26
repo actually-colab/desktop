@@ -17,6 +17,7 @@ import {
 import { User } from '../../types/user';
 import { EditorCell, KernelOutput } from '../../types/notebook';
 import * as jupyter from '../../kernel/jupyter';
+import { _ui } from '.';
 
 /**
  * Set the kernel gateway uri
@@ -53,6 +54,15 @@ export const connectToKernel = (uri: string): EditorAsyncActionTypes => async (d
   if (res.success) {
     dispatch(connectToKernelSuccess(res.kernel));
   } else {
+    dispatch(
+      _ui.notify({
+        level: 'error',
+        title: "Couldn't connect to the kernel",
+        message: res.error.message,
+        duration: 5000,
+      })
+    );
+
     dispatch(connectToKernelFailure(res.error.message));
   }
 };
@@ -68,14 +78,12 @@ const lockCellSuccess = (isMe: boolean, uid: User['uid'], cell_id: EditorCell['c
   cell_id,
 });
 
-const lockCellFailure = (errorMessage: string): EditorActionTypes => {
-  return {
-    type: LOCK_CELL.FAILURE,
-    error: {
-      message: errorMessage,
-    },
-  };
-};
+const lockCellFailure = (errorMessage: string): EditorActionTypes => ({
+  type: LOCK_CELL.FAILURE,
+  error: {
+    message: errorMessage,
+  },
+});
 
 /**
  * Try to lock a given cell
@@ -98,14 +106,12 @@ const unlockCellSuccess = (isMe: boolean, uid: User['uid'], cell_id: EditorCell[
   cell_id,
 });
 
-const unlockCellFailure = (errorMessage: string) => {
-  return {
-    type: UNLOCK_CELL.FAILURE,
-    error: {
-      message: errorMessage,
-    },
-  };
-};
+const unlockCellFailure = (errorMessage: string) => ({
+  type: UNLOCK_CELL.FAILURE,
+  error: {
+    message: errorMessage,
+  },
+});
 
 /**
  * Try to unlock the given cell
@@ -128,14 +134,12 @@ const addCellSuccess = (isMe: boolean, cell_id: EditorCell['cell_id'], index: nu
   index,
 });
 
-const addCellFailure = (errorMessage: string): EditorActionTypes => {
-  return {
-    type: ADD_CELL.FAILURE,
-    error: {
-      message: errorMessage,
-    },
-  };
-};
+const addCellFailure = (errorMessage: string): EditorActionTypes => ({
+  type: ADD_CELL.FAILURE,
+  error: {
+    message: errorMessage,
+  },
+});
 
 /**
  * Try to create a new cell at a given index. Use -1 to add to the end
@@ -157,14 +161,12 @@ const deleteCellSuccess = (isMe: boolean, cell_id: EditorCell['cell_id']): Edito
   cell_id,
 });
 
-const deleteCellFailure = (errorMessage: string): EditorActionTypes => {
-  return {
-    type: DELETE_CELL.FAILURE,
-    error: {
-      message: errorMessage,
-    },
-  };
-};
+const deleteCellFailure = (errorMessage: string): EditorActionTypes => ({
+  type: DELETE_CELL.FAILURE,
+  error: {
+    message: errorMessage,
+  },
+});
 
 /**
  * Try to delete a given cell

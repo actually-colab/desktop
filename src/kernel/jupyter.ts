@@ -41,36 +41,12 @@ export const connectToKernel = async (
       };
     }
 > => {
+  let kernelSpecs: Kernel.ISpecModels | undefined;
+
   try {
-    const kernelSpecs = await Kernel.getSpecs({
+    kernelSpecs = await Kernel.getSpecs({
       baseUrl: uri,
     });
-
-    console.log('Available kernelspecs', kernelSpecs);
-
-    try {
-      const kernel = await Kernel.startNew({
-        baseUrl: uri,
-        wsUrl: getGatewayWebSocketUri(uri),
-        name: 'python3',
-      });
-
-      console.log('Kernel started');
-      return {
-        success: true,
-        kernel,
-      };
-    } catch (error) {
-      console.log('Error starting new kernel');
-      console.error(error);
-
-      return {
-        success: false,
-        error: {
-          message: error?.xhr?.statusText?.message ?? 'Unknown error',
-        },
-      };
-    }
   } catch (error) {
     console.log('Error fetching kernel specs');
     console.error(error);
@@ -78,7 +54,33 @@ export const connectToKernel = async (
     return {
       success: false,
       error: {
-        message: error?.xhr?.statusText?.message ?? 'Unknown error',
+        message: error?.xhr?.statusText?.message ?? error.message ?? `Could not connect to gateway ${uri}`,
+      },
+    };
+  }
+
+  console.log('Available kernelspecs', kernelSpecs);
+
+  try {
+    const kernel = await Kernel.startNew({
+      baseUrl: uri,
+      wsUrl: getGatewayWebSocketUri(uri),
+      name: 'python3',
+    });
+
+    console.log('Kernel started');
+    return {
+      success: true,
+      kernel,
+    };
+  } catch (error) {
+    console.log('Error starting new kernel');
+    console.error(error);
+
+    return {
+      success: false,
+      error: {
+        message: error?.xhr?.statusText?.message ?? error.message ?? 'Unknown error',
       },
     };
   }
