@@ -14,7 +14,13 @@ const styles = StyleSheet.create({
   container: {
     display: 'flex',
     flex: 1,
+    flexDirection: 'row',
+    overflow: 'hidden',
+  },
+  pageContainer: {
+    display: 'flex',
     flexDirection: 'column',
+    flex: 1,
     overflow: 'hidden',
   },
   page: {
@@ -22,14 +28,14 @@ const styles = StyleSheet.create({
     flex: 1,
     overflow: 'hidden',
   },
-  editableAreaContainer: {
+  bodyContainer: {
     display: 'flex',
     flex: 1,
     backgroundColor: palette.BASE,
     flexDirection: 'column',
     overflow: 'hidden',
   },
-  editableArea: {
+  body: {
     flex: 1,
     padding: spacing.DEFAULT,
     overflowY: 'auto',
@@ -47,20 +53,22 @@ const EditorPage: React.FC = () => {
 
   return (
     <div className={css(styles.container)}>
-      <EditorHeader />
+      <LeftSidebar />
 
-      <div className={css(styles.page)}>
-        <LeftSidebar />
+      <div className={css(styles.pageContainer)}>
+        <EditorHeader />
 
-        <div className={css(styles.editableAreaContainer)}>
-          <div className={css(styles.editableArea)}>
-            {cells.map((cell) => (
-              <NotebookCell key={cell.cell_id} cell={cell} />
-            ))}
+        <div className={css(styles.page)}>
+          <div className={css(styles.bodyContainer)}>
+            <div className={css(styles.body)}>
+              {cells.map((cell) => (
+                <NotebookCell key={cell.cell_id} cell={cell} />
+              ))}
+            </div>
           </div>
-        </div>
 
-        <RightSidebar />
+          <RightSidebar />
+        </div>
       </div>
     </div>
   );

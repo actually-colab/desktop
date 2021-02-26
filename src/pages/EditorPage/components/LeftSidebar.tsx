@@ -17,9 +17,7 @@ const styles = StyleSheet.create({
     backgroundColor: palette.BASE_FADED,
   },
   titleContainer: {
-    marginLeft: spacing.DEFAULT,
-    marginRight: spacing.DEFAULT,
-    marginBottom: spacing.DEFAULT,
+    ...spacing.pad({ top: spacing.DEFAULT / 2 }),
   },
   title: {
     fontSize: 20,

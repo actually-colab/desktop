@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
   pane: {
     width: 250,
     height: '100%',
-    ...spacing.pad(spacing.DEFAULT, { top: spacing.DEFAULT / 2 }),
+    ...spacing.pad({ top: spacing.DEFAULT / 2 }),
     backgroundColor: palette.BASE_FADED,
     overflowY: 'auto',
   },

@@ -27,10 +27,10 @@ export const palette = {
  */
 export const spacing = {
   DEFAULT: 16,
-  pad: (fallback: number, padding: { left?: number; right?: number; top?: number; bottom?: number }) => ({
-    paddingLeft: padding.left ?? fallback,
-    paddingRight: padding.right ?? fallback,
-    paddingTop: padding.top ?? fallback,
-    paddingBottom: padding.bottom ?? fallback,
+  pad: (overrides: { left?: number; right?: number; top?: number; bottom?: number } = {}, fallback: number = 16) => ({
+    paddingLeft: overrides.left ?? fallback,
+    paddingRight: overrides.right ?? fallback,
+    paddingTop: overrides.top ?? fallback,
+    paddingBottom: overrides.bottom ?? fallback,
   }),
 };

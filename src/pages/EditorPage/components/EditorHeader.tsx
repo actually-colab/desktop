@@ -13,7 +13,6 @@ import { StatusIndicatorProps } from '../../../components/StatusIndicator';
 
 const styles = StyleSheet.create({
   header: {
-    paddingLeft: 263,
     paddingRight: 4,
     display: 'flex',
     flexDirection: 'row',
