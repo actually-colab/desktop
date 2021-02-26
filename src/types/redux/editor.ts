@@ -51,6 +51,7 @@ export const EXECUTE_CODE = {
 } as const;
 export const KERNEL_MESSAGE = {
   RECEIVE: 'KERNEL_MESSAGE_RECEIVE',
+  UPDATE_RUN_INDEX: 'KERNEL_MESSAGE_UPDATE_RUN_INDEX',
 } as const;
 export const INTERRUPT_KERNEL = {
   START: 'INTERRUPT_KERNEL_START',
@@ -184,10 +185,16 @@ type ExecuteCodeFailureAction = {
   cell_id: EditorCell['cell_id'];
 } & ActionError;
 
-type ReceiveKernelMessageAction = {
+type KernelMessageReceiveAction = {
   type: typeof KERNEL_MESSAGE.RECEIVE;
   cell_id: EditorCell['cell_id'];
   message: KernelOutput;
+};
+
+type KernelMessageUpdateRunIndexAction = {
+  type: typeof KERNEL_MESSAGE.UPDATE_RUN_INDEX;
+  cell_id: EditorCell['cell_id'];
+  runIndex: number;
 };
 
 type UpdateCellCodeAction = {
@@ -225,7 +232,8 @@ export type EditorActionTypes =
   | ExecuteCodeStartAction
   | ExecuteCodeSuccessAction
   | ExecuteCodeFailureAction
-  | ReceiveKernelMessageAction
+  | KernelMessageReceiveAction
+  | KernelMessageUpdateRunIndexAction
   | UpdateCellCodeAction;
 
 /**

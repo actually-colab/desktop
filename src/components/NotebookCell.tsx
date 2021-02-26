@@ -139,7 +139,9 @@ const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
           {cell.language !== 'md' && (
             <React.Fragment>
               <code>[</code>
-              <code className={css(styles.runIndex)}>{cell.runIndex === -1 ? '' : cell.runIndex}</code>
+              <code className={css(styles.runIndex)}>
+                {runningCellId === cell.cell_id ? '*' : cell.runIndex === -1 ? '' : cell.runIndex}
+              </code>
               <code>]</code>
             </React.Fragment>
           )}

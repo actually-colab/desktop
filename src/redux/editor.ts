@@ -250,6 +250,18 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...state,
         outputs: [...state.outputs, action.message],
       };
+    case KERNEL_MESSAGE.UPDATE_RUN_INDEX:
+      return {
+        ...state,
+        cells: state.cells.map((cell) =>
+          cell.cell_id === action.cell_id
+            ? {
+                ...cell,
+                runIndex: action.runIndex > state.executionCount ? action.runIndex : cell.runIndex,
+              }
+            : cell
+        ),
+      };
     case EDIT_CELL.UPDATE_CODE:
       return {
         ...state,
