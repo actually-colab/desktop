@@ -136,9 +136,13 @@ const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
     <div className={css(styles.container, ownsLock && styles.containerLocked)}>
       <div className={css(styles.controls)}>
         <div className={css(styles.runIndexContainer)}>
-          <code>[</code>
-          <code className={css(styles.runIndex)}>{cell.runIndex === -1 ? '' : cell.runIndex}</code>
-          <code>]</code>
+          {cell.language !== 'md' && (
+            <React.Fragment>
+              <code>[</code>
+              <code className={css(styles.runIndex)}>{cell.runIndex === -1 ? '' : cell.runIndex}</code>
+              <code>]</code>
+            </React.Fragment>
+          )}
         </div>
       </div>
 
