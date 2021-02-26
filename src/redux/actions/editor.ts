@@ -238,6 +238,12 @@ const receiveKernelMessage = (cell_id: EditorCell['cell_id'], message: KernelOut
   message,
 });
 
+const updateRunIndex = (cell_id: EditorCell['cell_id'], runIndex: number): EditorActionTypes => ({
+  type: KERNEL_MESSAGE.UPDATE_RUN_INDEX,
+  cell_id,
+  runIndex,
+});
+
 /**
  * Run code against the kernel and asynchronously process kernel messages
  */
@@ -267,6 +273,9 @@ export const executeCode = (user: User, kernel: IKernel, cell: EditorCell): Edit
       if (message.content.execution_count !== undefined) {
         // execution metadata
         runIndex = message.content.execution_count as number;
+
+        // Update the current run
+        dispatch(updateRunIndex(cell.cell_id, runIndex));
       } else if (message.content.name === 'stdout') {
         // regular text stream
         kernelOutput = {
