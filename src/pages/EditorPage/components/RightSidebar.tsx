@@ -35,9 +35,9 @@ const styles = StyleSheet.create({
  * The right sidebar for the editor page
  */
 const RightSidebar: React.FC = () => {
-  const [visibleMenu, setVisibleMenu] = React.useState<'Collaborators' | 'Comments' | 'Downloads' | 'Settings' | ''>(
-    ''
-  );
+  const [visibleMenu, setVisibleMenu] = React.useState<
+    'Collaborators' | 'Comments' | 'Stats' | 'Downloads' | 'Settings' | ''
+  >('');
 
   const openMenu = React.useCallback(
     (menu: typeof visibleMenu) => {
@@ -67,6 +67,13 @@ const RightSidebar: React.FC = () => {
             tooltipText="Comments"
             tooltipDirection="left"
             onClick={() => openMenu('Comments')}
+          />
+          <ColoredIconButton
+            active={visibleMenu === 'Stats'}
+            icon="area-chart"
+            tooltipText="Stats"
+            tooltipDirection="left"
+            onClick={() => openMenu('Stats')}
           />
           <ColoredIconButton
             active={visibleMenu === 'Downloads'}
