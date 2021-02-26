@@ -14,6 +14,7 @@ import {
 } from '../types/redux/editor';
 import { EditorCell, KernelOutput, Lock, ReducedNotebook } from '../types/notebook';
 import { BASE_CELL } from '../constants/notebook';
+import { exampleProject } from '../constants/demo';
 
 /**
  * The editor redux state
@@ -78,7 +79,7 @@ const initialState: EditorState = {
     },
   ],
   project: null,
-  cells: [],
+  cells: exampleProject.cells,
   outputs: [],
 };
 
