@@ -8,7 +8,8 @@
 @sidenav-default-active-font-color: @btn-primary-color;
 @input-border-focus: @charcoal-color;
 
-@markdown-border-color: #dddddd;
+@markdown-border-color: #ddd;
+@markdown-code-background-color: #fdefef;
 @user-1: #fb9f89;
 
 body {
@@ -89,6 +90,10 @@ code {
     font-size: 0.7em;
   }
 
+  p {
+    line-height: 1.5;
+  }
+
   table {
     font-family: arial, sans-serif;
     border-collapse: collapse;
@@ -111,7 +116,15 @@ code {
   code {
     padding: 0.2em 0.4em;
     border-radius: 6px;
-    background-color: @markdown-border-color;
+    background-color: @markdown-code-background-color;
+  }
+
+  pre {
+    padding: 16px;
+    border-radius: 6px;
+    overflow: auto;
+    line-height: 1.45;
+    background-color: @markdown-code-background-color;
   }
 
   input {
