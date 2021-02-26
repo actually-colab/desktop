@@ -284,7 +284,7 @@ export const executeCode = (user: User, kernel: IKernel, cell: EditorCell): Edit
           cell_id: cell.cell_id,
           runIndex: -1,
           messageIndex,
-          name: 'stdout',
+          channel: 'stdout',
           data: {
             text: message.content.text as string,
           },
@@ -297,7 +297,7 @@ export const executeCode = (user: User, kernel: IKernel, cell: EditorCell): Edit
           cell_id: cell.cell_id,
           runIndex: -1,
           messageIndex,
-          name: 'display_data',
+          channel: 'display_data',
           data: {
             text: (message.content.data as any)['text/plain'],
             image: (message.content.data as any)['image/png'],
@@ -311,7 +311,7 @@ export const executeCode = (user: User, kernel: IKernel, cell: EditorCell): Edit
           cell_id: cell.cell_id,
           runIndex: -1,
           messageIndex,
-          name: 'stderr',
+          channel: 'stderr',
           data: {
             ename: message.content.ename as string,
             evalue: message.content.evalue as string,

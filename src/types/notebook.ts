@@ -1,12 +1,24 @@
 import { User } from './user';
 
-type BaseKernelOutput<Name, Data> = {
+type BaseKernelOutput<Channel, Data> = {
   uid: User['uid'];
   output_id: string;
   cell_id: EditorCell['cell_id'];
+  /**
+   * The run index this message is from
+   */
   runIndex: number;
+  /**
+   * The index of this message in the output of the current run
+   */
   messageIndex: number;
-  name: Name;
+  /**
+   * The name of the output channel
+   */
+  channel: Channel;
+  /**
+   * The output data
+   */
   data: Data;
 };
 
@@ -42,7 +54,13 @@ export type KernelOutput =
 export type EditorCell = {
   cell_id: string;
   language: 'py' | 'md';
+  /**
+   * If the cell is markdown, this indicates if the markdown is rendered or editable
+   */
   rendered: boolean;
+  /**
+   * The latest execution count associated with this cell
+   */
   runIndex: number;
   code: string;
 };

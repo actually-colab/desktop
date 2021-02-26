@@ -39,9 +39,9 @@ const OutputCell: React.FC<{ cell: EditorCell; uid?: User['uid'] }> = ({ cell, u
         <pre className={css(styles.output)}>
           {cellOutputs.map((output) => (
             <React.Fragment key={output.output_id}>
-              {output.name === 'stdout' ? (
+              {output.channel === 'stdout' ? (
                 output.data.text
-              ) : output.name === 'display_data' ? (
+              ) : output.channel === 'display_data' ? (
                 <React.Fragment>
                   {output.data.text !== undefined && output.data.text}
                   {'\n'}
