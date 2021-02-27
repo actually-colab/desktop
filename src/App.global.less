@@ -11,6 +11,7 @@
 @input-border-focus: @charcoal-color;
 
 // Custom
+@table-alt-background-color: #f0f2ef;
 @markdown-border-color: #ddd;
 @markdown-code-background-color: #fdefef;
 @user-1: #fb9f89;
@@ -46,10 +47,45 @@ body {
   background-color: @base-color;
 }
 
+/**
+ * Output cells
+ */
 code {
   white-space: pre;
 }
 
+.output-html {
+  white-space: normal;
+
+  table.dataframe {
+    line-height: 1.25;
+
+    thead {
+      border-bottom: 1px solid @charcoal-color;
+    }
+
+    tr {
+      text-align: right;
+      white-space: normal;
+    }
+
+    td,
+    th {
+      border: 1px solid @markdown-border-color;
+      padding: 8px;
+    }
+
+    tbody {
+      tr:nth-child(odd) {
+        background-color: @table-alt-background-color;
+      }
+    }
+  }
+}
+
+/**
+ * Markdown when rendered
+ */
 .markdown-container > :first-child {
   margin-top: 0 !important;
 }
@@ -112,8 +148,10 @@ code {
     padding: 8px;
   }
 
-  tr:nth-child(even) {
-    background-color: @markdown-border-color;
+  tbody {
+    tr:nth-child(odd) {
+      background-color: @table-alt-background-color;
+    }
   }
 
   code {

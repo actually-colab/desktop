@@ -15,7 +15,7 @@ import {
   UNLOCK_CELL,
 } from '../../types/redux/editor';
 import { User } from '../../types/user';
-import { EditorCell, KernelOutput } from '../../types/notebook';
+import { BaseKernelOutput, EditorCell, KernelOutput } from '../../types/notebook';
 import * as jupyter from '../../kernel/jupyter';
 import { _ui } from '.';
 
@@ -278,14 +278,20 @@ export const executeCode = (user: User, kernel: IKernel, cell: EditorCell): Edit
 
         // Update the current run
         dispatch(updateRunIndex(cell.cell_id, runIndex));
-      } else if (message.content.name === 'stdout') {
+      }
+
+      const baseKernelOutput: BaseKernelOutput = {
+        uid: user.uid,
+        output_id: message.header.msg_id,
+        cell_id: cell.cell_id,
+        runIndex: -1,
+        messageIndex,
+      };
+
+      if (message.header.msg_type === 'stream') {
         // regular text stream
         kernelOutput = {
-          uid: user.uid, // TODO
-          output_id: message.header.msg_id,
-          cell_id: cell.cell_id,
-          runIndex: -1,
-          messageIndex,
+          ...baseKernelOutput,
           channel: 'stdout',
           data: {
             text: message.content.text as string,
@@ -294,25 +300,27 @@ export const executeCode = (user: User, kernel: IKernel, cell: EditorCell): Edit
       } else if (message.header.msg_type === 'display_data') {
         // image content
         kernelOutput = {
-          uid: user.uid, // TODO
-          output_id: message.header.msg_id,
-          cell_id: cell.cell_id,
-          runIndex: -1,
-          messageIndex,
+          ...baseKernelOutput,
           channel: 'display_data',
           data: {
             text: (message.content.data as any)['text/plain'],
             image: (message.content.data as any)['image/png'],
           },
         };
+      } else if (message.header.msg_type === 'execute_result') {
+        // html content
+        kernelOutput = {
+          ...baseKernelOutput,
+          channel: 'html',
+          data: {
+            text: (message.content.data as any)['text/plain'],
+            html: (message.content.data as any)['text/html'],
+          },
+        };
       } else if (message.header.msg_type === 'error') {
         // error
         kernelOutput = {
-          uid: user.uid,
-          output_id: message.header.msg_id,
-          cell_id: cell.cell_id,
-          runIndex: -1,
-          messageIndex,
+          ...baseKernelOutput,
           channel: 'stderr',
           data: {
             ename: message.content.ename as string,

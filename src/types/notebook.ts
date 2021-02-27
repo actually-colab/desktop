@@ -1,6 +1,6 @@
 import { User } from './user';
 
-type BaseKernelOutput<Channel, Data> = {
+export type BaseKernelOutput = {
   uid: User['uid'];
   output_id: string;
   cell_id: EditorCell['cell_id'];
@@ -12,6 +12,9 @@ type BaseKernelOutput<Channel, Data> = {
    * The index of this message in the output of the current run
    */
   messageIndex: number;
+};
+
+type KernelOutputChannel<Channel, Data> = BaseKernelOutput & {
   /**
    * The name of the output channel
    */
@@ -26,20 +29,27 @@ type BaseKernelOutput<Channel, Data> = {
  * An output from the kernel
  */
 export type KernelOutput =
-  | BaseKernelOutput<
+  | KernelOutputChannel<
       'stdout',
       {
         text: string;
       }
     >
-  | BaseKernelOutput<
+  | KernelOutputChannel<
       'display_data',
       {
         text?: string;
         image?: string;
       }
     >
-  | BaseKernelOutput<
+  | KernelOutputChannel<
+      'html',
+      {
+        text?: string;
+        html?: string;
+      }
+    >
+  | KernelOutputChannel<
       'stderr',
       {
         ename: string;
