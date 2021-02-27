@@ -15,6 +15,7 @@ import {
 import { EditorCell, KernelOutput, Lock, ReducedNotebook } from '../types/notebook';
 import { BASE_CELL } from '../constants/notebook';
 import { exampleProject } from '../constants/demo';
+import { DEFAULT_GATEWAY_URI } from '../constants/jupyter';
 
 /**
  * The editor redux state
@@ -66,7 +67,7 @@ const initialState: EditorState = {
   executionCount: 0,
   runningCellId: '',
 
-  gatewayUri: 'http://127.0.0.1:8888',
+  gatewayUri: DEFAULT_GATEWAY_URI,
   kernel: null,
 
   projects: [
