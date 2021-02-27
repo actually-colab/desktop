@@ -77,7 +77,7 @@ const RightSidebar: React.FC = () => {
           />
           <ColoredIconButton
             active={visibleMenu === 'Downloads'}
-            icon="download"
+            icon="download2"
             tooltipText="Downloads"
             tooltipDirection="left"
             onClick={() => openMenu('Downloads')}

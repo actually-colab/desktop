@@ -211,7 +211,7 @@ const EditorHeader: React.FC = () => {
           <Button appearance="subtle" onClick={() => setShowDeleteCell(false)}>
             Cancel
           </Button>
-          <Button appearance="primary" onClick={dispatchDeleteCell}>
+          <Button appearance="primary" loading={isDeletingCell} onClick={dispatchDeleteCell}>
             Delete
           </Button>
         </Modal.Footer>

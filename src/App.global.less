@@ -1,13 +1,16 @@
 @import '../node_modules/rsuite/lib/styles/themes/default/index.less';
 
+// Overrides
+@primary: #f55673;
 @base-color: #ed798e;
 @charcoal-color: #383f51;
-@btn-primary-color: #f55673;
-@btn-primary-bg: #f55673;
+@btn-primary-color: @primary;
+@btn-primary-bg: @primary;
 @dropdown-link-active-color: @btn-primary-color;
 @sidenav-default-active-font-color: @btn-primary-color;
 @input-border-focus: @charcoal-color;
 
+// Custom
 @markdown-border-color: #ddd;
 @markdown-code-background-color: #fdefef;
 @user-1: #fb9f89;
