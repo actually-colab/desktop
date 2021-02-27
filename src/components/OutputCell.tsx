@@ -50,6 +50,19 @@ const OutputCell: React.FC<{ cell: EditorCell; uid?: User['uid'] }> = ({ cell, u
                   )}
                   {'\n'}
                 </React.Fragment>
+              ) : output.channel === 'html' ? (
+                <React.Fragment>
+                  {output.data.html !== undefined ? (
+                    <div
+                      className="output-html"
+                      dangerouslySetInnerHTML={{
+                        __html: output.data.html,
+                      }}
+                    />
+                  ) : (
+                    output.data.text !== undefined && output.data.text
+                  )}
+                </React.Fragment>
               ) : (
                 <React.Fragment>
                   {output.data.ename}
