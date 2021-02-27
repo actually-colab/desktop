@@ -5,7 +5,8 @@ import { Button, Icon, IconButton, IconProps, Tooltip, Whisper } from 'rsuite';
 
 import { ReduxState } from '../../../redux';
 import { _auth } from '../../../redux/actions';
-import { palette, spacing } from '../../../constants/theme';
+import { palette, spacing, timing } from '../../../constants/theme';
+import { openCompanion } from '../../../utils/redirect';
 import { UserAvatar } from '../../../components';
 
 import { KernelPanel, ProjectsPanel } from '../LeftSidebar';
@@ -99,8 +100,8 @@ const CategoryButton: React.FC<{
     <Whisper
       placement="right"
       trigger="hover"
-      delayShow={1000}
-      delayHide={400}
+      delayShow={timing.SHOW_DELAY}
+      delayHide={timing.HIDE_DELAY}
       speaker={<Tooltip>{tooltipText}</Tooltip>}
     >
       <div className={css(styles.category, isActive && styles.categoryActive)}>
@@ -170,6 +171,21 @@ const LeftSidebar: React.FC = () => {
               activeMenuKey={activeMenuKey}
               onSelect={handleCategorySelect}
             />
+
+            <Whisper
+              placement="right"
+              trigger="hover"
+              delayShow={timing.SHOW_DELAY}
+              delayHide={timing.HIDE_DELAY}
+              speaker={<Tooltip>Launch Kernel Companion</Tooltip>}
+            >
+              <IconButton
+                size="lg"
+                appearance="subtle"
+                icon={<Icon icon="external-link-square" size="lg" style={{ color: palette.PRIMARY }} />}
+                onClick={() => openCompanion()}
+              />
+            </Whisper>
           </div>
 
           <div className={css(styles.endPanelCategories)}>
@@ -195,7 +211,6 @@ const LeftSidebar: React.FC = () => {
                       style={{ marginLeft: spacing.DEFAULT }}
                       appearance="subtle"
                       icon={<Icon icon="pencil" />}
-                      disabled={activeMenuKey === 'settings'}
                       onClick={() => setActiveMenuKey('settings')}
                     />
                   </div>
