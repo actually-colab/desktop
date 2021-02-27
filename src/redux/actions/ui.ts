@@ -1,22 +1,14 @@
 import { v4 as uuid } from 'uuid';
 import { addMilliseconds } from 'date-fns';
-import { Notification } from 'rsuite';
 
 import { NOTIFICATION, UIActionTypes, UIAsyncActionTypes } from '../../types/redux/ui';
 import { UINotification, UINotificationCore } from '../../types/ui';
+import { notifyUntraced } from '../../utils/ui';
 
 /**
  * Show a notification over the page
  */
-export const showNotification = (notification: UINotification): UIActionTypes => {
-  // Trigger a notification via rsuite
-  Notification[notification.level]({
-    key: notification.id,
-    title: notification.title,
-    description: notification.message,
-    duration: notification.duration,
-  });
-
+const showNotification = (notification: UINotification): UIActionTypes => {
   return {
     type: NOTIFICATION.SHOW,
     notification,
@@ -26,9 +18,7 @@ export const showNotification = (notification: UINotification): UIActionTypes =>
 /**
  * Hide a given notification
  */
-export const hideNotification = (id: UINotification['id']): UIActionTypes => {
-  Notification.close(id);
-
+const hideNotification = (id: UINotification['id']): UIActionTypes => {
   return {
     type: NOTIFICATION.HIDE,
     id,
@@ -47,9 +37,8 @@ export const notify = (notification: UINotificationCore): UIAsyncActionTypes => 
 
   dispatch(showNotification(fullNotification));
 
-  if (notification.duration > 0) {
-    setTimeout(() => {
-      dispatch(hideNotification(fullNotification.id));
-    }, notification.duration);
-  }
+  // Trigger a notification via rsuite
+  notifyUntraced(fullNotification, () => {
+    dispatch(hideNotification(fullNotification.id));
+  });
 };
