@@ -1,6 +1,8 @@
 import React from 'react';
 import { Badge, Tooltip, Whisper, WhisperProps } from 'rsuite';
 
+import { timing } from '../constants/theme';
+
 /**
  * Props for the StatusIndicator component
  */
@@ -38,8 +40,8 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({ color, content, textP
   return (
     <Whisper
       placement={tooltipOptions.placement}
-      delayShow={1000}
-      delayHide={400}
+      delayShow={timing.SHOW_DELAY}
+      delayHide={timing.HIDE_DELAY}
       speaker={<Tooltip>{tooltipOptions.text}</Tooltip>}
     >
       {StatusBadge}

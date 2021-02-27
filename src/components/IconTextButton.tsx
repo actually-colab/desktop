@@ -1,6 +1,8 @@
 import React from 'react';
 import { Button, ButtonProps, Icon, IconProps, Tooltip, Whisper, WhisperProps } from 'rsuite';
 
+import { timing } from '../constants/theme';
+
 /**
  * Props for the IconTextButton component
  */
@@ -54,8 +56,8 @@ const IconTextButton: React.FC<IconTextButtonProps> = ({
     <Whisper
       placement={tooltipDirection}
       trigger="hover"
-      delayShow={1000}
-      delayHide={400}
+      delayShow={timing.SHOW_DELAY}
+      delayHide={timing.HIDE_DELAY}
       speaker={<Tooltip>{tooltipText}</Tooltip>}
     >
       {ButtonContent}

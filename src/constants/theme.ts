@@ -20,7 +20,7 @@ export const palette = {
   ERROR: '#F52F57',
   WARNING: '#FFBC42',
   SUCCESS: '#62C370',
-};
+} as const;
 
 /**
  * The theme spacing values
@@ -33,4 +33,12 @@ export const spacing = {
     paddingTop: overrides.top ?? fallback,
     paddingBottom: overrides.bottom ?? fallback,
   }),
-};
+} as const;
+
+/**
+ * The theme timing values in milliseconds
+ */
+export const timing = {
+  SHOW_DELAY: 1000,
+  HIDE_DELAY: 400,
+} as const;

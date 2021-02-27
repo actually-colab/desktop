@@ -1,7 +1,7 @@
 import React from 'react';
 import { ButtonProps, Icon, IconButton, IconProps, Tooltip, Whisper, WhisperProps } from 'rsuite';
 
-import { palette } from '../constants/theme';
+import { palette, timing } from '../constants/theme';
 
 /**
  * Props for the ColoredIconButton component
@@ -70,8 +70,8 @@ const ColoredIconButton: React.FC<ColoredIconButtonProps> = ({
     <Whisper
       placement={tooltipDirection}
       trigger="hover"
-      delayShow={1000}
-      delayHide={400}
+      delayShow={timing.SHOW_DELAY}
+      delayHide={timing.HIDE_DELAY}
       speaker={<Tooltip>{tooltipText}</Tooltip>}
     >
       {ButtonContent}
