@@ -21,7 +21,7 @@ An Open Source real-time collaborative jupyter environment that lets you work on
 
 ### Setting up the kernel
 
-First you need to have \`python 3\` and the \`jupyter\` kernel installed. We recommend installing it with \`pip\`. You can [read more here](https://jupyter.readthedocs.io/en/latest/install/notebook-classic.html), but all you need to do is run this command in a terminal: \`pip3 install jupyter\`
+First you need to have \`python3\` and the \`jupyter\` kernel installed. We recommend installing it with \`pip3\`. You can [read more here](https://jupyter.readthedocs.io/en/latest/install/notebook-classic.html), but all you need to do is run this command in a terminal: \`pip3 install jupyter\`
 
 ### Download the Actually Colab Launcher
 
