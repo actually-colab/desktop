@@ -1,9 +1,16 @@
 import React from 'react';
 import { StyleSheet, css } from 'aphrodite';
-import { Placeholder } from 'rsuite';
 
 import { palette, spacing } from '../../../constants/theme';
 import { ColoredIconButton } from '../../../components';
+import {
+  CollaboratorsPanel,
+  CommentsPanel,
+  DownloadsPanel,
+  HelpPanel,
+  SettingsPanel,
+  StatsPanel,
+} from '../RightSidebar';
 
 const styles = StyleSheet.create({
   container: {
@@ -23,11 +30,14 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   pane: {
-    width: 250,
+    width: 320,
     height: '100%',
     ...spacing.pad({ top: spacing.DEFAULT / 2 }),
     backgroundColor: palette.BASE_FADED,
     overflowY: 'auto',
+  },
+  paneBody: {
+    paddingTop: spacing.DEFAULT / 2,
   },
 });
 
@@ -36,7 +46,7 @@ const styles = StyleSheet.create({
  */
 const RightSidebar: React.FC = () => {
   const [visibleMenu, setVisibleMenu] = React.useState<
-    'Collaborators' | 'Comments' | 'Stats' | 'Downloads' | 'Settings' | ''
+    'Collaborators' | 'Comments' | 'Stats' | 'Downloads' | 'Settings' | 'Help' | ''
   >('');
 
   const openMenu = React.useCallback(
@@ -89,6 +99,13 @@ const RightSidebar: React.FC = () => {
             tooltipDirection="left"
             onClick={() => openMenu('Settings')}
           />
+          <ColoredIconButton
+            active={visibleMenu === 'Help'}
+            icon="question"
+            tooltipText="Help"
+            tooltipDirection="left"
+            onClick={() => openMenu('Help')}
+          />
         </div>
 
         <ColoredIconButton
@@ -103,9 +120,16 @@ const RightSidebar: React.FC = () => {
 
       {visibleMenu !== '' && (
         <div className={css(styles.pane)}>
-          <h6>{visibleMenu}</h6>
+          <h4>{visibleMenu}</h4>
 
-          <Placeholder.Paragraph rows={30} active />
+          <div className={css(styles.paneBody)}>
+            {visibleMenu === 'Collaborators' && <CollaboratorsPanel />}
+            {visibleMenu === 'Comments' && <CommentsPanel />}
+            {visibleMenu === 'Stats' && <StatsPanel />}
+            {visibleMenu === 'Downloads' && <DownloadsPanel />}
+            {visibleMenu === 'Settings' && <SettingsPanel />}
+            {visibleMenu === 'Help' && <HelpPanel />}
+          </div>
         </div>
       )}
     </div>
