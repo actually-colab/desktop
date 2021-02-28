@@ -108,7 +108,16 @@ pd.set_option('max_colwidth', None)`}
         <a href="https://github.com/actually-colab" target="_blank" rel="noreferrer">
           GitHub organization
         </a>
-        . Our goal was to create a better way to collaborate on code, based on our experiences as students.
+        . Our goal was to create a better way to collaborate on code, based on our experiences as students. You can read
+        our{' '}
+        <a href="https://docs.actuallycolab.org/blog" target="_blank" rel="noreferrer">
+          development blog here
+        </a>
+        . If you like our work, consider{' '}
+        <a href="https://www.patreon.com/actuallycolab" target="_blank" rel="noreferrer">
+          sponsoring us on Patreon
+        </a>
+        !
       </p>
     </div>
   );
