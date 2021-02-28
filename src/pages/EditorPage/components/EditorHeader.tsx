@@ -38,6 +38,8 @@ const styles = StyleSheet.create({
 const EditorHeader: React.FC = () => {
   const localKernelStatus = useKernelStatus();
 
+  const user = useSelector((state: ReduxState) => state.auth.user);
+  const kernel = useSelector((state: ReduxState) => state.editor.kernel);
   const cells = useSelector((state: ReduxState) => state.editor.cells);
   const connectToKernelErrorMessage = useSelector((state: ReduxState) => state.editor.connectToKernelErrorMessage);
   const isAddingCell = useSelector((state: ReduxState) => state.editor.isAddingCell);
@@ -96,6 +98,15 @@ const EditorHeader: React.FC = () => {
     (cell_id: EditorCell['cell_id'], changes: Partial<EditorCell>) => dispatch(_editor.editCell(cell_id, changes)),
     [dispatch]
   );
+  const dispatchExecuteCode = React.useCallback(
+    () =>
+      user !== null &&
+      lockedCell !== null &&
+      (kernel !== null && lockedCell.language === 'py'
+        ? dispatch(_editor.executeCode(user, kernel, lockedCell))
+        : dispatch(_editor.editCell(lockedCell.cell_id, { rendered: true }))),
+    [dispatch, kernel, lockedCell, user]
+  );
 
   const handleLanguageSelect = React.useCallback(
     (eventKey: EditorCell['language']) => {
@@ -126,7 +137,7 @@ const EditorHeader: React.FC = () => {
             tooltipDirection="bottom"
             loading={isExecutingCode}
             disabled={!isStable}
-            onClick={() => console.log('TODO')}
+            onClick={dispatchExecuteCode}
           />
           <ColoredIconButton
             icon="stop"

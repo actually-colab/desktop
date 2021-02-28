@@ -172,7 +172,7 @@ const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
             color={palette.SUCCESS}
             size="xs"
             loading={runningCellId === cell.cell_id}
-            disabled={kernelStatus !== 'Idle' && cell.language === 'py'}
+            disabled={(kernelStatus !== 'Idle' && cell.language === 'py') || (cell.language === 'md' && cell.rendered)}
             onClick={dispatchExecuteCode}
           />
 
