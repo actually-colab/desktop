@@ -155,18 +155,14 @@ code {
     }
   }
 
-  code {
+  :not(pre) > code {
     padding: 0.2em 0.4em;
     border-radius: 6px;
     background-color: @markdown-code-background-color;
   }
 
   pre {
-    padding: 16px;
     border-radius: 6px;
-    overflow: auto;
-    line-height: 1.45;
-    background-color: @markdown-code-background-color;
   }
 
   input {
