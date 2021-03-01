@@ -39,39 +39,42 @@ const OutputCell: React.FC<{ cell: EditorCell; uid?: User['uid'] }> = ({ cell, u
         <pre className={css(styles.output)}>
           {cellOutputs.map((output) => (
             <React.Fragment key={output.output_id}>
-              {output.channel === 'stdout' ? (
-                output.data.text
-              ) : output.channel === 'display_data' ? (
+              {output.output.output_type === 'stream' ? (
+                output.output.text
+              ) : output.output.output_type === 'display_data' ? (
                 <React.Fragment>
-                  {output.data.text !== undefined && output.data.text}
                   {'\n'}
-                  {output.data.image !== undefined && (
-                    <img src={`data:image/png;base64, ${output.data.image}`} alt="" />
+                  {output.output.data['image/png'] !== undefined ? (
+                    <img src={`data:image/png;base64, ${output.output.data['image/png']}`} alt="" />
+                  ) : (
+                    output.output.data['text/plain']
                   )}
                   {'\n'}
                 </React.Fragment>
-              ) : output.channel === 'html' ? (
+              ) : output.output.output_type === 'execute_result' ? (
                 <React.Fragment>
-                  {output.data.html !== undefined ? (
+                  {output.output.data['text/html'] !== undefined ? (
                     <div
                       className="output-html"
                       dangerouslySetInnerHTML={{
-                        __html: output.data.html,
+                        __html: output.output.data['text/html'] as string,
                       }}
                     />
                   ) : (
-                    output.data.text !== undefined && output.data.text
+                    output.output.data['text/plain']
                   )}
                 </React.Fragment>
-              ) : (
+              ) : output.output.output_type === 'error' ? (
                 <React.Fragment>
-                  {output.data.ename}
+                  {output.output.ename}
                   {'\n'}
-                  {output.data.evalue}
+                  {output.output.evalue}
                   {'\n'}
 
-                  <Ansi>{output.data.traceback.join('\n')}</Ansi>
+                  <Ansi>{output.output.traceback.join('\n')}</Ansi>
                 </React.Fragment>
+              ) : (
+                <React.Fragment />
               )}
             </React.Fragment>
           ))}
