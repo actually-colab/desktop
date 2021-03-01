@@ -35,8 +35,8 @@
   },
   "dependencies": {
     "@actually-colab/editor-client": "file:../editor/client",
+    "@nteract/outputs": "^3.0.11",
     "ace-builds": "^1.4.12",
-    "ansi-to-react": "^6.1.4",
     "aphrodite": "^2.4.0",
     "date-fns": "^2.17.0",
     "jupyter-js-services": "^0.21.1",
@@ -53,6 +53,7 @@
     "redux-thunk": "^2.3.0",
     "remark-gfm": "^1.0.0",
     "rsuite": "^4.9.2",
+    "styled-components": "^5.2.1",
     "uuid": "^8.3.2",
     "web-vitals": "^1.0.1"
   },

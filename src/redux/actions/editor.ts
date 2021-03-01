@@ -15,10 +15,10 @@ import {
   UNLOCK_CELL,
 } from '../../types/redux/editor';
 import { User } from '../../types/user';
+import { IpynbOutput } from '../../types/ipynb';
 import { BaseKernelOutput, EditorCell, KernelOutput } from '../../types/notebook';
 import * as jupyter from '../../kernel/jupyter';
 import { _ui } from '.';
-import { IpynbOutput } from '../../types/ipynb';
 
 /**
  * Set the kernel gateway uri
@@ -270,8 +270,6 @@ export const executeCode = (user: User, kernel: IKernel, cell: EditorCell): Edit
   future.onIOPub = (message) => {
     let kernelOutput: KernelOutput | null = null;
 
-    console.log(message);
-
     try {
       if (message.content.execution_count !== undefined) {
         // execution metadata
@@ -303,6 +301,8 @@ export const executeCode = (user: User, kernel: IKernel, cell: EditorCell): Edit
           };
           break;
       }
+
+      console.log({ message, kernelOutput });
     } catch (error) {
       console.error(error);
     }
