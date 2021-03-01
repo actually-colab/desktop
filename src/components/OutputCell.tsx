@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import Ansi from 'ansi-to-react';
+import { DisplayData, ExecuteResult, KernelOutputError, Media, Output, StreamText } from '@nteract/outputs';
 
 import { ReduxState } from '../redux';
 import { User } from '../types/user';
@@ -38,45 +38,26 @@ const OutputCell: React.FC<{ cell: EditorCell; uid?: User['uid'] }> = ({ cell, u
       {cellOutputs.length > 0 && (
         <pre className={css(styles.output)}>
           {cellOutputs.map((output) => (
-            <React.Fragment key={output.output_id}>
-              {output.output.output_type === 'stream' ? (
-                output.output.text
-              ) : output.output.output_type === 'display_data' ? (
-                <React.Fragment>
-                  {'\n'}
-                  {output.output.data['image/png'] !== undefined ? (
-                    <img src={`data:image/png;base64, ${output.output.data['image/png']}`} alt="" />
-                  ) : (
-                    output.output.data['text/plain']
-                  )}
-                  {'\n'}
-                </React.Fragment>
-              ) : output.output.output_type === 'execute_result' ? (
-                <React.Fragment>
-                  {output.output.data['text/html'] !== undefined ? (
-                    <div
-                      className="output-html"
-                      dangerouslySetInnerHTML={{
-                        __html: output.output.data['text/html'] as string,
-                      }}
-                    />
-                  ) : (
-                    output.output.data['text/plain']
-                  )}
-                </React.Fragment>
-              ) : output.output.output_type === 'error' ? (
-                <React.Fragment>
-                  {output.output.ename}
-                  {'\n'}
-                  {output.output.evalue}
-                  {'\n'}
-
-                  <Ansi>{output.output.traceback.join('\n')}</Ansi>
-                </React.Fragment>
-              ) : (
-                <React.Fragment />
-              )}
-            </React.Fragment>
+            <Output key={output.output_id} output={output.output}>
+              <DisplayData>
+                <Media.HTML />
+                <Media.Image mediaType="image/png" />
+                <Media.Image mediaType="image/jpeg" />
+                <Media.Image mediaType="image/gif" />
+                <Media.Plain />
+              </DisplayData>
+              <ExecuteResult>
+                <Media.Json />
+                <Media.HTML />
+                <Media.SVG />
+                <Media.Image mediaType="image/png" />
+                <Media.Image mediaType="image/jpeg" />
+                <Media.Image mediaType="image/gif" />
+                <Media.Plain />
+              </ExecuteResult>
+              <StreamText />
+              <KernelOutputError />
+            </Output>
           ))}
         </pre>
       )}
