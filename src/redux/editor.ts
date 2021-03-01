@@ -204,7 +204,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
       return {
         ...state,
         isEditingCell: action.isMe ? false : state.isDeletingCell,
-        cells: state.cells.map((cell) =>
+        cells: state.cells.map<EditorCell>((cell) =>
           cell.cell_id === action.cell_id
             ? {
                 ...cell,
@@ -230,7 +230,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         isExecutingCode: false,
         runningCellId: '',
         executionCount: action.runIndex,
-        cells: state.cells.map((cell) =>
+        cells: state.cells.map<EditorCell>((cell) =>
           cell.cell_id === action.cell_id
             ? {
                 ...cell,
@@ -254,7 +254,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
     case KERNEL_MESSAGE.UPDATE_RUN_INDEX:
       return {
         ...state,
-        cells: state.cells.map((cell) =>
+        cells: state.cells.map<EditorCell>((cell) =>
           cell.cell_id === action.cell_id
             ? {
                 ...cell,
@@ -266,7 +266,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
     case EDIT_CELL.UPDATE_CODE:
       return {
         ...state,
-        cells: state.cells.map((cell) =>
+        cells: state.cells.map<EditorCell>((cell) =>
           cell.cell_id === action.cell_id
             ? {
                 ...cell,
