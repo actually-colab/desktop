@@ -1,3 +1,4 @@
+import { IpynbOutput } from './ipynb';
 import { User } from './user';
 
 export type BaseKernelOutput = {
@@ -14,49 +15,12 @@ export type BaseKernelOutput = {
   messageIndex: number;
 };
 
-type KernelOutputChannel<Channel, Data> = BaseKernelOutput & {
-  /**
-   * The name of the output channel
-   */
-  channel: Channel;
-  /**
-   * The output data
-   */
-  data: Data;
-};
-
 /**
  * An output from the kernel
  */
-export type KernelOutput =
-  | KernelOutputChannel<
-      'stdout',
-      {
-        text: string;
-      }
-    >
-  | KernelOutputChannel<
-      'display_data',
-      {
-        text?: string;
-        image?: string;
-      }
-    >
-  | KernelOutputChannel<
-      'html',
-      {
-        text?: string;
-        html?: string;
-      }
-    >
-  | KernelOutputChannel<
-      'stderr',
-      {
-        ename: string;
-        evalue: string;
-        traceback: string[];
-      }
-    >;
+export type KernelOutput = BaseKernelOutput & {
+  output: IpynbOutput;
+};
 
 /**
  * An editor cell in a notebook

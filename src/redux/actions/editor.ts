@@ -18,6 +18,7 @@ import { User } from '../../types/user';
 import { BaseKernelOutput, EditorCell, KernelOutput } from '../../types/notebook';
 import * as jupyter from '../../kernel/jupyter';
 import { _ui } from '.';
+import { IpynbOutput } from '../../types/ipynb';
 
 /**
  * Set the kernel gateway uri
@@ -288,46 +289,19 @@ export const executeCode = (user: User, kernel: IKernel, cell: EditorCell): Edit
         messageIndex,
       };
 
-      if (message.header.msg_type === 'stream') {
-        // regular text stream
-        kernelOutput = {
-          ...baseKernelOutput,
-          channel: 'stdout',
-          data: {
-            text: message.content.text as string,
-          },
-        };
-      } else if (message.header.msg_type === 'display_data') {
-        // image content
-        kernelOutput = {
-          ...baseKernelOutput,
-          channel: 'display_data',
-          data: {
-            text: (message.content.data as any)['text/plain'],
-            image: (message.content.data as any)['image/png'],
-          },
-        };
-      } else if (message.header.msg_type === 'execute_result') {
-        // html content
-        kernelOutput = {
-          ...baseKernelOutput,
-          channel: 'html',
-          data: {
-            text: (message.content.data as any)['text/plain'],
-            html: (message.content.data as any)['text/html'],
-          },
-        };
-      } else if (message.header.msg_type === 'error') {
-        // error
-        kernelOutput = {
-          ...baseKernelOutput,
-          channel: 'stderr',
-          data: {
-            ename: message.content.ename as string,
-            evalue: message.content.evalue as string,
-            traceback: message.content.traceback as string[],
-          },
-        };
+      switch (message.header.msg_type) {
+        case 'stream':
+        case 'display_data':
+        case 'execute_result':
+        case 'error':
+          kernelOutput = {
+            ...baseKernelOutput,
+            output: {
+              ...((message.content as unknown) as IpynbOutput),
+              output_type: message.header.msg_type,
+            } as IpynbOutput,
+          };
+          break;
       }
     } catch (error) {
       console.error(error);
