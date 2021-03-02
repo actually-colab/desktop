@@ -46,6 +46,7 @@ export const convertToIpynb = (cells: EditorCell[], outputs: KernelOutput[]): Ip
           },
           outputs: outputs
             .filter((output) => output.cell_id === cell.cell_id && output.runIndex === cell.runIndex)
+            .sort(sortOutputByMessageIndex)
             .map<IpynbOutput>((output) => output.output),
           source: cell.code.split(SPLIT_KEEP_NEWLINE),
         }
