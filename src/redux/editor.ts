@@ -8,11 +8,13 @@ import {
   EDIT_CELL,
   EXECUTE_CODE,
   KERNEL_GATEWAY,
+  KERNEL_LOG,
   KERNEL_MESSAGE,
   LOCK_CELL,
   UNLOCK_CELL,
 } from '../types/redux/editor';
 import { EditorCell, KernelOutput, Lock, ReducedNotebook } from '../types/notebook';
+import { KernelLog } from '../types/kernel';
 import { BASE_CELL } from '../constants/notebook';
 import { exampleProject } from '../constants/demo';
 import { DEFAULT_GATEWAY_URI } from '../constants/jupyter';
@@ -47,6 +49,7 @@ export interface EditorState {
   project: ReducedNotebook | null;
   cells: EditorCell[];
   outputs: KernelOutput[];
+  logs: KernelLog[];
 }
 
 const initialState: EditorState = {
@@ -84,6 +87,7 @@ const initialState: EditorState = {
   project: null,
   cells: exampleProject.cells,
   outputs: [],
+  logs: [],
 };
 
 /**
@@ -91,6 +95,16 @@ const initialState: EditorState = {
  */
 const reducer = (state = initialState, action: EditorActionTypes): EditorState => {
   switch (action.type) {
+    case KERNEL_LOG.APPEND:
+      return {
+        ...state,
+        logs: [...state.logs, { ...action.log, id: state.logs.length }],
+      };
+    case KERNEL_LOG.CLEAR:
+      return {
+        ...state,
+        logs: [],
+      };
     case KERNEL_GATEWAY.SET:
       return {
         ...state,

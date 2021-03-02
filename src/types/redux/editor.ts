@@ -4,7 +4,12 @@ import { ThunkAction } from 'redux-thunk';
 
 import { User } from '../user';
 import { EditorCell, KernelOutput } from '../notebook';
+import { KernelLog } from '../kernel';
 
+export const KERNEL_LOG = {
+  APPEND: 'KERNEL_LOG_APPEND',
+  CLEAR: 'KERNEL_LOG_CLEAR',
+} as const;
 export const KERNEL_GATEWAY = {
   SET: 'SET_KERNEL_GATEWAY',
 } as const;
@@ -64,6 +69,15 @@ type ActionError = {
   error: {
     message: string;
   };
+};
+
+type KernelLogAppendAction = {
+  type: typeof KERNEL_LOG.APPEND;
+  log: Omit<KernelLog, 'id'>;
+};
+
+type KernelLogClearAction = {
+  type: typeof KERNEL_LOG.CLEAR;
 };
 
 type SetKernelGatewayAction = {
@@ -222,6 +236,8 @@ type UpdateCellCodeAction = {
  * An action for manipulating the editor redux store
  */
 export type EditorActionTypes =
+  | KernelLogAppendAction
+  | KernelLogClearAction
   | SetKernelGatewayAction
   | ConnectToKernelStartAction
   | ConnectToKernelSuccessAction

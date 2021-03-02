@@ -1,5 +1,6 @@
 import { IKernel } from 'jupyter-js-services';
 import { v4 as uuid } from 'uuid';
+import { format } from 'date-fns';
 
 import {
   ADD_CELL,
@@ -10,6 +11,7 @@ import {
   EDIT_CELL,
   EXECUTE_CODE,
   KERNEL_GATEWAY,
+  KERNEL_LOG,
   KERNEL_MESSAGE,
   LOCK_CELL,
   UNLOCK_CELL,
@@ -19,6 +21,30 @@ import { IpynbOutput } from '../../types/ipynb';
 import { BaseKernelOutput, EditorCell, KernelOutput } from '../../types/notebook';
 import * as jupyter from '../../kernel/jupyter';
 import { _ui } from '.';
+import { KernelLog } from '../../types/kernel';
+
+/**
+ * Add a new log message
+ */
+export const appendKernelLog = (log: Omit<KernelLog, 'id' | 'date'>): EditorActionTypes => {
+  const date = new Date();
+
+  return {
+    type: KERNEL_LOG.APPEND,
+    log: {
+      ...log,
+      date,
+      dateString: format(date, 'Pp'),
+    },
+  };
+};
+
+/**
+ * Clear the kernel logs
+ */
+export const clearKernelLogs = (): EditorActionTypes => ({
+  type: KERNEL_LOG.CLEAR,
+});
 
 /**
  * Set the kernel gateway uri
@@ -75,6 +101,12 @@ const monitorKernelStatus = (kernel: IKernel): EditorAsyncActionTypes => async (
           duration: 5000,
         })
       );
+      dispatch(
+        appendKernelLog({
+          status: 'Warning',
+          message: `Kernel ${newKernel.id} connection lost`,
+        })
+      );
 
       dispatch(connectToKernelReconnecting());
     } else if (newKernel.status === 'dead') {
@@ -84,6 +116,12 @@ const monitorKernelStatus = (kernel: IKernel): EditorAsyncActionTypes => async (
           title: 'Kernel connection died',
           message: 'Could not reconnect to the kernel after multiple tries. The connection is now dead.',
           duration: 5000,
+        })
+      );
+      dispatch(
+        appendKernelLog({
+          status: 'Error',
+          message: `Kernel ${newKernel.id} connection dead`,
         })
       );
 
@@ -98,6 +136,12 @@ const monitorKernelStatus = (kernel: IKernel): EditorAsyncActionTypes => async (
             title: 'Kernel reconnected',
             message: 'The kernel reconnected, kernel state should be intact',
             duration: 5000,
+          })
+        );
+        dispatch(
+          appendKernelLog({
+            status: 'Success',
+            message: `Kernel ${newKernel.id} reconnected`,
           })
         );
 
@@ -119,6 +163,13 @@ export const connectToKernel = (uri: string, displayError = false): EditorAsyncA
     dispatch(connectToKernelSuccess(res.kernel));
 
     dispatch(monitorKernelStatus(res.kernel));
+
+    dispatch(
+      appendKernelLog({
+        status: 'Success',
+        message: `Kernel ${res.kernel.id} connected`,
+      })
+    );
   } else {
     if (displayError) {
       dispatch(
@@ -338,12 +389,18 @@ export const executeCode = (user: User, kernel: IKernel, cell: EditorCell): Edit
     let kernelOutput: KernelOutput | null = null;
 
     try {
-      if (message.content.execution_count !== undefined) {
+      if (message.content.execution_count !== undefined && runIndex === -1) {
         // execution metadata
         runIndex = message.content.execution_count as number;
 
         // Update the current run
         dispatch(updateRunIndex(cell.cell_id, runIndex));
+        dispatch(
+          appendKernelLog({
+            status: 'Info',
+            message: `Started run #${runIndex} on cell ${cell.cell_id}`,
+          })
+        );
       }
 
       const baseKernelOutput: BaseKernelOutput = {
@@ -408,6 +465,12 @@ export const executeCode = (user: User, kernel: IKernel, cell: EditorCell): Edit
     };
   });
 
+  dispatch(
+    appendKernelLog({
+      status: 'Success',
+      message: `Finished run #${runIndex} on cell ${cell.cell_id}`,
+    })
+  );
   dispatch(executeCodeSuccess(cell.cell_id, runIndex));
 };
 
