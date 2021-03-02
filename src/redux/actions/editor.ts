@@ -44,6 +44,69 @@ const connectToKernelFailure = (errorMessage: string): EditorActionTypes => ({
   },
 });
 
+const connectToKernelEnd = (): EditorActionTypes => ({
+  type: CONNECT_TO_KERNEL.END,
+});
+
+const connectToKernelReconnecting = (): EditorActionTypes => ({
+  type: CONNECT_TO_KERNEL.RECONNECTING,
+});
+
+const connectToKernelReconnected = (): EditorActionTypes => ({
+  type: CONNECT_TO_KERNEL.RECONNECTED,
+});
+
+/**
+ * Handle changes to the kernel status
+ */
+const monitorKernelStatus = (kernel: IKernel): EditorAsyncActionTypes => async (dispatch) => {
+  let disconnected = false;
+
+  kernel.statusChanged.connect((newKernel) => {
+    if (newKernel.status === 'reconnecting') {
+      disconnected = true;
+
+      dispatch(
+        _ui.notify({
+          level: 'warning',
+          title: 'Kernel connection lost',
+          message:
+            'The kernel disconnected, attempting to reconnect. If the kernel does not reconnect in the next couple minutes, the connection is dead.',
+          duration: 5000,
+        })
+      );
+
+      dispatch(connectToKernelReconnecting());
+    } else if (newKernel.status === 'dead') {
+      dispatch(
+        _ui.notify({
+          level: 'error',
+          title: 'Kernel connection died',
+          message: 'Could not reconnect to the kernel after multiple tries. The connection is now dead.',
+          duration: 5000,
+        })
+      );
+
+      dispatch(connectToKernelEnd());
+    } else {
+      if (disconnected) {
+        disconnected = false;
+
+        dispatch(
+          _ui.notify({
+            level: 'success',
+            title: 'Kernel reconnected',
+            message: 'The kernel reconnected, kernel state should be intact',
+            duration: 5000,
+          })
+        );
+
+        dispatch(connectToKernelReconnected());
+      }
+    }
+  });
+};
+
 /**
  * Attempt to connect to the jupyter kernel gateway. In the future this can also hook into the hidden renderer
  */
@@ -54,6 +117,8 @@ export const connectToKernel = (uri: string, displayError = false): EditorAsyncA
 
   if (res.success) {
     dispatch(connectToKernelSuccess(res.kernel));
+
+    dispatch(monitorKernelStatus(res.kernel));
   } else {
     if (displayError) {
       dispatch(
