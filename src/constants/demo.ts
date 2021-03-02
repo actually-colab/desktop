@@ -21,11 +21,11 @@ An Open Source real-time collaborative jupyter environment that lets you work on
 
 ### Setting up the kernel
 
-First you need to have \`python3\` and the \`jupyter\` kernel installed. We recommend installing it with \`pip3\`. You can [read more here](https://jupyter.readthedocs.io/en/latest/install/notebook-classic.html), but all you need to do is run this command in a terminal: \`pip3 install jupyter\`
+First you need to have \`python3\` and the \`jupyter\` kernel installed. We recommend installing it with \`pip3\`. You can [read more here](https://jupyter.readthedocs.io/en/latest/install/notebook-classic.html), but all you need to do is run this command in a terminal: \`pip3 install jupyter\`.
 
 ### Download the Actually Colab Launcher
 
-To make your life even easier, we built a native companion that will automatically start and manage the kernel for you! If you are on a supported platform, we highly recommend [downloading it](https://www.actuallycolab.org/downloads). If you aren't on a supported platform, that's fine! You can still [run the kernel yourself](https://github.com/actually-colab/desktop#the-kernel-gateway)
+To make your life even easier, we built a native companion that will automatically start and manage the kernel for you! If you are on a supported platform, we highly recommend [downloading it](https://www.actuallycolab.org/downloads). If you aren't on a supported platform, that's fine! You can still [run the kernel yourself](https://github.com/actually-colab/desktop#the-kernel-gateway).
 
 ## Let's get started
 
