@@ -25,7 +25,7 @@ First you need to have \`python3\` and the \`jupyter\` kernel installed. We reco
 
 ### Download the Actually Colab Launcher
 
-To make your life even easier, we built a native companion that will automatically start and manage the kernel for you! If you are on a supported platform, we highly recommend [downloading it](https://www.actuallycolab.org/downloads). If you aren't on a supported platform, that's fine! You can still [run the kernel yourself](https://github.com/actually-colab/desktop#the-kernel-gateway).
+To make your life even easier, we built a native companion that will automatically start and manage the kernel for you! If you are on a supported platform, we highly recommend [downloading it](https://github.com/actually-colab/desktop-launcher/releases). If you aren't on a supported platform, that's fine! You can still [run the kernel yourself](https://github.com/actually-colab/desktop#the-kernel-gateway).
 
 ## Let's get started
 
