@@ -1,10 +1,10 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import { Button, Icon, IconButton, Input, Modal } from 'rsuite';
+import { Button, Icon, IconButton, Input, Modal, Popover, Whisper } from 'rsuite';
 
 import { ReduxState } from '../../../redux';
-import { palette, spacing } from '../../../constants/theme';
+import { palette, spacing, timing } from '../../../constants/theme';
 import { DEFAULT_GATEWAY_URI } from '../../../constants/jupyter';
 import useKernelStatus from '../../../kernel/useKernelStatus';
 import { StatusIndicator } from '../../../components';
@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
   },
   description: {
     marginTop: spacing.DEFAULT / 4,
-    marginBottom: spacing.DEFAULT / 4,
+    marginBottom: spacing.DEFAULT / 2,
     fontSize: 12,
   },
   keyValue: {
@@ -43,6 +43,9 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  popoverContainer: {
+    maxWidth: 400,
   },
 });
 
@@ -105,37 +108,93 @@ const KernelPanel: React.FC = () => {
         </p>
       </div>
 
-      <KeyValue
-        attributeKey="Gateway URI"
-        attributeValue={
-          <React.Fragment>
-            {gatewayUri}
-            <IconButton
-              style={{ marginLeft: spacing.DEFAULT / 8 }}
-              appearance="subtle"
-              size="xs"
-              icon={<Icon icon="pencil" style={{ color: palette.PRIMARY }} />}
-              onClick={() => {
-                setShowEditGatewayUri(true);
-                setNewGatewayUri(gatewayUri);
-              }}
-            />
-          </React.Fragment>
+      <Whisper
+        placement="rightStart"
+        trigger="hover"
+        delayShow={timing.SHOW_DELAY}
+        delayHide={timing.HIDE_DELAY}
+        speaker={
+          <Popover title="Setting the Gateway URI">
+            <div className={css(styles.popoverContainer)}>
+              <div className="markdown-container">
+                <p className={css(styles.description)}>
+                  The Gateway URI is usually the IP of the machine running the Kernel Gateway. This could be a machine
+                  using our Kernel Companion or one running it via the terminal. You can even point to an IP of a
+                  machine that isn't your own as long as it is accessible.
+                </p>
+                <p className={css(styles.description)}>
+                  If you want to change the Gateway URI, you must first disconnect from a kernel if you have one
+                </p>
+              </div>
+            </div>
+          </Popover>
         }
-      />
+      >
+        <div>
+          <KeyValue
+            attributeKey="Gateway URI"
+            attributeValue={
+              <React.Fragment>
+                {gatewayUri}
+                <IconButton
+                  style={{ marginLeft: spacing.DEFAULT / 8 }}
+                  appearance="subtle"
+                  size="xs"
+                  icon={<Icon icon="pencil" style={{ color: palette.PRIMARY }} />}
+                  disabled={kernelStatus !== 'Offline'}
+                  onClick={() => {
+                    setShowEditGatewayUri(true);
+                    setNewGatewayUri(gatewayUri);
+                  }}
+                />
+              </React.Fragment>
+            }
+          />
+        </div>
+      </Whisper>
 
-      <KeyValue
-        attributeKey="Kernel Status"
-        attributeValue={
-          <React.Fragment>
-            <StatusIndicator textPlacement="right" color={statusColor} /> {kernelStatus}
-          </React.Fragment>
+      <Whisper
+        placement="rightStart"
+        trigger="hover"
+        delayShow={timing.SHOW_DELAY}
+        delayHide={timing.HIDE_DELAY}
+        speaker={
+          <Popover title="Understanding the status">
+            <div className={css(styles.popoverContainer)}>
+              <div className="markdown-container">
+                <p className={css(styles.description)}>
+                  <code>Offline</code> The kernel is not connected so you cannot run your code. We will automatically
+                  try connecting to the kernel periodically.
+                </p>
+                <p className={css(styles.description)}>
+                  <code>Connecting</code> We are trying to connect to the kernel.
+                </p>
+                <p className={css(styles.description)}>
+                  <code>Reconnecting</code> The kernel connection was lost and we are trying to reestablish it. If
+                  successful, it'll be like nothing happened. If we aren't, you'll need a new connection.
+                </p>
+                <p className={css(styles.description)}>
+                  <code>Busy</code> The kernel is running your code, some jobs take longer to finish than others.
+                </p>
+                <p className={css(styles.description)}>
+                  <code>Idle</code> The kernel is ready for you to use.
+                </p>
+              </div>
+            </div>
+          </Popover>
         }
-      />
-
-      <p className={css(styles.description)}>
-        We will automatically connect to the Kernel if we discover it at the specified Gateway URI.
-      </p>
+      >
+        <div>
+          <KeyValue
+            attributeKey="Kernel Status"
+            attributeValue={
+              <React.Fragment>
+                <StatusIndicator textPlacement="right" color={statusColor} /> {kernelStatus}
+              </React.Fragment>
+            }
+          />
+        </div>
+      </Whisper>
 
       <Modal size="xs" show={showEditGatewayUri} onHide={() => setShowEditGatewayUri(false)}>
         <Modal.Header>
