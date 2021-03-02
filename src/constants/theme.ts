@@ -8,7 +8,7 @@ export const palette = {
   BASE_FADED: '#F7F7FA',
   BASE_BORDER: '#DBE6F1',
   CHARCOAL: '#383F51',
-  LIGHT_GRAY: '#E6E8E6',
+  LIGHT_GRAY: '#E6E4E6',
   GRAY: '#8C8A93',
   TANGERINE: '#FB9F89',
   TURTLE: '#21A179',
