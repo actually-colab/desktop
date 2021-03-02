@@ -47,7 +47,7 @@ const connectToKernelFailure = (errorMessage: string): EditorActionTypes => ({
 /**
  * Attempt to connect to the jupyter kernel gateway. In the future this can also hook into the hidden renderer
  */
-export const connectToKernel = (uri: string): EditorAsyncActionTypes => async (dispatch) => {
+export const connectToKernel = (uri: string, displayError = false): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(connectToKernelStart());
 
   const res = await jupyter.connectToKernel(uri);
@@ -55,14 +55,16 @@ export const connectToKernel = (uri: string): EditorAsyncActionTypes => async (d
   if (res.success) {
     dispatch(connectToKernelSuccess(res.kernel));
   } else {
-    dispatch(
-      _ui.notify({
-        level: 'error',
-        title: "Couldn't connect to the kernel",
-        message: res.error.message,
-        duration: 5000,
-      })
-    );
+    if (displayError) {
+      dispatch(
+        _ui.notify({
+          level: 'error',
+          title: "Couldn't connect to the kernel",
+          message: res.error.message,
+          duration: 5000,
+        })
+      );
+    }
 
     dispatch(connectToKernelFailure(res.error.message));
   }
