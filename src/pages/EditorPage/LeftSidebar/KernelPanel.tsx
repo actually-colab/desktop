@@ -65,24 +65,12 @@ const KeyValue: React.FC<{ attributeKey: string | React.ReactNode; attributeValu
  * The kernel panel of the left sidebar of the editor page
  */
 const KernelPanel: React.FC = () => {
-  const kernelStatus = useKernelStatus();
+  const [kernelStatus, statusColor] = useKernelStatus();
 
   const gatewayUri = useSelector((state: ReduxState) => state.editor.gatewayUri);
 
   const [showEditGatewayUri, setShowEditGatewayUri] = React.useState<boolean>(false);
   const [newGatewayUri, setNewGatewayUri] = React.useState<string>('');
-
-  const statusColor = React.useMemo(
-    () =>
-      kernelStatus === 'Error'
-        ? palette.ERROR
-        : kernelStatus === 'Busy'
-        ? palette.WARNING
-        : kernelStatus === 'Idle'
-        ? palette.SUCCESS
-        : palette.GRAY,
-    [kernelStatus]
-  );
 
   const dispatch = useDispatch();
   const dispatchSetKernelGateway = React.useCallback((uri: string) => dispatch(_editor.setKernelGateway(uri)), [
