@@ -145,6 +145,10 @@ const KernelPanel: React.FC = () => {
         }
       />
 
+      <p className={css(styles.description)}>
+        We will automatically connect to the Kernel if we discover it at the specified Gateway URI.
+      </p>
+
       <Modal size="xs" show={showEditGatewayUri} onHide={() => setShowEditGatewayUri(false)}>
         <Modal.Header>
           <Modal.Title>Change Gateway URI</Modal.Title>
