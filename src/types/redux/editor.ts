@@ -12,6 +12,9 @@ export const CONNECT_TO_KERNEL = {
   START: 'CONNECT_TO_KERNEL_START',
   SUCCESS: 'CONNECT_TO_KERNEL_SUCCESS',
   FAILURE: 'CONNECT_TO_KERNEL_FAILURE',
+  END: 'CONNECT_TO_KERNEL_END',
+  RECONNECTING: 'CONNECT_TO_KERNEL_RECONNECTING',
+  RECONNECTED: 'CONNECT_TO_KERNEL_RECONNECTED',
 } as const;
 export const LOCK_CELL = {
   START: 'LOCK_CELL_START',
@@ -80,6 +83,18 @@ type ConnectToKernelSuccessAction = {
 type ConnectToKernelFailureAction = {
   type: typeof CONNECT_TO_KERNEL.FAILURE;
 } & ActionError;
+
+type ConnectToKernelEndAction = {
+  type: typeof CONNECT_TO_KERNEL.END;
+};
+
+type ConnectToKernelReconnectingAction = {
+  type: typeof CONNECT_TO_KERNEL.RECONNECTING;
+};
+
+type ConnectToKernelReconnectedAction = {
+  type: typeof CONNECT_TO_KERNEL.RECONNECTED;
+};
 
 type LockCellStartAction = {
   type: typeof LOCK_CELL.START;
@@ -211,6 +226,9 @@ export type EditorActionTypes =
   | ConnectToKernelStartAction
   | ConnectToKernelSuccessAction
   | ConnectToKernelFailureAction
+  | ConnectToKernelEndAction
+  | ConnectToKernelReconnectingAction
+  | ConnectToKernelReconnectedAction
   | LockCellStartAction
   | LockCellSuccessAction
   | LockCellFailureAction

@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
  * The header for the editor page
  */
 const EditorHeader: React.FC = () => {
-  const localKernelStatus = useKernelStatus();
+  const [kernelStatus, statusColor] = useKernelStatus();
 
   const user = useSelector((state: ReduxState) => state.auth.user);
   const kernel = useSelector((state: ReduxState) => state.editor.kernel);
@@ -55,23 +55,6 @@ const EditorHeader: React.FC = () => {
     cells,
     lockedCellId,
   ]);
-
-  const kernelStatus = React.useMemo(() => (tempKernelSelection === 'localhost' ? localKernelStatus : 'Offline'), [
-    localKernelStatus,
-    tempKernelSelection,
-  ]);
-
-  const statusColor = React.useMemo(
-    () =>
-      kernelStatus === 'Error'
-        ? palette.ERROR
-        : kernelStatus === 'Busy'
-        ? palette.WARNING
-        : kernelStatus === 'Idle'
-        ? palette.SUCCESS
-        : palette.GRAY,
-    [kernelStatus]
-  );
 
   const statusTooltip = React.useMemo<StatusIndicatorProps['tooltipOptions']>(
     () => ({

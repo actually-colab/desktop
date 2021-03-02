@@ -22,6 +22,7 @@ import { DEFAULT_GATEWAY_URI } from '../constants/jupyter';
  */
 export interface EditorState {
   isConnectingToKernel: boolean;
+  isReconnectingToKernel: boolean;
   connectToKernelErrorMessage: string;
 
   isLockingCell: boolean;
@@ -50,6 +51,7 @@ export interface EditorState {
 
 const initialState: EditorState = {
   isConnectingToKernel: false,
+  isReconnectingToKernel: false,
   connectToKernelErrorMessage: '',
 
   isLockingCell: false,
@@ -97,6 +99,8 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
     case CONNECT_TO_KERNEL.START:
       return {
         ...state,
+        executionCount: 0,
+        runningCellId: '',
         isConnectingToKernel: true,
         connectToKernelErrorMessage: '',
         kernel: null,
@@ -112,6 +116,22 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...state,
         isConnectingToKernel: false,
         connectToKernelErrorMessage: action.error.message,
+      };
+    case CONNECT_TO_KERNEL.END:
+      return {
+        ...state,
+        isReconnectingToKernel: false,
+        kernel: null,
+      };
+    case CONNECT_TO_KERNEL.RECONNECTING:
+      return {
+        ...state,
+        isReconnectingToKernel: true,
+      };
+    case CONNECT_TO_KERNEL.RECONNECTED:
+      return {
+        ...state,
+        isReconnectingToKernel: false,
       };
     case LOCK_CELL.START:
       return {
