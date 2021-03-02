@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
  * The header for the editor page
  */
 const EditorHeader: React.FC = () => {
-  const [kernelStatus, statusColor] = useKernelStatus();
+  const { kernelStatus, kernelStatusColor } = useKernelStatus();
 
   const user = useSelector((state: ReduxState) => state.auth.user);
   const kernel = useSelector((state: ReduxState) => state.editor.kernel);
@@ -183,7 +183,7 @@ const EditorHeader: React.FC = () => {
             buttonContent={
               <React.Fragment>
                 {tempKernelSelection !== '' && (
-                  <StatusIndicator textPlacement="right" color={statusColor} tooltipOptions={statusTooltip} />
+                  <StatusIndicator textPlacement="right" color={kernelStatusColor} tooltipOptions={statusTooltip} />
                 )}
 
                 {tempKernelSelection}

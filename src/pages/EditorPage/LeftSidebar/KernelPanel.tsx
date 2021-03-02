@@ -68,7 +68,7 @@ const KeyValue: React.FC<{ attributeKey: string | React.ReactNode; attributeValu
  * The kernel panel of the left sidebar of the editor page
  */
 const KernelPanel: React.FC = () => {
-  const [kernelStatus, statusColor] = useKernelStatus();
+  const { kernelStatus, kernelStatusColor } = useKernelStatus();
 
   const gatewayUri = useSelector((state: ReduxState) => state.editor.gatewayUri);
 
@@ -189,7 +189,8 @@ const KernelPanel: React.FC = () => {
             attributeKey="Kernel Status"
             attributeValue={
               <React.Fragment>
-                <StatusIndicator textPlacement="right" color={statusColor} /> {kernelStatus}
+                <StatusIndicator textPlacement="right" color={kernelStatusColor} />
+                {kernelStatus === 'Connecting' ? 'Offline' : kernelStatus}
               </React.Fragment>
             }
           />

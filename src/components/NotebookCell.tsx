@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
 });
 
 const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
-  const [kernelStatus] = useKernelStatus();
+  const { kernelStatus } = useKernelStatus();
 
   const user = useSelector((state: ReduxState) => state.auth.user);
   const kernel = useSelector((state: ReduxState) => state.editor.kernel);

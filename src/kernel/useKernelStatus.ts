@@ -28,9 +28,8 @@ const useKernelStatus = () => {
     [isConnectingToKernel, isExecutingCode, isReconnectingToKernel, kernel]
   );
 
-  const statusColor = React.useMemo(() => {
+  const kernelStatusColor = React.useMemo(() => {
     switch (kernelStatus) {
-      case 'Connecting':
       case 'Reconnecting':
       case 'Busy':
         return palette.WARNING;
@@ -38,13 +37,14 @@ const useKernelStatus = () => {
         return palette.ERROR;
       case 'Idle':
         return palette.SUCCESS;
+      case 'Connecting':
       case 'Offline':
       default:
         return palette.GRAY;
     }
   }, [kernelStatus]);
 
-  return [kernelStatus, statusColor];
+  return { kernelStatus, kernelStatusColor };
 };
 
 export default useKernelStatus;
