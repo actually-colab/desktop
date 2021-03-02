@@ -4,12 +4,12 @@ import { StyleSheet, css } from 'aphrodite';
 import { Button, Icon, IconButton, Input, Modal, Popover, Whisper } from 'rsuite';
 
 import { ReduxState } from '../../../redux';
+import { _editor } from '../../../redux/actions';
 import { palette, spacing, timing } from '../../../constants/theme';
 import { DEFAULT_GATEWAY_URI } from '../../../constants/jupyter';
 import useKernelStatus from '../../../kernel/useKernelStatus';
 import { StatusIndicator } from '../../../components';
 import { openCompanionDownloadsPage } from '../../../utils/redirect';
-import { _editor } from '../../../redux/actions';
 
 const styles = StyleSheet.create({
   container: {
@@ -17,6 +17,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     flex: 1,
     minWidth: 0,
+    overflowY: 'hidden',
   },
   downloadContainer: {
     marginBottom: spacing.DEFAULT / 2,
@@ -47,6 +48,25 @@ const styles = StyleSheet.create({
   popoverContainer: {
     maxWidth: 400,
   },
+  output: {
+    flex: 1,
+    marginTop: spacing.DEFAULT / 8,
+    paddingBottom: spacing.DEFAULT / 4,
+    paddingTop: spacing.DEFAULT / 2,
+    paddingLeft: spacing.DEFAULT / 2,
+    paddingRight: spacing.DEFAULT / 4,
+    borderRadius: 4,
+    backgroundColor: palette.CHARCOAL,
+    color: palette.BASE,
+    overflowX: 'auto',
+    overflowY: 'auto',
+    fontSize: 12,
+    whiteSpace: 'pre-wrap',
+    wordBreak: 'break-word',
+  },
+  bold: {
+    fontWeight: 'bold',
+  },
 });
 
 /**
@@ -68,23 +88,39 @@ const KeyValue: React.FC<{ attributeKey: string | React.ReactNode; attributeValu
  * The kernel panel of the left sidebar of the editor page
  */
 const KernelPanel: React.FC = () => {
+  const logsAnchorRef = React.useRef<HTMLDivElement | null>(null);
+
   const { kernelStatus, kernelStatusColor } = useKernelStatus();
 
   const gatewayUri = useSelector((state: ReduxState) => state.editor.gatewayUri);
+  const logs = useSelector((state: ReduxState) => state.editor.logs);
 
   const [showEditGatewayUri, setShowEditGatewayUri] = React.useState<boolean>(false);
   const [newGatewayUri, setNewGatewayUri] = React.useState<string>('');
+  const [isLogsPinned, setIsLogsPinned] = React.useState<boolean>(true);
 
   const dispatch = useDispatch();
   const dispatchSetKernelGateway = React.useCallback((uri: string) => dispatch(_editor.setKernelGateway(uri)), [
     dispatch,
   ]);
 
+  /**
+   * Hide gateway uri modal on change
+   */
   React.useEffect(() => {
     if (gatewayUri !== '') {
       setShowEditGatewayUri(false);
     }
   }, [gatewayUri]);
+
+  /**
+   * Auto scroll logs if pinned
+   */
+  React.useEffect(() => {
+    if (isLogsPinned && logs.length > 0) {
+      logsAnchorRef?.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [isLogsPinned, logs.length]);
 
   return (
     <div className={css(styles.container)}>
@@ -196,6 +232,35 @@ const KernelPanel: React.FC = () => {
           />
         </div>
       </Whisper>
+
+      <p className={css(styles.keyText)}>
+        Kernel Logs
+        <Button appearance="subtle" size="xs" onClick={() => setIsLogsPinned(!isLogsPinned)}>
+          <Icon icon="thumb-tack" style={isLogsPinned ? { color: palette.PRIMARY } : undefined} />
+        </Button>
+      </p>
+      <pre className={css(styles.output)}>
+        {logs.map((log) => (
+          <React.Fragment key={log.id}>
+            <span className={css(styles.bold)}>{log.dateString}</span>
+            {'\n'}
+
+            {log.status === 'Success' && (
+              <Icon icon="check-circle" style={{ color: palette.SUCCESS, marginRight: spacing.DEFAULT / 4 }} />
+            )}
+            {log.status === 'Warning' && (
+              <Icon icon="exclamation-triangle" style={{ color: palette.WARNING, marginRight: spacing.DEFAULT / 4 }} />
+            )}
+            {log.status === 'Error' && (
+              <Icon icon="close-circle" style={{ color: palette.ERROR, marginRight: spacing.DEFAULT / 4 }} />
+            )}
+            {log.message}
+            {'\n\n'}
+          </React.Fragment>
+        ))}
+
+        <div ref={logsAnchorRef} />
+      </pre>
 
       <Modal size="xs" show={showEditGatewayUri} onHide={() => setShowEditGatewayUri(false)}>
         <Modal.Header>
