@@ -23,6 +23,9 @@ import { DEFAULT_GATEWAY_URI } from '../constants/jupyter';
  * The editor redux state
  */
 export interface EditorState {
+  autoConnectToKernel: boolean;
+  isEditingGatewayUri: boolean;
+
   isConnectingToKernel: boolean;
   isReconnectingToKernel: boolean;
   connectToKernelErrorMessage: string;
@@ -53,6 +56,9 @@ export interface EditorState {
 }
 
 const initialState: EditorState = {
+  autoConnectToKernel: true,
+  isEditingGatewayUri: false,
+
   isConnectingToKernel: false,
   isReconnectingToKernel: false,
   connectToKernelErrorMessage: '',
@@ -110,6 +116,16 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...state,
         gatewayUri: action.uri,
       };
+    case KERNEL_GATEWAY.EDIT:
+      return {
+        ...state,
+        isEditingGatewayUri: action.editing,
+      };
+    case CONNECT_TO_KERNEL.AUTO:
+      return {
+        ...state,
+        autoConnectToKernel: action.enable,
+      };
     case CONNECT_TO_KERNEL.START:
       return {
         ...state,
@@ -131,12 +147,6 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         isConnectingToKernel: false,
         connectToKernelErrorMessage: action.error.message,
       };
-    case CONNECT_TO_KERNEL.END:
-      return {
-        ...state,
-        isReconnectingToKernel: false,
-        kernel: null,
-      };
     case CONNECT_TO_KERNEL.RECONNECTING:
       return {
         ...state,
@@ -146,6 +156,14 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
       return {
         ...state,
         isReconnectingToKernel: false,
+      };
+    case CONNECT_TO_KERNEL.DISCONNECTED:
+      return {
+        ...state,
+        autoConnectToKernel: action.retry,
+        isConnectingToKernel: false,
+        isReconnectingToKernel: false,
+        kernel: null,
       };
     case LOCK_CELL.START:
       return {

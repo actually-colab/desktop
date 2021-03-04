@@ -54,6 +54,22 @@ export const setKernelGateway = (uri: string): EditorActionTypes => ({
   uri,
 });
 
+/**
+ * Set if editing the kernel gateway URI
+ */
+export const editKernelGateway = (editing: boolean): EditorActionTypes => ({
+  type: KERNEL_GATEWAY.EDIT,
+  editing,
+});
+
+/**
+ * Enable or disable connecting to the kernel automatically
+ */
+export const connectToKernelAuto = (enable: boolean) => ({
+  type: CONNECT_TO_KERNEL.AUTO,
+  enable,
+});
+
 const connectToKernelStart = (): EditorActionTypes => ({
   type: CONNECT_TO_KERNEL.START,
 });
@@ -70,16 +86,17 @@ const connectToKernelFailure = (errorMessage: string): EditorActionTypes => ({
   },
 });
 
-const connectToKernelEnd = (): EditorActionTypes => ({
-  type: CONNECT_TO_KERNEL.END,
-});
-
 const connectToKernelReconnecting = (): EditorActionTypes => ({
   type: CONNECT_TO_KERNEL.RECONNECTING,
 });
 
 const connectToKernelReconnected = (): EditorActionTypes => ({
   type: CONNECT_TO_KERNEL.RECONNECTED,
+});
+
+const connectToKernelDisconnected = (retry: boolean = true): EditorActionTypes => ({
+  type: CONNECT_TO_KERNEL.DISCONNECTED,
+  retry,
 });
 
 /**
@@ -121,11 +138,11 @@ const monitorKernelStatus = (kernel: IKernel): EditorAsyncActionTypes => async (
       dispatch(
         appendKernelLog({
           status: 'Error',
-          message: `Kernel ${newKernel.id} connection dead`,
+          message: `Kernel ${newKernel.id} connection died`,
         })
       );
 
-      dispatch(connectToKernelEnd());
+      dispatch(connectToKernelDisconnected());
     } else {
       if (disconnected) {
         disconnected = false;
@@ -184,6 +201,26 @@ export const connectToKernel = (uri: string, displayError = false): EditorAsyncA
 
     dispatch(connectToKernelFailure(res.error.message));
   }
+};
+
+/**
+ * Shutdown a live kernel or disconnect from a dying one.
+ */
+export const disconnectFromKernel = (kernel: IKernel): EditorAsyncActionTypes => async (dispatch) => {
+  try {
+    await kernel.shutdown();
+  } catch (error) {
+    kernel.dispose();
+  }
+
+  dispatch(
+    appendKernelLog({
+      status: 'Success',
+      message: `Kernel ${kernel.id} disconnected`,
+    })
+  );
+
+  dispatch(connectToKernelDisconnected(false));
 };
 
 const lockCellStart = (): EditorActionTypes => ({

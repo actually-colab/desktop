@@ -12,14 +12,16 @@ export const KERNEL_LOG = {
 } as const;
 export const KERNEL_GATEWAY = {
   SET: 'SET_KERNEL_GATEWAY',
+  EDIT: ' SET_KERNEL_GATEWAY_EDIT',
 } as const;
 export const CONNECT_TO_KERNEL = {
+  AUTO: 'CONNECT_TO_KERNEL_AUTO',
   START: 'CONNECT_TO_KERNEL_START',
   SUCCESS: 'CONNECT_TO_KERNEL_SUCCESS',
   FAILURE: 'CONNECT_TO_KERNEL_FAILURE',
-  END: 'CONNECT_TO_KERNEL_END',
   RECONNECTING: 'CONNECT_TO_KERNEL_RECONNECTING',
   RECONNECTED: 'CONNECT_TO_KERNEL_RECONNECTED',
+  DISCONNECTED: 'CONNECT_TO_KERNEL_DISCONNECTED',
 } as const;
 export const LOCK_CELL = {
   START: 'LOCK_CELL_START',
@@ -85,6 +87,16 @@ type SetKernelGatewayAction = {
   uri: string;
 };
 
+type SetKernelGatewayEditAction = {
+  type: typeof KERNEL_GATEWAY.EDIT;
+  editing: boolean;
+};
+
+type ConnectToKernelAutoAction = {
+  type: typeof CONNECT_TO_KERNEL.AUTO;
+  enable: boolean;
+};
+
 type ConnectToKernelStartAction = {
   type: typeof CONNECT_TO_KERNEL.START;
 };
@@ -98,16 +110,17 @@ type ConnectToKernelFailureAction = {
   type: typeof CONNECT_TO_KERNEL.FAILURE;
 } & ActionError;
 
-type ConnectToKernelEndAction = {
-  type: typeof CONNECT_TO_KERNEL.END;
-};
-
 type ConnectToKernelReconnectingAction = {
   type: typeof CONNECT_TO_KERNEL.RECONNECTING;
 };
 
 type ConnectToKernelReconnectedAction = {
   type: typeof CONNECT_TO_KERNEL.RECONNECTED;
+};
+
+type ConnectToKernelDisconnectedAction = {
+  type: typeof CONNECT_TO_KERNEL.DISCONNECTED;
+  retry: boolean;
 };
 
 type LockCellStartAction = {
@@ -239,12 +252,14 @@ export type EditorActionTypes =
   | KernelLogAppendAction
   | KernelLogClearAction
   | SetKernelGatewayAction
+  | SetKernelGatewayEditAction
+  | ConnectToKernelAutoAction
   | ConnectToKernelStartAction
   | ConnectToKernelSuccessAction
   | ConnectToKernelFailureAction
-  | ConnectToKernelEndAction
   | ConnectToKernelReconnectingAction
   | ConnectToKernelReconnectedAction
+  | ConnectToKernelDisconnectedAction
   | LockCellStartAction
   | LockCellSuccessAction
   | LockCellFailureAction

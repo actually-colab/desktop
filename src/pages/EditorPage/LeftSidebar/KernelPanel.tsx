@@ -67,6 +67,9 @@ const styles = StyleSheet.create({
   bold: {
     fontWeight: 'bold',
   },
+  disconnectContainer: {
+    marginBottom: spacing.DEFAULT / 2,
+  },
 });
 
 /**
@@ -90,42 +93,46 @@ const KeyValue: React.FC<{ attributeKey: string | React.ReactNode; attributeValu
 const KernelPanel: React.FC = () => {
   const logsAnchorRef = React.useRef<HTMLDivElement | null>(null);
 
-  const { kernelStatus, kernelStatusColor } = useKernelStatus();
+  const { kernel, kernelStatus, kernelStatusColor } = useKernelStatus();
 
+  const autoConnectToKernel = useSelector((state: ReduxState) => state.editor.autoConnectToKernel);
+  const isEditingGatewayUri = useSelector((state: ReduxState) => state.editor.isEditingGatewayUri);
   const gatewayUri = useSelector((state: ReduxState) => state.editor.gatewayUri);
   const logs = useSelector((state: ReduxState) => state.editor.logs);
 
-  const [showEditGatewayUri, setShowEditGatewayUri] = React.useState<boolean>(false);
   const [newGatewayUri, setNewGatewayUri] = React.useState<string>('');
   const [isLogsPinned, setIsLogsPinned] = React.useState<boolean>(true);
 
   const dispatch = useDispatch();
+  const dispatchConnectToKernelAuto = React.useCallback(
+    (enable: boolean) => dispatch(_editor.connectToKernelAuto(enable)),
+    [dispatch]
+  );
+  const dispatchDisconnectFromKernel = React.useCallback(
+    () => kernel !== null && dispatch(_editor.disconnectFromKernel(kernel)),
+    [dispatch, kernel]
+  );
   const dispatchSetKernelGateway = React.useCallback((uri: string) => dispatch(_editor.setKernelGateway(uri)), [
     dispatch,
   ]);
-
-  /**
-   * Hide gateway uri modal on change
-   */
-  React.useEffect(() => {
-    if (gatewayUri !== '') {
-      setShowEditGatewayUri(false);
-    }
-  }, [gatewayUri]);
+  const dispatchEditKernelGateway = React.useCallback(
+    (editing: boolean) => dispatch(_editor.editKernelGateway(editing)),
+    [dispatch]
+  );
 
   /**
    * Auto scroll logs if pinned
    */
   React.useEffect(() => {
     if (isLogsPinned && logs.length > 0) {
-      logsAnchorRef?.current?.scrollIntoView({ behavior: 'smooth' });
+      setTimeout(() => logsAnchorRef?.current?.scrollIntoView({ behavior: 'smooth' }), 100);
     }
   }, [isLogsPinned, logs.length]);
 
   return (
     <div className={css(styles.container)}>
       <div className={css(styles.downloadContainer)}>
-        <Button appearance="ghost" block onClick={() => openCompanionDownloadsPage()}>
+        <Button appearance="primary" block onClick={() => openCompanionDownloadsPage()}>
           <Icon icon="download2" style={{ marginRight: spacing.DEFAULT / 2 }} />
           Download Companion
         </Button>
@@ -179,8 +186,8 @@ const KernelPanel: React.FC = () => {
                   icon={<Icon icon="pencil" style={{ color: palette.PRIMARY }} />}
                   disabled={kernelStatus !== 'Offline'}
                   onClick={() => {
-                    setShowEditGatewayUri(true);
                     setNewGatewayUri(gatewayUri);
+                    dispatchEditKernelGateway(true);
                   }}
                 />
               </React.Fragment>
@@ -262,7 +269,27 @@ const KernelPanel: React.FC = () => {
         <div ref={logsAnchorRef} />
       </pre>
 
-      <Modal size="xs" show={showEditGatewayUri} onHide={() => setShowEditGatewayUri(false)}>
+      <div className={css(styles.disconnectContainer)}>
+        <Button
+          appearance="ghost"
+          block
+          disabled={kernelStatus !== 'Offline' && kernelStatus !== 'Connecting'}
+          onClick={() => dispatchConnectToKernelAuto(!autoConnectToKernel)}
+        >
+          {autoConnectToKernel ? 'Disable Auto Connect' : 'Enable Auto Connect'}
+        </Button>
+        <Button
+          appearance="subtle"
+          block
+          disabled={kernelStatus === 'Offline' || kernelStatus === 'Connecting'}
+          onClick={dispatchDisconnectFromKernel}
+        >
+          <Icon icon="ban" style={{ marginRight: spacing.DEFAULT / 2 }} />
+          Disconnect
+        </Button>
+      </div>
+
+      <Modal size="xs" show={isEditingGatewayUri} onHide={() => dispatchEditKernelGateway(false)}>
         <Modal.Header>
           <Modal.Title>Change Gateway URI</Modal.Title>
         </Modal.Header>
@@ -279,10 +306,17 @@ const KernelPanel: React.FC = () => {
           </Button>
         </Modal.Body>
         <Modal.Footer>
-          <Button appearance="subtle" onClick={() => setShowEditGatewayUri(false)}>
+          <Button appearance="subtle" onClick={() => dispatchEditKernelGateway(false)}>
             Cancel
           </Button>
-          <Button appearance="primary" onClick={() => dispatchSetKernelGateway(newGatewayUri)}>
+          <Button
+            appearance="primary"
+            disabled={kernelStatus !== 'Offline' || newGatewayUri === gatewayUri}
+            onClick={() => {
+              dispatchSetKernelGateway(newGatewayUri);
+              dispatchEditKernelGateway(false);
+            }}
+          >
             Save
           </Button>
         </Modal.Footer>
