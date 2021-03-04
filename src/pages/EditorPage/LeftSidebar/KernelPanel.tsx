@@ -103,6 +103,10 @@ const KernelPanel: React.FC = () => {
   const [newGatewayUri, setNewGatewayUri] = React.useState<string>('');
   const [isLogsPinned, setIsLogsPinned] = React.useState<boolean>(true);
 
+  const kernelActiveIsh = React.useMemo(() => kernelStatus !== 'Offline' && kernelStatus !== 'Connecting', [
+    kernelStatus,
+  ]);
+
   const dispatch = useDispatch();
   const dispatchConnectToKernelAuto = React.useCallback(
     (enable: boolean) => dispatch(_editor.connectToKernelAuto(enable)),
@@ -183,8 +187,15 @@ const KernelPanel: React.FC = () => {
                   style={{ marginLeft: spacing.DEFAULT / 8 }}
                   appearance="subtle"
                   size="xs"
-                  icon={<Icon icon="pencil" style={{ color: palette.PRIMARY }} />}
-                  disabled={kernelStatus !== 'Offline'}
+                  icon={
+                    <Icon
+                      icon="pencil"
+                      style={{
+                        color: kernelActiveIsh ? palette.GRAY : palette.PRIMARY,
+                      }}
+                    />
+                  }
+                  disabled={kernelActiveIsh}
                   onClick={() => {
                     setNewGatewayUri(gatewayUri);
                     dispatchEditKernelGateway(true);
@@ -273,17 +284,12 @@ const KernelPanel: React.FC = () => {
         <Button
           appearance="ghost"
           block
-          disabled={kernelStatus !== 'Offline' && kernelStatus !== 'Connecting'}
+          disabled={kernelActiveIsh}
           onClick={() => dispatchConnectToKernelAuto(!autoConnectToKernel)}
         >
           {autoConnectToKernel ? 'Disable Auto Connect' : 'Enable Auto Connect'}
         </Button>
-        <Button
-          appearance="subtle"
-          block
-          disabled={kernelStatus === 'Offline' || kernelStatus === 'Connecting'}
-          onClick={dispatchDisconnectFromKernel}
-        >
+        <Button appearance="subtle" block disabled={!kernelActiveIsh} onClick={dispatchDisconnectFromKernel}>
           <Icon icon="ban" style={{ marginRight: spacing.DEFAULT / 2 }} />
           Disconnect
         </Button>
@@ -311,7 +317,7 @@ const KernelPanel: React.FC = () => {
           </Button>
           <Button
             appearance="primary"
-            disabled={kernelStatus !== 'Offline' || newGatewayUri === gatewayUri}
+            disabled={kernelActiveIsh || newGatewayUri === gatewayUri}
             onClick={() => {
               dispatchSetKernelGateway(newGatewayUri);
               dispatchEditKernelGateway(false);
