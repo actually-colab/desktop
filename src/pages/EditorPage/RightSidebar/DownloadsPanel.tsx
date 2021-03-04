@@ -19,7 +19,7 @@ const DownloadsPanel: React.FC = () => {
         other people make edits that haven't propagated they will not be included. What you see is what you get!
       </p>
 
-      <Button appearance="subtle">
+      <Button appearance="ghost" block>
         <Icon icon="download2" style={{ marginRight: spacing.DEFAULT / 2 }} />
         Download Notebook
       </Button>
