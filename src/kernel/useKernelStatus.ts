@@ -44,7 +44,7 @@ const useKernelStatus = () => {
     }
   }, [kernelStatus]);
 
-  return { kernelStatus, kernelStatusColor };
+  return { kernelStatus, kernelStatusColor, kernel };
 };
 
 export default useKernelStatus;

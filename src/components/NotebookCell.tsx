@@ -80,10 +80,9 @@ const styles = StyleSheet.create({
 });
 
 const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
-  const { kernelStatus } = useKernelStatus();
+  const { kernel, kernelStatus } = useKernelStatus();
 
   const user = useSelector((state: ReduxState) => state.auth.user);
-  const kernel = useSelector((state: ReduxState) => state.editor.kernel);
   const lockedCellId = useSelector((state: ReduxState) => state.editor.lockedCellId);
   const lockedCells = useSelector((state: ReduxState) => state.editor.lockedCells);
   const isLockingCell = useSelector((state: ReduxState) => state.editor.isLockingCell);

@@ -36,10 +36,9 @@ const styles = StyleSheet.create({
  * The header for the editor page
  */
 const EditorHeader: React.FC = () => {
-  const { kernelStatus, kernelStatusColor } = useKernelStatus();
+  const { kernel, kernelStatus, kernelStatusColor } = useKernelStatus();
 
   const user = useSelector((state: ReduxState) => state.auth.user);
-  const kernel = useSelector((state: ReduxState) => state.editor.kernel);
   const cells = useSelector((state: ReduxState) => state.editor.cells);
   const connectToKernelErrorMessage = useSelector((state: ReduxState) => state.editor.connectToKernelErrorMessage);
   const isAddingCell = useSelector((state: ReduxState) => state.editor.isAddingCell);
