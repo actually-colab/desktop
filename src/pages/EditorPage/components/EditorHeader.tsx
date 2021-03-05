@@ -39,6 +39,7 @@ const EditorHeader: React.FC = () => {
   const { kernel, kernelStatus, kernelStatusColor } = useKernelStatus();
 
   const user = useSelector((state: ReduxState) => state.auth.user);
+  const gatewayUri = useSelector((state: ReduxState) => state.editor.gatewayUri);
   const cells = useSelector((state: ReduxState) => state.editor.cells);
   const connectToKernelErrorMessage = useSelector((state: ReduxState) => state.editor.connectToKernelErrorMessage);
   const isAddingCell = useSelector((state: ReduxState) => state.editor.isAddingCell);
@@ -47,7 +48,7 @@ const EditorHeader: React.FC = () => {
   const isExecutingCode = useSelector((state: ReduxState) => state.editor.isExecutingCode);
   const lockedCellId = useSelector((state: ReduxState) => state.editor.lockedCellId);
 
-  const [tempKernelSelection, setTempKernelSelection] = React.useState<string>('localhost');
+  const [outputSelection, setOutputSelection] = React.useState<string>(gatewayUri);
   const [showDeleteCell, setShowDeleteCell] = React.useState<boolean>(false);
 
   const lockedCell = React.useMemo(() => cells.find((cell) => cell.cell_id === lockedCellId) ?? null, [
@@ -100,7 +101,7 @@ const EditorHeader: React.FC = () => {
   );
 
   const handleKernelSelect = React.useCallback((eventKey: string) => {
-    setTempKernelSelection(eventKey);
+    setOutputSelection(eventKey);
   }, []);
 
   React.useEffect(() => {
@@ -178,19 +179,20 @@ const EditorHeader: React.FC = () => {
 
           <PopoverDropdown
             placement="bottomEnd"
-            activeKey={tempKernelSelection}
+            activeKey={outputSelection}
             buttonContent={
               <React.Fragment>
-                {tempKernelSelection !== '' && (
+                {outputSelection === gatewayUri && (
                   <StatusIndicator textPlacement="right" color={kernelStatusColor} tooltipOptions={statusTooltip} />
                 )}
 
-                {tempKernelSelection}
+                {outputSelection}
               </React.Fragment>
             }
             onSelect={handleKernelSelect}
           >
-            <Dropdown.Item eventKey="localhost">localhost</Dropdown.Item>
+            <Dropdown.Item eventKey={gatewayUri}>{gatewayUri}</Dropdown.Item>
+            <Dropdown.Item eventKey="bailey@test.com">bailey@test.com</Dropdown.Item>
           </PopoverDropdown>
         </div>
       </div>
