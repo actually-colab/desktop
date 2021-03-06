@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
 });
 
 const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
-  const { kernel, kernelStatus } = useKernelStatus();
+  const { kernelStatus } = useKernelStatus();
 
   const user = useSelector((state: ReduxState) => state.auth.user);
   const lockedCellId = useSelector((state: ReduxState) => state.editor.lockedCellId);
@@ -88,6 +88,7 @@ const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
   const isLockingCell = useSelector((state: ReduxState) => state.editor.isLockingCell);
   const isUnlockingCell = useSelector((state: ReduxState) => state.editor.isUnlockingCell);
   const runningCellId = useSelector((state: ReduxState) => state.editor.runningCellId);
+  const runQueue = useSelector((state: ReduxState) => state.editor.runQueue);
 
   const lock = React.useMemo(() => lockedCells.find((lockedCell) => lockedCell.cell_id === cell.cell_id) ?? null, [
     cell.cell_id,
@@ -96,6 +97,11 @@ const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
   const ownsLock = React.useMemo(() => lock?.uid === user?.uid, [lock?.uid, user?.uid]);
   const lockedByOtherUser = React.useMemo(() => !ownsLock && lock !== null, [lock, ownsLock]);
   const canLock = React.useMemo(() => lock === null && lockedCellId === '', [lock, lockedCellId]);
+  const isRunning = React.useMemo(() => runningCellId === cell.cell_id || runQueue.includes(cell.cell_id), [
+    cell.cell_id,
+    runQueue,
+    runningCellId,
+  ]);
 
   const dispatch = useDispatch();
   const dispatchLockCell = React.useCallback(
@@ -110,12 +116,12 @@ const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
     (cell_id: EditorCell['cell_id'], changes: Partial<EditorCell>) => dispatch(_editor.editCell(cell_id, changes)),
     [dispatch]
   );
-  const dispatchExecuteCode = React.useCallback(
+  const onClickPlay = React.useCallback(
     () =>
-      kernel !== null && user !== null && cell.language === 'py'
-        ? dispatch(_editor.executeCode(user, kernel, cell))
+      cell.language === 'py'
+        ? dispatch(_editor.executeCodeQueue(cell.cell_id))
         : dispatch(_editor.editCell(cell.cell_id, { rendered: true })),
-    [cell, dispatch, kernel, user]
+    [cell, dispatch]
   );
   const dispatchEditMarkdownCell = React.useCallback(
     () => cell.language === 'md' && cell.rendered && dispatch(_editor.editCell(cell.cell_id, { rendered: false })),
@@ -139,7 +145,7 @@ const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
             <React.Fragment>
               <code>[</code>
               <code className={css(styles.runIndex)}>
-                {runningCellId === cell.cell_id ? '*' : cell.runIndex === -1 ? '' : cell.runIndex}
+                {isRunning ? '*' : cell.runIndex === -1 ? '' : cell.runIndex}
               </code>
               <code>]</code>
             </React.Fragment>
@@ -170,9 +176,9 @@ const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
             icon="play"
             color={palette.SUCCESS}
             size="xs"
-            loading={runningCellId === cell.cell_id}
-            disabled={(kernelStatus !== 'Idle' && cell.language === 'py') || (cell.language === 'md' && cell.rendered)}
-            onClick={dispatchExecuteCode}
+            loading={isRunning}
+            disabled={cell.language === 'md' && cell.rendered}
+            onClick={onClickPlay}
           />
 
           {ownsLock ? (

@@ -42,8 +42,10 @@ export interface EditorState {
   lockedCellId: string;
   lockedCells: Lock[];
 
+  selectedCellId: string;
   executionCount: number;
   runningCellId: string;
+  runQueue: string[];
 
   gatewayUri: string;
   kernel: IKernel | null;
@@ -75,8 +77,10 @@ const initialState: EditorState = {
   lockedCellId: '',
   lockedCells: [],
 
+  selectedCellId: '',
   executionCount: 0,
   runningCellId: '',
+  runQueue: [],
 
   gatewayUri: DEFAULT_GATEWAY_URI,
   kernel: null,
@@ -242,6 +246,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         lockedCells: state.lockedCells.filter((lock) => lock.cell_id !== action.cell_id),
         cells: state.cells.filter((cell) => cell.cell_id !== action.cell_id),
         outputs: state.outputs.filter((output) => output.cell_id !== action.cell_id),
+        runQueue: state.runQueue.filter((cell_id) => cell_id !== action.cell_id),
       };
     case DELETE_CELL.FAILURE:
       return {
@@ -271,9 +276,15 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...state,
         isEditingCell: false,
       };
+    case EXECUTE_CODE.QUEUE:
+      return {
+        ...state,
+        runQueue: [...state.runQueue, action.cell_id],
+      };
     case EXECUTE_CODE.START:
       return {
         ...state,
+        runQueue: state.runQueue.filter((cell_id) => cell_id !== action.cell_id),
         isExecutingCode: true,
         runningCellId: action.cell_id,
         outputs: state.outputs.filter((output) => output.cell_id !== action.cell_id),
@@ -299,6 +310,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         isExecutingCode: false,
         runningCellId: '',
         executeCodeErrorMessage: action.error.message,
+        runQueue: [],
       };
     case KERNEL_MESSAGE.RECEIVE:
       return {

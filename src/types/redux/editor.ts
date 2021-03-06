@@ -55,6 +55,7 @@ export const EDIT_CELL = {
   UPDATE_CODE: 'EDIT_CELL_UPDATE_CODE',
 } as const;
 export const EXECUTE_CODE = {
+  QUEUE: 'EXECUTE_CODE_QUEUE',
   START: 'EXECUTE_CODE_START',
   SUCCESS: 'EXECUTE_CODE_SUCCESS',
   FAILURE: 'EXECUTE_CODE_FAILURE',
@@ -212,6 +213,11 @@ type EditCellFailureAction = {
   type: typeof EDIT_CELL.FAILURE;
 } & ActionError;
 
+type ExecuteCodeQueueAction = {
+  type: typeof EXECUTE_CODE.QUEUE;
+  cell_id: EditorCell['cell_id'];
+};
+
 type ExecuteCodeStartAction = {
   type: typeof EXECUTE_CODE.START;
   cell_id: EditorCell['cell_id'];
@@ -284,6 +290,7 @@ export type EditorActionTypes =
   | EditCellStartAction
   | EditCellSuccessAction
   | EditCellFailureAction
+  | ExecuteCodeQueueAction
   | ExecuteCodeStartAction
   | ExecuteCodeSuccessAction
   | ExecuteCodeFailureAction

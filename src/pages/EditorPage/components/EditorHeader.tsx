@@ -38,13 +38,11 @@ const styles = StyleSheet.create({
 const EditorHeader: React.FC = () => {
   const { kernel, kernelStatus, kernelStatusColor } = useKernelStatus();
 
-  const user = useSelector((state: ReduxState) => state.auth.user);
   const gatewayUri = useSelector((state: ReduxState) => state.editor.gatewayUri);
   const cells = useSelector((state: ReduxState) => state.editor.cells);
   const connectToKernelErrorMessage = useSelector((state: ReduxState) => state.editor.connectToKernelErrorMessage);
   const isAddingCell = useSelector((state: ReduxState) => state.editor.isAddingCell);
   const isDeletingCell = useSelector((state: ReduxState) => state.editor.isDeletingCell);
-  const isEditingCell = useSelector((state: ReduxState) => state.editor.isEditingCell);
   const isExecutingCode = useSelector((state: ReduxState) => state.editor.isExecutingCode);
   const lockedCellId = useSelector((state: ReduxState) => state.editor.lockedCellId);
 
@@ -64,13 +62,6 @@ const EditorHeader: React.FC = () => {
     [connectToKernelErrorMessage, kernelStatus]
   );
 
-  const isStable = React.useMemo(() => !(isAddingCell || isDeletingCell || isEditingCell || isExecutingCode), [
-    isAddingCell,
-    isDeletingCell,
-    isEditingCell,
-    isExecutingCode,
-  ]);
-
   const dispatch = useDispatch();
   const dispatchAddCell = React.useCallback((index: number) => dispatch(_editor.addCell(index)), [dispatch]);
   const dispatchDeleteCell = React.useCallback(() => dispatch(_editor.deleteCell(lockedCellId)), [
@@ -81,14 +72,13 @@ const EditorHeader: React.FC = () => {
     (cell_id: EditorCell['cell_id'], changes: Partial<EditorCell>) => dispatch(_editor.editCell(cell_id, changes)),
     [dispatch]
   );
-  const dispatchExecuteCode = React.useCallback(
+  const onClickPlayNext = React.useCallback(
     () =>
-      user !== null &&
       lockedCell !== null &&
-      (kernel !== null && lockedCell.language === 'py'
-        ? dispatch(_editor.executeCode(user, kernel, lockedCell))
+      (lockedCell.language === 'py'
+        ? dispatch(_editor.executeCodeQueue(lockedCell.cell_id))
         : dispatch(_editor.editCell(lockedCell.cell_id, { rendered: true }))),
-    [dispatch, kernel, lockedCell, user]
+    [dispatch, lockedCell]
   );
   const dispatchStopCodeExecution = React.useCallback(
     () => lockedCell !== null && kernel !== null && dispatch(_editor.stopCodeExecution(gatewayUri, kernel, lockedCell)),
@@ -122,9 +112,7 @@ const EditorHeader: React.FC = () => {
             icon="step-forward"
             tooltipText="Run the next cell"
             tooltipDirection="bottom"
-            loading={isExecutingCode}
-            disabled={!isStable}
-            onClick={dispatchExecuteCode}
+            onClick={onClickPlayNext}
           />
           <ColoredIconButton
             icon="stop"
@@ -140,7 +128,6 @@ const EditorHeader: React.FC = () => {
             tooltipText="Create a new cell"
             tooltipDirection="bottom"
             loading={isAddingCell}
-            disabled={!isStable}
             onClick={() => dispatchAddCell(-1)}
           />
           <ColoredIconButton
@@ -148,7 +135,7 @@ const EditorHeader: React.FC = () => {
             tooltipText="Delete the current cell"
             tooltipDirection="bottom"
             loading={isDeletingCell}
-            disabled={!isStable || lockedCellId === ''}
+            disabled={lockedCellId === ''}
             onClick={() => setShowDeleteCell(true)}
           />
 

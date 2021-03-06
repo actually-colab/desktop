@@ -371,6 +371,14 @@ export const editCell = (
   dispatch(editCellSuccess(true, cell_id, changes));
 };
 
+/**
+ * Add a cell to the execution queue
+ */
+export const executeCodeQueue = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
+  type: EXECUTE_CODE.QUEUE,
+  cell_id,
+});
+
 const executeCodeStart = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
   type: EXECUTE_CODE.START,
   cell_id,
