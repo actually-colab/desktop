@@ -247,6 +247,8 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
 
         if (nextIndex <= state.cells.length - 1) {
           selectionChanges.selectedCellId = state.cells[nextIndex].cell_id;
+        } else if (state.cells.length > 1) {
+          selectionChanges.selectedCellId = state.cells[state.cells.length - 2].cell_id;
         } else {
           selectionChanges.selectedCellId = '';
         }
