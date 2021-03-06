@@ -257,13 +257,13 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
 
       return {
         ...state,
+        ...selectionChanges,
         isDeletingCell: action.isMe ? false : state.isDeletingCell,
         lockedCellId: action.isMe ? '' : state.lockedCellId,
         lockedCells: state.lockedCells.filter((lock) => lock.cell_id !== action.cell_id),
         cells: state.cells.filter((cell) => cell.cell_id !== action.cell_id),
         outputs: state.outputs.filter((output) => output.cell_id !== action.cell_id),
         runQueue: state.runQueue.filter((cell_id) => cell_id !== action.cell_id),
-        ...selectionChanges,
       };
     }
     case DELETE_CELL.FAILURE:
@@ -288,6 +288,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
 
       return {
         ...state,
+        ...runQueueChanges,
         isEditingCell: action.isMe ? false : state.isDeletingCell,
         cells: state.cells.map<EditorCell>((cell) =>
           cell.cell_id === action.cell_id
@@ -297,7 +298,6 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
               }
             : cell
         ),
-        ...runQueueChanges,
       };
     }
     case EDIT_CELL.FAILURE:
