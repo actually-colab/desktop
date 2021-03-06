@@ -241,6 +241,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         lockedCellId: action.isMe ? '' : state.lockedCellId,
         lockedCells: state.lockedCells.filter((lock) => lock.cell_id !== action.cell_id),
         cells: state.cells.filter((cell) => cell.cell_id !== action.cell_id),
+        outputs: state.outputs.filter((output) => output.cell_id !== action.cell_id),
       };
     case DELETE_CELL.FAILURE:
       return {
