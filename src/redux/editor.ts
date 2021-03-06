@@ -241,6 +241,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
     case DELETE_CELL.SUCCESS: {
       const selectionChanges: Partial<EditorState> = {};
 
+      // If the selected cell is deleted, the selected cell should become the next cell or remain the last
       if (state.selectedCellId === action.cell_id) {
         const currentIndex = state.cells.findIndex((cell) => cell.cell_id === state.selectedCellId);
         const nextIndex = currentIndex >= 0 ? currentIndex + 1 : 0;
@@ -275,7 +276,16 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...state,
         isEditingCell: true,
       };
-    case EDIT_CELL.SUCCESS:
+    case EDIT_CELL.SUCCESS: {
+      const runQueueChanges: Partial<EditorState> = {};
+
+      // If a cell in the runQueue is no longer python, it should not be executed
+      if (action.changes.language === 'md') {
+        if (state.runQueue.includes(action.cell_id)) {
+          runQueueChanges.runQueue = state.runQueue.filter((cell_id) => cell_id !== action.cell_id);
+        }
+      }
+
       return {
         ...state,
         isEditingCell: action.isMe ? false : state.isDeletingCell,
@@ -287,7 +297,9 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
               }
             : cell
         ),
+        ...runQueueChanges,
       };
+    }
     case EDIT_CELL.FAILURE:
       return {
         ...state,
