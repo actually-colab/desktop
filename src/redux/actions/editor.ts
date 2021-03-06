@@ -519,9 +519,13 @@ const executeCodeStopped = (cell: EditorCell): EditorActionTypes => ({
 /**
  * Interrupt the kernel execution
  */
-export const stopCodeExecution = (kernel: IKernel, cell: EditorCell): EditorAsyncActionTypes => async (dispatch) => {
+export const stopCodeExecution = (
+  gatewayUri: string,
+  kernel: IKernel,
+  cell: EditorCell
+): EditorAsyncActionTypes => async (dispatch) => {
   try {
-    await kernel.interrupt();
+    await fetch(`${gatewayUri}/api/kernels/${kernel.id}/interrupt`, { method: 'POST' });
 
     dispatch(executeCodeStopped(cell));
   } catch (error) {}

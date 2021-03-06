@@ -91,8 +91,8 @@ const EditorHeader: React.FC = () => {
     [dispatch, kernel, lockedCell, user]
   );
   const dispatchStopCodeExecution = React.useCallback(
-    () => lockedCell !== null && kernel !== null && dispatch(_editor.stopCodeExecution(kernel, lockedCell)),
-    [dispatch, kernel, lockedCell]
+    () => lockedCell !== null && kernel !== null && dispatch(_editor.stopCodeExecution(gatewayUri, kernel, lockedCell)),
+    [dispatch, gatewayUri, kernel, lockedCell]
   );
 
   const handleLanguageSelect = React.useCallback(
