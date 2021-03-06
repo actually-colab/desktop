@@ -388,13 +388,24 @@ export const selectNextCell = (): EditorActionTypes => ({
   type: SELECT_CELL.NEXT,
 });
 
-/**
- * Add a cell to the execution queue
- */
-export const executeCodeQueue = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
+const executeCodeQueue = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
   type: EXECUTE_CODE.QUEUE,
   cell_id,
 });
+
+/**
+ * Add a cell to the execution queue
+ */
+export const addCellToQueue = (cell_id: EditorCell['cell_id']): EditorAsyncActionTypes => async (dispatch) => {
+  dispatch(
+    appendKernelLog({
+      status: 'Info',
+      message: `Added cell ${cell_id} to queue`,
+    })
+  );
+
+  dispatch(executeCodeQueue(cell_id));
+};
 
 const executeCodeStart = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
   type: EXECUTE_CODE.START,

@@ -132,7 +132,7 @@ const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
 
   const onClickPlay = React.useCallback(() => {
     if (cell.language === 'py') {
-      dispatch(_editor.executeCodeQueue(cell.cell_id));
+      dispatch(_editor.addCellToQueue(cell.cell_id));
     } else {
       dispatch(_editor.editCell(cell.cell_id, { rendered: true }));
     }

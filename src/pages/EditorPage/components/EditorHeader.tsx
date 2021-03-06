@@ -82,7 +82,7 @@ const EditorHeader: React.FC = () => {
     }
 
     if (selectedCell.language === 'py') {
-      dispatch(_editor.executeCodeQueue(selectedCell.cell_id));
+      dispatch(_editor.addCellToQueue(selectedCell.cell_id));
     } else {
       dispatch(_editor.editCell(selectedCell.cell_id, { rendered: true }));
     }
