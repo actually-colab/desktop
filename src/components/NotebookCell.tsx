@@ -32,6 +32,9 @@ const styles = StyleSheet.create({
     borderLeftColor: palette.LIGHT_LAVENDER,
     backgroundColor: palette.BASE_FADED,
   },
+  containerSelected: {
+    borderLeftColor: palette.TANGERINE,
+  },
   controls: {
     marginTop: -3,
     display: 'flex',
@@ -87,6 +90,7 @@ const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
   const lockedCells = useSelector((state: ReduxState) => state.editor.lockedCells);
   const isLockingCell = useSelector((state: ReduxState) => state.editor.isLockingCell);
   const isUnlockingCell = useSelector((state: ReduxState) => state.editor.isUnlockingCell);
+  const selectedCellId = useSelector((state: ReduxState) => state.editor.selectedCellId);
   const runningCellId = useSelector((state: ReduxState) => state.editor.runningCellId);
   const runQueue = useSelector((state: ReduxState) => state.editor.runQueue);
 
@@ -97,6 +101,7 @@ const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
   const ownsLock = React.useMemo(() => lock?.uid === user?.uid, [lock?.uid, user?.uid]);
   const lockedByOtherUser = React.useMemo(() => !ownsLock && lock !== null, [lock, ownsLock]);
   const canLock = React.useMemo(() => lock === null && lockedCellId === '', [lock, lockedCellId]);
+  const isSelected = React.useMemo(() => selectedCellId === cell.cell_id, [cell.cell_id, selectedCellId]);
   const isRunning = React.useMemo(() => runningCellId === cell.cell_id || runQueue.includes(cell.cell_id), [
     cell.cell_id,
     runQueue,
@@ -104,10 +109,6 @@ const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
   ]);
 
   const dispatch = useDispatch();
-  const dispatchLockCell = React.useCallback(
-    () => lockedCellId === '' && lock === null && user !== null && dispatch(_editor.lockCell(user, cell.cell_id)),
-    [cell.cell_id, dispatch, lock, lockedCellId, user]
-  );
   const dispatchUnlockCell = React.useCallback(
     () => user !== null && dispatch(_editor.unlockCell(user, cell.cell_id)),
     [cell.cell_id, dispatch, user]
@@ -116,17 +117,26 @@ const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
     (cell_id: EditorCell['cell_id'], changes: Partial<EditorCell>) => dispatch(_editor.editCell(cell_id, changes)),
     [dispatch]
   );
-  const onClickPlay = React.useCallback(
-    () =>
-      cell.language === 'py'
-        ? dispatch(_editor.executeCodeQueue(cell.cell_id))
-        : dispatch(_editor.editCell(cell.cell_id, { rendered: true })),
-    [cell, dispatch]
-  );
   const dispatchEditMarkdownCell = React.useCallback(
     () => cell.language === 'md' && cell.rendered && dispatch(_editor.editCell(cell.cell_id, { rendered: false })),
     [cell.cell_id, cell.language, cell.rendered, dispatch]
   );
+
+  const onFocusEditor = React.useCallback(() => {
+    if (lockedCellId === '' && lock === null && user !== null) {
+      dispatch(_editor.lockCell(user, cell.cell_id));
+    }
+
+    dispatch(_editor.selectCell(cell.cell_id));
+  }, [cell.cell_id, dispatch, lock, lockedCellId, user]);
+
+  const onClickPlay = React.useCallback(() => {
+    if (cell.language === 'py') {
+      dispatch(_editor.executeCodeQueue(cell.cell_id));
+    } else {
+      dispatch(_editor.editCell(cell.cell_id, { rendered: true }));
+    }
+  }, [cell, dispatch]);
 
   const onChange = React.useCallback(
     (_: string, newValue: string) => {
@@ -138,7 +148,7 @@ const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
   );
 
   return (
-    <div className={css(styles.container, ownsLock && styles.containerLocked)}>
+    <div className={css(styles.container, ownsLock && styles.containerLocked, isSelected && styles.containerSelected)}>
       <div className={css(styles.controls)}>
         <div className={css(styles.runIndexContainer)}>
           {cell.language !== 'md' && (
@@ -165,7 +175,7 @@ const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
                 : undefined
             )}
           >
-            <CodeCell cell={cell} onFocus={dispatchLockCell} onChange={onChange} />
+            <CodeCell cell={cell} onFocus={onFocusEditor} onChange={onChange} />
           </div>
         ) : (
           <MarkdownCell cell={cell} onDoubleClick={dispatchEditMarkdownCell} />
@@ -207,7 +217,7 @@ const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
               color={palette.GRAY}
               loading={isLockingCell}
               disabled={!canLock}
-              onClick={dispatchLockCell}
+              onClick={onFocusEditor}
             />
           )}
         </div>

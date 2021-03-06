@@ -44,6 +44,7 @@ const EditorHeader: React.FC = () => {
   const isAddingCell = useSelector((state: ReduxState) => state.editor.isAddingCell);
   const isDeletingCell = useSelector((state: ReduxState) => state.editor.isDeletingCell);
   const lockedCellId = useSelector((state: ReduxState) => state.editor.lockedCellId);
+  const selectedCellId = useSelector((state: ReduxState) => state.editor.selectedCellId);
 
   const [outputSelection, setOutputSelection] = React.useState<string>(gatewayUri);
   const [showDeleteCell, setShowDeleteCell] = React.useState<boolean>(false);
@@ -52,6 +53,10 @@ const EditorHeader: React.FC = () => {
     cells,
     lockedCellId,
   ]);
+  const selectedCell = React.useMemo(
+    () => cells.find((cell) => cell.cell_id === selectedCellId) ?? (cells.length > 0 ? cells[0] : null),
+    [cells, selectedCellId]
+  );
 
   const statusTooltip = React.useMemo<StatusIndicatorProps['tooltipOptions']>(
     () => ({
@@ -71,14 +76,19 @@ const EditorHeader: React.FC = () => {
     (cell_id: EditorCell['cell_id'], changes: Partial<EditorCell>) => dispatch(_editor.editCell(cell_id, changes)),
     [dispatch]
   );
-  const onClickPlayNext = React.useCallback(
-    () =>
-      lockedCell !== null &&
-      (lockedCell.language === 'py'
-        ? dispatch(_editor.executeCodeQueue(lockedCell.cell_id))
-        : dispatch(_editor.editCell(lockedCell.cell_id, { rendered: true }))),
-    [dispatch, lockedCell]
-  );
+  const onClickPlayNext = React.useCallback(() => {
+    if (selectedCell === null) {
+      return;
+    }
+
+    if (selectedCell.language === 'py') {
+      dispatch(_editor.executeCodeQueue(selectedCell.cell_id));
+    } else {
+      dispatch(_editor.editCell(selectedCell.cell_id, { rendered: true }));
+    }
+
+    dispatch(_editor.selectNextCell());
+  }, [dispatch, selectedCell]);
   const dispatchStopCodeExecution = React.useCallback(
     () => lockedCell !== null && kernel !== null && dispatch(_editor.stopCodeExecution(gatewayUri, kernel, lockedCell)),
     [dispatch, gatewayUri, kernel, lockedCell]
@@ -111,7 +121,7 @@ const EditorHeader: React.FC = () => {
             icon="step-forward"
             tooltipText="Run the next cell"
             tooltipDirection="bottom"
-            disabled={!kernelIsConnected}
+            disabled={!kernelIsConnected && selectedCell?.language !== 'md'}
             onClick={onClickPlayNext}
           />
           <ColoredIconButton

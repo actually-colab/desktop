@@ -14,6 +14,7 @@ import {
   KERNEL_LOG,
   KERNEL_MESSAGE,
   LOCK_CELL,
+  SELECT_CELL,
   UNLOCK_CELL,
 } from '../../types/redux/editor';
 import { User } from '../../types/user';
@@ -246,6 +247,7 @@ const lockCellFailure = (errorMessage: string): EditorActionTypes => ({
  */
 export const lockCell = (user: User, cell_id: EditorCell['cell_id']): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(lockCellStart());
+  dispatch(selectCell(cell_id));
 
   // TODO: make request
   dispatch(lockCellSuccess(true, user.uid, cell_id));
@@ -370,6 +372,21 @@ export const editCell = (
   // TODO: make debounced request
   dispatch(editCellSuccess(true, cell_id, changes));
 };
+
+/**
+ * Select a given cell for running
+ */
+export const selectCell = (cell_id: string): EditorActionTypes => ({
+  type: SELECT_CELL.SET,
+  cell_id,
+});
+
+/**
+ * Select the next cell
+ */
+export const selectNextCell = (): EditorActionTypes => ({
+  type: SELECT_CELL.NEXT,
+});
 
 /**
  * Add a cell to the execution queue

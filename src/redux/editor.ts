@@ -11,6 +11,7 @@ import {
   KERNEL_LOG,
   KERNEL_MESSAGE,
   LOCK_CELL,
+  SELECT_CELL,
   UNLOCK_CELL,
 } from '../types/redux/editor';
 import { EditorCell, KernelOutput, Lock, ReducedNotebook } from '../types/notebook';
@@ -275,6 +276,25 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...state,
         isEditingCell: false,
       };
+    case SELECT_CELL.SET:
+      return {
+        ...state,
+        selectedCellId: action.cell_id,
+      };
+    case SELECT_CELL.NEXT: {
+      const currentIndex =
+        state.selectedCellId === '' ? -1 : state.cells.findIndex((cell) => cell.cell_id === state.selectedCellId);
+      const nextIndex = currentIndex === -1 ? 1 : currentIndex + 1;
+
+      if (nextIndex >= state.cells.length) {
+        return state;
+      }
+
+      return {
+        ...state,
+        selectedCellId: state.cells[nextIndex].cell_id,
+      };
+    }
     case EXECUTE_CODE.QUEUE:
       return {
         ...state,

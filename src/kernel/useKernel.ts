@@ -55,6 +55,9 @@ const useKernel = () => {
     }
   }, [autoConnectToKernel, dispatchConnectToKernel, gatewayUri, isConnectingToKernel, isEditingGatewayUri, kernel]);
 
+  /**
+   * Automatically execute code from the queue
+   */
   React.useEffect(() => {
     if (!isExecutingCode && runQueue.length > 0) {
       const cell = cells.find((cell) => cell.cell_id === runQueue[0]);
