@@ -58,6 +58,7 @@ export const EXECUTE_CODE = {
   START: 'EXECUTE_CODE_START',
   SUCCESS: 'EXECUTE_CODE_SUCCESS',
   FAILURE: 'EXECUTE_CODE_FAILURE',
+  STOPPED: 'EXECUTE_CODE_STOPPED',
 } as const;
 export const KERNEL_MESSAGE = {
   RECEIVE: 'KERNEL_MESSAGE_RECEIVE',
@@ -227,6 +228,11 @@ type ExecuteCodeFailureAction = {
   cell_id: EditorCell['cell_id'];
 } & ActionError;
 
+type ExecuteCodeStoppedAction = {
+  type: typeof EXECUTE_CODE.STOPPED;
+  cell_id: EditorCell['cell_id'];
+};
+
 type KernelMessageReceiveAction = {
   type: typeof KERNEL_MESSAGE.RECEIVE;
   cell_id: EditorCell['cell_id'];
@@ -281,6 +287,7 @@ export type EditorActionTypes =
   | ExecuteCodeStartAction
   | ExecuteCodeSuccessAction
   | ExecuteCodeFailureAction
+  | ExecuteCodeStoppedAction
   | KernelMessageReceiveAction
   | KernelMessageUpdateRunIndexAction
   | UpdateCellCodeAction;

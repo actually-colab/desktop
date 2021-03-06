@@ -90,6 +90,10 @@ const EditorHeader: React.FC = () => {
         : dispatch(_editor.editCell(lockedCell.cell_id, { rendered: true }))),
     [dispatch, kernel, lockedCell, user]
   );
+  const dispatchStopCodeExecution = React.useCallback(
+    () => lockedCell !== null && kernel !== null && dispatch(_editor.stopCodeExecution(kernel, lockedCell)),
+    [dispatch, kernel, lockedCell]
+  );
 
   const handleLanguageSelect = React.useCallback(
     (eventKey: EditorCell['language']) => {
@@ -126,7 +130,7 @@ const EditorHeader: React.FC = () => {
             icon="stop"
             tooltipText="Interrupt the kernel"
             tooltipDirection="bottom"
-            onClick={() => console.log('TODO')}
+            onClick={dispatchStopCodeExecution}
           />
 
           <Divider vertical />

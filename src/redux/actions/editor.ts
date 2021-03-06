@@ -511,6 +511,22 @@ export const executeCode = (user: User, kernel: IKernel, cell: EditorCell): Edit
   dispatch(executeCodeSuccess(cell.cell_id, runIndex));
 };
 
+const executeCodeStopped = (cell: EditorCell): EditorActionTypes => ({
+  type: EXECUTE_CODE.STOPPED,
+  cell_id: cell.cell_id,
+});
+
+/**
+ * Interrupt the kernel execution
+ */
+export const stopCodeExecution = (kernel: IKernel, cell: EditorCell): EditorAsyncActionTypes => async (dispatch) => {
+  try {
+    await kernel.interrupt();
+
+    dispatch(executeCodeStopped(cell));
+  } catch (error) {}
+};
+
 /**
  * Triggered by a socket
  */

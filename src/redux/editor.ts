@@ -275,6 +275,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...state,
         isExecutingCode: true,
         runningCellId: action.cell_id,
+        outputs: state.outputs.filter((output) => output.cell_id !== action.cell_id),
       };
     case EXECUTE_CODE.SUCCESS:
       return {
