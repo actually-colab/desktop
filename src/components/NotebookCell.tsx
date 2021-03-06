@@ -60,11 +60,10 @@ const styles = StyleSheet.create({
     opacity: 1,
   },
   codeContainerLockInUse: {
-    opacity: 0.6,
+    opacity: 0.5,
   },
   codeContainerLockedByOtherUser: {
-    pointerEvents: 'none',
-    opacity: 0.6,
+    opacity: 0.5,
   },
   cellToolbar: {
     display: 'flex',
@@ -171,7 +170,7 @@ const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
               styles.codeContainer,
               lockedByOtherUser
                 ? styles.codeContainerLockedByOtherUser
-                : !ownsLock && !canLock
+                : !ownsLock && (!canLock || lockedCellId !== '')
                 ? styles.codeContainerLockInUse
                 : undefined
             )}
