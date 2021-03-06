@@ -310,6 +310,15 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         isExecutingCode: false,
         runningCellId: '',
         executeCodeErrorMessage: action.error.message,
+        executionCount: action.runIndex,
+        cells: state.cells.map<EditorCell>((cell) =>
+          cell.cell_id === action.cell_id
+            ? {
+                ...cell,
+                runIndex: action.runIndex > state.executionCount ? action.runIndex : cell.runIndex,
+              }
+            : cell
+        ),
         runQueue: [],
       };
     case KERNEL_MESSAGE.RECEIVE:

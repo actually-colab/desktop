@@ -232,6 +232,7 @@ type ExecuteCodeSuccessAction = {
 type ExecuteCodeFailureAction = {
   type: typeof EXECUTE_CODE.FAILURE;
   cell_id: EditorCell['cell_id'];
+  runIndex: number;
 } & ActionError;
 
 type ExecuteCodeStoppedAction = {

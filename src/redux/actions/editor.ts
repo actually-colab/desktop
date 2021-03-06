@@ -390,9 +390,14 @@ const executeCodeSuccess = (cell_id: EditorCell['cell_id'], runIndex: number): E
   runIndex,
 });
 
-const executeCodeFailure = (cell_id: EditorCell['cell_id'], errorMessage: string): EditorActionTypes => ({
+const executeCodeFailure = (
+  cell_id: EditorCell['cell_id'],
+  runIndex: number,
+  errorMessage: string
+): EditorActionTypes => ({
   type: EXECUTE_CODE.FAILURE,
   cell_id,
+  runIndex,
   error: {
     message: errorMessage,
   },
@@ -429,6 +434,7 @@ export const executeCode = (user: User, kernel: IKernel, cell: EditorCell): Edit
   let runIndex = -1;
   let messageIndex = 0;
   const messageQueue: KernelOutput[] = [];
+  let threwError = false;
 
   future.onIOPub = (message) => {
     let kernelOutput: KernelOutput | null = null;
@@ -469,6 +475,10 @@ export const executeCode = (user: User, kernel: IKernel, cell: EditorCell): Edit
             } as IpynbOutput,
           };
           break;
+      }
+
+      if (message.header.msg_type === 'error') {
+        threwError = true;
       }
 
       console.log({ message, kernelOutput });
@@ -512,11 +522,16 @@ export const executeCode = (user: User, kernel: IKernel, cell: EditorCell): Edit
 
   dispatch(
     appendKernelLog({
-      status: 'Success',
+      status: threwError ? 'Error' : 'Success',
       message: `Finished run #${runIndex} on cell ${cell.cell_id}`,
     })
   );
-  dispatch(executeCodeSuccess(cell.cell_id, runIndex));
+
+  if (threwError) {
+    dispatch(executeCodeFailure(cell.cell_id, runIndex, 'Code threw an error'));
+  } else {
+    dispatch(executeCodeSuccess(cell.cell_id, runIndex));
+  }
 };
 
 const executeCodeStopped = (cell: EditorCell): EditorActionTypes => ({
