@@ -14,6 +14,7 @@ import {
   KERNEL_LOG,
   KERNEL_MESSAGE,
   LOCK_CELL,
+  SELECT_CELL,
   UNLOCK_CELL,
 } from '../../types/redux/editor';
 import { User } from '../../types/user';
@@ -246,6 +247,7 @@ const lockCellFailure = (errorMessage: string): EditorActionTypes => ({
  */
 export const lockCell = (user: User, cell_id: EditorCell['cell_id']): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(lockCellStart());
+  dispatch(selectCell(cell_id));
 
   // TODO: make request
   dispatch(lockCellSuccess(true, user.uid, cell_id));
@@ -371,6 +373,29 @@ export const editCell = (
   dispatch(editCellSuccess(true, cell_id, changes));
 };
 
+/**
+ * Select a given cell for running
+ */
+export const selectCell = (cell_id: string): EditorActionTypes => ({
+  type: SELECT_CELL.SET,
+  cell_id,
+});
+
+/**
+ * Select the next cell
+ */
+export const selectNextCell = (): EditorActionTypes => ({
+  type: SELECT_CELL.NEXT,
+});
+
+/**
+ * Add a cell to the execution queue
+ */
+export const executeCodeQueue = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
+  type: EXECUTE_CODE.QUEUE,
+  cell_id,
+});
+
 const executeCodeStart = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
   type: EXECUTE_CODE.START,
   cell_id,
@@ -382,9 +407,14 @@ const executeCodeSuccess = (cell_id: EditorCell['cell_id'], runIndex: number): E
   runIndex,
 });
 
-const executeCodeFailure = (cell_id: EditorCell['cell_id'], errorMessage: string): EditorActionTypes => ({
+const executeCodeFailure = (
+  cell_id: EditorCell['cell_id'],
+  runIndex: number,
+  errorMessage: string
+): EditorActionTypes => ({
   type: EXECUTE_CODE.FAILURE,
   cell_id,
+  runIndex,
   error: {
     message: errorMessage,
   },
@@ -421,6 +451,7 @@ export const executeCode = (user: User, kernel: IKernel, cell: EditorCell): Edit
   let runIndex = -1;
   let messageIndex = 0;
   const messageQueue: KernelOutput[] = [];
+  let threwError = false;
 
   future.onIOPub = (message) => {
     let kernelOutput: KernelOutput | null = null;
@@ -461,6 +492,10 @@ export const executeCode = (user: User, kernel: IKernel, cell: EditorCell): Edit
             } as IpynbOutput,
           };
           break;
+      }
+
+      if (message.header.msg_type === 'error') {
+        threwError = true;
       }
 
       console.log({ message, kernelOutput });
@@ -504,11 +539,16 @@ export const executeCode = (user: User, kernel: IKernel, cell: EditorCell): Edit
 
   dispatch(
     appendKernelLog({
-      status: 'Success',
+      status: threwError ? 'Error' : 'Success',
       message: `Finished run #${runIndex} on cell ${cell.cell_id}`,
     })
   );
-  dispatch(executeCodeSuccess(cell.cell_id, runIndex));
+
+  if (threwError) {
+    dispatch(executeCodeFailure(cell.cell_id, runIndex, 'Code threw an error'));
+  } else {
+    dispatch(executeCodeSuccess(cell.cell_id, runIndex));
+  }
 };
 
 const executeCodeStopped = (cell: EditorCell): EditorActionTypes => ({

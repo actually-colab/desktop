@@ -44,7 +44,9 @@ const useKernelStatus = () => {
     }
   }, [kernelStatus]);
 
-  return { kernelStatus, kernelStatusColor, kernel };
+  const kernelIsConnected = React.useMemo(() => kernelStatus === 'Idle' || kernelStatus === 'Busy', [kernelStatus]);
+
+  return { kernelStatus, kernelStatusColor, kernelIsConnected, kernel };
 };
 
 export default useKernelStatus;
