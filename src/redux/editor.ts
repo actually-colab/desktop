@@ -35,9 +35,7 @@ export interface EditorState {
   isAddingCell: boolean;
   isDeletingCell: boolean;
   isEditingCell: boolean;
-
   isExecutingCode: boolean;
-  executeCodeErrorMessage: string;
 
   lockedCellId: string;
   lockedCells: Lock[];
@@ -70,9 +68,7 @@ const initialState: EditorState = {
   isAddingCell: false,
   isDeletingCell: false,
   isEditingCell: false,
-
   isExecutingCode: false,
-  executeCodeErrorMessage: '',
 
   lockedCellId: '',
   lockedCells: [],
@@ -167,6 +163,9 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         autoConnectToKernel: action.retry,
         isConnectingToKernel: false,
         isReconnectingToKernel: false,
+        isExecutingCode: false,
+        runningCellId: '',
+        runQueue: [],
         kernel: null,
       };
     case LOCK_CELL.START:
@@ -309,7 +308,6 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...state,
         isExecutingCode: false,
         runningCellId: '',
-        executeCodeErrorMessage: action.error.message,
         executionCount: action.runIndex,
         cells: state.cells.map<EditorCell>((cell) =>
           cell.cell_id === action.cell_id
