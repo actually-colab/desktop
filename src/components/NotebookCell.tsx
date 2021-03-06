@@ -102,11 +102,8 @@ const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
   const lockedByOtherUser = React.useMemo(() => !ownsLock && lock !== null, [lock, ownsLock]);
   const canLock = React.useMemo(() => lock === null, [lock]);
   const isSelected = React.useMemo(() => selectedCellId === cell.cell_id, [cell.cell_id, selectedCellId]);
-  const isRunning = React.useMemo(() => runningCellId === cell.cell_id || runQueue.includes(cell.cell_id), [
-    cell.cell_id,
-    runQueue,
-    runningCellId,
-  ]);
+  const isRunning = React.useMemo(() => runningCellId === cell.cell_id, [cell.cell_id, runningCellId]);
+  const isQueued = React.useMemo(() => runQueue.includes(cell.cell_id), [cell.cell_id, runQueue]);
 
   const dispatch = useDispatch();
   const dispatchUnlockCell = React.useCallback(
@@ -159,7 +156,7 @@ const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
             <React.Fragment>
               <code>[</code>
               <code className={css(styles.runIndex)}>
-                {isRunning ? '*' : cell.runIndex === -1 ? '' : cell.runIndex}
+                {isRunning || isQueued ? '*' : cell.runIndex === -1 ? '' : cell.runIndex}
               </code>
               <code>]</code>
             </React.Fragment>
@@ -191,7 +188,9 @@ const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
             color={palette.SUCCESS}
             size="xs"
             loading={isRunning}
-            disabled={(cell.language === 'py' && !kernelIsConnected) || (cell.language === 'md' && cell.rendered)}
+            disabled={
+              (cell.language === 'py' && isQueued) || !kernelIsConnected || (cell.language === 'md' && cell.rendered)
+            }
             onClick={onClickPlay}
           />
 
