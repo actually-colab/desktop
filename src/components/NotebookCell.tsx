@@ -100,7 +100,7 @@ const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
   ]);
   const ownsLock = React.useMemo(() => lock?.uid === user?.uid, [lock?.uid, user?.uid]);
   const lockedByOtherUser = React.useMemo(() => !ownsLock && lock !== null, [lock, ownsLock]);
-  const canLock = React.useMemo(() => lock === null && lockedCellId === '', [lock, lockedCellId]);
+  const canLock = React.useMemo(() => lock === null, [lock]);
   const isSelected = React.useMemo(() => selectedCellId === cell.cell_id, [cell.cell_id, selectedCellId]);
   const isRunning = React.useMemo(() => runningCellId === cell.cell_id || runQueue.includes(cell.cell_id), [
     cell.cell_id,
@@ -123,7 +123,11 @@ const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
   );
 
   const onFocusEditor = React.useCallback(() => {
-    if (lockedCellId === '' && lock === null && user !== null) {
+    if (lock === null && user !== null) {
+      if (lockedCellId !== '') {
+        dispatch(_editor.unlockCell(user, lockedCellId));
+      }
+
       dispatch(_editor.lockCell(user, cell.cell_id));
     }
 

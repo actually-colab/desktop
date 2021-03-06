@@ -178,9 +178,9 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
       return {
         ...state,
         isLockingCell: action.isMe ? false : state.isLockingCell,
-        lockedCellId: action.isMe ? action.cell_id : state.lockedCellId,
+        lockedCellId: action.isMe ? action.cell_id : state.lockedCellId === action.cell_id ? '' : state.lockedCellId,
         lockedCells: [
-          ...state.lockedCells,
+          ...state.lockedCells.filter((lock) => lock.cell_id !== action.cell_id),
           {
             uid: action.uid,
             cell_id: action.cell_id,
@@ -202,7 +202,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...state,
         isUnlockingCell: action.isMe ? false : state.isUnlockingCell,
         lockedCellId: action.isMe ? '' : state.lockedCellId,
-        lockedCells: state.lockedCells.filter((lock) => lock.cell_id !== action.cell_id),
+        lockedCells: state.lockedCells.filter((lock) => lock.cell_id !== action.cell_id || lock.uid !== action.uid),
       };
     case UNLOCK_CELL.FAILURE:
       return {
