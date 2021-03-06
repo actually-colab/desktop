@@ -238,7 +238,20 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...state,
         isDeletingCell: true,
       };
-    case DELETE_CELL.SUCCESS:
+    case DELETE_CELL.SUCCESS: {
+      const selectionChanges: Partial<EditorState> = {};
+
+      if (state.selectedCellId === action.cell_id) {
+        const currentIndex = state.cells.findIndex((cell) => cell.cell_id === state.selectedCellId);
+        const nextIndex = currentIndex >= 0 ? currentIndex + 1 : 0;
+
+        if (nextIndex <= state.cells.length - 1) {
+          selectionChanges.selectedCellId = state.cells[nextIndex].cell_id;
+        } else {
+          selectionChanges.selectedCellId = '';
+        }
+      }
+
       return {
         ...state,
         isDeletingCell: action.isMe ? false : state.isDeletingCell,
@@ -247,7 +260,9 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         cells: state.cells.filter((cell) => cell.cell_id !== action.cell_id),
         outputs: state.outputs.filter((output) => output.cell_id !== action.cell_id),
         runQueue: state.runQueue.filter((cell_id) => cell_id !== action.cell_id),
+        ...selectionChanges,
       };
+    }
     case DELETE_CELL.FAILURE:
       return {
         ...state,
@@ -284,10 +299,17 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
     case SELECT_CELL.NEXT: {
       const currentIndex =
         state.selectedCellId === '' ? -1 : state.cells.findIndex((cell) => cell.cell_id === state.selectedCellId);
-      const nextIndex = currentIndex === -1 ? 1 : currentIndex + 1;
+      const nextIndex = state.selectedCellId === '' ? 1 : currentIndex === -1 ? 0 : currentIndex + 1;
 
       if (nextIndex >= state.cells.length) {
-        return state;
+        if (state.cells.length > 0) {
+          return {
+            ...state,
+            selectedCellId: state.cells[state.cells.length - 1].cell_id,
+          };
+        } else {
+          return state;
+        }
       }
 
       return {
