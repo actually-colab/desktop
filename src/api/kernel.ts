@@ -85,3 +85,9 @@ export const connectToKernel = async (
     };
   }
 };
+
+/**
+ * Interrupt the given kernel
+ */
+export const interrupt = (gatewayUri: string, kernel: IKernel) =>
+  fetch(`${gatewayUri}/api/kernels/${kernel.id}/interrupt`, { method: 'POST' });

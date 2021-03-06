@@ -19,9 +19,9 @@ import {
 import { User } from '../../types/user';
 import { IpynbOutput } from '../../types/ipynb';
 import { BaseKernelOutput, EditorCell, KernelOutput } from '../../types/notebook';
-import * as jupyter from '../../kernel/jupyter';
 import { _ui } from '.';
 import { KernelLog } from '../../types/kernel';
+import { KernelApi } from '../../api';
 
 /**
  * Add a new log message
@@ -174,7 +174,7 @@ const monitorKernelStatus = (kernel: IKernel): EditorAsyncActionTypes => async (
 export const connectToKernel = (uri: string, displayError = false): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(connectToKernelStart());
 
-  const res = await jupyter.connectToKernel(uri);
+  const res = await KernelApi.connectToKernel(uri);
 
   if (res.success) {
     dispatch(connectToKernelSuccess(res.kernel));
@@ -525,7 +525,7 @@ export const stopCodeExecution = (
   cell: EditorCell
 ): EditorAsyncActionTypes => async (dispatch) => {
   try {
-    await fetch(`${gatewayUri}/api/kernels/${kernel.id}/interrupt`, { method: 'POST' });
+    await KernelApi.interrupt(gatewayUri, kernel);
 
     dispatch(executeCodeStopped(cell));
   } catch (error) {}
