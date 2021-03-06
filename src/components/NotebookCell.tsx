@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
 });
 
 const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
-  const { kernelStatus } = useKernelStatus();
+  const { kernelIsConnected } = useKernelStatus();
 
   const user = useSelector((state: ReduxState) => state.auth.user);
   const lockedCellId = useSelector((state: ReduxState) => state.editor.lockedCellId);
@@ -177,7 +177,7 @@ const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
             color={palette.SUCCESS}
             size="xs"
             loading={isRunning}
-            disabled={cell.language === 'md' && cell.rendered}
+            disabled={(cell.language === 'py' && !kernelIsConnected) || (cell.language === 'md' && cell.rendered)}
             onClick={onClickPlay}
           />
 

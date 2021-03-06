@@ -36,14 +36,13 @@ const styles = StyleSheet.create({
  * The header for the editor page
  */
 const EditorHeader: React.FC = () => {
-  const { kernel, kernelStatus, kernelStatusColor } = useKernelStatus();
+  const { kernel, kernelStatus, kernelStatusColor, kernelIsConnected } = useKernelStatus();
 
   const gatewayUri = useSelector((state: ReduxState) => state.editor.gatewayUri);
   const cells = useSelector((state: ReduxState) => state.editor.cells);
   const connectToKernelErrorMessage = useSelector((state: ReduxState) => state.editor.connectToKernelErrorMessage);
   const isAddingCell = useSelector((state: ReduxState) => state.editor.isAddingCell);
   const isDeletingCell = useSelector((state: ReduxState) => state.editor.isDeletingCell);
-  const isExecutingCode = useSelector((state: ReduxState) => state.editor.isExecutingCode);
   const lockedCellId = useSelector((state: ReduxState) => state.editor.lockedCellId);
 
   const [outputSelection, setOutputSelection] = React.useState<string>(gatewayUri);
@@ -112,12 +111,14 @@ const EditorHeader: React.FC = () => {
             icon="step-forward"
             tooltipText="Run the next cell"
             tooltipDirection="bottom"
+            disabled={!kernelIsConnected}
             onClick={onClickPlayNext}
           />
           <ColoredIconButton
             icon="stop"
             tooltipText="Interrupt the kernel"
             tooltipDirection="bottom"
+            disabled={!kernelIsConnected}
             onClick={dispatchStopCodeExecution}
           />
 
