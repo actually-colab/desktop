@@ -119,7 +119,7 @@ const EditorHeader: React.FC = () => {
         <div className={css(styles.headerNoDrag)}>
           <ColoredIconButton
             icon="step-forward"
-            tooltipText="Run the next cell"
+            tooltipText="Run and advance"
             tooltipDirection="bottom"
             disabled={!kernelIsConnected && selectedCell?.language !== 'md'}
             onClick={onClickPlayNext}
