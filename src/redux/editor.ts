@@ -18,7 +18,7 @@ import {
 import { EditorCell, KernelOutput, Lock, Notebook, ReducedNotebook } from '../types/notebook';
 import { KernelLog } from '../types/kernel';
 import { BASE_CELL } from '../constants/notebook';
-import { EXAMPLE_PROJECT } from '../constants/demo';
+import { EXAMPLE_PROJECT, EXAMPLE_PROJECT_CELLS } from '../constants/demo';
 import { DEFAULT_GATEWAY_URI } from '../constants/jupyter';
 
 /**
@@ -34,6 +34,7 @@ export interface EditorState {
 
   isGettingNotebooks: boolean;
   getNotebooksErrorMessage: string;
+  getNotebooksTimestamp: Date | null;
 
   isLockingCell: boolean;
   isUnlockingCell: boolean;
@@ -70,6 +71,7 @@ const initialState: EditorState = {
 
   isGettingNotebooks: false,
   getNotebooksErrorMessage: '',
+  getNotebooksTimestamp: null,
 
   isLockingCell: false,
   isUnlockingCell: false,
@@ -92,9 +94,9 @@ const initialState: EditorState = {
   notebooks: [EXAMPLE_PROJECT],
   notebook: {
     ...EXAMPLE_PROJECT,
-    cell_ids: EXAMPLE_PROJECT.cells.map((cell) => cell.cell_id),
+    cell_ids: EXAMPLE_PROJECT_CELLS.map((cell) => cell.cell_id),
   },
-  cells: EXAMPLE_PROJECT.cells,
+  cells: EXAMPLE_PROJECT_CELLS,
   outputs: [],
   logs: [],
 };
@@ -182,6 +184,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...state,
         isGettingNotebooks: false,
         notebooks: action.notebooks,
+        getNotebooksTimestamp: new Date(),
       };
     case NOTEBOOKS.GET.FAILURE:
       return {
