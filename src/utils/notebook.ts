@@ -3,6 +3,7 @@ import { saveAs } from 'file-saver';
 import { IpynbCell, IpynbNotebook, IpynbOutput } from '../types/ipynb';
 import { EditorCell, KernelOutput } from '../types/notebook';
 import { User } from '../types/user';
+import { filterUndefined } from './filter';
 
 import { SPLIT_KEEP_NEWLINE } from './regex';
 
@@ -50,7 +51,12 @@ const convertToIpynb = (cells: EditorCell[], outputs: KernelOutput[]): IpynbNote
           outputs: outputs
             .filter((output) => output.cell_id === cell.cell_id && output.runIndex === cell.runIndex)
             .sort(sortOutputByMessageIndex)
-            .map<IpynbOutput>((output) => output.output),
+            .map<IpynbOutput>((output) =>
+              filterUndefined<IpynbOutput & { transient?: any }, IpynbOutput>({
+                ...output.output,
+                transient: undefined,
+              })
+            ),
           source: cell.code.split(SPLIT_KEEP_NEWLINE),
         }
   ),
@@ -60,11 +66,21 @@ const convertToIpynb = (cells: EditorCell[], outputs: KernelOutput[]): IpynbNote
  * Download the given notebook data to an ipynb file. Only include outputs with the given uid and latest run index
  */
 export const download = (name: string, uid: User['uid'], cells: EditorCell[], outputs: KernelOutput[]) => {
-  const includedOutputs = outputs.filter((output) => output.uid === uid);
+  const cellToRunIndex: {
+    [key: string]: number;
+  } = {};
+
+  cells.forEach((cell) => {
+    cellToRunIndex[cell.cell_id] = cell.runIndex;
+  });
+
+  const includedOutputs = outputs.filter(
+    (output) => output.uid === uid && output.runIndex === cellToRunIndex[output.cell_id]
+  );
   const ipynb = convertToIpynb(cells, includedOutputs);
 
   const blob = new Blob([JSON.stringify(ipynb)], {
-    type: 'application/json;charset=utf-8',
+    type: 'charset=utf-8',
   });
 
   saveAs(blob, `${name}.ipynb`);
