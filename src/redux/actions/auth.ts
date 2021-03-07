@@ -1,4 +1,4 @@
-import { devLogin } from '@actually-colab/editor-client';
+import * as client from '@actually-colab/editor-client';
 
 import { AuthActionTypes, AuthAsyncActionTypes, LOAD_SESSION, SIGN_IN, SIGN_OUT } from '../../types/redux/auth';
 import { User } from '../../types/user';
@@ -34,17 +34,8 @@ const signInFailure = (errorMessage: string): AuthActionTypes => {
 export const signIn = (token: string): AuthAsyncActionTypes => async (dispatch) => {
   dispatch(signInStart());
 
-  // TODO: sign in
   try {
-    // const res = await devLogin('jeff@test.com', 'Jeff Taylor-Chang');
-    const res: { user: User; sessionToken: string } = {
-      user: {
-        uid: 0,
-        name: 'Jeff Taylor-Chang',
-        email: 'jeff@test.com',
-      },
-      sessionToken: 'TEST',
-    };
+    const res = await client.devLogin('jeff@test.com', 'Jeff Taylor-Chang');
 
     console.log('Signed in', res);
 
@@ -84,7 +75,6 @@ export const loadSession = (): AuthAsyncActionTypes => async (dispatch) => {
  * Sign in with the google token
  */
 export const googleSignIn = (token: string): AuthAsyncActionTypes => async (dispatch) => {
-  // TODO: sign in
   dispatch(signIn(token));
 };
 

@@ -3,7 +3,7 @@ import { Action } from 'redux';
 import { ThunkAction } from 'redux-thunk';
 
 import { User } from '../user';
-import { EditorCell, KernelOutput } from '../notebook';
+import { EditorCell, KernelOutput, Notebook } from '../notebook';
 import { KernelLog } from '../kernel';
 
 export const KERNEL_LOG = {
@@ -22,6 +22,13 @@ export const CONNECT_TO_KERNEL = {
   RECONNECTING: 'CONNECT_TO_KERNEL_RECONNECTING',
   RECONNECTED: 'CONNECT_TO_KERNEL_RECONNECTED',
   DISCONNECTED: 'CONNECT_TO_KERNEL_DISCONNECTED',
+} as const;
+export const NOTEBOOKS = {
+  GET: {
+    START: 'NOTEBOOKS_GET_START',
+    SUCCESS: 'NOTEBOOKS_GET_SUCCESS',
+    FAILURE: 'NOTEBOOKS_GET_FAILURE',
+  },
 } as const;
 export const LOCK_CELL = {
   START: 'LOCK_CELL_START',
@@ -128,6 +135,19 @@ type ConnectToKernelDisconnectedAction = {
   type: typeof CONNECT_TO_KERNEL.DISCONNECTED;
   retry: boolean;
 };
+
+type NotebooksGetStartAction = {
+  type: typeof NOTEBOOKS.GET.START;
+};
+
+type NotebooksGetSuccessAction = {
+  type: typeof NOTEBOOKS.GET.SUCCESS;
+  notebooks: Notebook[];
+};
+
+type NotebooksGetFailureAction = {
+  type: typeof NOTEBOOKS.GET.FAILURE;
+} & ActionError;
 
 type LockCellStartAction = {
   type: typeof LOCK_CELL.START;
@@ -286,6 +306,9 @@ export type EditorActionTypes =
   | ConnectToKernelReconnectingAction
   | ConnectToKernelReconnectedAction
   | ConnectToKernelDisconnectedAction
+  | NotebooksGetStartAction
+  | NotebooksGetSuccessAction
+  | NotebooksGetFailureAction
   | LockCellStartAction
   | LockCellSuccessAction
   | LockCellFailureAction

@@ -5,8 +5,8 @@ import { BASE_CELL } from './notebook';
 /**
  * A demo project
  */
-export const exampleProject: Notebook = {
-  nb_id: 0,
+export const EXAMPLE_PROJECT: Notebook = {
+  nb_id: -2,
   name: 'Example Project',
   users: [],
   access_level: 'Read Only',

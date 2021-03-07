@@ -14,15 +14,17 @@ import {
   KERNEL_LOG,
   KERNEL_MESSAGE,
   LOCK_CELL,
+  NOTEBOOKS,
   SELECT_CELL,
   UNLOCK_CELL,
 } from '../../types/redux/editor';
 import { User } from '../../types/user';
 import { IpynbOutput } from '../../types/ipynb';
-import { BaseKernelOutput, EditorCell, KernelOutput } from '../../types/notebook';
+import { BaseKernelOutput, EditorCell, KernelOutput, Notebook } from '../../types/notebook';
 import { _ui } from '.';
 import { KernelLog } from '../../types/kernel';
 import { KernelApi } from '../../api';
+import * as client from '@actually-colab/editor-client';
 
 /**
  * Add a new log message
@@ -224,6 +226,47 @@ export const disconnectFromKernel = (kernel: IKernel): EditorAsyncActionTypes =>
   dispatch(connectToKernelDisconnected(false));
 };
 
+const getNotebooksStart = (): EditorActionTypes => ({
+  type: NOTEBOOKS.GET.START,
+});
+
+const getNotebooksSuccess = (notebooks: Notebook[]): EditorActionTypes => ({
+  type: NOTEBOOKS.GET.SUCCESS,
+  notebooks,
+});
+
+const getNotebooksFailure = (errorMessage: string): EditorActionTypes => ({
+  type: NOTEBOOKS.GET.FAILURE,
+  error: {
+    message: errorMessage,
+  },
+});
+
+/**
+ * Get a list of notebooks for the current user
+ */
+export const getNotebooks = (token: string): EditorAsyncActionTypes => async (dispatch) => {
+  dispatch(getNotebooksStart());
+
+  try {
+    const res = await client.getNotebooksForUser();
+
+    // @ts-ignore
+    dispatch(getNotebooksSuccess(res ?? []));
+  } catch (error) {
+    console.error(error);
+    dispatch(getNotebooksFailure(error.message));
+    dispatch(
+      _ui.notify({
+        level: 'error',
+        title: 'Error',
+        message: 'Failed to get your notebooks!',
+        duration: 3000,
+      })
+    );
+  }
+};
+
 const lockCellStart = (): EditorActionTypes => ({
   type: LOCK_CELL.START,
 });
@@ -306,7 +349,7 @@ export const addCell = (index: number): EditorAsyncActionTypes => async (dispatc
   dispatch(addCellStart());
 
   // TODO: make request
-  dispatch(addCellSuccess(true, `TODO-${uuid()}`, index));
+  dispatch(addCellSuccess(true, `CELL-${uuid()}`, index));
 };
 
 const deleteCellStart = (): EditorActionTypes => ({
