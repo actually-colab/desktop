@@ -19,6 +19,17 @@ const useKernel = () => {
   const runQueue = useSelector((state: ReduxState) => state.editor.runQueue);
   const isExecutingCode = useSelector((state: ReduxState) => state.editor.isExecutingCode);
 
+  const shouldConnect = React.useMemo(
+    () =>
+      autoConnectToKernel &&
+      !isEditingGatewayUri &&
+      gatewayUri !== '' &&
+      !isConnectingToKernel &&
+      kernel === null &&
+      user !== null,
+    [autoConnectToKernel, gatewayUri, isConnectingToKernel, isEditingGatewayUri, kernel, user]
+  );
+
   const dispatch = useDispatch();
   const dispatchConnectToKernel = React.useCallback(
     (uri: string, displayError?: boolean) => dispatch(_editor.connectToKernel(uri, displayError)),
@@ -39,21 +50,21 @@ const useKernel = () => {
    * Manage the kernel connection
    */
   React.useEffect(() => {
-    if (autoConnectToKernel && !isEditingGatewayUri && gatewayUri !== '' && !isConnectingToKernel && kernel === null) {
+    if (shouldConnect) {
       const displayError = timeout.current === null;
       const delay = timeout.current === null ? 10 : 5000;
 
       timeout.current = setTimeout(() => dispatchConnectToKernel(gatewayUri, displayError), delay);
-    }
-
-    // Cancel timer if auto connecting is disabled
-    if (!autoConnectToKernel || isEditingGatewayUri) {
-      if (timeout.current) {
-        clearTimeout(timeout.current);
-        timeout.current = null;
+    } else {
+      // Cancel timer if auto connecting is disabled
+      if (!autoConnectToKernel || isEditingGatewayUri) {
+        if (timeout.current) {
+          clearTimeout(timeout.current);
+          timeout.current = null;
+        }
       }
     }
-  }, [autoConnectToKernel, dispatchConnectToKernel, gatewayUri, isConnectingToKernel, isEditingGatewayUri, kernel]);
+  }, [autoConnectToKernel, dispatchConnectToKernel, gatewayUri, isEditingGatewayUri, shouldConnect]);
 
   /**
    * Automatically execute code from the queue
