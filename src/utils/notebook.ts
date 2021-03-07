@@ -1,5 +1,8 @@
+import { saveAs } from 'file-saver';
+
 import { IpynbCell, IpynbNotebook, IpynbOutput } from '../types/ipynb';
 import { EditorCell, KernelOutput } from '../types/notebook';
+import { User } from '../types/user';
 
 import { SPLIT_KEEP_NEWLINE } from './regex';
 
@@ -11,7 +14,7 @@ export const sortOutputByMessageIndex = (a: KernelOutput, b: KernelOutput) => a.
 /**
  * Given a cells and output, convert the notebook to a JSON ipynb format
  */
-export const convertToIpynb = (cells: EditorCell[], outputs: KernelOutput[]): IpynbNotebook => ({
+const convertToIpynb = (cells: EditorCell[], outputs: KernelOutput[]): IpynbNotebook => ({
   nbformat: 4,
   nbformat_minor: 1,
   metadata: {
@@ -52,3 +55,17 @@ export const convertToIpynb = (cells: EditorCell[], outputs: KernelOutput[]): Ip
         }
   ),
 });
+
+/**
+ * Download the given notebook data to an ipynb file. Only include outputs with the given uid and latest run index
+ */
+export const download = (name: string, uid: User['uid'], cells: EditorCell[], outputs: KernelOutput[]) => {
+  const includedOutputs = outputs.filter((output) => output.uid === uid);
+  const ipynb = convertToIpynb(cells, includedOutputs);
+
+  const blob = new Blob([JSON.stringify(ipynb)], {
+    type: 'application/json;charset=utf-8',
+  });
+
+  saveAs(blob, `${name}.ipynb`);
+};

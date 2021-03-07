@@ -49,8 +49,8 @@ export interface EditorState {
   gatewayUri: string;
   kernel: IKernel | null;
 
-  projects: ReducedNotebook[];
-  project: ReducedNotebook | null;
+  notebooks: ReducedNotebook[];
+  notebook: ReducedNotebook | null;
   cells: EditorCell[];
   outputs: KernelOutput[];
   logs: KernelLog[];
@@ -82,7 +82,7 @@ const initialState: EditorState = {
   gatewayUri: DEFAULT_GATEWAY_URI,
   kernel: null,
 
-  projects: [
+  notebooks: [
     {
       nb_id: 0,
       name: 'Example Project',
@@ -91,7 +91,7 @@ const initialState: EditorState = {
       cell_ids: [],
     },
   ],
-  project: null,
+  notebook: null,
   cells: exampleProject.cells,
   outputs: [],
   logs: [],
