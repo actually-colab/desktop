@@ -431,10 +431,10 @@ const executeCodeFailure = (
   },
 });
 
-const receiveKernelMessage = (cell_id: EditorCell['cell_id'], message: KernelOutput): EditorActionTypes => ({
+const receiveKernelMessage = (cell_id: EditorCell['cell_id'], messages: KernelOutput[]): EditorActionTypes => ({
   type: KERNEL_MESSAGE.RECEIVE,
   cell_id,
-  message,
+  messages,
 });
 
 const updateRunIndex = (cell_id: EditorCell['cell_id'], runIndex: number): EditorActionTypes => ({
@@ -520,10 +520,12 @@ export const executeCode = (user: User, kernel: IKernel, cell: EditorCell): Edit
       if (runIndex !== -1) {
         // No need to queue
         dispatch(
-          receiveKernelMessage(cell.cell_id, {
-            ...kernelOutput,
-            runIndex,
-          })
+          receiveKernelMessage(cell.cell_id, [
+            {
+              ...kernelOutput,
+              runIndex,
+            },
+          ])
         );
       } else {
         // Store messages until execution count message is received
@@ -531,14 +533,12 @@ export const executeCode = (user: User, kernel: IKernel, cell: EditorCell): Edit
       }
     } else if (runIndex !== -1 && messageQueue.length > 0) {
       // process any messages in queue
-      for (const oldMessage of messageQueue) {
-        dispatch(
-          receiveKernelMessage(cell.cell_id, {
-            ...oldMessage,
-            runIndex,
-          })
-        );
-      }
+      dispatch(
+        receiveKernelMessage(
+          cell.cell_id,
+          messageQueue.map((oldMessage) => ({ ...oldMessage, runIndex }))
+        )
+      );
     }
   };
 

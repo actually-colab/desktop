@@ -256,7 +256,7 @@ type ExecuteCodeStoppedAction = {
 type KernelMessageReceiveAction = {
   type: typeof KERNEL_MESSAGE.RECEIVE;
   cell_id: EditorCell['cell_id'];
-  message: KernelOutput;
+  messages: KernelOutput[];
 };
 
 type KernelMessageUpdateRunIndexAction = {

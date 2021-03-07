@@ -384,7 +384,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
     case KERNEL_MESSAGE.RECEIVE:
       return {
         ...state,
-        outputs: [...state.outputs, action.message],
+        outputs: [...state.outputs, ...action.messages],
       };
     case KERNEL_MESSAGE.UPDATE_RUN_INDEX:
       return {
