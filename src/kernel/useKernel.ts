@@ -100,7 +100,7 @@ const useKernel = () => {
     };
   }, []);
 
-  return kernel;
+  return null;
 };
 
 export default useKernel;

@@ -183,7 +183,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
       return {
         ...state,
         isGettingNotebooks: false,
-        notebooks: action.notebooks,
+        notebooks: [EXAMPLE_PROJECT, ...action.notebooks],
         getNotebooksTimestamp: new Date(),
       };
     case NOTEBOOKS.GET.FAILURE:

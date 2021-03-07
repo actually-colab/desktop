@@ -245,7 +245,7 @@ const getNotebooksFailure = (errorMessage: string): EditorActionTypes => ({
 /**
  * Get a list of notebooks for the current user
  */
-export const getNotebooks = (token: string): EditorAsyncActionTypes => async (dispatch) => {
+export const getNotebooks = (): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(getNotebooksStart());
 
   try {
