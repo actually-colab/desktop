@@ -43,6 +43,7 @@
     "ace-builds": "^1.4.12",
     "aphrodite": "^2.4.0",
     "date-fns": "^2.17.0",
+    "file-saver": "^2.0.5",
     "jupyter-js-services": "^0.21.1",
     "lodash.debounce": "^4.0.8",
     "react": "^17.0.1",
@@ -59,6 +60,7 @@
     "web-vitals": "^1.0.1"
   },
   "devDependencies": {
+    "@types/file-saver": "^2.0.1",
     "@types/lodash.debounce": "^4.0.6",
     "@types/node": "^12.0.0",
     "@types/react": "^17.0.0",

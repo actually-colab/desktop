@@ -1,8 +1,11 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import { Button, Icon } from 'rsuite';
 
 import { spacing } from '../../../constants/theme';
+import { ReduxState } from '../../../redux';
+import { download } from '../../../utils/notebook';
 
 const styles = StyleSheet.create({});
 
@@ -10,6 +13,27 @@ const styles = StyleSheet.create({});
  * The Downloads panel for the right sidebar
  */
 const DownloadsPanel: React.FC = () => {
+  const user = useSelector((state: ReduxState) => state.auth.user);
+  const notebook = useSelector((state: ReduxState) => state.editor.notebook);
+  const cells = useSelector((state: ReduxState) => state.editor.cells);
+  const outputs = useSelector((state: ReduxState) => state.editor.outputs);
+
+  const isDownloadSupported = React.useMemo(() => {
+    let isSupported = false;
+
+    try {
+      isSupported = !!new Blob();
+    } catch (error) {}
+
+    return isSupported;
+  }, []);
+  const name = React.useMemo(() => notebook?.name ?? '', [notebook?.name]);
+  const uid = React.useMemo(() => user?.uid ?? -1, [user?.uid]);
+
+  const onClickDownload = React.useCallback(() => {
+    download(name, uid, cells, outputs);
+  }, [cells, name, outputs, uid]);
+
   return (
     <div className="markdown-container">
       <p>
@@ -19,7 +43,7 @@ const DownloadsPanel: React.FC = () => {
         other people make edits that haven't propagated they will not be included. What you see is what you get!
       </p>
 
-      <Button appearance="ghost" block>
+      <Button appearance="ghost" block disabled={!isDownloadSupported} onClick={onClickDownload}>
         <Icon icon="download2" style={{ marginRight: spacing.DEFAULT / 2 }} />
         Download Notebook
       </Button>
