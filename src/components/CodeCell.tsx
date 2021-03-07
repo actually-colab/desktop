@@ -67,6 +67,7 @@ const CodeCell: React.FC<{
         onFocus={handleFocus}
         onBlur={handleBlur}
         onChange={handleChange}
+        wrapEnabled={cell.language === 'md'}
       />
     </div>
   );
