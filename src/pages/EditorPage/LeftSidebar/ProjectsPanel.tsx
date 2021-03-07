@@ -28,6 +28,7 @@ const styles = StyleSheet.create({
  */
 const ProjectsPanel: React.FC = () => {
   const notebooks = useSelector((state: ReduxState) => state.editor.notebooks);
+  const notebook = useSelector((state: ReduxState) => state.editor.notebook);
 
   const [showCreateProject, setShowCreateProject] = React.useState<boolean>(false);
   const [newProjectName, setNewProjectName] = React.useState<string>('');
@@ -71,17 +72,22 @@ const ProjectsPanel: React.FC = () => {
         <Dropdown.Item eventKey="edited">Sort by edited</Dropdown.Item>
       </PopoverDropdown>
 
-      {notebooks.map((notebook) => (
-        <div key={notebook.nb_id} className={css(styles.project)}>
+      {notebooks.map((project) => (
+        <div key={project.nb_id} className={css(styles.project)}>
           <Button
             block
             style={{
               textAlign: 'left',
-              background: palette.PRIMARY_LIGHT,
-              color: palette.PRIMARY,
+              ...(project.nb_id === notebook?.nb_id
+                ? {
+                    background: palette.PRIMARY_LIGHT,
+                    color: palette.PRIMARY,
+                  }
+                : {}),
             }}
+            onClick={() => project.nb_id !== notebook?.nb_id && console.log('TODO', project)}
           >
-            {notebook.name}
+            {project.name}
           </Button>
         </div>
       ))}
