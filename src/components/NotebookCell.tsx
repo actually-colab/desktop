@@ -102,7 +102,11 @@ const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
   const canLock = React.useMemo(() => lock === null, [lock]);
   const isSelected = React.useMemo(() => selectedCellId === cell.cell_id, [cell.cell_id, selectedCellId]);
   const isRunning = React.useMemo(() => runningCellId === cell.cell_id, [cell.cell_id, runningCellId]);
-  const isQueued = React.useMemo(() => runQueue.includes(cell.cell_id), [cell.cell_id, runQueue]);
+  const queueIndex = React.useMemo(() => runQueue.findIndex((cell_id) => cell_id === cell.cell_id), [
+    cell.cell_id,
+    runQueue,
+  ]);
+  const isQueued = React.useMemo(() => queueIndex >= 0, [queueIndex]);
 
   const dispatch = useDispatch();
   const dispatchUnlockCell = React.useCallback(
