@@ -41,3 +41,7 @@ jobs:
       - name: Run eslint
         working-directory: ./desktop
         run: yarn lint
+
+      - name: Run validate
+        working-directory: ./desktop
+        run: yarn validate
