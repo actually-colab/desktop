@@ -334,7 +334,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
     case EXECUTE_CODE.QUEUE:
       return {
         ...state,
-        runQueue: [...state.runQueue, action.cell_id],
+        runQueue: [...state.runQueue.filter((cell_id) => cell_id !== action.cell_id), action.cell_id],
       };
     case EXECUTE_CODE.START:
       return {
