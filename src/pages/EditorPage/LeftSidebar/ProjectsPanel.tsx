@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
  * The projects panel for the left sidebar of the editor page
  */
 const ProjectsPanel: React.FC = () => {
-  const projects = useSelector((state: ReduxState) => state.editor.projects);
+  const notebooks = useSelector((state: ReduxState) => state.editor.notebooks);
 
   const [showCreateProject, setShowCreateProject] = React.useState<boolean>(false);
   const [newProjectName, setNewProjectName] = React.useState<string>('');
@@ -71,8 +71,8 @@ const ProjectsPanel: React.FC = () => {
         <Dropdown.Item eventKey="edited">Sort by edited</Dropdown.Item>
       </PopoverDropdown>
 
-      {projects.map((project) => (
-        <div key={project.nb_id} className={css(styles.project)}>
+      {notebooks.map((notebook) => (
+        <div key={notebook.nb_id} className={css(styles.project)}>
           <Button
             block
             style={{
@@ -81,7 +81,7 @@ const ProjectsPanel: React.FC = () => {
               color: palette.PRIMARY,
             }}
           >
-            {project.name}
+            {notebook.name}
           </Button>
         </div>
       ))}
