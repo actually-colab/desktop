@@ -14,6 +14,7 @@ import OutputCell from './OutputCell';
 import ColoredIconButton from './ColoredIconButton';
 import IconTextButton from './IconTextButton';
 import useKernelStatus from '../kernel/useKernelStatus';
+import { selectIfExists } from '../utils/spreadable';
 
 const styles = StyleSheet.create({
   container: {
@@ -234,4 +235,19 @@ const NotebookCell: React.FC<{ cell: EditorCell }> = ({ cell }) => {
   );
 };
 
-export default NotebookCell;
+/**
+ * Verify cell exists before creating cell
+ */
+const NotebookCellWrapper: React.FC<{ cell_id: EditorCell['cell_id'] }> = ({ cell_id }) => {
+  const cells = useSelector((state: ReduxState) => state.editor.cells);
+
+  const cell = React.useMemo(() => selectIfExists<EditorCell>(cells, cell_id) ?? null, [cell_id, cells]);
+
+  if (cell !== null) {
+    return <NotebookCell cell={cell} />;
+  } else {
+    return <React.Fragment />;
+  }
+};
+
+export default NotebookCellWrapper;

@@ -10,6 +10,7 @@ import { EditorCell } from '../../../types/notebook';
 import useKernelStatus from '../../../kernel/useKernelStatus';
 import { ColoredIconButton, Header, PopoverDropdown, StatusIndicator, UserAvatar } from '../../../components';
 import { StatusIndicatorProps } from '../../../components/StatusIndicator';
+import { selectIfExists } from '../../../utils/spreadable';
 
 const styles = StyleSheet.create({
   header: {
@@ -39,6 +40,7 @@ const EditorHeader: React.FC = () => {
   const { kernel, kernelStatus, kernelStatusColor, kernelIsConnected } = useKernelStatus();
 
   const gatewayUri = useSelector((state: ReduxState) => state.editor.gatewayUri);
+  const notebook = useSelector((state: ReduxState) => state.editor.notebook);
   const cells = useSelector((state: ReduxState) => state.editor.cells);
   const connectToKernelErrorMessage = useSelector((state: ReduxState) => state.editor.connectToKernelErrorMessage);
   const isAddingCell = useSelector((state: ReduxState) => state.editor.isAddingCell);
@@ -49,13 +51,15 @@ const EditorHeader: React.FC = () => {
   const [outputSelection, setOutputSelection] = React.useState<string>(gatewayUri);
   const [showDeleteCell, setShowDeleteCell] = React.useState<boolean>(false);
 
-  const lockedCell = React.useMemo(() => cells.find((cell) => cell.cell_id === lockedCellId) ?? null, [
+  const lockedCell = React.useMemo(() => selectIfExists<EditorCell>(cells, lockedCellId) ?? null, [
     cells,
     lockedCellId,
   ]);
   const selectedCell = React.useMemo(
-    () => cells.find((cell) => cell.cell_id === selectedCellId) ?? (cells.length > 0 ? cells[0] : null),
-    [cells, selectedCellId]
+    () =>
+      selectIfExists<EditorCell>(cells, selectedCellId) ??
+      (notebook.cell_ids.length > 0 ? selectIfExists<EditorCell>(cells, notebook.cell_ids[0]) ?? null : null),
+    [cells, notebook.cell_ids, selectedCellId]
   );
 
   const statusTooltip = React.useMemo<StatusIndicatorProps['tooltipOptions']>(

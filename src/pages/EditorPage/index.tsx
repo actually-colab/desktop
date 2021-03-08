@@ -52,7 +52,7 @@ const EditorPage: React.FC = () => {
   // Include the notebooks
   useNotebooks();
 
-  const cells = useSelector((state: ReduxState) => state.editor.cells);
+  const notebook = useSelector((state: ReduxState) => state.editor.notebook);
 
   return (
     <div className={css(styles.container)}>
@@ -64,8 +64,8 @@ const EditorPage: React.FC = () => {
         <div className={css(styles.page)}>
           <div className={css(styles.bodyContainer)}>
             <div className={css(styles.body)}>
-              {cells.map((cell) => (
-                <NotebookCell key={cell.cell_id} cell={cell} />
+              {notebook.cell_ids.map((cell_id) => (
+                <NotebookCell key={cell_id} cell_id={cell_id} />
               ))}
             </div>
           </div>
