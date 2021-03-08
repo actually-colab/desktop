@@ -27,12 +27,11 @@ const DownloadsPanel: React.FC = () => {
 
     return isSupported;
   }, []);
-  const name = React.useMemo(() => notebook?.name ?? '', [notebook?.name]);
   const uid = React.useMemo(() => user?.uid ?? '', [user?.uid]);
 
   const onClickDownload = React.useCallback(() => {
-    download(name, uid, cells, outputs);
-  }, [cells, name, outputs, uid]);
+    download(notebook, uid, cells, outputs);
+  }, [cells, notebook, outputs, uid]);
 
   return (
     <div className="markdown-container">

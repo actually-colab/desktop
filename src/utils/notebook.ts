@@ -1,16 +1,30 @@
 import { saveAs } from 'file-saver';
 
 import { IpynbCell, IpynbNotebook, IpynbOutput } from '../types/ipynb';
-import { EditorCell, KernelOutput } from '../types/notebook';
+import { EditorCell, KernelOutput, ReducedNotebook } from '../types/notebook';
 import { User } from '../types/user';
 import { filterUndefined } from './filter';
 
 import { SPLIT_KEEP_NEWLINE } from './regex';
+import { selectIfExists } from './spreadable';
 
 /**
  * A comparator for sorting kernel outputs by their message indices
  */
 export const sortOutputByMessageIndex = (a: KernelOutput, b: KernelOutput) => a.messageIndex - b.messageIndex;
+
+/**
+ * Convert an array of cells to a dictionary
+ */
+export const cellArrayToRecord = (cells: EditorCell[]): Record<EditorCell['cell_id'], EditorCell> => {
+  const cellRecord: Record<EditorCell['cell_id'], EditorCell> = {};
+
+  cells.forEach((cell) => {
+    cellRecord[cell.cell_id] = cell;
+  });
+
+  return cellRecord;
+};
 
 /**
  * Given a cells and output, convert the notebook to a JSON ipynb format
@@ -65,23 +79,34 @@ const convertToIpynb = (cells: EditorCell[], outputs: KernelOutput[]): IpynbNote
 /**
  * Download the given notebook data to an ipynb file. Only include outputs with the given uid and latest run index
  */
-export const download = (name: string, uid: User['uid'], cells: EditorCell[], outputs: KernelOutput[]) => {
+export const download = (
+  notebook: ReducedNotebook,
+  uid: User['uid'],
+  cells: Record<EditorCell['cell_id'], EditorCell>,
+  outputs: KernelOutput[]
+) => {
   const cellToRunIndex: {
     [key: string]: number;
   } = {};
+  const cellsArray: EditorCell[] = [];
 
-  cells.forEach((cell) => {
-    cellToRunIndex[cell.cell_id] = cell.runIndex;
+  notebook.cell_ids.forEach((cell_id) => {
+    const cell = selectIfExists<EditorCell>(cells, cell_id);
+
+    if (cell) {
+      cellToRunIndex[cell_id] = cell.runIndex;
+      cellsArray.push(cell);
+    }
   });
 
   const includedOutputs = outputs.filter(
     (output) => output.uid === uid && output.runIndex === cellToRunIndex[output.cell_id]
   );
-  const ipynb = convertToIpynb(cells, includedOutputs);
+  const ipynb = convertToIpynb(cellsArray, includedOutputs);
 
   const blob = new Blob([JSON.stringify(ipynb)], {
     type: 'charset=utf-8',
   });
 
-  saveAs(blob, `${name}.ipynb`);
+  saveAs(blob, `${notebook.name}.ipynb`);
 };

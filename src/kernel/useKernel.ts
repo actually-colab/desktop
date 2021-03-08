@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { ReduxState } from '../redux';
 import { _editor } from '../redux/actions';
 import { EditorCell } from '../types/notebook';
+import { selectIfExists } from '../utils/spreadable';
 
 /**
  * Hook to connect to a kernel
@@ -71,7 +72,7 @@ const useKernel = () => {
    */
   React.useEffect(() => {
     if (!isExecutingCode && runQueue.length > 0) {
-      const cell = cells.find((cell) => cell.cell_id === runQueue[0]);
+      const cell = selectIfExists<EditorCell>(cells, runQueue[0]);
 
       if (cell) {
         dispatchExecuteCode(cell);

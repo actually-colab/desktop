@@ -20,6 +20,8 @@ import { KernelLog } from '../types/kernel';
 import { BASE_CELL } from '../constants/notebook';
 import { EXAMPLE_PROJECT, EXAMPLE_PROJECT_CELLS } from '../constants/demo';
 import { DEFAULT_GATEWAY_URI } from '../constants/jupyter';
+import { cellArrayToRecord } from '../utils/notebook';
+import { selectIfExists, spreadableIfExists } from '../utils/spreadable';
 
 /**
  * The editor redux state
@@ -57,8 +59,8 @@ export interface EditorState {
   kernel: IKernel | null;
 
   notebooks: Notebook[];
-  notebook: ReducedNotebook | null;
-  cells: EditorCell[];
+  notebook: ReducedNotebook;
+  cells: Record<EditorCell['cell_id'], EditorCell>;
   outputs: KernelOutput[];
   logs: KernelLog[];
 }
@@ -100,7 +102,7 @@ const initialState: EditorState = {
     ...EXAMPLE_PROJECT,
     cell_ids: EXAMPLE_PROJECT_CELLS.map((cell) => cell.cell_id),
   },
-  cells: EXAMPLE_PROJECT_CELLS,
+  cells: cellArrayToRecord(EXAMPLE_PROJECT_CELLS),
   outputs: [],
   logs: [],
 };
@@ -258,17 +260,24 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         isAddingCell: true,
       };
     case ADD_CELL.SUCCESS: {
-      const newCells = [...state.cells];
+      const newCellIds = [...(state.notebook?.cell_ids ?? [])];
 
-      newCells.splice(action.index === -1 ? newCells.length : action.index, 0, {
-        ...BASE_CELL,
-        cell_id: action.cell_id,
-      });
+      newCellIds.splice(action.index === -1 ? newCellIds.length : action.index, 0, action.cell_id);
 
       return {
         ...state,
         isAddingCell: action.isMe ? false : state.isAddingCell,
-        cells: newCells,
+        notebook: {
+          ...state.notebook,
+          cell_ids: newCellIds,
+        },
+        cells: {
+          ...state.cells,
+          [action.cell_id]: {
+            ...BASE_CELL,
+            cell_id: action.cell_id,
+          },
+        },
       };
     }
     case ADD_CELL.FAILURE:
@@ -286,17 +295,19 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
 
       // If the selected cell is deleted, the selected cell should become the next cell or remain the last
       if (state.selectedCellId === action.cell_id) {
-        const currentIndex = state.cells.findIndex((cell) => cell.cell_id === state.selectedCellId);
+        const currentIndex = state.notebook.cell_ids.findIndex((cell_id) => cell_id === state.selectedCellId);
         const nextIndex = currentIndex >= 0 ? currentIndex + 1 : 0;
 
-        if (nextIndex <= state.cells.length - 1) {
-          selectionChanges.selectedCellId = state.cells[nextIndex].cell_id;
-        } else if (state.cells.length > 1) {
-          selectionChanges.selectedCellId = state.cells[state.cells.length - 2].cell_id;
+        if (nextIndex <= state.notebook.cell_ids.length - 1) {
+          selectionChanges.selectedCellId = state.notebook.cell_ids[nextIndex];
+        } else if (state.notebook.cell_ids.length > 1) {
+          selectionChanges.selectedCellId = state.notebook.cell_ids[state.notebook.cell_ids.length - 2];
         } else {
           selectionChanges.selectedCellId = '';
         }
       }
+
+      const { [action.cell_id]: deletedCell, ...restOfCells } = state.cells;
 
       return {
         ...state,
@@ -304,7 +315,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         isDeletingCell: action.isMe ? false : state.isDeletingCell,
         lockedCellId: action.isMe ? '' : state.lockedCellId,
         lockedCells: state.lockedCells.filter((lock) => lock.cell_id !== action.cell_id),
-        cells: state.cells.filter((cell) => cell.cell_id !== action.cell_id),
+        cells: restOfCells,
         outputs: state.outputs.filter((output) => output.cell_id !== action.cell_id),
         runQueue: state.runQueue.filter((cell_id) => cell_id !== action.cell_id),
       };
@@ -333,14 +344,10 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...state,
         ...runQueueChanges,
         isEditingCell: action.isMe ? false : state.isDeletingCell,
-        cells: state.cells.map<EditorCell>((cell) =>
-          cell.cell_id === action.cell_id
-            ? {
-                ...cell,
-                ...action.changes,
-              }
-            : cell
-        ),
+        cells: {
+          ...state.cells,
+          ...spreadableIfExists<EditorCell>(state.cells, action.cell_id, action.changes),
+        },
       };
     }
     case EDIT_CELL.FAILURE:
@@ -355,14 +362,16 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
       };
     case SELECT_CELL.NEXT: {
       const currentIndex =
-        state.selectedCellId === '' ? -1 : state.cells.findIndex((cell) => cell.cell_id === state.selectedCellId);
+        state.selectedCellId === ''
+          ? -1
+          : state.notebook.cell_ids.findIndex((cell_id) => cell_id === state.selectedCellId);
       const nextIndex = state.selectedCellId === '' ? 1 : currentIndex === -1 ? 0 : currentIndex + 1;
 
-      if (nextIndex >= state.cells.length) {
-        if (state.cells.length > 0) {
+      if (nextIndex >= state.notebook.cell_ids.length) {
+        if (state.notebook.cell_ids.length > 0) {
           return {
             ...state,
-            selectedCellId: state.cells[state.cells.length - 1].cell_id,
+            selectedCellId: state.notebook.cell_ids[state.notebook.cell_ids.length - 1],
           };
         } else {
           return state;
@@ -371,7 +380,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
 
       return {
         ...state,
-        selectedCellId: state.cells[nextIndex].cell_id,
+        selectedCellId: state.notebook.cell_ids[nextIndex],
       };
     }
     case EXECUTE_CODE.QUEUE:
@@ -393,14 +402,15 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         isExecutingCode: false,
         runningCellId: '',
         executionCount: action.runIndex,
-        cells: state.cells.map<EditorCell>((cell) =>
-          cell.cell_id === action.cell_id
-            ? {
-                ...cell,
-                runIndex: action.runIndex > state.executionCount ? action.runIndex : cell.runIndex,
-              }
-            : cell
-        ),
+        cells: {
+          ...state.cells,
+          ...spreadableIfExists<EditorCell>(state.cells, action.cell_id, {
+            runIndex:
+              action.runIndex > state.executionCount
+                ? action.runIndex
+                : selectIfExists<EditorCell>(state.cells, action.cell_id)?.runIndex,
+          }),
+        },
       };
     case EXECUTE_CODE.FAILURE:
       return {
@@ -408,14 +418,15 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         isExecutingCode: false,
         runningCellId: '',
         executionCount: action.runIndex,
-        cells: state.cells.map<EditorCell>((cell) =>
-          cell.cell_id === action.cell_id
-            ? {
-                ...cell,
-                runIndex: action.runIndex > state.executionCount ? action.runIndex : cell.runIndex,
-              }
-            : cell
-        ),
+        cells: {
+          ...state.cells,
+          ...spreadableIfExists<EditorCell>(state.cells, action.cell_id, {
+            runIndex:
+              action.runIndex > state.executionCount
+                ? action.runIndex
+                : selectIfExists<EditorCell>(state.cells, action.cell_id)?.runIndex,
+          }),
+        },
         runQueue: [],
       };
     case KERNEL_MESSAGE.RECEIVE:
@@ -426,26 +437,25 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
     case KERNEL_MESSAGE.UPDATE_RUN_INDEX:
       return {
         ...state,
-        cells: state.cells.map<EditorCell>((cell) =>
-          cell.cell_id === action.cell_id
-            ? {
-                ...cell,
-                runIndex: action.runIndex > state.executionCount ? action.runIndex : cell.runIndex,
-              }
-            : cell
-        ),
+        cells: {
+          ...state.cells,
+          ...spreadableIfExists<EditorCell>(state.cells, action.cell_id, {
+            runIndex:
+              action.runIndex > state.executionCount
+                ? action.runIndex
+                : selectIfExists<EditorCell>(state.cells, action.cell_id)?.runIndex,
+          }),
+        },
       };
     case EDIT_CELL.UPDATE_CODE:
       return {
         ...state,
-        cells: state.cells.map<EditorCell>((cell) =>
-          cell.cell_id === action.cell_id
-            ? {
-                ...cell,
-                code: action.code,
-              }
-            : cell
-        ),
+        cells: {
+          ...state.cells,
+          ...spreadableIfExists<EditorCell>(state.cells, action.cell_id, {
+            code: action.code,
+          }),
+        },
       };
     default:
       return state;
