@@ -11,13 +11,14 @@ import {
   KERNEL_LOG,
   KERNEL_MESSAGE,
   LOCK_CELL,
+  NOTEBOOKS,
   SELECT_CELL,
   UNLOCK_CELL,
 } from '../types/redux/editor';
-import { EditorCell, KernelOutput, Lock, ReducedNotebook } from '../types/notebook';
+import { EditorCell, KernelOutput, Lock, Notebook, ReducedNotebook } from '../types/notebook';
 import { KernelLog } from '../types/kernel';
 import { BASE_CELL } from '../constants/notebook';
-import { exampleProject } from '../constants/demo';
+import { EXAMPLE_PROJECT, EXAMPLE_PROJECT_CELLS } from '../constants/demo';
 import { DEFAULT_GATEWAY_URI } from '../constants/jupyter';
 
 /**
@@ -30,6 +31,12 @@ export interface EditorState {
   isConnectingToKernel: boolean;
   isReconnectingToKernel: boolean;
   connectToKernelErrorMessage: string;
+
+  isGettingNotebooks: boolean;
+  getNotebooksErrorMessage: string;
+  getNotebooksTimestamp: Date | null;
+
+  isCreatingNotebook: boolean;
 
   isLockingCell: boolean;
   isUnlockingCell: boolean;
@@ -49,7 +56,7 @@ export interface EditorState {
   gatewayUri: string;
   kernel: IKernel | null;
 
-  notebooks: ReducedNotebook[];
+  notebooks: Notebook[];
   notebook: ReducedNotebook | null;
   cells: EditorCell[];
   outputs: KernelOutput[];
@@ -63,6 +70,12 @@ const initialState: EditorState = {
   isConnectingToKernel: false,
   isReconnectingToKernel: false,
   connectToKernelErrorMessage: '',
+
+  isGettingNotebooks: false,
+  getNotebooksErrorMessage: '',
+  getNotebooksTimestamp: null,
+
+  isCreatingNotebook: false,
 
   isLockingCell: false,
   isUnlockingCell: false,
@@ -82,23 +95,12 @@ const initialState: EditorState = {
   gatewayUri: DEFAULT_GATEWAY_URI,
   kernel: null,
 
-  notebooks: [
-    {
-      nb_id: 0,
-      name: 'Example Project',
-      users: [],
-      access_level: 'Full Access',
-      cell_ids: [],
-    },
-  ],
+  notebooks: [EXAMPLE_PROJECT],
   notebook: {
-    nb_id: 0,
-    name: 'Example Project',
-    users: [],
-    access_level: 'Full Access',
-    cell_ids: [],
+    ...EXAMPLE_PROJECT,
+    cell_ids: EXAMPLE_PROJECT_CELLS.map((cell) => cell.cell_id),
   },
-  cells: exampleProject.cells,
+  cells: EXAMPLE_PROJECT_CELLS,
   outputs: [],
   logs: [],
 };
@@ -174,6 +176,41 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         runningCellId: '',
         runQueue: [],
         kernel: null,
+      };
+    case NOTEBOOKS.GET.START:
+      return {
+        ...state,
+        isGettingNotebooks: true,
+        getNotebooksErrorMessage: '',
+      };
+    case NOTEBOOKS.GET.SUCCESS:
+      return {
+        ...state,
+        isGettingNotebooks: false,
+        notebooks: [EXAMPLE_PROJECT, ...action.notebooks],
+        getNotebooksTimestamp: new Date(),
+      };
+    case NOTEBOOKS.GET.FAILURE:
+      return {
+        ...state,
+        isGettingNotebooks: false,
+        getNotebooksErrorMessage: action.error.message,
+      };
+    case NOTEBOOKS.CREATE.START:
+      return {
+        ...state,
+        isCreatingNotebook: true,
+      };
+    case NOTEBOOKS.CREATE.SUCCESS:
+      return {
+        ...state,
+        isCreatingNotebook: false,
+        notebooks: [...state.notebooks, action.notebook],
+      };
+    case NOTEBOOKS.CREATE.FAILURE:
+      return {
+        ...state,
+        isCreatingNotebook: false,
       };
     case LOCK_CELL.START:
       return {

@@ -199,13 +199,13 @@ const EditorHeader: React.FC = () => {
         </div>
       </div>
 
-      <Modal size="xs" show={showDeleteCell} onHide={() => setShowDeleteCell(false)}>
+      <Modal size="xs" show={showDeleteCell} onHide={() => !isDeletingCell && setShowDeleteCell(false)}>
         <Modal.Header>
           <Modal.Title>Are you sure you want to delete the cell?</Modal.Title>
         </Modal.Header>
         <Modal.Body>You cannot undo this action</Modal.Body>
         <Modal.Footer>
-          <Button appearance="subtle" onClick={() => setShowDeleteCell(false)}>
+          <Button appearance="subtle" disabled={isDeletingCell} onClick={() => setShowDeleteCell(false)}>
             Cancel
           </Button>
           <Button appearance="primary" loading={isDeletingCell} onClick={dispatchDeleteCell}>

@@ -26,6 +26,7 @@
     "start:kernel:prod": "jupyter kernelgateway --KernelGatewayApp.allow_origin=\"https://app.actuallycolab.org\" --KernelGatewayApp.allow_headers=\"content-type\" --KernelGatewayApp.allow_methods=\"*\"",
     "build": "react-scripts build",
     "build:client": "cd ../editor/client && git pull && yarn install && yarn build",
+    "upgrade:client": "yarn build:client && yarn upgrade @actually-colab/editor-client",
     "install:client": "yarn build:client && yarn remove @actually-colab/editor-client && yarn add file:../editor/client",
     "postinstall": "husky install && yarn yarn-deduplicate yarn.lock",
     "predeploy": "yarn build",

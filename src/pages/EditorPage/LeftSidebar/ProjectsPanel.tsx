@@ -1,9 +1,10 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import { Button, Dropdown, Icon, Input, InputGroup, Modal } from 'rsuite';
+import { Button, Dropdown, Icon, IconButton, Input, InputGroup, Modal } from 'rsuite';
 
 import { ReduxState } from '../../../redux';
+import { _editor } from '../../../redux/actions';
 import { palette, spacing } from '../../../constants/theme';
 import { PopoverDropdown } from '../../../components';
 
@@ -17,6 +18,12 @@ const styles = StyleSheet.create({
   searchContainer: {
     marginBottom: spacing.DEFAULT,
   },
+  projectListHeader: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   sortText: {},
   project: {
     marginBottom: spacing.DEFAULT / 2,
@@ -27,10 +34,29 @@ const styles = StyleSheet.create({
  * The projects panel for the left sidebar of the editor page
  */
 const ProjectsPanel: React.FC = () => {
+  const isGettingNotebooks = useSelector((state: ReduxState) => state.editor.isGettingNotebooks);
+  const isCreatingNotebook = useSelector((state: ReduxState) => state.editor.isCreatingNotebook);
   const notebooks = useSelector((state: ReduxState) => state.editor.notebooks);
+  const notebook = useSelector((state: ReduxState) => state.editor.notebook);
 
   const [showCreateProject, setShowCreateProject] = React.useState<boolean>(false);
   const [newProjectName, setNewProjectName] = React.useState<string>('');
+
+  const dispatch = useDispatch();
+  const dispatchGetNotebooks = React.useCallback(() => dispatch(_editor.getNotebooks()), [dispatch]);
+  const dispatchCreateNotebook = React.useCallback(() => dispatch(_editor.createNotebook(newProjectName)), [
+    dispatch,
+    newProjectName,
+  ]);
+
+  /**
+   * Auto close modal when create project switches to false
+   */
+  React.useEffect(() => {
+    if (!isCreatingNotebook) {
+      setShowCreateProject(false);
+    }
+  }, [isCreatingNotebook]);
 
   return (
     <React.Fragment>
@@ -59,34 +85,48 @@ const ProjectsPanel: React.FC = () => {
         </InputGroup>
       </div>
 
-      <PopoverDropdown
-        placement="rightStart"
-        buttonContent={<span className={css(styles.sortText)}>Sort by name</span>}
-        activeKey="name"
-        buttonProps={{
-          ripple: false,
-        }}
-      >
-        <Dropdown.Item eventKey="name">Sort by name</Dropdown.Item>
-        <Dropdown.Item eventKey="edited">Sort by edited</Dropdown.Item>
-      </PopoverDropdown>
+      <div className={css(styles.projectListHeader)}>
+        <PopoverDropdown
+          placement="rightStart"
+          buttonContent={<span className={css(styles.sortText)}>Sort by name</span>}
+          activeKey="name"
+          buttonProps={{
+            ripple: false,
+          }}
+        >
+          <Dropdown.Item eventKey="name">Sort by name</Dropdown.Item>
+          <Dropdown.Item eventKey="edited">Sort by edited</Dropdown.Item>
+        </PopoverDropdown>
 
-      {notebooks.map((notebook) => (
-        <div key={notebook.nb_id} className={css(styles.project)}>
+        <IconButton
+          icon={<Icon icon="refresh" />}
+          appearance="subtle"
+          loading={isGettingNotebooks}
+          onClick={dispatchGetNotebooks}
+        />
+      </div>
+
+      {notebooks.map((project) => (
+        <div key={project.nb_id} className={css(styles.project)}>
           <Button
             block
             style={{
               textAlign: 'left',
-              background: palette.PRIMARY_LIGHT,
-              color: palette.PRIMARY,
+              ...(project.nb_id === notebook?.nb_id
+                ? {
+                    background: palette.PRIMARY_LIGHT,
+                    color: palette.PRIMARY,
+                  }
+                : {}),
             }}
+            onClick={() => project.nb_id !== notebook?.nb_id && console.log('TODO', project)}
           >
-            {notebook.name}
+            {project.name}
           </Button>
         </div>
       ))}
 
-      <Modal size="xs" show={showCreateProject} onHide={() => setShowCreateProject(false)}>
+      <Modal size="xs" show={showCreateProject} onHide={() => !isCreatingNotebook && setShowCreateProject(false)}>
         <Modal.Header>
           <Modal.Title>New Project Details</Modal.Title>
         </Modal.Header>
@@ -98,10 +138,12 @@ const ProjectsPanel: React.FC = () => {
           />
         </Modal.Body>
         <Modal.Footer>
-          <Button appearance="subtle" onClick={() => setShowCreateProject(false)}>
+          <Button appearance="subtle" disabled={isCreatingNotebook} onClick={() => setShowCreateProject(false)}>
             Cancel
           </Button>
-          <Button appearance="primary">Create</Button>
+          <Button appearance="primary" loading={isCreatingNotebook} onClick={dispatchCreateNotebook}>
+            Create
+          </Button>
         </Modal.Footer>
       </Modal>
     </React.Fragment>

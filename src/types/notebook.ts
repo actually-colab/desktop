@@ -63,8 +63,6 @@ export type Notebook = {
   nb_id: number;
   name: string;
   users: (User & { access_level: NotebookAccessLevel['access_level'] })[];
-  access_level: 'Full Access' | 'Read Only';
-  cells: EditorCell[];
 };
 
 /**

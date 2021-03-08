@@ -9,6 +9,7 @@ import useKernel from '../../kernel/useKernel';
 import { NotebookCell } from '../../components';
 
 import { EditorHeader, LeftSidebar, RightSidebar } from './components';
+import useNotebooks from './hooks/useNotebooks';
 
 const styles = StyleSheet.create({
   container: {
@@ -48,6 +49,8 @@ const styles = StyleSheet.create({
 const EditorPage: React.FC = () => {
   // Include the kernel manager once
   useKernel();
+  // Include the notebooks
+  useNotebooks();
 
   const cells = useSelector((state: ReduxState) => state.editor.cells);
 
