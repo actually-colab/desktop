@@ -6,7 +6,7 @@ import { BASE_CELL } from './notebook';
  * A demo project
  */
 export const EXAMPLE_PROJECT: Notebook = {
-  nb_id: -2,
+  nb_id: 'DEMO',
   name: 'Example Project',
   users: [],
 };

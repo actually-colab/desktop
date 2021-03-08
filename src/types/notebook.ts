@@ -60,7 +60,7 @@ export type NotebookAccessLevel = {
  * A notebook
  */
 export type Notebook = {
-  nb_id: number;
+  nb_id: string;
   name: string;
   users: (User & { access_level: NotebookAccessLevel['access_level'] })[];
 };

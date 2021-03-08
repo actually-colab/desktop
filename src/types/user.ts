@@ -2,7 +2,7 @@
  * A user
  */
 export type User = {
-  uid: number;
+  uid: string;
   name: string;
   email: string;
 };

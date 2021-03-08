@@ -170,7 +170,7 @@ const EditorHeader: React.FC = () => {
               <UserAvatar
                 placement="bottomEnd"
                 user={{
-                  uid: 1, // TODO
+                  uid: 'BAILEY', // TODO
                   name: 'Bailey Tincher',
                   email: 'bailey@test.com',
                 }}

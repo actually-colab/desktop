@@ -28,7 +28,7 @@ const DownloadsPanel: React.FC = () => {
     return isSupported;
   }, []);
   const name = React.useMemo(() => notebook?.name ?? '', [notebook?.name]);
-  const uid = React.useMemo(() => user?.uid ?? -1, [user?.uid]);
+  const uid = React.useMemo(() => user?.uid ?? '', [user?.uid]);
 
   const onClickDownload = React.useCallback(() => {
     download(name, uid, cells, outputs);
