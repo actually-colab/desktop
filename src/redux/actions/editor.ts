@@ -251,7 +251,7 @@ export const getNotebooks = (): EditorAsyncActionTypes => async (dispatch) => {
   try {
     const res = await client.getNotebooksForUser();
 
-    dispatch(getNotebooksSuccess(res?.data ?? []));
+    dispatch(getNotebooksSuccess(res ?? []));
   } catch (error) {
     console.error(error);
     dispatch(getNotebooksFailure(error.message));
