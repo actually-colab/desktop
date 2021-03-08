@@ -33,7 +33,7 @@ In order to setup this repo, you also must clone the [editor repo](https://githu
 If the `editor/client` changes, you can install the latest version in the `desktop` repo by running:
 
 ```bash
-yarn install:client
+yarn upgrade:client
 ```
 
 This will automatically pull the latest client (assuming proper directory structure), install and build it, remove it from `desktop` and add it back. This complicated process seems to be required from an issue where `yarn install` doesn't pick up the latest build of the local package.
