@@ -36,6 +36,8 @@ export interface EditorState {
   getNotebooksErrorMessage: string;
   getNotebooksTimestamp: Date | null;
 
+  isCreatingNotebook: boolean;
+
   isLockingCell: boolean;
   isUnlockingCell: boolean;
   isAddingCell: boolean;
@@ -72,6 +74,8 @@ const initialState: EditorState = {
   isGettingNotebooks: false,
   getNotebooksErrorMessage: '',
   getNotebooksTimestamp: null,
+
+  isCreatingNotebook: false,
 
   isLockingCell: false,
   isUnlockingCell: false,
@@ -191,6 +195,22 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...state,
         isGettingNotebooks: false,
         getNotebooksErrorMessage: action.error.message,
+      };
+    case NOTEBOOKS.CREATE.START:
+      return {
+        ...state,
+        isCreatingNotebook: true,
+      };
+    case NOTEBOOKS.CREATE.SUCCESS:
+      return {
+        ...state,
+        isCreatingNotebook: false,
+        notebooks: [...state.notebooks, action.notebook],
+      };
+    case NOTEBOOKS.CREATE.FAILURE:
+      return {
+        ...state,
+        isCreatingNotebook: false,
       };
     case LOCK_CELL.START:
       return {

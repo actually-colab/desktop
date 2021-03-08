@@ -29,6 +29,11 @@ export const NOTEBOOKS = {
     SUCCESS: 'NOTEBOOKS_GET_SUCCESS',
     FAILURE: 'NOTEBOOKS_GET_FAILURE',
   },
+  CREATE: {
+    START: 'NOTEBOOKS_CREATE_START',
+    SUCCESS: 'NOTEBOOKS_CREATE_SUCCESS',
+    FAILURE: 'NOTEBOOKS_CREATE_FAILURE',
+  },
 } as const;
 export const LOCK_CELL = {
   START: 'LOCK_CELL_START',
@@ -147,6 +152,19 @@ type NotebooksGetSuccessAction = {
 
 type NotebooksGetFailureAction = {
   type: typeof NOTEBOOKS.GET.FAILURE;
+} & ActionError;
+
+type NotebooksCreateStartAction = {
+  type: typeof NOTEBOOKS.CREATE.START;
+};
+
+type NotebooksCreateSuccessAction = {
+  type: typeof NOTEBOOKS.CREATE.SUCCESS;
+  notebook: Notebook;
+};
+
+type NotebooksCreateFailureAction = {
+  type: typeof NOTEBOOKS.CREATE.FAILURE;
 } & ActionError;
 
 type LockCellStartAction = {
@@ -309,6 +327,9 @@ export type EditorActionTypes =
   | NotebooksGetStartAction
   | NotebooksGetSuccessAction
   | NotebooksGetFailureAction
+  | NotebooksCreateStartAction
+  | NotebooksCreateSuccessAction
+  | NotebooksCreateFailureAction
   | LockCellStartAction
   | LockCellSuccessAction
   | LockCellFailureAction

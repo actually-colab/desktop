@@ -35,6 +35,7 @@ const styles = StyleSheet.create({
  */
 const ProjectsPanel: React.FC = () => {
   const isGettingNotebooks = useSelector((state: ReduxState) => state.editor.isGettingNotebooks);
+  const isCreatingNotebook = useSelector((state: ReduxState) => state.editor.isCreatingNotebook);
   const notebooks = useSelector((state: ReduxState) => state.editor.notebooks);
   const notebook = useSelector((state: ReduxState) => state.editor.notebook);
 
@@ -43,6 +44,19 @@ const ProjectsPanel: React.FC = () => {
 
   const dispatch = useDispatch();
   const dispatchGetNotebooks = React.useCallback(() => dispatch(_editor.getNotebooks()), [dispatch]);
+  const dispatchCreateNotebook = React.useCallback(() => dispatch(_editor.createNotebook(newProjectName)), [
+    dispatch,
+    newProjectName,
+  ]);
+
+  /**
+   * Auto close modal when create project switches to false
+   */
+  React.useEffect(() => {
+    if (!isCreatingNotebook) {
+      setShowCreateProject(false);
+    }
+  }, [isCreatingNotebook]);
 
   return (
     <React.Fragment>
@@ -112,7 +126,7 @@ const ProjectsPanel: React.FC = () => {
         </div>
       ))}
 
-      <Modal size="xs" show={showCreateProject} onHide={() => setShowCreateProject(false)}>
+      <Modal size="xs" show={showCreateProject} onHide={() => !isCreatingNotebook && setShowCreateProject(false)}>
         <Modal.Header>
           <Modal.Title>New Project Details</Modal.Title>
         </Modal.Header>
@@ -124,10 +138,12 @@ const ProjectsPanel: React.FC = () => {
           />
         </Modal.Body>
         <Modal.Footer>
-          <Button appearance="subtle" onClick={() => setShowCreateProject(false)}>
+          <Button appearance="subtle" disabled={isCreatingNotebook} onClick={() => setShowCreateProject(false)}>
             Cancel
           </Button>
-          <Button appearance="primary">Create</Button>
+          <Button appearance="primary" loading={isCreatingNotebook} onClick={dispatchCreateNotebook}>
+            Create
+          </Button>
         </Modal.Footer>
       </Modal>
     </React.Fragment>

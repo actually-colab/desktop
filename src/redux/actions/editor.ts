@@ -266,6 +266,46 @@ export const getNotebooks = (): EditorAsyncActionTypes => async (dispatch) => {
   }
 };
 
+const createNotebookStart = (): EditorActionTypes => ({
+  type: NOTEBOOKS.CREATE.START,
+});
+
+const createNotebookSuccess = (notebook: Notebook): EditorActionTypes => ({
+  type: NOTEBOOKS.CREATE.SUCCESS,
+  notebook,
+});
+
+const createNotebookFailure = (errorMessage: string): EditorActionTypes => ({
+  type: NOTEBOOKS.CREATE.FAILURE,
+  error: {
+    message: errorMessage,
+  },
+});
+
+/**
+ * Create a notebook with the given name
+ */
+export const createNotebook = (name: string): EditorAsyncActionTypes => async (dispatch) => {
+  dispatch(createNotebookStart());
+
+  try {
+    const res = await client.createNotebook(name);
+
+    dispatch(createNotebookSuccess(res));
+  } catch (error) {
+    console.error(error);
+    dispatch(createNotebookFailure(error.message));
+    dispatch(
+      _ui.notify({
+        level: 'error',
+        title: 'Error',
+        message: 'Failed to create your notebook!',
+        duration: 3000,
+      })
+    );
+  }
+};
+
 const lockCellStart = (): EditorActionTypes => ({
   type: LOCK_CELL.START,
 });
