@@ -2,6 +2,11 @@ import { Map as ImmutableMap } from 'immutable';
 
 type ValueOf<T> = T[keyof T];
 
+/**
+ * An ImmutableMap override that is aware of your object properties.
+ *
+ * Note: if you need an immutable inside an immutable, you must define that on your type.
+ */
 export interface ImmutableObject<T>
   extends Omit<ImmutableMap<string, any>, 'get' | 'set' | 'update' | 'merge' | 'toJS'> {
   cell_ids: any;
