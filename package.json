@@ -45,6 +45,7 @@
     "aphrodite": "^2.4.0",
     "date-fns": "^2.17.0",
     "file-saver": "^2.0.5",
+    "immutable": "^4.0.0-rc.12",
     "jupyter-js-services": "^0.21.1",
     "lodash.debounce": "^4.0.8",
     "react": "^17.0.1",
