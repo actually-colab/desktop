@@ -5,7 +5,7 @@ import { DisplayData, ExecuteResult, KernelOutputError, Media, Output, StreamTex
 
 import { ReduxState } from '../redux';
 import { User } from '../types/user';
-import { ImmutableEditorCell, KernelOutput } from '../types/notebook';
+import { ImmutableEditorCell } from '../types/notebook';
 import { spacing } from '../constants/theme';
 import { sortImmutableOutputByMessageIndex } from '../utils/notebook';
 

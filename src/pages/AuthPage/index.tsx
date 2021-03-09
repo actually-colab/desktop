@@ -60,8 +60,6 @@ const styles = StyleSheet.create({
  * The auth page
  */
 const AuthPage: React.FC = () => {
-  const isSigningIn = useSelector((state: ReduxState) => state.auth.isSigningIn);
-
   const dispatch = useDispatch();
   const dispatchGoogleSignIn = React.useCallback((token: string) => dispatch(_auth.googleSignIn(token)), [dispatch]);
 
