@@ -28,19 +28,15 @@ const OutputCell: React.FC<{ cell: ImmutableEditorCell; uid?: User['uid'] }> = (
   const cellOutputs = React.useMemo(
     () =>
       outputs
-        .filter(
-          (output) =>
-            output.get('runIndex') === cell.get('runIndex') &&
-            output.get('cell_id') === cell.get('cell_id') &&
-            output.get('uid') === uid
-        )
-        .sort(sortImmutableOutputByMessageIndex),
+        .get(cell.get('cell_id'))
+        ?.filter((output) => output.get('runIndex') === cell.get('runIndex') && output.get('uid') === uid)
+        ?.sort(sortImmutableOutputByMessageIndex) ?? null,
     [cell, outputs, uid]
   );
 
   return (
     <div className={css(styles.container)}>
-      {cellOutputs.size > 0 && (
+      {cellOutputs !== null && cellOutputs.size > 0 && (
         <pre className={css(styles.output)}>
           {cellOutputs.map((output) => (
             <Output key={output.get('output_id')} output={output.get('output')}>
