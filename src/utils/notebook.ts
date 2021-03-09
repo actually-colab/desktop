@@ -11,7 +11,6 @@ import {
 } from '../types/notebook';
 import { User } from '../types/user';
 import { filterUndefined } from './filter';
-
 import { SPLIT_KEEP_NEWLINE } from './regex';
 
 /**
@@ -40,7 +39,12 @@ export const cellArrayToImmutableMap = (
 /**
  * Given a cells and output, convert the notebook to a JSON ipynb format
  */
-const convertToIpynb = (cells: EditorCell[], outputs: KernelOutput[]): IpynbNotebook => ({
+const convertToIpynb = (
+  notebookCells: {
+    cell: ImmutableEditorCell;
+    outputs?: ImmutableList<ImmutableKernelOutput>;
+  }[]
+): IpynbNotebook => ({
   nbformat: 4,
   nbformat_minor: 1,
   metadata: {
@@ -60,29 +64,29 @@ const convertToIpynb = (cells: EditorCell[], outputs: KernelOutput[]): IpynbNote
       pygments_lexer: 'ipython3',
     },
   },
-  cells: cells.map<IpynbCell>((cell) =>
-    cell.language === 'md'
+  cells: notebookCells.map<IpynbCell>(({ cell, outputs }) =>
+    cell.get('language') === 'md'
       ? {
           cell_type: 'markdown',
           metadata: {},
-          source: cell.code.split(SPLIT_KEEP_NEWLINE),
+          source: cell.get('code').split(SPLIT_KEEP_NEWLINE),
         }
       : {
           cell_type: 'code',
-          execution_count: cell.runIndex !== -1 ? cell.runIndex : null,
+          execution_count: cell.get('runIndex') !== -1 ? cell.get('runIndex') : null,
           metadata: {
             tags: [],
           },
-          outputs: outputs
-            .filter((output) => output.cell_id === cell.cell_id && output.runIndex === cell.runIndex)
-            .sort(sortOutputByMessageIndex)
-            .map<IpynbOutput>((output) =>
-              filterUndefined<IpynbOutput & { transient?: any }, IpynbOutput>({
-                ...output.output,
-                transient: undefined,
-              })
-            ),
-          source: cell.code.split(SPLIT_KEEP_NEWLINE),
+          outputs:
+            outputs
+              ?.map<IpynbOutput>((output) =>
+                filterUndefined<IpynbOutput & { transient?: any }, IpynbOutput>({
+                  ...output.get('output'),
+                  transient: undefined,
+                })
+              )
+              ?.toJS() ?? [],
+          source: cell.get('code').split(SPLIT_KEEP_NEWLINE),
         }
   ),
 });
@@ -94,26 +98,25 @@ export const download = (
   notebook: ImmutableReducedNotebook,
   uid: User['uid'],
   cells: ImmutableMap<EditorCell['cell_id'], ImmutableEditorCell>,
-  outputs: ImmutableList<ImmutableKernelOutput>
+  outputs: ImmutableMap<EditorCell['cell_id'], ImmutableList<ImmutableKernelOutput>>
 ) => {
-  const cellToRunIndex: {
-    [key: string]: number;
-  } = {};
-  const cellsArray: EditorCell[] = [];
+  const notebookData: { cell: ImmutableEditorCell; outputs?: ImmutableList<ImmutableKernelOutput> }[] = [];
 
   notebook.get('cell_ids').forEach((cell_id) => {
     const cell = cells.get(cell_id);
+    const cellOutputs = outputs.get(cell_id);
 
     if (cell) {
-      cellToRunIndex[cell_id] = cell.get('runIndex');
-      cellsArray.push(cell.toJS());
+      notebookData.push({
+        cell,
+        outputs: cellOutputs
+          ?.filter((output) => output.get('uid') === uid && output.get('runIndex') === cell.get('runIndex'))
+          ?.sort(sortImmutableOutputByMessageIndex),
+      });
     }
   });
 
-  const includedOutputs = outputs
-    .filter((output) => output.get('uid') === uid && output.get('runIndex') === cellToRunIndex[output.get('cell_id')])
-    .toJS();
-  const ipynb = convertToIpynb(cellsArray, includedOutputs);
+  const ipynb = convertToIpynb(notebookData);
 
   const blob = new Blob([JSON.stringify(ipynb)], {
     type: 'charset=utf-8',

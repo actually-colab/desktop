@@ -1,12 +1,11 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import { GoogleLoginResponse } from 'react-google-login';
 
 import { spacing } from '../../constants/theme';
 import { _auth } from '../../redux/actions';
 import { GoogleSignInButton } from '../../components';
-import { ReduxState } from '../../redux';
 
 const styles = StyleSheet.create({
   container: {

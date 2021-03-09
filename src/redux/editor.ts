@@ -68,7 +68,7 @@ export interface EditorState {
   notebooks: ImmutableList<ImmutableNotebook>;
   notebook: ImmutableReducedNotebook;
   cells: ImmutableMap<EditorCell['cell_id'], ImmutableEditorCell>;
-  outputs: ImmutableList<ImmutableKernelOutput>;
+  outputs: ImmutableMap<EditorCell['cell_id'], ImmutableList<ImmutableKernelOutput>>;
   logs: ImmutableList<ImmutableKernelLog>;
 }
 
@@ -110,7 +110,7 @@ const initialState: EditorState = {
     cell_ids: EXAMPLE_PROJECT_CELLS.map((cell) => cell.cell_id),
   }),
   cells: cellArrayToImmutableMap(EXAMPLE_PROJECT_CELLS),
-  outputs: ImmutableList(),
+  outputs: ImmutableMap(),
   logs: ImmutableList(),
 };
 
@@ -324,7 +324,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         lockedCellId: action.isMe ? '' : state.lockedCellId,
         lockedCells: state.lockedCells.filter((lock) => lock.get('cell_id') !== action.cell_id),
         cells: state.cells.delete(action.cell_id),
-        outputs: state.outputs.filter((output) => output.get('cell_id') !== action.cell_id),
+        outputs: state.outputs.remove(action.cell_id),
         runQueue: state.runQueue.filter((cell_id) => cell_id !== action.cell_id),
       };
     }
@@ -401,7 +401,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         runQueue: state.runQueue.filter((cell_id) => cell_id !== action.cell_id),
         isExecutingCode: true,
         runningCellId: action.cell_id,
-        outputs: state.outputs.filter((output) => output.get('cell_id') !== action.cell_id),
+        outputs: state.outputs.update(action.cell_id, ImmutableList(), (outputs) => outputs.clear()),
       };
     case EXECUTE_CODE.SUCCESS:
       return {
@@ -427,10 +427,12 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
     case KERNEL_MESSAGE.RECEIVE:
       return {
         ...state,
-        outputs: state.outputs.concat(
-          ImmutableList<ImmutableKernelOutput>(
-            action.messages.map<ImmutableKernelOutput>(
-              (message) => (ImmutableMap(message) as unknown) as ImmutableKernelOutput
+        outputs: state.outputs.update(action.cell_id, ImmutableList(), (outputs) =>
+          outputs.concat(
+            ImmutableList<ImmutableKernelOutput>(
+              action.messages.map<ImmutableKernelOutput>(
+                (message) => (ImmutableMap(message) as unknown) as ImmutableKernelOutput
+              )
             )
           )
         ),
