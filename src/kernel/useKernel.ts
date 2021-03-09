@@ -3,8 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { ReduxState } from '../redux';
 import { _editor } from '../redux/actions';
-import { EditorCell } from '../types/notebook';
-import { selectIfExists } from '../utils/spreadable';
+import { ImmutableEditorCell } from '../types/notebook';
 
 /**
  * Hook to connect to a kernel
@@ -37,7 +36,8 @@ const useKernel = () => {
     [dispatch]
   );
   const dispatchExecuteCode = React.useCallback(
-    (cell: EditorCell) => user !== null && kernel !== null && dispatch(_editor.executeCode(user, kernel, cell)),
+    (cell: ImmutableEditorCell) =>
+      user !== null && kernel !== null && dispatch(_editor.executeCode(user, kernel, cell)),
     [dispatch, kernel, user]
   );
   const dispatchDisconnectFromKernel = React.useCallback(
@@ -71,8 +71,8 @@ const useKernel = () => {
    * Automatically execute code from the queue
    */
   React.useEffect(() => {
-    if (!isExecutingCode && runQueue.length > 0) {
-      const cell = selectIfExists<EditorCell>(cells, runQueue[0]);
+    if (!isExecutingCode && runQueue.size > 0) {
+      const cell = cells.get(runQueue.get(0) ?? '');
 
       if (cell) {
         dispatchExecuteCode(cell);

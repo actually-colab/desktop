@@ -20,7 +20,7 @@ import {
 } from '../../types/redux/editor';
 import { User } from '../../types/user';
 import { IpynbOutput } from '../../types/ipynb';
-import { BaseKernelOutput, EditorCell, KernelOutput, Notebook } from '../../types/notebook';
+import { BaseKernelOutput, EditorCell, ImmutableEditorCell, KernelOutput, Notebook } from '../../types/notebook';
 import { _ui } from '.';
 import { KernelLog } from '../../types/kernel';
 import { KernelApi } from '../../api';
@@ -528,17 +528,17 @@ const updateRunIndex = (cell_id: EditorCell['cell_id'], runIndex: number): Edito
 /**
  * Run code against the kernel and asynchronously process kernel messages
  */
-export const executeCode = (user: User, kernel: IKernel, cell: EditorCell): EditorAsyncActionTypes => async (
+export const executeCode = (user: User, kernel: IKernel, cell: ImmutableEditorCell): EditorAsyncActionTypes => async (
   dispatch
 ) => {
-  if (cell.language !== 'py' || cell.code.trim() === '') {
+  if (cell.get('language') !== 'py' || cell.get('code').trim() === '') {
     return;
   }
 
-  dispatch(executeCodeStart(cell.cell_id));
+  dispatch(executeCodeStart(cell.get('cell_id')));
 
   const future = kernel.execute({
-    code: cell.code,
+    code: cell.get('code'),
   });
 
   let runIndex = -1;
@@ -555,11 +555,11 @@ export const executeCode = (user: User, kernel: IKernel, cell: EditorCell): Edit
         runIndex = message.content.execution_count as number;
 
         // Update the current run
-        dispatch(updateRunIndex(cell.cell_id, runIndex));
+        dispatch(updateRunIndex(cell.get('cell_id'), runIndex));
         dispatch(
           appendKernelLog({
             status: 'Info',
-            message: `Started run #${runIndex} on cell ${cell.cell_id}`,
+            message: `Started run #${runIndex} on cell ${cell.get('cell_id')}`,
           })
         );
       }
@@ -567,7 +567,7 @@ export const executeCode = (user: User, kernel: IKernel, cell: EditorCell): Edit
       const baseKernelOutput: BaseKernelOutput = {
         uid: user.uid,
         output_id: message.header.msg_id,
-        cell_id: cell.cell_id,
+        cell_id: cell.get('cell_id'),
         runIndex: -1,
         messageIndex,
       };
@@ -602,7 +602,7 @@ export const executeCode = (user: User, kernel: IKernel, cell: EditorCell): Edit
       if (runIndex !== -1) {
         // No need to queue
         dispatch(
-          receiveKernelMessage(cell.cell_id, [
+          receiveKernelMessage(cell.get('cell_id'), [
             {
               ...kernelOutput,
               runIndex,
@@ -617,7 +617,7 @@ export const executeCode = (user: User, kernel: IKernel, cell: EditorCell): Edit
       // process any messages in queue
       dispatch(
         receiveKernelMessage(
-          cell.cell_id,
+          cell.get('cell_id'),
           messageQueue.map((oldMessage) => ({ ...oldMessage, runIndex }))
         )
       );
@@ -633,20 +633,20 @@ export const executeCode = (user: User, kernel: IKernel, cell: EditorCell): Edit
   dispatch(
     appendKernelLog({
       status: threwError ? 'Error' : 'Success',
-      message: `Finished run #${runIndex} on cell ${cell.cell_id}`,
+      message: `Finished run #${runIndex} on cell ${cell.get('cell_id')}`,
     })
   );
 
   if (threwError) {
-    dispatch(executeCodeFailure(cell.cell_id, runIndex, 'Code threw an error'));
+    dispatch(executeCodeFailure(cell.get('cell_id'), runIndex, 'Code threw an error'));
   } else {
-    dispatch(executeCodeSuccess(cell.cell_id, runIndex));
+    dispatch(executeCodeSuccess(cell.get('cell_id'), runIndex));
   }
 };
 
-const executeCodeStopped = (cell: EditorCell): EditorActionTypes => ({
+const executeCodeStopped = (cell: ImmutableEditorCell): EditorActionTypes => ({
   type: EXECUTE_CODE.STOPPED,
-  cell_id: cell.cell_id,
+  cell_id: cell.get('cell_id'),
 });
 
 /**
@@ -655,7 +655,7 @@ const executeCodeStopped = (cell: EditorCell): EditorActionTypes => ({
 export const stopCodeExecution = (
   gatewayUri: string,
   kernel: IKernel,
-  cell: EditorCell
+  cell: ImmutableEditorCell
 ): EditorAsyncActionTypes => async (dispatch) => {
   try {
     await KernelApi.interrupt(gatewayUri, kernel);
