@@ -5,9 +5,9 @@ import { DisplayData, ExecuteResult, KernelOutputError, Media, Output, StreamTex
 
 import { ReduxState } from '../redux';
 import { User } from '../types/user';
-import { EditorCell } from '../types/notebook';
+import { ImmutableEditorCell, KernelOutput } from '../types/notebook';
 import { spacing } from '../constants/theme';
-import { sortOutputByMessageIndex } from '../utils/notebook';
+import { sortImmutableOutputByMessageIndex } from '../utils/notebook';
 
 const styles = StyleSheet.create({
   container: {},
@@ -22,23 +22,28 @@ const styles = StyleSheet.create({
 /**
  * A component to render the output of a cell
  */
-const OutputCell: React.FC<{ cell: EditorCell; uid?: User['uid'] }> = ({ cell, uid }) => {
+const OutputCell: React.FC<{ cell: ImmutableEditorCell; uid?: User['uid'] }> = ({ cell, uid }) => {
   const outputs = useSelector((state: ReduxState) => state.editor.outputs);
 
   const cellOutputs = React.useMemo(
     () =>
       outputs
-        .filter((output) => output.runIndex === cell.runIndex && output.cell_id === cell.cell_id && output.uid === uid)
-        .sort(sortOutputByMessageIndex),
-    [cell.cell_id, cell.runIndex, outputs, uid]
+        .filter(
+          (output) =>
+            output.get('runIndex') === cell.get('runIndex') &&
+            output.get('cell_id') === cell.get('cell_id') &&
+            output.get('uid') === uid
+        )
+        .sort(sortImmutableOutputByMessageIndex),
+    [cell, outputs, uid]
   );
 
   return (
     <div className={css(styles.container)}>
-      {cellOutputs.length > 0 && (
+      {cellOutputs.size > 0 && (
         <pre className={css(styles.output)}>
           {cellOutputs.map((output) => (
-            <Output key={output.output_id} output={output.output}>
+            <Output key={output.get('output_id')} output={output.get('output')}>
               <DisplayData>
                 <Media.HTML />
                 <Media.Image mediaType="image/png" />

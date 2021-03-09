@@ -10,7 +10,6 @@ import { EditorCell } from '../../../types/notebook';
 import useKernelStatus from '../../../kernel/useKernelStatus';
 import { ColoredIconButton, Header, PopoverDropdown, StatusIndicator, UserAvatar } from '../../../components';
 import { StatusIndicatorProps } from '../../../components/StatusIndicator';
-import { selectIfExists } from '../../../utils/spreadable';
 
 const styles = StyleSheet.create({
   header: {
@@ -51,15 +50,12 @@ const EditorHeader: React.FC = () => {
   const [outputSelection, setOutputSelection] = React.useState<string>(gatewayUri);
   const [showDeleteCell, setShowDeleteCell] = React.useState<boolean>(false);
 
-  const lockedCell = React.useMemo(() => selectIfExists<EditorCell>(cells, lockedCellId) ?? null, [
-    cells,
-    lockedCellId,
-  ]);
+  const lockedCell = React.useMemo(() => cells.get(lockedCellId) ?? null, [cells, lockedCellId]);
   const selectedCell = React.useMemo(
     () =>
-      selectIfExists<EditorCell>(cells, selectedCellId) ??
-      (notebook.cell_ids.length > 0 ? selectIfExists<EditorCell>(cells, notebook.cell_ids[0]) ?? null : null),
-    [cells, notebook.cell_ids, selectedCellId]
+      cells.get(selectedCellId) ??
+      (notebook.get('cell_ids').size > 0 ? cells.get(notebook.get('cell_ids').get(0) ?? '') ?? null : null),
+    [cells, notebook, selectedCellId]
   );
 
   const statusTooltip = React.useMemo<StatusIndicatorProps['tooltipOptions']>(
@@ -85,10 +81,10 @@ const EditorHeader: React.FC = () => {
       return;
     }
 
-    if (selectedCell.language === 'py') {
-      dispatch(_editor.addCellToQueue(selectedCell.cell_id));
+    if (selectedCell.get('language') === 'py') {
+      dispatch(_editor.addCellToQueue(selectedCell.get('cell_id')));
     } else {
-      dispatch(_editor.editCell(selectedCell.cell_id, { rendered: true }));
+      dispatch(_editor.editCell(selectedCell.get('cell_id'), { rendered: true }));
     }
 
     dispatch(_editor.selectNextCell());
@@ -125,7 +121,7 @@ const EditorHeader: React.FC = () => {
             icon="step-forward"
             tooltipText="Run and advance"
             tooltipDirection="bottom"
-            disabled={!kernelIsConnected && selectedCell?.language !== 'md'}
+            disabled={!kernelIsConnected && selectedCell?.get('language') !== 'md'}
             onClick={onClickPlayNext}
           />
           <ColoredIconButton
@@ -158,9 +154,9 @@ const EditorHeader: React.FC = () => {
 
           <PopoverDropdown
             placement="bottomEnd"
-            activeKey={lockedCell?.language ?? 'py'}
+            activeKey={lockedCell?.get('language') ?? 'py'}
             buttonProps={{ disabled: lockedCell === null }}
-            buttonContent={lockedCell?.language ?? 'py'}
+            buttonContent={lockedCell?.get('language') ?? 'py'}
             onSelect={handleLanguageSelect}
           >
             <Dropdown.Item eventKey="py">python</Dropdown.Item>

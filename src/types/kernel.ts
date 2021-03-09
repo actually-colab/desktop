@@ -1,3 +1,5 @@
+import { ImmutableObject } from './immutable';
+
 /**
  * Status of the kernel
  */
@@ -13,3 +15,5 @@ export type KernelLog = {
   date: Date;
   dateString?: string;
 };
+
+export type ImmutableKernelLog = ImmutableObject<KernelLog>;

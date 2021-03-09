@@ -1,3 +1,6 @@
+import { List as ImmutableList } from 'immutable';
+
+import { ImmutableObject } from './immutable';
 import { IpynbOutput } from './ipynb';
 import { User } from './user';
 
@@ -22,6 +25,8 @@ export type KernelOutput = BaseKernelOutput & {
   output: IpynbOutput;
 };
 
+export type ImmutableKernelOutput = ImmutableObject<KernelOutput>;
+
 /**
  * An editor cell in a notebook
  */
@@ -39,6 +44,8 @@ export type EditorCell = {
   code: string;
 };
 
+export type ImmutableEditorCell = ImmutableObject<EditorCell>;
+
 /**
  * A lock that indicates which user owns which cell
  */
@@ -46,6 +53,8 @@ export type Lock = {
   uid: User['uid'];
   cell_id: EditorCell['cell_id'];
 };
+
+export type ImmutableLock = ImmutableObject<Lock>;
 
 /**
  * Indicates the access level for a given user on a given notebook
@@ -56,18 +65,30 @@ export type NotebookAccessLevel = {
   access_level: 'Full Access' | 'Read Only';
 };
 
+type UserWithAccessLevel = User & {
+  access_level: NotebookAccessLevel['access_level'];
+};
+
 /**
  * A notebook
  */
 export type Notebook = {
   nb_id: string;
   name: string;
-  users: (User & { access_level: NotebookAccessLevel['access_level'] })[];
+  users: UserWithAccessLevel[];
 };
+
+export type ImmutableNotebook = ImmutableObject<
+  Omit<Notebook, 'users'> & {
+    users: ImmutableList<ImmutableObject<UserWithAccessLevel>>;
+  }
+>;
 
 /**
  * Notebooks are separated so the cells are stored in redux on their own
  */
-export type ReducedNotebook = Omit<Notebook, 'cells'> & {
-  cell_ids: EditorCell['cell_id'][];
+type ReducedNotebook = Notebook & {
+  cell_ids: ImmutableList<EditorCell['cell_id']>;
 };
+
+export type ImmutableReducedNotebook = ImmutableObject<ReducedNotebook>;

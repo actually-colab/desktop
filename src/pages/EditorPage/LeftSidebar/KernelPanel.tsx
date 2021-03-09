@@ -128,10 +128,10 @@ const KernelPanel: React.FC = () => {
    * Auto scroll logs if pinned
    */
   React.useEffect(() => {
-    if (isLogsPinned && logs.length > 0) {
+    if (isLogsPinned && logs.size > 0) {
       setTimeout(() => logsAnchorRef?.current?.scrollIntoView({ behavior: 'smooth' }), 100);
     }
-  }, [isLogsPinned, logs.length]);
+  }, [isLogsPinned, logs.size]);
 
   return (
     <div className={css(styles.container)}>
@@ -259,20 +259,20 @@ const KernelPanel: React.FC = () => {
       </p>
       <pre className={css(styles.output)}>
         {logs.map((log) => (
-          <React.Fragment key={log.id}>
-            <span className={css(styles.bold)}>{log.dateString}</span>
+          <React.Fragment key={log.get('id')}>
+            <span className={css(styles.bold)}>{log.get('dateString')}</span>
             {'\n'}
 
-            {log.status === 'Success' && (
+            {log.get('status') === 'Success' && (
               <Icon icon="check-circle" style={{ color: palette.SUCCESS, marginRight: spacing.DEFAULT / 4 }} />
             )}
-            {log.status === 'Warning' && (
+            {log.get('status') === 'Warning' && (
               <Icon icon="exclamation-triangle" style={{ color: palette.WARNING, marginRight: spacing.DEFAULT / 4 }} />
             )}
-            {log.status === 'Error' && (
+            {log.get('status') === 'Error' && (
               <Icon icon="close-circle" style={{ color: palette.ERROR, marginRight: spacing.DEFAULT / 4 }} />
             )}
-            {log.message}
+            {log.get('message')}
             {'\n\n'}
           </React.Fragment>
         ))}

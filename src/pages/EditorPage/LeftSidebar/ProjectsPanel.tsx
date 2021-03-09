@@ -107,21 +107,21 @@ const ProjectsPanel: React.FC = () => {
       </div>
 
       {notebooks.map((project) => (
-        <div key={project.nb_id} className={css(styles.project)}>
+        <div key={project.get('nb_id')} className={css(styles.project)}>
           <Button
             block
             style={{
               textAlign: 'left',
-              ...(project.nb_id === notebook?.nb_id
+              ...(project.get('nb_id') === notebook.get('nb_id')
                 ? {
                     background: palette.PRIMARY_LIGHT,
                     color: palette.PRIMARY,
                   }
                 : {}),
             }}
-            onClick={() => project.nb_id !== notebook?.nb_id && console.log('TODO', project)}
+            onClick={() => project.get('nb_id') !== notebook.get('nb_id') && console.log('TODO', project)}
           >
-            {project.name}
+            {project.get('name')}
           </Button>
         </div>
       ))}
