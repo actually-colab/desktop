@@ -1,4 +1,4 @@
-import { fromJS, List as ImmutableList, Map as ImmutableMap } from 'immutable';
+import { List as ImmutableList, Map as ImmutableMap } from 'immutable';
 import { IKernel } from 'jupyter-js-services';
 
 import {
@@ -26,9 +26,17 @@ import {
 } from '../types/notebook';
 import { ImmutableKernelLog } from '../types/kernel';
 import { BASE_CELL, IMMUTABLE_BASE_CELL } from '../constants/notebook';
-import { EXAMPLE_PROJECT, EXAMPLE_PROJECT_CELLS } from '../constants/demo';
+import { EXAMPLE_PROJECT, EXAMPLE_PROJECT_CELLS, IMMUTABLE_EXAMPLE_PROJECT } from '../constants/demo';
 import { DEFAULT_GATEWAY_URI } from '../constants/jupyter';
 import { cellArrayToImmutableMap } from '../utils/notebook';
+import { makeImmutableKernelLog } from '../utils/immutable/kernel';
+import {
+  makeImmutableEditorCell,
+  makeImmutableKernelOutput,
+  makeImmutableLock,
+  makeImmutableNotebook,
+  makeImmutableReducedNotebook,
+} from '../utils/immutable/notebook';
 
 /**
  * The editor redux state
@@ -104,8 +112,8 @@ const initialState: EditorState = {
   gatewayUri: DEFAULT_GATEWAY_URI,
   kernel: null,
 
-  notebooks: fromJS([EXAMPLE_PROJECT]),
-  notebook: fromJS({
+  notebooks: ImmutableList([makeImmutableNotebook(EXAMPLE_PROJECT)]),
+  notebook: makeImmutableReducedNotebook({
     ...EXAMPLE_PROJECT,
     cell_ids: EXAMPLE_PROJECT_CELLS.map((cell) => cell.cell_id),
   }),
@@ -123,7 +131,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
       return {
         ...state,
         logs: state.logs.push(
-          fromJS({
+          makeImmutableKernelLog({
             ...action.log,
             id: state.logs.size,
           })
@@ -201,7 +209,10 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
       return {
         ...state,
         isGettingNotebooks: false,
-        notebooks: fromJS([EXAMPLE_PROJECT, ...action.notebooks]),
+        notebooks: ImmutableList([
+          IMMUTABLE_EXAMPLE_PROJECT,
+          ...action.notebooks.map((notebook) => makeImmutableNotebook(notebook)),
+        ]),
         getNotebooksTimestamp: new Date(),
       };
     case NOTEBOOKS.GET.FAILURE:
@@ -219,7 +230,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
       return {
         ...state,
         isCreatingNotebook: false,
-        notebooks: state.notebooks.push(fromJS(action.notebook)),
+        notebooks: state.notebooks.push(makeImmutableNotebook(action.notebook)),
       };
     case NOTEBOOKS.CREATE.FAILURE:
       return {
@@ -239,7 +250,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         lockedCells: state.lockedCells
           .filter((lock) => lock.get('cell_id') !== action.cell_id)
           .push(
-            fromJS({
+            makeImmutableLock({
               uid: action.uid,
               cell_id: action.cell_id,
             })
@@ -281,13 +292,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         notebook: state.notebook.update('cell_ids', ImmutableList(), (cell_ids) =>
           cell_ids.splice(action.index === -1 ? state.notebook.get('cell_ids').size : action.index, 0, action.cell_id)
         ),
-        cells: state.cells.set(
-          action.cell_id,
-          fromJS({
-            ...BASE_CELL,
-            cell_id: action.cell_id,
-          })
-        ),
+        cells: state.cells.set(action.cell_id, IMMUTABLE_BASE_CELL.set('cell_id', action.cell_id)),
       };
     }
     case ADD_CELL.FAILURE:
@@ -353,7 +358,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...runQueueChanges,
         isEditingCell: action.isMe ? false : state.isDeletingCell,
         cells: state.cells.update(action.cell_id, IMMUTABLE_BASE_CELL, (value) =>
-          value.merge((ImmutableMap(action.changes) as unknown) as ImmutableEditorCell)
+          value.merge(makeImmutableEditorCell(action.changes as EditorCell))
         ),
       };
     }
@@ -430,9 +435,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         outputs: state.outputs.update(action.cell_id, ImmutableList(), (outputs) =>
           outputs.concat(
             ImmutableList<ImmutableKernelOutput>(
-              action.messages.map<ImmutableKernelOutput>(
-                (message) => (ImmutableMap(message) as unknown) as ImmutableKernelOutput
-              )
+              action.messages.map<ImmutableKernelOutput>((message) => makeImmutableKernelOutput(message))
             )
           )
         ),

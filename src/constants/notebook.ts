@@ -1,5 +1,5 @@
-import { Map as ImmutableMap } from 'immutable';
-import { EditorCell, ImmutableEditorCell } from '../types/notebook';
+import { EditorCell } from '../types/notebook';
+import { makeImmutableEditorCell } from '../utils/immutable/notebook';
 
 /**
  * An editor cell with default values to be overridden
@@ -13,6 +13,6 @@ export const BASE_CELL: EditorCell = {
   rendered: false,
   runIndex: -1,
   contents: '',
-};
+} as const;
 
-export const IMMUTABLE_BASE_CELL: ImmutableEditorCell = (ImmutableMap(BASE_CELL) as unknown) as ImmutableEditorCell;
+export const IMMUTABLE_BASE_CELL = makeImmutableEditorCell(BASE_CELL);

@@ -54,18 +54,24 @@ export type Lock = {
 
 export type ImmutableLock = ImmutableObject<Lock>;
 
-export type ImmutableNotebook = ImmutableObject<
-  Omit<Notebook, 'users'> & {
-    users: ImmutableList<ImmutableObject<NotebookAccessLevel>>;
-  }
->;
+export type ImmutableNotebookAccessLevel = ImmutableObject<NotebookAccessLevel>;
+
+export type PseudoImmutableNotebook = Omit<Notebook, 'users'> & {
+  users: ImmutableList<ImmutableNotebookAccessLevel>;
+};
+
+export type ImmutableNotebook = ImmutableObject<PseudoImmutableNotebook>;
 
 /**
  * Notebooks are separated so the cells are stored in redux on their own
  */
-export type ReducedNotebook = Omit<Notebook, 'users'> & {
-  users: ImmutableList<ImmutableObject<NotebookAccessLevel>>;
+export type ReducedNotebook = Notebook & {
+  cell_ids: EditorCell['cell_id'][];
+};
+
+export type PseudoImmutableReducedNotebook = Omit<ReducedNotebook, 'users' | 'cell_ids'> & {
+  users: ImmutableList<ImmutableNotebookAccessLevel>;
   cell_ids: ImmutableList<EditorCell['cell_id']>;
 };
 
-export type ImmutableReducedNotebook = ImmutableObject<ReducedNotebook>;
+export type ImmutableReducedNotebook = ImmutableObject<PseudoImmutableReducedNotebook>;

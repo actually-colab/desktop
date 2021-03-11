@@ -1,4 +1,4 @@
-import { fromJS, List as ImmutableList, Map as ImmutableMap } from 'immutable';
+import { List as ImmutableList, Map as ImmutableMap } from 'immutable';
 import { saveAs } from 'file-saver';
 
 import { IpynbCell, IpynbNotebook, IpynbOutput } from '../types/ipynb';
@@ -12,6 +12,7 @@ import {
 import { User } from '../types/user';
 import { filterUndefined } from './filter';
 import { SPLIT_KEEP_NEWLINE } from './regex';
+import { makeImmutableEditorCell } from './immutable/notebook';
 
 /**
  * A comparator for sorting kernel outputs by their message indices
@@ -30,7 +31,7 @@ export const cellArrayToImmutableMap = (
   let map = ImmutableMap<EditorCell['cell_id'], ImmutableEditorCell>();
 
   cells.forEach((cell) => {
-    map = map.set(cell.cell_id, fromJS(cell));
+    map = map.set(cell.cell_id, makeImmutableEditorCell(cell));
   });
 
   return map;

@@ -1,6 +1,7 @@
 import { Notebook } from '@actually-colab/editor-client';
 
 import { EditorCell } from '../types/notebook';
+import { makeImmutableNotebook } from '../utils/immutable/notebook';
 
 import { BASE_CELL } from './notebook';
 
@@ -13,6 +14,8 @@ export const EXAMPLE_PROJECT: Notebook = {
   language: 'python3',
   users: [],
 };
+
+export const IMMUTABLE_EXAMPLE_PROJECT = makeImmutableNotebook(EXAMPLE_PROJECT);
 
 export const EXAMPLE_PROJECT_CELLS: EditorCell[] = [
   {
