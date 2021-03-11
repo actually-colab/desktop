@@ -58,16 +58,16 @@ const CodeCell: React.FC<{
       <AceEditor
         style={{ width: '100%' }}
         name={cell.get('cell_id')}
-        mode={cell.get('language') === 'md' ? 'markdown' : 'python'}
+        mode={cell.get('language') === 'markdown' ? 'markdown' : 'python'}
         theme="xcode"
         setOptions={isEditable ? editorOptionsActive : editorOptionsInactive}
         minLines={1}
         maxLines={Infinity}
-        value={cell.get('code')}
+        value={cell.get('contents')}
         onFocus={handleFocus}
         onBlur={handleBlur}
         onChange={handleChange}
-        wrapEnabled={cell.get('language') === 'md'}
+        wrapEnabled={cell.get('language') === 'markdown'}
       />
     </div>
   );

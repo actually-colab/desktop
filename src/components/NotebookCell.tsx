@@ -119,7 +119,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
   );
   const dispatchEditMarkdownCell = React.useCallback(
     () =>
-      cell.get('language') === 'md' &&
+      cell.get('language') === 'markdown' &&
       cell.get('rendered') &&
       dispatch(_editor.editCell(cell.get('cell_id'), { rendered: false })),
     [cell, dispatch]
@@ -138,7 +138,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
   }, [cell, dispatch, lock, lockedCellId, user]);
 
   const onClickPlay = React.useCallback(() => {
-    if (cell.get('language') === 'py') {
+    if (cell.get('language') === 'python3') {
       dispatch(_editor.addCellToQueue(cell.get('cell_id')));
     } else {
       dispatch(_editor.editCell(cell.get('cell_id'), { rendered: true }));
@@ -151,7 +151,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
   const onChange = React.useCallback(
     (_: string, newValue: string) => {
       dispatchEditCell(cell.get('cell_id'), {
-        code: newValue,
+        contents: newValue,
       });
     },
     [cell, dispatchEditCell]
@@ -161,7 +161,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
     <div className={css(styles.container, ownsLock && styles.containerLocked, isSelected && styles.containerSelected)}>
       <div className={css(styles.controls)}>
         <div className={css(styles.runIndexContainer)}>
-          {cell.get('language') !== 'md' && (
+          {cell.get('language') !== 'markdown' && (
             <React.Fragment>
               <code>[</code>
               <code className={css(styles.runIndex)}>
@@ -174,7 +174,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
       </div>
 
       <div className={css(styles.content)}>
-        {cell.get('language') === 'py' || !cell.get('rendered') ? (
+        {cell.get('language') === 'python3' || !cell.get('rendered') ? (
           <div
             className={css(
               styles.codeContainer,
@@ -198,9 +198,9 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
             size="xs"
             loading={isRunning}
             disabled={
-              (cell.get('language') === 'py' && isQueued) ||
+              (cell.get('language') === 'python3' && isQueued) ||
               !kernelIsConnected ||
-              (cell.get('language') === 'md' && cell.get('rendered'))
+              (cell.get('language') === 'markdown' && cell.get('rendered'))
             }
             onClick={onClickPlay}
           />

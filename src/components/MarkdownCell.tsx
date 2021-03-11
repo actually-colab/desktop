@@ -16,7 +16,7 @@ const renderers = {
 const MarkdownCell: React.FC<{ cell: ImmutableEditorCell; onDoubleClick(): void }> = ({ cell, onDoubleClick }) => {
   return (
     <div className="markdown-container" onDoubleClick={onDoubleClick}>
-      <MarkdownRender renderers={renderers} source={cell.get('code')} escapeHtml={false} />
+      <MarkdownRender renderers={renderers} source={cell.get('contents')} escapeHtml={false} />
     </div>
   );
 };

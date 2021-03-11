@@ -1,9 +1,10 @@
 import { IKernel } from 'jupyter-js-services';
 import { Action } from 'redux';
 import { ThunkAction } from 'redux-thunk';
+import { Notebook } from '@actually-colab/editor-client';
 
 import { User } from '../user';
-import { EditorCell, KernelOutput, Notebook } from '../notebook';
+import { EditorCell, KernelOutput } from '../notebook';
 import { KernelLog } from '../kernel';
 
 export const KERNEL_LOG = {
