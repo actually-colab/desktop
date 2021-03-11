@@ -31,6 +31,7 @@ const ReduxSocketClient = (): Middleware<{}, ReduxState> => {
       case NOTEBOOKS.OPEN.START: {
         console.log('Opening notebook');
         client?.openNotebook(action.nb_id);
+        break;
       }
     }
 
