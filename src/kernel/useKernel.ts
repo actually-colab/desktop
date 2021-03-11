@@ -108,7 +108,7 @@ const useKernel = () => {
   }, [dispatchDisconnectFromKernel, isEditingGatewayUri]);
 
   /**
-   * Destroy timer on unmount
+   * Handle unmount
    */
   React.useEffect(() => {
     return () => {
