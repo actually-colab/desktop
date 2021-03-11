@@ -86,20 +86,24 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
 
   const user = useSelector((state: ReduxState) => state.auth.user);
   const lockedCellId = useSelector((state: ReduxState) => state.editor.lockedCellId);
-  const lockedCells = useSelector((state: ReduxState) => state.editor.lockedCells);
   const isLockingCell = useSelector((state: ReduxState) => state.editor.isLockingCell);
   const isUnlockingCell = useSelector((state: ReduxState) => state.editor.isUnlockingCell);
   const selectedCellId = useSelector((state: ReduxState) => state.editor.selectedCellId);
   const runningCellId = useSelector((state: ReduxState) => state.editor.runningCellId);
   const runQueue = useSelector((state: ReduxState) => state.editor.runQueue);
 
-  const lock = React.useMemo(
-    () => lockedCells.find((lockedCell) => lockedCell.get('cell_id') === cell.get('cell_id')) ?? null,
-    [cell, lockedCells]
+  const lockOwner = React.useMemo(
+    () =>
+      cell.get('lock_held_by') !== ''
+        ? {
+            uid: cell.get('lock_held_by'),
+          }
+        : null,
+    [cell]
   );
-  const ownsLock = React.useMemo(() => lock?.get('uid') === user?.uid, [lock, user?.uid]);
-  const lockedByOtherUser = React.useMemo(() => !ownsLock && lock !== null, [lock, ownsLock]);
-  const canLock = React.useMemo(() => lock === null, [lock]);
+  const ownsLock = React.useMemo(() => lockOwner?.uid === user?.uid, [lockOwner?.uid, user?.uid]);
+  const lockedByOtherUser = React.useMemo(() => !ownsLock && lockOwner !== null, [lockOwner, ownsLock]);
+  const canLock = React.useMemo(() => lockOwner === null, [lockOwner]);
   const isSelected = React.useMemo(() => selectedCellId === cell.get('cell_id'), [cell, selectedCellId]);
   const isRunning = React.useMemo(() => runningCellId === cell.get('cell_id'), [cell, runningCellId]);
   const queueIndex = React.useMemo(() => runQueue.findIndex((cell_id) => cell_id === cell.get('cell_id')), [
@@ -126,7 +130,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
   );
 
   const onFocusEditor = React.useCallback(() => {
-    if (lock === null && user !== null) {
+    if (canLock && user !== null) {
       if (lockedCellId !== '') {
         dispatch(_editor.unlockCell(user, lockedCellId));
       }
@@ -135,7 +139,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
     }
 
     dispatch(_editor.selectCell(cell.get('cell_id')));
-  }, [cell, dispatch, lock, lockedCellId, user]);
+  }, [canLock, cell, dispatch, lockedCellId, user]);
 
   const onClickPlay = React.useCallback(() => {
     if (cell.get('language') === 'python3') {
@@ -216,7 +220,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
               loading={isUnlockingCell}
               onClick={dispatchUnlockCell}
             />
-          ) : lock !== null ? (
+          ) : lockOwner !== null ? (
             <div className={css(styles.lockOwnerContainer)}>
               <Icon icon="pencil" />
               <span className={css(styles.lockOwnerText)}>Bailey Tincher</span>
