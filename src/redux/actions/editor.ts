@@ -250,9 +250,9 @@ export const getNotebooks = (): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(getNotebooksStart());
 
   try {
-    const res = await client.getNotebooksForUser();
+    const notebooks = await client.getNotebooksForUser();
 
-    dispatch(getNotebooksSuccess(res));
+    dispatch(getNotebooksSuccess(notebooks));
   } catch (error) {
     console.error(error);
     dispatch(getNotebooksFailure(error.message));
@@ -290,9 +290,9 @@ export const createNotebook = (name: string): EditorAsyncActionTypes => async (d
   dispatch(createNotebookStart());
 
   try {
-    const res = await client.createNotebook(name);
+    const notebook = await client.createNotebook(name);
 
-    dispatch(createNotebookSuccess(res));
+    dispatch(createNotebookSuccess(notebook));
   } catch (error) {
     console.error(error);
     dispatch(createNotebookFailure(error.message));
@@ -340,9 +340,9 @@ export const openNotebook = (nb_id: client.Notebook['nb_id']): EditorAsyncAction
   dispatch(openNotebookStart(nb_id));
 
   try {
-    const res = await client.getNotebookContents(nb_id);
+    const notebook = await client.getNotebookContents(nb_id);
 
-    dispatch(openNotebookSuccess(res));
+    dispatch(openNotebookSuccess(notebook));
   } catch (error) {
     console.error(error);
     dispatch(openNotebookFailure(error.message));
