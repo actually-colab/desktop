@@ -1,21 +1,7 @@
 import { List as ImmutableList, Map as ImmutableMap } from 'immutable';
 import { IKernel } from 'jupyter-js-services';
 
-import {
-  ADD_CELL,
-  CONNECT_TO_KERNEL,
-  DELETE_CELL,
-  EditorActionTypes,
-  EDIT_CELL,
-  EXECUTE_CODE,
-  KERNEL_GATEWAY,
-  KERNEL_LOG,
-  KERNEL_MESSAGE,
-  LOCK_CELL,
-  NOTEBOOKS,
-  SELECT_CELL,
-  UNLOCK_CELL,
-} from '../types/redux/editor';
+import { CELL, EditorActionTypes, KERNEL, NOTEBOOKS } from '../types/redux/editor';
 import {
   EditorCell,
   ImmutableEditorCell,
@@ -131,7 +117,7 @@ const initialState: EditorState = {
  */
 const reducer = (state = initialState, action: EditorActionTypes): EditorState => {
   switch (action.type) {
-    case KERNEL_LOG.APPEND:
+    case KERNEL.LOG.APPEND:
       return {
         ...state,
         logs: state.logs.push(
@@ -141,30 +127,30 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
           })
         ),
       };
-    case KERNEL_LOG.CLEAR:
+    case KERNEL.LOG.CLEAR:
       return {
         ...state,
         logs: state.logs.clear(),
       };
 
-    case KERNEL_GATEWAY.SET:
+    case KERNEL.GATEWAY.SET:
       return {
         ...state,
         gatewayUri: action.uri,
       };
-    case KERNEL_GATEWAY.EDIT:
+    case KERNEL.GATEWAY.EDIT:
       return {
         ...state,
         isEditingGatewayUri: action.editing,
       };
 
-    case CONNECT_TO_KERNEL.AUTO:
+    case KERNEL.CONNECT.AUTO:
       return {
         ...state,
         autoConnectToKernel: action.enable,
       };
 
-    case CONNECT_TO_KERNEL.START:
+    case KERNEL.CONNECT.START:
       return {
         ...state,
         executionCount: 0,
@@ -173,30 +159,30 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         connectToKernelErrorMessage: '',
         kernel: null,
       };
-    case CONNECT_TO_KERNEL.SUCCESS:
+    case KERNEL.CONNECT.SUCCESS:
       return {
         ...state,
         isConnectingToKernel: false,
         kernel: action.kernel,
       };
-    case CONNECT_TO_KERNEL.FAILURE:
+    case KERNEL.CONNECT.FAILURE:
       return {
         ...state,
         isConnectingToKernel: false,
         connectToKernelErrorMessage: action.error.message,
       };
 
-    case CONNECT_TO_KERNEL.RECONNECTING:
+    case KERNEL.CONNECT.RECONNECTING:
       return {
         ...state,
         isReconnectingToKernel: true,
       };
-    case CONNECT_TO_KERNEL.RECONNECTED:
+    case KERNEL.CONNECT.RECONNECTED:
       return {
         ...state,
         isReconnectingToKernel: false,
       };
-    case CONNECT_TO_KERNEL.DISCONNECTED:
+    case KERNEL.CONNECT.DISCONNECTED:
       return {
         ...state,
         autoConnectToKernel: action.retry,
@@ -279,12 +265,12 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
       };
     }
 
-    case LOCK_CELL.START:
+    case CELL.LOCK.START:
       return {
         ...state,
         isLockingCell: true,
       };
-    case LOCK_CELL.SUCCESS:
+    case CELL.LOCK.SUCCESS:
       return {
         ...state,
         isLockingCell: action.isMe ? false : state.isLockingCell,
@@ -299,18 +285,18 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
           ),
         cells: state.cells.update(action.cell_id, IMMUTABLE_BASE_CELL, (cell) => cell.set('lock_held_by', action.uid)),
       };
-    case LOCK_CELL.FAILURE:
+    case CELL.LOCK.FAILURE:
       return {
         ...state,
         isLockingCell: false,
       };
 
-    case UNLOCK_CELL.START:
+    case CELL.UNLOCK.START:
       return {
         ...state,
         isUnlockingCell: true,
       };
-    case UNLOCK_CELL.SUCCESS:
+    case CELL.UNLOCK.SUCCESS:
       return {
         ...state,
         isUnlockingCell: action.isMe ? false : state.isUnlockingCell,
@@ -320,18 +306,18 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ),
         cells: state.cells.update(action.cell_id, IMMUTABLE_BASE_CELL, (cell) => cell.set('lock_held_by', '')),
       };
-    case UNLOCK_CELL.FAILURE:
+    case CELL.UNLOCK.FAILURE:
       return {
         ...state,
         isUnlockingCell: false,
       };
 
-    case ADD_CELL.START:
+    case CELL.ADD.START:
       return {
         ...state,
         isAddingCell: true,
       };
-    case ADD_CELL.SUCCESS: {
+    case CELL.ADD.SUCCESS: {
       return {
         ...state,
         isAddingCell: action.isMe ? false : state.isAddingCell,
@@ -341,18 +327,18 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         cells: state.cells.set(action.cell_id, IMMUTABLE_BASE_CELL.set('cell_id', action.cell_id)),
       };
     }
-    case ADD_CELL.FAILURE:
+    case CELL.ADD.FAILURE:
       return {
         ...state,
         isAddingCell: false,
       };
 
-    case DELETE_CELL.START:
+    case CELL.DELETE.START:
       return {
         ...state,
         isDeletingCell: true,
       };
-    case DELETE_CELL.SUCCESS: {
+    case CELL.DELETE.SUCCESS: {
       const selectionChanges: Partial<EditorState> = {};
 
       // If the selected cell is deleted, the selected cell should become the next cell or remain the last
@@ -380,18 +366,18 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         runQueue: state.runQueue.filter((cell_id) => cell_id !== action.cell_id),
       };
     }
-    case DELETE_CELL.FAILURE:
+    case CELL.DELETE.FAILURE:
       return {
         ...state,
         isDeletingCell: false,
       };
 
-    case EDIT_CELL.START:
+    case CELL.EDIT.START:
       return {
         ...state,
         isEditingCell: true,
       };
-    case EDIT_CELL.SUCCESS: {
+    case CELL.EDIT.SUCCESS: {
       const runQueueChanges: Partial<EditorState> = {};
 
       // If a cell in the runQueue is no longer python, it should not be executed
@@ -410,23 +396,23 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ),
       };
     }
-    case EDIT_CELL.FAILURE:
+    case CELL.EDIT.FAILURE:
       return {
         ...state,
         isEditingCell: false,
       };
-    case EDIT_CELL.UPDATE_CODE:
+    case CELL.EDIT.UPDATE_CODE:
       return {
         ...state,
         cells: state.cells.update(action.cell_id, IMMUTABLE_BASE_CELL, (value) => value.set('contents', action.code)),
       };
 
-    case SELECT_CELL.SET:
+    case CELL.SELECT.SET:
       return {
         ...state,
         selectedCellId: action.cell_id,
       };
-    case SELECT_CELL.NEXT: {
+    case CELL.SELECT.NEXT: {
       const currentIndex =
         state.selectedCellId === ''
           ? -1
@@ -450,12 +436,12 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
       };
     }
 
-    case EXECUTE_CODE.QUEUE:
+    case KERNEL.EXECUTE.QUEUE:
       return {
         ...state,
         runQueue: state.runQueue.filter((cell_id) => cell_id !== action.cell_id).push(action.cell_id),
       };
-    case EXECUTE_CODE.START:
+    case KERNEL.EXECUTE.START:
       return {
         ...state,
         runQueue: state.runQueue.filter((cell_id) => cell_id !== action.cell_id),
@@ -463,7 +449,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         runningCellId: action.cell_id,
         outputs: state.outputs.update(action.cell_id, ImmutableList(), (outputs) => outputs.clear()),
       };
-    case EXECUTE_CODE.SUCCESS:
+    case KERNEL.EXECUTE.SUCCESS:
       return {
         ...state,
         isExecutingCode: false,
@@ -473,7 +459,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
           value.set('runIndex', action.runIndex > state.executionCount ? action.runIndex : value.get('runIndex'))
         ),
       };
-    case EXECUTE_CODE.FAILURE:
+    case KERNEL.EXECUTE.FAILURE:
       return {
         ...state,
         isExecutingCode: false,
@@ -485,7 +471,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         runQueue: state.runQueue.clear(),
       };
 
-    case KERNEL_MESSAGE.RECEIVE:
+    case KERNEL.MESSAGE.RECEIVE:
       return {
         ...state,
         outputs: state.outputs.update(action.cell_id, ImmutableList(), (outputs) =>
@@ -496,7 +482,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
           )
         ),
       };
-    case KERNEL_MESSAGE.UPDATE_RUN_INDEX:
+    case KERNEL.MESSAGE.UPDATE_RUN_INDEX:
       return {
         ...state,
         cells: state.cells.update(action.cell_id, IMMUTABLE_BASE_CELL, (value) =>

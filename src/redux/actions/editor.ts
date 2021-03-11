@@ -3,22 +3,7 @@ import { v4 as uuid } from 'uuid';
 import { format } from 'date-fns';
 import * as client from '@actually-colab/editor-client';
 
-import {
-  ADD_CELL,
-  CONNECT_TO_KERNEL,
-  DELETE_CELL,
-  EditorActionTypes,
-  EditorAsyncActionTypes,
-  EDIT_CELL,
-  EXECUTE_CODE,
-  KERNEL_GATEWAY,
-  KERNEL_LOG,
-  KERNEL_MESSAGE,
-  LOCK_CELL,
-  NOTEBOOKS,
-  SELECT_CELL,
-  UNLOCK_CELL,
-} from '../../types/redux/editor';
+import { CELL, EditorActionTypes, EditorAsyncActionTypes, KERNEL, NOTEBOOKS } from '../../types/redux/editor';
 import { User } from '../../types/user';
 import { IpynbOutput } from '../../types/ipynb';
 import { BaseKernelOutput, EditorCell, ImmutableEditorCell, KernelOutput } from '../../types/notebook';
@@ -34,7 +19,7 @@ export const appendKernelLog = (log: Omit<KernelLog, 'id' | 'date'>): EditorActi
   const date = new Date();
 
   return {
-    type: KERNEL_LOG.APPEND,
+    type: KERNEL.LOG.APPEND,
     log: {
       ...log,
       date,
@@ -47,14 +32,14 @@ export const appendKernelLog = (log: Omit<KernelLog, 'id' | 'date'>): EditorActi
  * Clear the kernel logs
  */
 export const clearKernelLogs = (): EditorActionTypes => ({
-  type: KERNEL_LOG.CLEAR,
+  type: KERNEL.LOG.CLEAR,
 });
 
 /**
  * Set the kernel gateway uri
  */
 export const setKernelGateway = (uri: string): EditorActionTypes => ({
-  type: KERNEL_GATEWAY.SET,
+  type: KERNEL.GATEWAY.SET,
   uri,
 });
 
@@ -62,7 +47,7 @@ export const setKernelGateway = (uri: string): EditorActionTypes => ({
  * Set if editing the kernel gateway URI
  */
 export const editKernelGateway = (editing: boolean): EditorActionTypes => ({
-  type: KERNEL_GATEWAY.EDIT,
+  type: KERNEL.GATEWAY.EDIT,
   editing,
 });
 
@@ -70,36 +55,36 @@ export const editKernelGateway = (editing: boolean): EditorActionTypes => ({
  * Enable or disable connecting to the kernel automatically
  */
 export const connectToKernelAuto = (enable: boolean) => ({
-  type: CONNECT_TO_KERNEL.AUTO,
+  type: KERNEL.CONNECT.AUTO,
   enable,
 });
 
 const connectToKernelStart = (): EditorActionTypes => ({
-  type: CONNECT_TO_KERNEL.START,
+  type: KERNEL.CONNECT.START,
 });
 
 const connectToKernelSuccess = (kernel: IKernel): EditorActionTypes => ({
-  type: CONNECT_TO_KERNEL.SUCCESS,
+  type: KERNEL.CONNECT.SUCCESS,
   kernel,
 });
 
 const connectToKernelFailure = (errorMessage: string): EditorActionTypes => ({
-  type: CONNECT_TO_KERNEL.FAILURE,
+  type: KERNEL.CONNECT.FAILURE,
   error: {
     message: errorMessage,
   },
 });
 
 const connectToKernelReconnecting = (): EditorActionTypes => ({
-  type: CONNECT_TO_KERNEL.RECONNECTING,
+  type: KERNEL.CONNECT.RECONNECTING,
 });
 
 const connectToKernelReconnected = (): EditorActionTypes => ({
-  type: CONNECT_TO_KERNEL.RECONNECTED,
+  type: KERNEL.CONNECT.RECONNECTED,
 });
 
 const connectToKernelDisconnected = (retry: boolean = true): EditorActionTypes => ({
-  type: CONNECT_TO_KERNEL.DISCONNECTED,
+  type: KERNEL.CONNECT.DISCONNECTED,
   retry,
 });
 
@@ -358,18 +343,18 @@ export const openNotebook = (nb_id: client.Notebook['nb_id']): EditorAsyncAction
 };
 
 const lockCellStart = (): EditorActionTypes => ({
-  type: LOCK_CELL.START,
+  type: CELL.LOCK.START,
 });
 
 const lockCellSuccess = (isMe: boolean, uid: User['uid'], cell_id: EditorCell['cell_id']): EditorActionTypes => ({
-  type: LOCK_CELL.SUCCESS,
+  type: CELL.LOCK.SUCCESS,
   isMe,
   uid,
   cell_id,
 });
 
 const lockCellFailure = (errorMessage: string): EditorActionTypes => ({
-  type: LOCK_CELL.FAILURE,
+  type: CELL.LOCK.FAILURE,
   error: {
     message: errorMessage,
   },
@@ -387,18 +372,18 @@ export const lockCell = (user: User, cell_id: EditorCell['cell_id']): EditorAsyn
 };
 
 const unlockCellStart = (): EditorActionTypes => ({
-  type: UNLOCK_CELL.START,
+  type: CELL.UNLOCK.START,
 });
 
 const unlockCellSuccess = (isMe: boolean, uid: User['uid'], cell_id: EditorCell['cell_id']): EditorActionTypes => ({
-  type: UNLOCK_CELL.SUCCESS,
+  type: CELL.UNLOCK.SUCCESS,
   isMe,
   uid,
   cell_id,
 });
 
 const unlockCellFailure = (errorMessage: string) => ({
-  type: UNLOCK_CELL.FAILURE,
+  type: CELL.UNLOCK.FAILURE,
   error: {
     message: errorMessage,
   },
@@ -415,18 +400,18 @@ export const unlockCell = (user: User, cell_id: EditorCell['cell_id']): EditorAs
 };
 
 const addCellStart = (): EditorActionTypes => ({
-  type: ADD_CELL.START,
+  type: CELL.ADD.START,
 });
 
 const addCellSuccess = (isMe: boolean, cell_id: EditorCell['cell_id'], index: number): EditorActionTypes => ({
-  type: ADD_CELL.SUCCESS,
+  type: CELL.ADD.SUCCESS,
   isMe,
   cell_id,
   index,
 });
 
 const addCellFailure = (errorMessage: string): EditorActionTypes => ({
-  type: ADD_CELL.FAILURE,
+  type: CELL.ADD.FAILURE,
   error: {
     message: errorMessage,
   },
@@ -443,17 +428,17 @@ export const addCell = (index: number): EditorAsyncActionTypes => async (dispatc
 };
 
 const deleteCellStart = (): EditorActionTypes => ({
-  type: DELETE_CELL.START,
+  type: CELL.DELETE.START,
 });
 
 const deleteCellSuccess = (isMe: boolean, cell_id: EditorCell['cell_id']): EditorActionTypes => ({
-  type: DELETE_CELL.SUCCESS,
+  type: CELL.DELETE.SUCCESS,
   isMe,
   cell_id,
 });
 
 const deleteCellFailure = (errorMessage: string): EditorActionTypes => ({
-  type: DELETE_CELL.FAILURE,
+  type: CELL.DELETE.FAILURE,
   error: {
     message: errorMessage,
   },
@@ -470,7 +455,7 @@ export const deleteCell = (cell_id: EditorCell['cell_id']): EditorAsyncActionTyp
 };
 
 const editCellStart = (): EditorActionTypes => ({
-  type: EDIT_CELL.START,
+  type: CELL.EDIT.START,
 });
 
 const editCellSuccess = (
@@ -478,7 +463,7 @@ const editCellSuccess = (
   cell_id: EditorCell['cell_id'],
   changes: Partial<EditorCell>
 ): EditorActionTypes => ({
-  type: EDIT_CELL.SUCCESS,
+  type: CELL.EDIT.SUCCESS,
   isMe,
   cell_id,
   changes,
@@ -486,7 +471,7 @@ const editCellSuccess = (
 
 const editCellFailure = (errorMessage: string): EditorActionTypes => {
   return {
-    type: EDIT_CELL.FAILURE,
+    type: CELL.EDIT.FAILURE,
     error: {
       message: errorMessage,
     },
@@ -510,7 +495,7 @@ export const editCell = (
  * Triggered by a socket
  */
 export const updateCellCode = (cell_id: EditorCell['cell_id'], code: string): EditorActionTypes => ({
-  type: EDIT_CELL.UPDATE_CODE,
+  type: CELL.EDIT.UPDATE_CODE,
   cell_id,
   code,
 });
@@ -519,7 +504,7 @@ export const updateCellCode = (cell_id: EditorCell['cell_id'], code: string): Ed
  * Select a given cell for running
  */
 export const selectCell = (cell_id: string): EditorActionTypes => ({
-  type: SELECT_CELL.SET,
+  type: CELL.SELECT.SET,
   cell_id,
 });
 
@@ -527,11 +512,11 @@ export const selectCell = (cell_id: string): EditorActionTypes => ({
  * Select the next cell
  */
 export const selectNextCell = (): EditorActionTypes => ({
-  type: SELECT_CELL.NEXT,
+  type: CELL.SELECT.NEXT,
 });
 
 const executeCodeQueue = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
-  type: EXECUTE_CODE.QUEUE,
+  type: KERNEL.EXECUTE.QUEUE,
   cell_id,
 });
 
@@ -554,12 +539,12 @@ export const addCellToQueue = (cell: ImmutableEditorCell): EditorAsyncActionType
 };
 
 const executeCodeStart = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
-  type: EXECUTE_CODE.START,
+  type: KERNEL.EXECUTE.START,
   cell_id,
 });
 
 const executeCodeSuccess = (cell_id: EditorCell['cell_id'], runIndex: number): EditorActionTypes => ({
-  type: EXECUTE_CODE.SUCCESS,
+  type: KERNEL.EXECUTE.SUCCESS,
   cell_id,
   runIndex,
 });
@@ -569,7 +554,7 @@ const executeCodeFailure = (
   runIndex: number,
   errorMessage: string
 ): EditorActionTypes => ({
-  type: EXECUTE_CODE.FAILURE,
+  type: KERNEL.EXECUTE.FAILURE,
   cell_id,
   runIndex,
   error: {
@@ -578,13 +563,13 @@ const executeCodeFailure = (
 });
 
 const receiveKernelMessage = (cell_id: EditorCell['cell_id'], messages: KernelOutput[]): EditorActionTypes => ({
-  type: KERNEL_MESSAGE.RECEIVE,
+  type: KERNEL.MESSAGE.RECEIVE,
   cell_id,
   messages,
 });
 
 const updateRunIndex = (cell_id: EditorCell['cell_id'], runIndex: number): EditorActionTypes => ({
-  type: KERNEL_MESSAGE.UPDATE_RUN_INDEX,
+  type: KERNEL.MESSAGE.UPDATE_RUN_INDEX,
   cell_id,
   runIndex,
 });
@@ -709,7 +694,7 @@ export const executeCode = (user: User, kernel: IKernel, cell: ImmutableEditorCe
 };
 
 const executeCodeStopped = (cell: ImmutableEditorCell): EditorActionTypes => ({
-  type: EXECUTE_CODE.STOPPED,
+  type: KERNEL.EXECUTE.STOPPED,
   cell_id: cell.get('cell_id'),
 });
 
