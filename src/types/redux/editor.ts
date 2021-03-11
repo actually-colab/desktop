@@ -1,7 +1,7 @@
 import { IKernel } from 'jupyter-js-services';
 import { Action } from 'redux';
 import { ThunkAction } from 'redux-thunk';
-import { Notebook } from '@actually-colab/editor-client';
+import { Notebook, NotebookContents } from '@actually-colab/editor-client';
 
 import { User } from '../user';
 import { EditorCell, KernelOutput } from '../notebook';
@@ -34,6 +34,12 @@ export const NOTEBOOKS = {
     START: 'NOTEBOOKS_CREATE_START',
     SUCCESS: 'NOTEBOOKS_CREATE_SUCCESS',
     FAILURE: 'NOTEBOOKS_CREATE_FAILURE',
+  },
+  OPEN: {
+    START: 'NOTEBOOKS_OPEN_START',
+    SUCCESS: 'NOTEBOOKS_OPEN_SUCCESS',
+    FAILURE: 'NOTEBOOKS_OPEN_FAILURE',
+    DEMO: 'NOTEBOOKS_OPEN_DEMO',
   },
 } as const;
 export const LOCK_CELL = {
@@ -168,6 +174,24 @@ type NotebooksCreateFailureAction = {
   type: typeof NOTEBOOKS.CREATE.FAILURE;
 } & ActionError;
 
+type NotebooksOpenStartAction = {
+  type: typeof NOTEBOOKS.OPEN.START;
+  nb_id: Notebook['nb_id'];
+};
+
+type NotebooksOpenSuccessAction = {
+  type: typeof NOTEBOOKS.OPEN.SUCCESS;
+  notebook: NotebookContents;
+};
+
+type NotebooksOpenFailureAction = {
+  type: typeof NOTEBOOKS.OPEN.FAILURE;
+} & ActionError;
+
+type NotebooksOpenDemoAction = {
+  type: typeof NOTEBOOKS.OPEN.DEMO;
+};
+
 type LockCellStartAction = {
   type: typeof LOCK_CELL.START;
 };
@@ -256,6 +280,12 @@ type EditCellFailureAction = {
   type: typeof EDIT_CELL.FAILURE;
 } & ActionError;
 
+type UpdateCellCodeAction = {
+  type: typeof EDIT_CELL.UPDATE_CODE;
+  cell_id: EditorCell['cell_id'];
+  code: string;
+};
+
 type SelectCellSetAction = {
   type: typeof SELECT_CELL.SET;
   cell_id: EditorCell['cell_id'];
@@ -304,12 +334,6 @@ type KernelMessageUpdateRunIndexAction = {
   runIndex: number;
 };
 
-type UpdateCellCodeAction = {
-  type: typeof EDIT_CELL.UPDATE_CODE;
-  cell_id: EditorCell['cell_id'];
-  code: string;
-};
-
 /**
  * An action for manipulating the editor redux store
  */
@@ -331,6 +355,10 @@ export type EditorActionTypes =
   | NotebooksCreateStartAction
   | NotebooksCreateSuccessAction
   | NotebooksCreateFailureAction
+  | NotebooksOpenStartAction
+  | NotebooksOpenSuccessAction
+  | NotebooksOpenFailureAction
+  | NotebooksOpenDemoAction
   | LockCellStartAction
   | LockCellSuccessAction
   | LockCellFailureAction
@@ -349,6 +377,7 @@ export type EditorActionTypes =
   | EditCellStartAction
   | EditCellSuccessAction
   | EditCellFailureAction
+  | UpdateCellCodeAction
   | SelectCellSetAction
   | SelectCellNextAction
   | ExecuteCodeQueueAction
@@ -357,8 +386,7 @@ export type EditorActionTypes =
   | ExecuteCodeFailureAction
   | ExecuteCodeStoppedAction
   | KernelMessageReceiveAction
-  | KernelMessageUpdateRunIndexAction
-  | UpdateCellCodeAction;
+  | KernelMessageUpdateRunIndexAction;
 
 /**
  * An asynchronous action for manipulating the editor redux store
