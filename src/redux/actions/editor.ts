@@ -25,6 +25,7 @@ import { BaseKernelOutput, EditorCell, ImmutableEditorCell, KernelOutput } from 
 import { _ui } from '.';
 import { KernelLog } from '../../types/kernel';
 import { KernelApi } from '../../api';
+import { EXAMPLE_PROJECT } from '../../constants/demo';
 
 /**
  * Add a new log message
@@ -249,9 +250,9 @@ export const getNotebooks = (): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(getNotebooksStart());
 
   try {
-    const res = await client.getNotebooksForUser();
+    const notebooks = await client.getNotebooksForUser();
 
-    dispatch(getNotebooksSuccess(res ?? []));
+    dispatch(getNotebooksSuccess(notebooks));
   } catch (error) {
     console.error(error);
     dispatch(getNotebooksFailure(error.message));
@@ -289,9 +290,9 @@ export const createNotebook = (name: string): EditorAsyncActionTypes => async (d
   dispatch(createNotebookStart());
 
   try {
-    const res = await client.createNotebook(name);
+    const notebook = await client.createNotebook(name);
 
-    dispatch(createNotebookSuccess(res));
+    dispatch(createNotebookSuccess(notebook));
   } catch (error) {
     console.error(error);
     dispatch(createNotebookFailure(error.message));
@@ -300,6 +301,56 @@ export const createNotebook = (name: string): EditorAsyncActionTypes => async (d
         level: 'error',
         title: 'Error',
         message: 'Failed to create your notebook!',
+        duration: 3000,
+      })
+    );
+  }
+};
+
+const openNotebookStart = (nb_id: client.Notebook['nb_id']): EditorActionTypes => ({
+  type: NOTEBOOKS.OPEN.START,
+  nb_id,
+});
+
+const openNotebookSuccess = (notebook: client.NotebookContents): EditorActionTypes => ({
+  type: NOTEBOOKS.OPEN.SUCCESS,
+  notebook,
+});
+
+const openNotebookFailure = (errorMessage: string): EditorActionTypes => ({
+  type: NOTEBOOKS.OPEN.FAILURE,
+  error: {
+    message: errorMessage,
+  },
+});
+
+const openNotebookDemo = (): EditorActionTypes => ({
+  type: NOTEBOOKS.OPEN.DEMO,
+});
+
+/**
+ * Open the notebook with the given id
+ */
+export const openNotebook = (nb_id: client.Notebook['nb_id']): EditorAsyncActionTypes => async (dispatch) => {
+  if (nb_id === EXAMPLE_PROJECT.nb_id) {
+    dispatch(openNotebookDemo());
+    return;
+  }
+
+  dispatch(openNotebookStart(nb_id));
+
+  try {
+    const notebook = await client.getNotebookContents(nb_id);
+
+    dispatch(openNotebookSuccess(notebook));
+  } catch (error) {
+    console.error(error);
+    dispatch(openNotebookFailure(error.message));
+    dispatch(
+      _ui.notify({
+        level: 'error',
+        title: 'Error',
+        message: 'Failed to open your notebook!',
         duration: 3000,
       })
     );
@@ -456,6 +507,15 @@ export const editCell = (
 };
 
 /**
+ * Triggered by a socket
+ */
+export const updateCellCode = (cell_id: EditorCell['cell_id'], code: string): EditorActionTypes => ({
+  type: EDIT_CELL.UPDATE_CODE,
+  cell_id,
+  code,
+});
+
+/**
  * Select a given cell for running
  */
 export const selectCell = (cell_id: string): EditorActionTypes => ({
@@ -478,15 +538,19 @@ const executeCodeQueue = (cell_id: EditorCell['cell_id']): EditorActionTypes => 
 /**
  * Add a cell to the execution queue
  */
-export const addCellToQueue = (cell_id: EditorCell['cell_id']): EditorAsyncActionTypes => async (dispatch) => {
+export const addCellToQueue = (cell: ImmutableEditorCell): EditorAsyncActionTypes => async (dispatch) => {
+  if (cell.get('language') !== 'python3' || cell.get('contents').trim() === '') {
+    return;
+  }
+
   dispatch(
     appendKernelLog({
       status: 'Info',
-      message: `Added cell ${cell_id} to queue`,
+      message: `Added cell ${cell.get('cell_id')} to queue`,
     })
   );
 
-  dispatch(executeCodeQueue(cell_id));
+  dispatch(executeCodeQueue(cell.get('cell_id')));
 };
 
 const executeCodeStart = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
@@ -663,12 +727,3 @@ export const stopCodeExecution = (
     dispatch(executeCodeStopped(cell));
   } catch (error) {}
 };
-
-/**
- * Triggered by a socket
- */
-export const updateCellCode = (cell_id: EditorCell['cell_id'], code: string): EditorActionTypes => ({
-  type: EDIT_CELL.UPDATE_CODE,
-  cell_id,
-  code,
-});

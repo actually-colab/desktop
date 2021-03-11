@@ -1,3 +1,4 @@
+import { DCell, Notebook, NotebookContents } from '@actually-colab/editor-client';
 import { List as ImmutableList, Map as ImmutableMap } from 'immutable';
 import { saveAs } from 'file-saver';
 
@@ -6,13 +7,16 @@ import {
   EditorCell,
   ImmutableEditorCell,
   ImmutableKernelOutput,
+  ImmutableNotebook,
   ImmutableReducedNotebook,
   KernelOutput,
+  ReducedNotebook,
 } from '../types/notebook';
 import { User } from '../types/user';
 import { filterUndefined } from './filter';
 import { SPLIT_KEEP_NEWLINE } from './regex';
-import { makeImmutableEditorCell } from './immutable/notebook';
+import { makeImmutableEditorCell, makeImmutableReducedNotebook } from './immutable/notebook';
+import { BASE_CELL } from '../constants/notebook';
 
 /**
  * A comparator for sorting kernel outputs by their message indices
@@ -20,18 +24,47 @@ import { makeImmutableEditorCell } from './immutable/notebook';
 export const sortImmutableOutputByMessageIndex = (a: ImmutableKernelOutput, b: ImmutableKernelOutput) =>
   a.get('messageIndex') - b.get('messageIndex');
 
+/**
+ * A comparator for sorting immutable kernel outputs by their message indices
+ */
 export const sortOutputByMessageIndex = (a: KernelOutput, b: KernelOutput) => a.messageIndex - b.messageIndex;
+
+/**
+ * Convert a notebook to a reduced notebook
+ */
+export const reduceNotebook = (notebook: Notebook): ReducedNotebook => ({
+  ...notebook,
+  cell_ids: [],
+});
+
+/**
+ * Convert an immutable notebook to an immutable reduced notebook
+ */
+export const reduceImmutableNotebook = (notebook: ImmutableNotebook) =>
+  makeImmutableReducedNotebook(reduceNotebook(notebook.toJS() as any));
+
+/**
+ * Convert a notebook contents object to a reduced notebook
+ */
+export const reduceNotebookContents = (notebook: NotebookContents): ReducedNotebook => {
+  const { cells, ...rest } = notebook;
+
+  return {
+    ...rest,
+    cell_ids: Object.keys(cells),
+  };
+};
 
 /**
  * Convert an array of cells to a dictionary
  */
 export const cellArrayToImmutableMap = (
-  cells: EditorCell[]
+  cells: DCell[] | EditorCell[]
 ): ImmutableMap<EditorCell['cell_id'], ImmutableEditorCell> => {
   let map = ImmutableMap<EditorCell['cell_id'], ImmutableEditorCell>();
 
   cells.forEach((cell) => {
-    map = map.set(cell.cell_id, makeImmutableEditorCell(cell));
+    map = map.set(cell.cell_id, makeImmutableEditorCell({ ...BASE_CELL, ...cell }));
   });
 
   return map;

@@ -26,9 +26,14 @@ import {
 } from '../types/notebook';
 import { ImmutableKernelLog } from '../types/kernel';
 import { IMMUTABLE_BASE_CELL } from '../constants/notebook';
-import { EXAMPLE_PROJECT, EXAMPLE_PROJECT_CELLS, IMMUTABLE_EXAMPLE_PROJECT } from '../constants/demo';
+import {
+  EXAMPLE_PROJECT,
+  EXAMPLE_PROJECT_CELLS,
+  IMMUTABLE_EXAMPLE_PROJECT,
+  IMMUTABLE_REDUCED_EXAMPLE_PROJECT,
+} from '../constants/demo';
 import { DEFAULT_GATEWAY_URI } from '../constants/jupyter';
-import { cellArrayToImmutableMap } from '../utils/notebook';
+import { cellArrayToImmutableMap, reduceImmutableNotebook, reduceNotebookContents } from '../utils/notebook';
 import { makeImmutableKernelLog } from '../utils/immutable/kernel';
 import {
   makeImmutableEditorCell,
@@ -52,8 +57,9 @@ export interface EditorState {
   isGettingNotebooks: boolean;
   getNotebooksErrorMessage: string;
   getNotebooksTimestamp: Date | null;
-
   isCreatingNotebook: boolean;
+  isOpeningNotebook: boolean;
+  openingNotebookId: string;
 
   isLockingCell: boolean;
   isUnlockingCell: boolean;
@@ -91,8 +97,9 @@ const initialState: EditorState = {
   isGettingNotebooks: false,
   getNotebooksErrorMessage: '',
   getNotebooksTimestamp: null,
-
   isCreatingNotebook: false,
+  isOpeningNotebook: false,
+  openingNotebookId: '',
 
   isLockingCell: false,
   isUnlockingCell: false,
@@ -113,10 +120,7 @@ const initialState: EditorState = {
   kernel: null,
 
   notebooks: ImmutableList([makeImmutableNotebook(EXAMPLE_PROJECT)]),
-  notebook: makeImmutableReducedNotebook({
-    ...EXAMPLE_PROJECT,
-    cell_ids: EXAMPLE_PROJECT_CELLS.map((cell) => cell.cell_id),
-  }),
+  notebook: IMMUTABLE_REDUCED_EXAMPLE_PROJECT,
   cells: cellArrayToImmutableMap(EXAMPLE_PROJECT_CELLS),
   outputs: ImmutableMap(),
   logs: ImmutableList(),
@@ -142,6 +146,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...state,
         logs: state.logs.clear(),
       };
+
     case KERNEL_GATEWAY.SET:
       return {
         ...state,
@@ -152,11 +157,13 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...state,
         isEditingGatewayUri: action.editing,
       };
+
     case CONNECT_TO_KERNEL.AUTO:
       return {
         ...state,
         autoConnectToKernel: action.enable,
       };
+
     case CONNECT_TO_KERNEL.START:
       return {
         ...state,
@@ -178,6 +185,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         isConnectingToKernel: false,
         connectToKernelErrorMessage: action.error.message,
       };
+
     case CONNECT_TO_KERNEL.RECONNECTING:
       return {
         ...state,
@@ -199,6 +207,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         runQueue: state.runQueue.clear(),
         kernel: null,
       };
+
     case NOTEBOOKS.GET.START:
       return {
         ...state,
@@ -221,6 +230,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         isGettingNotebooks: false,
         getNotebooksErrorMessage: action.error.message,
       };
+
     case NOTEBOOKS.CREATE.START:
       return {
         ...state,
@@ -237,6 +247,38 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...state,
         isCreatingNotebook: false,
       };
+
+    case NOTEBOOKS.OPEN.START:
+      return {
+        ...state,
+        isOpeningNotebook: true,
+        openingNotebookId: action.nb_id,
+        notebook: reduceImmutableNotebook(
+          state.notebooks.find((notebook) => notebook.get('nb_id') === action.nb_id) ?? IMMUTABLE_EXAMPLE_PROJECT
+        ),
+      };
+    case NOTEBOOKS.OPEN.SUCCESS:
+      return {
+        ...state,
+        isOpeningNotebook: false,
+        openingNotebookId: '',
+        notebook: makeImmutableReducedNotebook(reduceNotebookContents(action.notebook)),
+        cells: cellArrayToImmutableMap(Object.values(action.notebook.cells)),
+      };
+    case NOTEBOOKS.OPEN.FAILURE:
+      return {
+        ...state,
+        isOpeningNotebook: false,
+        openingNotebookId: '',
+      };
+    case NOTEBOOKS.OPEN.DEMO: {
+      return {
+        ...state,
+        notebook: IMMUTABLE_REDUCED_EXAMPLE_PROJECT,
+        cells: cellArrayToImmutableMap(EXAMPLE_PROJECT_CELLS),
+      };
+    }
+
     case LOCK_CELL.START:
       return {
         ...state,
@@ -262,6 +304,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...state,
         isLockingCell: false,
       };
+
     case UNLOCK_CELL.START:
       return {
         ...state,
@@ -282,6 +325,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...state,
         isUnlockingCell: false,
       };
+
     case ADD_CELL.START:
       return {
         ...state,
@@ -302,6 +346,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...state,
         isAddingCell: false,
       };
+
     case DELETE_CELL.START:
       return {
         ...state,
@@ -340,6 +385,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...state,
         isDeletingCell: false,
       };
+
     case EDIT_CELL.START:
       return {
         ...state,
@@ -369,6 +415,12 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...state,
         isEditingCell: false,
       };
+    case EDIT_CELL.UPDATE_CODE:
+      return {
+        ...state,
+        cells: state.cells.update(action.cell_id, IMMUTABLE_BASE_CELL, (value) => value.set('contents', action.code)),
+      };
+
     case SELECT_CELL.SET:
       return {
         ...state,
@@ -397,6 +449,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         selectedCellId: state.notebook.get('cell_ids').get(nextIndex) ?? '',
       };
     }
+
     case EXECUTE_CODE.QUEUE:
       return {
         ...state,
@@ -431,6 +484,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ),
         runQueue: state.runQueue.clear(),
       };
+
     case KERNEL_MESSAGE.RECEIVE:
       return {
         ...state,
@@ -448,11 +502,6 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         cells: state.cells.update(action.cell_id, IMMUTABLE_BASE_CELL, (value) =>
           value.set('runIndex', action.runIndex > state.executionCount ? action.runIndex : value.get('runIndex'))
         ),
-      };
-    case EDIT_CELL.UPDATE_CODE:
-      return {
-        ...state,
-        cells: state.cells.update(action.cell_id, IMMUTABLE_BASE_CELL, (value) => value.set('contents', action.code)),
       };
     default:
       return state;

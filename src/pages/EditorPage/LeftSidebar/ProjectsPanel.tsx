@@ -2,6 +2,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import { Button, Dropdown, Icon, IconButton, Input, InputGroup, Modal } from 'rsuite';
+import { Notebook } from '@actually-colab/editor-client';
 
 import { ReduxState } from '../../../redux';
 import { _editor } from '../../../redux/actions';
@@ -36,6 +37,8 @@ const styles = StyleSheet.create({
 const ProjectsPanel: React.FC = () => {
   const isGettingNotebooks = useSelector((state: ReduxState) => state.editor.isGettingNotebooks);
   const isCreatingNotebook = useSelector((state: ReduxState) => state.editor.isCreatingNotebook);
+  const isOpeningNotebook = useSelector((state: ReduxState) => state.editor.isOpeningNotebook);
+  const openingNotebookId = useSelector((state: ReduxState) => state.editor.openingNotebookId);
   const notebooks = useSelector((state: ReduxState) => state.editor.notebooks);
   const notebook = useSelector((state: ReduxState) => state.editor.notebook);
 
@@ -47,6 +50,9 @@ const ProjectsPanel: React.FC = () => {
   const dispatchCreateNotebook = React.useCallback(() => dispatch(_editor.createNotebook(newProjectName)), [
     dispatch,
     newProjectName,
+  ]);
+  const dispatchOpenNotebook = React.useCallback((nb_id: Notebook['nb_id']) => dispatch(_editor.openNotebook(nb_id)), [
+    dispatch,
   ]);
 
   /**
@@ -119,7 +125,12 @@ const ProjectsPanel: React.FC = () => {
                   }
                 : {}),
             }}
-            onClick={() => project.get('nb_id') !== notebook.get('nb_id') && console.log('TODO', project)}
+            loading={project.get('nb_id') === openingNotebookId}
+            onClick={() =>
+              !isOpeningNotebook &&
+              project.get('nb_id') !== notebook.get('nb_id') &&
+              dispatchOpenNotebook(project.get('nb_id'))
+            }
           >
             {project.get('name')}
           </Button>
