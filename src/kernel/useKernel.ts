@@ -1,5 +1,7 @@
+import { Notebook } from '@actually-colab/editor-client';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { EXAMPLE_PROJECT } from '../constants/demo';
 
 import { ReduxState } from '../redux';
 import { _editor } from '../redux/actions';
@@ -18,6 +20,7 @@ const useKernel = () => {
   const cells = useSelector((state: ReduxState) => state.editor.cells);
   const runQueue = useSelector((state: ReduxState) => state.editor.runQueue);
   const isExecutingCode = useSelector((state: ReduxState) => state.editor.isExecutingCode);
+  const notebook = useSelector((state: ReduxState) => state.editor.notebook);
 
   const shouldConnect = React.useMemo(
     () =>
@@ -44,8 +47,13 @@ const useKernel = () => {
     () => kernel !== null && dispatch(_editor.disconnectFromKernel(kernel)),
     [dispatch, kernel]
   );
+  const dispatchRestartKernel = React.useCallback(
+    () => kernel !== null && dispatch(_editor.restartKernel(gatewayUri, kernel)),
+    [dispatch, gatewayUri, kernel]
+  );
 
   const timeout = React.useRef<NodeJS.Timeout | null>(null);
+  const currentNotebookId = React.useRef<Notebook['nb_id']>(EXAMPLE_PROJECT.nb_id);
 
   /**
    * Manage the kernel connection
@@ -79,6 +87,16 @@ const useKernel = () => {
       }
     }
   }, [cells, dispatchExecuteCode, isExecutingCode, runQueue]);
+
+  /**
+   * Automatically restart kernel on notebook change
+   */
+  React.useEffect(() => {
+    if (notebook.get('nb_id') !== currentNotebookId.current) {
+      dispatchRestartKernel();
+      currentNotebookId.current = notebook.get('nb_id');
+    }
+  }, [dispatchRestartKernel, notebook]);
 
   /**
    * Automatically disconnect from the kernel if the gateway URI is edited

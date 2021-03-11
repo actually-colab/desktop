@@ -91,3 +91,9 @@ export const connectToKernel = async (
  */
 export const interrupt = (gatewayUri: string, kernel: IKernel) =>
   fetch(`${gatewayUri}/api/kernels/${kernel.id}/interrupt`, { method: 'POST' });
+
+/**
+ * Restart the given kernel
+ */
+export const restart = (gatewayUri: string, kernel: IKernel) =>
+  fetch(`${gatewayUri}/api/kernels/${kernel.id}/restart`, { method: 'POST' });
