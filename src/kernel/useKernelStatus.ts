@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 
 import { KERNEL_STATUS } from '../types/kernel';
-import { ReduxState } from '../redux';
+import { ReduxState } from '../types/redux';
 import { palette } from '../constants/theme';
 
 /**

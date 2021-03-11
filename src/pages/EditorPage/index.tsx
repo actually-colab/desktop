@@ -4,7 +4,7 @@ import { StyleSheet, css } from 'aphrodite';
 
 import AceImports from '../../utils/AceImports';
 import { palette, spacing } from '../../constants/theme';
-import { ReduxState } from '../../redux';
+import { ReduxState } from '../../types/redux';
 import useKernel from '../../kernel/useKernel';
 import { NotebookCell } from '../../components';
 

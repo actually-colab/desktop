@@ -1,18 +1,9 @@
 import { combineReducers, createStore, applyMiddleware } from 'redux';
 import ReduxThunk from 'redux-thunk';
 
-import auth, { AuthState } from './auth';
-import editor, { EditorState } from './editor';
-import ui, { UIState } from './ui';
-
-/**
- * The type of the combined reducer
- */
-export type ReduxState = {
-  auth: AuthState;
-  editor: EditorState;
-  ui: UIState;
-};
+import auth from './auth';
+import editor from './editor';
+import ui from './ui';
 
 /**
  * The combined redux store

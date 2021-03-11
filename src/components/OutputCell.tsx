@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import { DisplayData, ExecuteResult, KernelOutputError, Media, Output, StreamText } from '@nteract/outputs';
 
-import { ReduxState } from '../redux';
+import { ReduxState } from '../types/redux';
 import { User } from '../types/user';
 import { ImmutableEditorCell } from '../types/notebook';
 import { spacing } from '../constants/theme';

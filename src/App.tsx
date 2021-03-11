@@ -3,8 +3,10 @@ import { Provider, useDispatch, useSelector } from 'react-redux';
 import { BrowserRouter as Router, Switch, Route, useHistory, useLocation } from 'react-router-dom';
 import { StyleSheet, css } from 'aphrodite';
 
+import { ReduxState } from './types/redux';
+
 import './App.global.css';
-import store, { ReduxState } from './redux';
+import store from './redux';
 import { _auth } from './redux/actions';
 import { AuthPage, EditorPage } from './pages';
 

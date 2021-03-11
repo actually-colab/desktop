@@ -4,7 +4,7 @@ import { StyleSheet, css } from 'aphrodite';
 import { Button, Dropdown, Icon, IconButton, Input, InputGroup, Modal } from 'rsuite';
 import { Notebook } from '@actually-colab/editor-client';
 
-import { ReduxState } from '../../../redux';
+import { ReduxState } from '../../../types/redux';
 import { _editor } from '../../../redux/actions';
 import { palette, spacing } from '../../../constants/theme';
 import { PopoverDropdown } from '../../../components';
