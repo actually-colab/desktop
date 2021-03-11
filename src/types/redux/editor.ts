@@ -7,22 +7,36 @@ import { User } from '../user';
 import { EditorCell, KernelOutput } from '../notebook';
 import { KernelLog } from '../kernel';
 
-export const KERNEL_LOG = {
-  APPEND: 'KERNEL_LOG_APPEND',
-  CLEAR: 'KERNEL_LOG_CLEAR',
-} as const;
-export const KERNEL_GATEWAY = {
-  SET: 'SET_KERNEL_GATEWAY',
-  EDIT: ' SET_KERNEL_GATEWAY_EDIT',
-} as const;
-export const CONNECT_TO_KERNEL = {
-  AUTO: 'CONNECT_TO_KERNEL_AUTO',
-  START: 'CONNECT_TO_KERNEL_START',
-  SUCCESS: 'CONNECT_TO_KERNEL_SUCCESS',
-  FAILURE: 'CONNECT_TO_KERNEL_FAILURE',
-  RECONNECTING: 'CONNECT_TO_KERNEL_RECONNECTING',
-  RECONNECTED: 'CONNECT_TO_KERNEL_RECONNECTED',
-  DISCONNECTED: 'CONNECT_TO_KERNEL_DISCONNECTED',
+export const KERNEL = {
+  LOG: {
+    APPEND: 'KERNEL_LOG_APPEND',
+    CLEAR: 'KERNEL_LOG_CLEAR',
+  },
+  GATEWAY: {
+    SET: 'KERNEL_GATEWAY_SET',
+    EDIT: ' KERNEL_GATEWAY_EDIT',
+  },
+  CONNECT: {
+    AUTO: 'KERNEL_CONNECT_AUTO',
+    START: 'KERNEL_CONNECT_START',
+    SUCCESS: 'KERNEL_CONNECT_SUCCESS',
+    FAILURE: 'KERNEL_CONNECT_FAILURE',
+    RECONNECTING: 'KERNEL_CONNECT_RECONNECTING',
+    RECONNECTED: 'KERNEL_CONNECT_RECONNECTED',
+    DISCONNECTED: 'KERNEL_CONNECT_DISCONNECTED',
+    RESTART: 'KERNEL_CONNECT_RESTART',
+  },
+  EXECUTE: {
+    QUEUE: 'EXECUTE_CODE_QUEUE',
+    START: 'EXECUTE_CODE_START',
+    SUCCESS: 'EXECUTE_CODE_SUCCESS',
+    FAILURE: 'EXECUTE_CODE_FAILURE',
+    STOPPED: 'EXECUTE_CODE_STOPPED',
+  },
+  MESSAGE: {
+    RECEIVE: 'KERNEL_MESSAGE_RECEIVE',
+    UPDATE_RUN_INDEX: 'KERNEL_MESSAGE_UPDATE_RUN_INDEX',
+  },
 } as const;
 export const NOTEBOOKS = {
   GET: {
@@ -42,54 +56,42 @@ export const NOTEBOOKS = {
     DEMO: 'NOTEBOOKS_OPEN_DEMO',
   },
 } as const;
-export const LOCK_CELL = {
-  START: 'LOCK_CELL_START',
-  SUCCESS: 'LOCK_CELL_SUCCESS',
-  FAILURE: 'LOCK_CELL_FAILURE',
-} as const;
-export const UNLOCK_CELL = {
-  START: 'UNLOCK_CELL_START',
-  SUCCESS: 'UNLOCK_CELL_SUCCESS',
-  FAILURE: 'UNLOCK_CELL_FAILURE',
-} as const;
-export const ADD_CELL = {
-  START: 'ADD_CELL_START',
-  SUCCESS: 'ADD_CELL_SUCCESS',
-  FAILURE: 'ADD_CELL_FAILURE',
-} as const;
-export const DELETE_CELL = {
-  START: 'DELETE_CELL_START',
-  SUCCESS: 'DELETE_CELL_SUCCESS',
-  FAILURE: 'DELETE_CELL_FAILURE',
-} as const;
-export const MOVE_CELL = {
-  START: 'MOVE_CELL_START',
-  SUCCESS: 'MOVE_CELL_SUCCESS',
-  FAILURE: 'MOVE_CELL_FAILURE',
-} as const;
-export const EDIT_CELL = {
-  START: 'EDIT_CELL_START',
-  SUCCESS: 'EDIT_CELL_SUCCESS',
-  FAILURE: 'EDIT_CELL_FAILURE',
-  UPDATE_CODE: 'EDIT_CELL_UPDATE_CODE',
-} as const;
-export const SELECT_CELL = {
-  SET: 'SELECT_CELL_SET',
-  NEXT: 'SELECT_CELL_NEXT',
-} as const;
-export const EXECUTE_CODE = {
-  QUEUE: 'EXECUTE_CODE_QUEUE',
-  START: 'EXECUTE_CODE_START',
-  SUCCESS: 'EXECUTE_CODE_SUCCESS',
-  FAILURE: 'EXECUTE_CODE_FAILURE',
-  STOPPED: 'EXECUTE_CODE_STOPPED',
-} as const;
-export const KERNEL_MESSAGE = {
-  RECEIVE: 'KERNEL_MESSAGE_RECEIVE',
-  UPDATE_RUN_INDEX: 'KERNEL_MESSAGE_UPDATE_RUN_INDEX',
-} as const;
-export const INTERRUPT_KERNEL = {
-  START: 'INTERRUPT_KERNEL_START',
+export const CELL = {
+  LOCK: {
+    START: 'CELL_LOCK_START',
+    SUCCESS: 'CELL_LOCK_SUCCESS',
+    FAILURE: 'CELL_LOCK_FAILURE',
+  },
+  UNLOCK: {
+    START: 'CELL_UNLOCK_START',
+    SUCCESS: 'CELL_UNLOCK_SUCCESS',
+    FAILURE: 'CELL_UNLOCK_FAILURE',
+  },
+  ADD: {
+    START: 'CELL_ADD_START',
+    SUCCESS: 'CELL_ADD_SUCCESS',
+    FAILURE: 'CELL_ADD_FAILURE',
+  },
+  DELETE: {
+    START: 'CELL_DELETE_START',
+    SUCCESS: 'CELL_DELETE_SUCCESS',
+    FAILURE: 'CELL_DELETE_FAILURE',
+  },
+  MOVE: {
+    START: 'CELL_MOVE_START',
+    SUCCESS: 'CELL_MOVE_SUCCESS',
+    FAILURE: 'CELL_MOVE_FAILURE',
+  },
+  EDIT: {
+    START: 'CELL_EDIT_START',
+    SUCCESS: 'CELL_EDIT_SUCCESS',
+    FAILURE: 'CELL_EDIT_FAILURE',
+    UPDATE_CODE: 'CELL_EDIT_UPDATE_CODE',
+  },
+  SELECT: {
+    SET: 'CELL_SELECT_SET',
+    NEXT: 'CELL_SELECT_NEXT',
+  },
 } as const;
 
 type ActionError = {
@@ -99,52 +101,52 @@ type ActionError = {
 };
 
 type KernelLogAppendAction = {
-  type: typeof KERNEL_LOG.APPEND;
+  type: typeof KERNEL.LOG.APPEND;
   log: Omit<KernelLog, 'id'>;
 };
 
 type KernelLogClearAction = {
-  type: typeof KERNEL_LOG.CLEAR;
+  type: typeof KERNEL.LOG.CLEAR;
 };
 
 type SetKernelGatewayAction = {
-  type: typeof KERNEL_GATEWAY.SET;
+  type: typeof KERNEL.GATEWAY.SET;
   uri: string;
 };
 
 type SetKernelGatewayEditAction = {
-  type: typeof KERNEL_GATEWAY.EDIT;
+  type: typeof KERNEL.GATEWAY.EDIT;
   editing: boolean;
 };
 
 type ConnectToKernelAutoAction = {
-  type: typeof CONNECT_TO_KERNEL.AUTO;
+  type: typeof KERNEL.CONNECT.AUTO;
   enable: boolean;
 };
 
 type ConnectToKernelStartAction = {
-  type: typeof CONNECT_TO_KERNEL.START;
+  type: typeof KERNEL.CONNECT.START;
 };
 
 type ConnectToKernelSuccessAction = {
-  type: typeof CONNECT_TO_KERNEL.SUCCESS;
+  type: typeof KERNEL.CONNECT.SUCCESS;
   kernel: IKernel;
 };
 
 type ConnectToKernelFailureAction = {
-  type: typeof CONNECT_TO_KERNEL.FAILURE;
+  type: typeof KERNEL.CONNECT.FAILURE;
 } & ActionError;
 
 type ConnectToKernelReconnectingAction = {
-  type: typeof CONNECT_TO_KERNEL.RECONNECTING;
+  type: typeof KERNEL.CONNECT.RECONNECTING;
 };
 
 type ConnectToKernelReconnectedAction = {
-  type: typeof CONNECT_TO_KERNEL.RECONNECTED;
+  type: typeof KERNEL.CONNECT.RECONNECTED;
 };
 
 type ConnectToKernelDisconnectedAction = {
-  type: typeof CONNECT_TO_KERNEL.DISCONNECTED;
+  type: typeof KERNEL.CONNECT.DISCONNECTED;
   retry: boolean;
 };
 
@@ -193,143 +195,143 @@ type NotebooksOpenDemoAction = {
 };
 
 type LockCellStartAction = {
-  type: typeof LOCK_CELL.START;
+  type: typeof CELL.LOCK.START;
 };
 
 type LockCellSuccessAction = {
-  type: typeof LOCK_CELL.SUCCESS;
+  type: typeof CELL.LOCK.SUCCESS;
   isMe: boolean;
   uid: User['uid'];
   cell_id: EditorCell['cell_id'];
 };
 
 type LockCellFailureAction = {
-  type: typeof LOCK_CELL.FAILURE;
+  type: typeof CELL.LOCK.FAILURE;
 } & ActionError;
 
 type UnlockCellStartAction = {
-  type: typeof UNLOCK_CELL.START;
+  type: typeof CELL.UNLOCK.START;
 };
 
 type UnlockCellSuccessAction = {
-  type: typeof UNLOCK_CELL.SUCCESS;
+  type: typeof CELL.UNLOCK.SUCCESS;
   isMe: boolean;
   uid: User['uid'];
   cell_id: EditorCell['cell_id'];
 };
 
 type UnlockCellFailureAction = {
-  type: typeof UNLOCK_CELL.FAILURE;
+  type: typeof CELL.UNLOCK.FAILURE;
 } & ActionError;
 
 type AddCellStartAction = {
-  type: typeof ADD_CELL.START;
+  type: typeof CELL.ADD.START;
 };
 
 type AddCellSuccessAction = {
-  type: typeof ADD_CELL.SUCCESS;
+  type: typeof CELL.ADD.SUCCESS;
   isMe: boolean;
   cell_id: EditorCell['cell_id'];
   index: number;
 };
 
 type AddCellFailureAction = {
-  type: typeof ADD_CELL.FAILURE;
+  type: typeof CELL.ADD.FAILURE;
 } & ActionError;
 
 type DeleteCellStartAction = {
-  type: typeof DELETE_CELL.START;
+  type: typeof CELL.DELETE.START;
 };
 
 type DeleteCellSuccessAction = {
-  type: typeof DELETE_CELL.SUCCESS;
+  type: typeof CELL.DELETE.SUCCESS;
   isMe: boolean;
   cell_id: EditorCell['cell_id'];
 };
 
 type DeleteCellFailureAction = {
-  type: typeof DELETE_CELL.FAILURE;
+  type: typeof CELL.DELETE.FAILURE;
 } & ActionError;
 
 type MoveCellStartAction = {
-  type: typeof MOVE_CELL.START;
+  type: typeof CELL.MOVE.START;
 };
 
 type MoveCellSuccessAction = {
-  type: typeof MOVE_CELL.SUCCESS;
+  type: typeof CELL.MOVE.SUCCESS;
   cell_id: EditorCell['cell_id'];
   index: number;
 };
 
 type MoveCellFailureAction = {
-  type: typeof MOVE_CELL.FAILURE;
+  type: typeof CELL.MOVE.FAILURE;
 } & ActionError;
 
 type EditCellStartAction = {
-  type: typeof EDIT_CELL.START;
+  type: typeof CELL.EDIT.START;
 };
 
 type EditCellSuccessAction = {
-  type: typeof EDIT_CELL.SUCCESS;
+  type: typeof CELL.EDIT.SUCCESS;
   isMe: boolean;
   cell_id: EditorCell['cell_id'];
   changes: Partial<EditorCell>;
 };
 
 type EditCellFailureAction = {
-  type: typeof EDIT_CELL.FAILURE;
+  type: typeof CELL.EDIT.FAILURE;
 } & ActionError;
 
 type UpdateCellCodeAction = {
-  type: typeof EDIT_CELL.UPDATE_CODE;
+  type: typeof CELL.EDIT.UPDATE_CODE;
   cell_id: EditorCell['cell_id'];
   code: string;
 };
 
 type SelectCellSetAction = {
-  type: typeof SELECT_CELL.SET;
+  type: typeof CELL.SELECT.SET;
   cell_id: EditorCell['cell_id'];
 };
 
 type SelectCellNextAction = {
-  type: typeof SELECT_CELL.NEXT;
+  type: typeof CELL.SELECT.NEXT;
 };
 
 type ExecuteCodeQueueAction = {
-  type: typeof EXECUTE_CODE.QUEUE;
+  type: typeof KERNEL.EXECUTE.QUEUE;
   cell_id: EditorCell['cell_id'];
 };
 
 type ExecuteCodeStartAction = {
-  type: typeof EXECUTE_CODE.START;
+  type: typeof KERNEL.EXECUTE.START;
   cell_id: EditorCell['cell_id'];
 };
 
 type ExecuteCodeSuccessAction = {
-  type: typeof EXECUTE_CODE.SUCCESS;
+  type: typeof KERNEL.EXECUTE.SUCCESS;
   cell_id: EditorCell['cell_id'];
   runIndex: number;
 };
 
 type ExecuteCodeFailureAction = {
-  type: typeof EXECUTE_CODE.FAILURE;
+  type: typeof KERNEL.EXECUTE.FAILURE;
   cell_id: EditorCell['cell_id'];
   runIndex: number;
 } & ActionError;
 
 type ExecuteCodeStoppedAction = {
-  type: typeof EXECUTE_CODE.STOPPED;
+  type: typeof KERNEL.EXECUTE.STOPPED;
   cell_id: EditorCell['cell_id'];
 };
 
 type KernelMessageReceiveAction = {
-  type: typeof KERNEL_MESSAGE.RECEIVE;
+  type: typeof KERNEL.MESSAGE.RECEIVE;
   cell_id: EditorCell['cell_id'];
   messages: KernelOutput[];
 };
 
 type KernelMessageUpdateRunIndexAction = {
-  type: typeof KERNEL_MESSAGE.UPDATE_RUN_INDEX;
+  type: typeof KERNEL.MESSAGE.UPDATE_RUN_INDEX;
   cell_id: EditorCell['cell_id'];
   runIndex: number;
 };
