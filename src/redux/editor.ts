@@ -25,7 +25,7 @@ import {
   ImmutableReducedNotebook,
 } from '../types/notebook';
 import { ImmutableKernelLog } from '../types/kernel';
-import { BASE_CELL, IMMUTABLE_BASE_CELL } from '../constants/notebook';
+import { IMMUTABLE_BASE_CELL } from '../constants/notebook';
 import { EXAMPLE_PROJECT, EXAMPLE_PROJECT_CELLS, IMMUTABLE_EXAMPLE_PROJECT } from '../constants/demo';
 import { DEFAULT_GATEWAY_URI } from '../constants/jupyter';
 import { cellArrayToImmutableMap } from '../utils/notebook';
@@ -255,6 +255,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
               cell_id: action.cell_id,
             })
           ),
+        cells: state.cells.update(action.cell_id, IMMUTABLE_BASE_CELL, (cell) => cell.set('lock_held_by', action.uid)),
       };
     case LOCK_CELL.FAILURE:
       return {
@@ -274,6 +275,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         lockedCells: state.lockedCells.filter(
           (lock) => lock.get('cell_id') !== action.cell_id || lock.get('uid') !== action.uid
         ),
+        cells: state.cells.update(action.cell_id, IMMUTABLE_BASE_CELL, (cell) => cell.set('lock_held_by', '')),
       };
     case UNLOCK_CELL.FAILURE:
       return {
