@@ -24,7 +24,7 @@ export const KERNEL = {
     RECONNECTING: 'KERNEL_CONNECT_RECONNECTING',
     RECONNECTED: 'KERNEL_CONNECT_RECONNECTED',
     DISCONNECTED: 'KERNEL_CONNECT_DISCONNECTED',
-    RESTART: 'KERNEL_CONNECT_RESTART',
+    RESTARTED: 'KERNEL_CONNECT_RESTARTED',
   },
   EXECUTE: {
     QUEUE: 'EXECUTE_CODE_QUEUE',
@@ -148,6 +148,10 @@ type ConnectToKernelReconnectedAction = {
 type ConnectToKernelDisconnectedAction = {
   type: typeof KERNEL.CONNECT.DISCONNECTED;
   retry: boolean;
+};
+
+type ConnectToKernelRestartedAction = {
+  type: typeof KERNEL.CONNECT.RESTARTED;
 };
 
 type NotebooksGetStartAction = {
@@ -351,6 +355,7 @@ export type EditorActionTypes =
   | ConnectToKernelReconnectingAction
   | ConnectToKernelReconnectedAction
   | ConnectToKernelDisconnectedAction
+  | ConnectToKernelRestartedAction
   | NotebooksGetStartAction
   | NotebooksGetSuccessAction
   | NotebooksGetFailureAction

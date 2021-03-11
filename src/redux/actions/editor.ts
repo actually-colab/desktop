@@ -192,6 +192,24 @@ export const connectToKernel = (uri: string, displayError = false): EditorAsyncA
   }
 };
 
+const connectToKernelRestarted = (): EditorActionTypes => ({
+  type: KERNEL.CONNECT.RESTARTED,
+});
+
+/**
+ * Restart the given kernel
+ */
+export const restartKernel = (gatewayUri: string, kernel: IKernel): EditorAsyncActionTypes => async (dispatch) => {
+  try {
+    await KernelApi.restart(gatewayUri, kernel);
+
+    console.log('Kernel was restarted');
+    dispatch(connectToKernelRestarted());
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 /**
  * Shutdown a live kernel or disconnect from a dying one.
  */
@@ -709,6 +727,9 @@ export const stopCodeExecution = (
   try {
     await KernelApi.interrupt(gatewayUri, kernel);
 
+    console.log('Kernel was interrupted');
     dispatch(executeCodeStopped(cell));
-  } catch (error) {}
+  } catch (error) {
+    console.error(error);
+  }
 };

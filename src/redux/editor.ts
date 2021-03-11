@@ -11,7 +11,7 @@ import {
   ImmutableReducedNotebook,
 } from '../types/notebook';
 import { ImmutableKernelLog } from '../types/kernel';
-import { IMMUTABLE_BASE_CELL } from '../constants/notebook';
+import { BASE_CELL, IMMUTABLE_BASE_CELL } from '../constants/notebook';
 import {
   EXAMPLE_PROJECT,
   EXAMPLE_PROJECT_CELLS,
@@ -189,9 +189,20 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         isConnectingToKernel: false,
         isReconnectingToKernel: false,
         isExecutingCode: false,
+        executionCount: 0,
         runningCellId: '',
         runQueue: state.runQueue.clear(),
         kernel: null,
+      };
+    case KERNEL.CONNECT.RESTARTED:
+      return {
+        ...state,
+        isExecutingCode: false,
+        executionCount: 0,
+        runningCellId: '',
+        runQueue: state.runQueue.clear(),
+        cells: state.cells.map((cell) => cell.set('runIndex', BASE_CELL.runIndex)),
+        outputs: state.outputs.clear(),
       };
 
     case NOTEBOOKS.GET.START:
