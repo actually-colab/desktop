@@ -1,4 +1,5 @@
 import { List as ImmutableList } from 'immutable';
+import { DCell, Notebook, NotebookAccessLevel } from '@actually-colab/editor-client';
 
 import { ImmutableObject } from './immutable';
 import { IpynbOutput } from './ipynb';
@@ -30,9 +31,7 @@ export type ImmutableKernelOutput = ImmutableObject<KernelOutput>;
 /**
  * An editor cell in a notebook
  */
-export type EditorCell = {
-  cell_id: string;
-  language: 'py' | 'md';
+export type EditorCell = Required<DCell> & {
   /**
    * If the cell is markdown, this indicates if the markdown is rendered or editable
    */
@@ -41,7 +40,6 @@ export type EditorCell = {
    * The latest execution count associated with this cell
    */
   runIndex: number;
-  code: string;
 };
 
 export type ImmutableEditorCell = ImmutableObject<EditorCell>;
@@ -56,38 +54,17 @@ export type Lock = {
 
 export type ImmutableLock = ImmutableObject<Lock>;
 
-/**
- * Indicates the access level for a given user on a given notebook
- */
-export type NotebookAccessLevel = {
-  nb_id: Notebook['nb_id'];
-  uid: User['uid'];
-  access_level: 'Full Access' | 'Read Only';
-};
-
-type UserWithAccessLevel = User & {
-  access_level: NotebookAccessLevel['access_level'];
-};
-
-/**
- * A notebook
- */
-export type Notebook = {
-  nb_id: string;
-  name: string;
-  users: UserWithAccessLevel[];
-};
-
 export type ImmutableNotebook = ImmutableObject<
   Omit<Notebook, 'users'> & {
-    users: ImmutableList<ImmutableObject<UserWithAccessLevel>>;
+    users: ImmutableList<ImmutableObject<NotebookAccessLevel>>;
   }
 >;
 
 /**
  * Notebooks are separated so the cells are stored in redux on their own
  */
-type ReducedNotebook = Notebook & {
+export type ReducedNotebook = Omit<Notebook, 'users'> & {
+  users: ImmutableList<ImmutableObject<NotebookAccessLevel>>;
   cell_ids: ImmutableList<EditorCell['cell_id']>;
 };
 

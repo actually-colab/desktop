@@ -342,7 +342,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
       const runQueueChanges: Partial<EditorState> = {};
 
       // If a cell in the runQueue is no longer python, it should not be executed
-      if (action.changes.language === 'md') {
+      if (action.changes.language === 'markdown') {
         if (state.runQueue.includes(action.cell_id)) {
           runQueueChanges.runQueue = state.runQueue.filter((cell_id) => cell_id !== action.cell_id);
         }
@@ -447,7 +447,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
     case EDIT_CELL.UPDATE_CODE:
       return {
         ...state,
-        cells: state.cells.update(action.cell_id, IMMUTABLE_BASE_CELL, (value) => value.set('code', action.code)),
+        cells: state.cells.update(action.cell_id, IMMUTABLE_BASE_CELL, (value) => value.set('contents', action.code)),
       };
     default:
       return state;

@@ -65,11 +65,11 @@ const convertToIpynb = (
     },
   },
   cells: notebookCells.map<IpynbCell>(({ cell, outputs }) =>
-    cell.get('language') === 'md'
+    cell.get('language') === 'markdown'
       ? {
           cell_type: 'markdown',
           metadata: {},
-          source: cell.get('code').split(SPLIT_KEEP_NEWLINE),
+          source: cell.get('contents').split(SPLIT_KEEP_NEWLINE),
         }
       : {
           cell_type: 'code',
@@ -86,7 +86,7 @@ const convertToIpynb = (
                 })
               )
               ?.toJS() ?? [],
-          source: cell.get('code').split(SPLIT_KEEP_NEWLINE),
+          source: cell.get('contents').split(SPLIT_KEEP_NEWLINE),
         }
   ),
 });

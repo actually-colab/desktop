@@ -1,6 +1,7 @@
 import { IKernel } from 'jupyter-js-services';
 import { v4 as uuid } from 'uuid';
 import { format } from 'date-fns';
+import * as client from '@actually-colab/editor-client';
 
 import {
   ADD_CELL,
@@ -20,11 +21,10 @@ import {
 } from '../../types/redux/editor';
 import { User } from '../../types/user';
 import { IpynbOutput } from '../../types/ipynb';
-import { BaseKernelOutput, EditorCell, ImmutableEditorCell, KernelOutput, Notebook } from '../../types/notebook';
+import { BaseKernelOutput, EditorCell, ImmutableEditorCell, KernelOutput } from '../../types/notebook';
 import { _ui } from '.';
 import { KernelLog } from '../../types/kernel';
 import { KernelApi } from '../../api';
-import * as client from '@actually-colab/editor-client';
 
 /**
  * Add a new log message
@@ -230,7 +230,7 @@ const getNotebooksStart = (): EditorActionTypes => ({
   type: NOTEBOOKS.GET.START,
 });
 
-const getNotebooksSuccess = (notebooks: Notebook[]): EditorActionTypes => ({
+const getNotebooksSuccess = (notebooks: client.Notebook[]): EditorActionTypes => ({
   type: NOTEBOOKS.GET.SUCCESS,
   notebooks,
 });
@@ -270,7 +270,7 @@ const createNotebookStart = (): EditorActionTypes => ({
   type: NOTEBOOKS.CREATE.START,
 });
 
-const createNotebookSuccess = (notebook: Notebook): EditorActionTypes => ({
+const createNotebookSuccess = (notebook: client.Notebook): EditorActionTypes => ({
   type: NOTEBOOKS.CREATE.SUCCESS,
   notebook,
 });
@@ -531,14 +531,14 @@ const updateRunIndex = (cell_id: EditorCell['cell_id'], runIndex: number): Edito
 export const executeCode = (user: User, kernel: IKernel, cell: ImmutableEditorCell): EditorAsyncActionTypes => async (
   dispatch
 ) => {
-  if (cell.get('language') !== 'py' || cell.get('code').trim() === '') {
+  if (cell.get('language') !== 'python3' || cell.get('contents').trim() === '') {
     return;
   }
 
   dispatch(executeCodeStart(cell.get('cell_id')));
 
   const future = kernel.execute({
-    code: cell.get('code'),
+    code: cell.get('contents'),
   });
 
   let runIndex = -1;
