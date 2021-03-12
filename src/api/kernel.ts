@@ -68,6 +68,18 @@ export const connectToKernel = async (
       name: 'python3',
     });
 
+    // Attempt to shutdown the kernel on page exit
+    window.addEventListener(
+      'unload',
+      () => {
+        try {
+          kernel.shutdown();
+          syncSleep(1000);
+        } catch (error) {}
+      },
+      false
+    );
+
     console.log('Kernel started');
     return {
       success: true,
@@ -97,3 +109,17 @@ export const interrupt = (gatewayUri: string, kernel: IKernel) =>
  */
 export const restart = (gatewayUri: string, kernel: IKernel) =>
   fetch(`${gatewayUri}/api/kernels/${kernel.id}/restart`, { method: 'POST' });
+
+/**
+ * Kill the given kernel
+ */
+export const kill = (gatewayUri: string, kernel: IKernel) =>
+  fetch(`${gatewayUri}/api/kernels/${kernel.id}`, { method: 'DELETE' });
+
+/**
+ * Sleep in-sync to delay close
+ */
+export const syncSleep = (delay: number) => {
+  const start = new Date().getTime();
+  while (new Date().getTime() < start + delay);
+};
