@@ -1,5 +1,4 @@
 import { IKernel } from 'jupyter-js-services';
-import { v4 as uuid } from 'uuid';
 import { format } from 'date-fns';
 import * as client from '@actually-colab/editor-client';
 

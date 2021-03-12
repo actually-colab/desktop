@@ -19,8 +19,7 @@ const styles = StyleSheet.create({
     right: 0,
     top: HEADER_HEIGHT,
     bottom: 0,
-    backgroundColor: `${palette.GRAY}15`,
-    'backdrop-filter': 'blur(16px)',
+    backgroundColor: palette.BASE,
     borderLeftWidth: 1,
     borderLeftStyle: 'solid',
     borderColor: palette.BASE_BORDER,
@@ -41,6 +40,7 @@ const styles = StyleSheet.create({
     width: 320,
     height: '100%',
     ...spacing.pad({ top: spacing.DEFAULT / 2 }),
+    backgroundColor: palette.BASE_FADED,
     overflowY: 'auto',
   },
   paneBody: {

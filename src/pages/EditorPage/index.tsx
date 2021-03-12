@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
   },
   body: {
     flex: 1,
-    ...spacing.pad({ top: spacing.DEFAULT + HEADER_HEIGHT }),
+    padding: spacing.DEFAULT,
     overflowY: 'auto',
   },
   rightContainer: {

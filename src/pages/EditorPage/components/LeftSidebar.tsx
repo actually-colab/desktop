@@ -6,14 +6,16 @@ import { Button, Icon, IconButton, IconProps, Tooltip, Whisper } from 'rsuite';
 import { ReduxState } from '../../../types/redux';
 import { _auth } from '../../../redux/actions';
 import { palette, spacing, timing } from '../../../constants/theme';
+import {
+  HEADER_HEIGHT,
+  LEFT_SIDEBAR_PANEL_WIDTH,
+  LEFT_SIDEBAR_TRAY_WIDTH,
+  LEFT_SIDEBAR_WIDTH,
+} from '../../../constants/dimensions';
 import { openCompanion } from '../../../utils/redirect';
 import { UserAvatar } from '../../../components';
 
 import { KernelPanel, ProjectsPanel } from '../LeftSidebar';
-
-export const LEFT_SIDEBAR_TRAY_WIDTH = 46;
-export const LEFT_SIDEBAR_PANEL_WIDTH = 220;
-export const LEFT_SIDEBAR_WIDTH = 266;
 
 const styles = StyleSheet.create({
   container: {
@@ -23,6 +25,7 @@ const styles = StyleSheet.create({
     backgroundColor: palette.BASE_FADED,
   },
   titleContainer: {
+    height: HEADER_HEIGHT,
     ...spacing.pad({ top: spacing.DEFAULT / 2 }),
   },
   title: {
@@ -33,10 +36,14 @@ const styles = StyleSheet.create({
     '-webkit-text-fill-color': 'transparent',
   },
   panel: {
+    paddingTop: spacing.DEFAULT / 2,
     flex: 1,
     display: 'flex',
     flexDirection: 'row',
     overflowY: 'hidden',
+    borderRightWidth: 1,
+    borderRightStyle: 'solid',
+    borderColor: palette.BASE_BORDER,
   },
   categoryContainer: {
     width: LEFT_SIDEBAR_TRAY_WIDTH,
