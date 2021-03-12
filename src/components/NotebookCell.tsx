@@ -212,12 +212,12 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
           {ownsLock ? (
             <IconTextButton
               icon="unlock-alt"
-              text="Unlock"
+              text={isUnlockingCell ? 'Unlocking...' : 'Unlock'}
               bgColor="transparent"
               tooltipText="Allow others to edit"
               tooltipDirection="bottom"
               color={palette.PRIMARY}
-              loading={isUnlockingCell}
+              disabled={isUnlockingCell}
               onClick={dispatchUnlockCell}
             />
           ) : lockOwner !== null ? (
@@ -228,13 +228,12 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
           ) : (
             <IconTextButton
               icon="lock"
-              text="Lock"
+              text={isLockingCell ? 'Locking...' : 'Lock'}
               bgColor="transparent"
               tooltipText="Lock for editing"
               tooltipDirection="bottom"
               color={palette.GRAY}
-              loading={isLockingCell}
-              disabled={!canLock}
+              disabled={!canLock || isLockingCell}
               onClick={onFocusEditor}
             />
           )}
