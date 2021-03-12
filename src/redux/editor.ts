@@ -19,7 +19,12 @@ import {
   IMMUTABLE_REDUCED_EXAMPLE_PROJECT,
 } from '../constants/demo';
 import { DEFAULT_GATEWAY_URI } from '../constants/jupyter';
-import { cellArrayToImmutableMap, reduceImmutableNotebook, reduceNotebookContents } from '../utils/notebook';
+import {
+  cellArrayToImmutableMap,
+  cleanDCell,
+  reduceImmutableNotebook,
+  reduceNotebookContents,
+} from '../utils/notebook';
 import { makeImmutableKernelLog } from '../utils/immutable/kernel';
 import {
   makeImmutableEditorCell,
@@ -260,7 +265,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         isOpeningNotebook: false,
         openingNotebookId: '',
         notebook: makeImmutableReducedNotebook(reduceNotebookContents(action.notebook)),
-        cells: cellArrayToImmutableMap(Object.values(action.notebook.cells)),
+        cells: cellArrayToImmutableMap(Object.values(action.notebook.cells).map((dcell) => cleanDCell(dcell))),
       };
     case NOTEBOOKS.OPEN.FAILURE:
       return {

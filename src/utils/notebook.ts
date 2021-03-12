@@ -56,6 +56,16 @@ export const reduceNotebookContents = (notebook: NotebookContents): ReducedNoteb
 };
 
 /**
+ * Given a DCell, make sure all values exist
+ */
+export const cleanDCell = (cell: DCell): Required<DCell> => {
+  return {
+    ...cell,
+    lock_held_by: cell.lock_held_by ?? '',
+  };
+};
+
+/**
  * Convert an array of cells to a dictionary
  */
 export const cellArrayToImmutableMap = (

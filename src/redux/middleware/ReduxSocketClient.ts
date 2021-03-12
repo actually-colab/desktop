@@ -5,9 +5,11 @@ import { ActuallyColabSocketClient } from '@actually-colab/editor-client';
 import { ReduxState } from '../../types/redux';
 import { AuthActionTypes, SIGN_IN } from '../../types/redux/auth';
 import { CELL, EditorActionTypes, NOTEBOOKS } from '../../types/redux/editor';
+import { EXAMPLE_PROJECT } from '../../constants/demo';
 import { httpToWebSocket } from '../../utils/request';
 import { isCellOwner, isDemo } from '../../utils/redux';
 import { _editor } from '../actions';
+import { cleanDCell } from '../../utils/notebook';
 
 const baseURL = httpToWebSocket(process.env.REACT_APP_AC_API_URI ?? 'http://localhost:3001/dev');
 
@@ -30,36 +32,43 @@ const ReduxSocketClient = (): Middleware<{}, ReduxState> => {
         client.on('error', (error) => console.error(error));
 
         client.on('notebook_opened', (user) => console.log('Notebook opened by', user));
-        client.on('cell_created', (cell) => {
-          console.log('Cell created', cell);
-          store.dispatch(_editor.addCellSuccess(true, cell.cell_id, -1, cell));
+        client.on('cell_created', (dcell) => {
+          console.log('Cell created', dcell);
+          store.dispatch(_editor.addCellSuccess(true, dcell.cell_id, -1, cleanDCell(dcell)));
         });
-        client.on('cell_locked', (cell) => {
-          console.log('Cell locked', cell);
+        client.on('cell_locked', (dcell) => {
+          console.log('Cell locked', dcell);
           store.dispatch(
-            _editor.lockCellSuccess(isCellOwner(store.getState(), cell), cell.lock_held_by ?? '', cell.cell_id, cell)
-          );
-        });
-        client.on('cell_unlocked', (cell) => {
-          console.log('Cell unlocked', cell);
-          store.dispatch(
-            _editor.unlockCellSuccess(
-              isCellOwner(store.getState(), cell),
-              store.getState().auth.user?.uid ?? '',
-              cell.cell_id,
-              cell
+            _editor.lockCellSuccess(
+              isCellOwner(store.getState(), dcell),
+              dcell.lock_held_by ?? '',
+              dcell.cell_id,
+              cleanDCell(dcell)
             )
           );
         });
-        client.on('cell_edited', (cell) => {
-          console.log('Cell edited', cell);
-          store.dispatch(_editor.editCellSuccess(isCellOwner(store.getState(), cell), cell.cell_id, cell));
+        client.on('cell_unlocked', (dcell) => {
+          console.log('Cell unlocked', dcell);
+          store.dispatch(
+            _editor.unlockCellSuccess(
+              isCellOwner(store.getState(), dcell),
+              store.getState().auth.user?.uid ?? '',
+              dcell.cell_id,
+              cleanDCell(dcell)
+            )
+          );
+        });
+        client.on('cell_edited', (dcell) => {
+          console.log('Cell edited', dcell);
+          store.dispatch(
+            _editor.editCellSuccess(isCellOwner(store.getState(), dcell), dcell.cell_id, cleanDCell(dcell))
+          );
         });
         break;
       }
 
       case NOTEBOOKS.OPEN.START: {
-        if (isDemo(store.getState())) {
+        if (action.nb_id === EXAMPLE_PROJECT.nb_id) {
           break;
         }
 
