@@ -9,8 +9,8 @@ export const BASE_CELL: EditorCell = {
   cell_id: '',
   time_modified: -1,
   lock_held_by: '',
-  language: 'python3',
-  rendered: false,
+  language: 'python',
+  rendered: true,
   runIndex: -1,
   contents: '',
 } as const;

@@ -556,7 +556,7 @@ const executeCodeQueue = (cell_id: EditorCell['cell_id']): EditorActionTypes => 
  * Add a cell to the execution queue
  */
 export const addCellToQueue = (cell: ImmutableEditorCell): EditorAsyncActionTypes => async (dispatch) => {
-  if (cell.get('language') !== 'python3' || cell.get('contents').trim() === '') {
+  if (cell.get('language') !== 'python' || cell.get('contents').trim() === '') {
     return;
   }
 
@@ -612,7 +612,7 @@ const updateRunIndex = (cell_id: EditorCell['cell_id'], runIndex: number): Edito
 export const executeCode = (user: User, kernel: IKernel, cell: ImmutableEditorCell): EditorAsyncActionTypes => async (
   dispatch
 ) => {
-  if (cell.get('language') !== 'python3' || cell.get('contents').trim() === '') {
+  if (cell.get('language') !== 'python' || cell.get('contents').trim() === '') {
     return;
   }
 

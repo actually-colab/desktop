@@ -89,7 +89,7 @@ const ReduxSocketClient = (): Middleware<{}, ReduxState> => {
           return;
         }
 
-        client?.createCell(store.getState().editor.notebook.get('nb_id'), 'python3');
+        client?.createCell(store.getState().editor.notebook.get('nb_id'), 'python');
         break;
       }
       case CELL.DELETE.START: {

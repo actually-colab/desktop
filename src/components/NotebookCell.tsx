@@ -142,7 +142,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
   }, [canLock, cell, dispatch, lockedCellId, user]);
 
   const onClickPlay = React.useCallback(() => {
-    if (cell.get('language') === 'python3') {
+    if (cell.get('language') === 'python') {
       dispatch(_editor.addCellToQueue(cell));
     } else {
       dispatch(_editor.editCell(cell.get('cell_id'), { rendered: true }));
@@ -178,7 +178,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
       </div>
 
       <div className={css(styles.content)}>
-        {cell.get('language') === 'python3' || !cell.get('rendered') ? (
+        {cell.get('language') === 'python' || !cell.get('rendered') ? (
           <div
             className={css(
               styles.codeContainer,
@@ -202,7 +202,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
             size="xs"
             loading={isRunning}
             disabled={
-              (cell.get('language') === 'python3' && isQueued) ||
+              (cell.get('language') === 'python' && isQueued) ||
               !kernelIsConnected ||
               (cell.get('language') === 'markdown' && cell.get('rendered'))
             }

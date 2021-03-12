@@ -81,7 +81,7 @@ const EditorHeader: React.FC = () => {
       return;
     }
 
-    if (selectedCell.get('language') === 'python3') {
+    if (selectedCell.get('language') === 'python') {
       dispatch(_editor.addCellToQueue(selectedCell));
     } else {
       dispatch(_editor.editCell(selectedCell.get('cell_id'), { rendered: true }));
@@ -154,13 +154,15 @@ const EditorHeader: React.FC = () => {
 
           <PopoverDropdown
             placement="bottomEnd"
-            activeKey={lockedCell?.get('language') ?? 'python3'}
+            activeKey={lockedCell?.get('language') ?? 'python'}
             buttonProps={{ disabled: lockedCell === null }}
-            buttonContent={lockedCell?.get('language') ?? 'python3'}
+            buttonContent={
+              (lockedCell?.get('language') === 'python' ? 'python3' : lockedCell?.get('language')) ?? 'python3'
+            }
             onSelect={handleLanguageSelect}
           >
-            <Dropdown.Item eventKey="py">python</Dropdown.Item>
-            <Dropdown.Item eventKey="md">markdown</Dropdown.Item>
+            <Dropdown.Item eventKey="python">python3</Dropdown.Item>
+            <Dropdown.Item eventKey="markdown">markdown</Dropdown.Item>
           </PopoverDropdown>
         </div>
 
