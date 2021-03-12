@@ -67,6 +67,8 @@ Create a file `.env.production.local`:
 
 ```
 REACT_APP_GOOGLE_CLIENT_ID="<CHANGE_ME>"
+REACT_APP_AC_API_URI="<CHANGE_ME>"
+REACT_APP_AC_WS_URI="<CHANGE_ME>"
 ```
 
 ```bash
