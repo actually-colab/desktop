@@ -208,6 +208,7 @@ type LockCellSuccessAction = {
   isMe: boolean;
   uid: User['uid'];
   cell_id: EditorCell['cell_id'];
+  cell: Partial<EditorCell>;
 };
 
 type LockCellFailureAction = {
@@ -224,6 +225,7 @@ type UnlockCellSuccessAction = {
   isMe: boolean;
   uid: User['uid'];
   cell_id: EditorCell['cell_id'];
+  cell: Partial<EditorCell>;
 };
 
 type UnlockCellFailureAction = {
@@ -240,6 +242,7 @@ type AddCellSuccessAction = {
   isMe: boolean;
   cell_id: EditorCell['cell_id'];
   index: number;
+  cell: Partial<EditorCell>;
 };
 
 type AddCellFailureAction = {
@@ -285,7 +288,7 @@ type EditCellSuccessAction = {
   type: typeof CELL.EDIT.SUCCESS;
   isMe: boolean;
   cell_id: EditorCell['cell_id'];
-  changes: Partial<EditorCell>;
+  cell: Partial<EditorCell>;
 };
 
 type EditCellFailureAction = {

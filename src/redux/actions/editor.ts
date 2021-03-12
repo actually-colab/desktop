@@ -368,12 +368,14 @@ const lockCellStart = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
 export const lockCellSuccess = (
   isMe: boolean,
   uid: User['uid'],
-  cell_id: EditorCell['cell_id']
+  cell_id: EditorCell['cell_id'],
+  cell: Partial<EditorCell>
 ): EditorActionTypes => ({
   type: CELL.LOCK.SUCCESS,
   isMe,
   uid,
   cell_id,
+  cell,
 });
 
 export const lockCellFailure = (errorMessage: string): EditorActionTypes => ({
@@ -389,10 +391,6 @@ export const lockCellFailure = (errorMessage: string): EditorActionTypes => ({
 export const lockCell = (user: User, cell_id: EditorCell['cell_id']): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(lockCellStart(cell_id));
   dispatch(selectCell(cell_id));
-
-  if (cell_id.startsWith('DEMO')) {
-    dispatch(lockCellSuccess(true, user.uid, cell_id));
-  }
 };
 
 const unlockCellStart = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
@@ -403,12 +401,14 @@ const unlockCellStart = (cell_id: EditorCell['cell_id']): EditorActionTypes => (
 export const unlockCellSuccess = (
   isMe: boolean,
   uid: User['uid'],
-  cell_id: EditorCell['cell_id']
+  cell_id: EditorCell['cell_id'],
+  cell: Partial<EditorCell>
 ): EditorActionTypes => ({
   type: CELL.UNLOCK.SUCCESS,
   isMe,
   uid,
   cell_id,
+  cell,
 });
 
 export const unlockCellFailure = (errorMessage: string) => ({
@@ -423,11 +423,6 @@ export const unlockCellFailure = (errorMessage: string) => ({
  */
 export const unlockCell = (user: User, cell_id: EditorCell['cell_id']): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(unlockCellStart(cell_id));
-
-  // TODO: make request
-  if (cell_id.startsWith('DEMO')) {
-    dispatch(unlockCellSuccess(true, user.uid, cell_id));
-  }
 };
 
 const addCellStart = (index: number): EditorActionTypes => ({
@@ -435,11 +430,17 @@ const addCellStart = (index: number): EditorActionTypes => ({
   index,
 });
 
-export const addCellSuccess = (isMe: boolean, cell_id: EditorCell['cell_id'], index: number): EditorActionTypes => ({
+export const addCellSuccess = (
+  isMe: boolean,
+  cell_id: EditorCell['cell_id'],
+  index: number,
+  cell: Partial<EditorCell>
+): EditorActionTypes => ({
   type: CELL.ADD.SUCCESS,
   isMe,
   cell_id,
   index,
+  cell,
 });
 
 export const addCellFailure = (errorMessage: string): EditorActionTypes => ({
@@ -479,11 +480,6 @@ export const deleteCellFailure = (errorMessage: string): EditorActionTypes => ({
  */
 export const deleteCell = (cell_id: EditorCell['cell_id']): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(deleteCellStart(cell_id));
-
-  // TODO: make request
-  if (cell_id.startsWith('DEMO')) {
-    dispatch(deleteCellSuccess(true, cell_id));
-  }
 };
 
 const editCellStart = (cell_id: EditorCell['cell_id'], changes: Partial<EditorCell>): EditorActionTypes => ({
@@ -495,12 +491,12 @@ const editCellStart = (cell_id: EditorCell['cell_id'], changes: Partial<EditorCe
 export const editCellSuccess = (
   isMe: boolean,
   cell_id: EditorCell['cell_id'],
-  changes: Partial<EditorCell>
+  cell: Partial<EditorCell>
 ): EditorActionTypes => ({
   type: CELL.EDIT.SUCCESS,
   isMe,
   cell_id,
-  changes,
+  cell,
 });
 
 export const editCellFailure = (errorMessage: string): EditorActionTypes => {

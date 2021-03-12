@@ -294,7 +294,9 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
               cell_id: action.cell_id,
             })
           ),
-        cells: state.cells.update(action.cell_id, IMMUTABLE_BASE_CELL, (cell) => cell.set('lock_held_by', action.uid)),
+        cells: state.cells.update(action.cell_id, IMMUTABLE_BASE_CELL, (cell) =>
+          cell.merge(makeImmutableEditorCell(action.cell as EditorCell))
+        ),
       };
     case CELL.LOCK.FAILURE:
       return {
@@ -315,7 +317,9 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         lockedCells: state.lockedCells.filter(
           (lock) => lock.get('cell_id') !== action.cell_id || lock.get('uid') !== action.uid
         ),
-        cells: state.cells.update(action.cell_id, IMMUTABLE_BASE_CELL, (cell) => cell.set('lock_held_by', '')),
+        cells: state.cells.update(action.cell_id, IMMUTABLE_BASE_CELL, (cell) =>
+          cell.merge(makeImmutableEditorCell(action.cell as EditorCell))
+        ),
       };
     case CELL.UNLOCK.FAILURE:
       return {
@@ -335,7 +339,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         notebook: state.notebook.update('cell_ids', ImmutableList(), (cell_ids) =>
           cell_ids.splice(action.index === -1 ? state.notebook.get('cell_ids').size : action.index, 0, action.cell_id)
         ),
-        cells: state.cells.set(action.cell_id, IMMUTABLE_BASE_CELL.set('cell_id', action.cell_id)),
+        cells: state.cells.set(action.cell_id, makeImmutableEditorCell({ ...BASE_CELL, ...action.cell })),
       };
     }
     case CELL.ADD.FAILURE:
@@ -392,7 +396,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
       const runQueueChanges: Partial<EditorState> = {};
 
       // If a cell in the runQueue is no longer python, it should not be executed
-      if (action.changes.language === 'markdown') {
+      if (action.cell.language === 'markdown') {
         if (state.runQueue.includes(action.cell_id)) {
           runQueueChanges.runQueue = state.runQueue.filter((cell_id) => cell_id !== action.cell_id);
         }
@@ -403,7 +407,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...runQueueChanges,
         isEditingCell: action.isMe ? false : state.isDeletingCell,
         cells: state.cells.update(action.cell_id, IMMUTABLE_BASE_CELL, (value) =>
-          value.merge(makeImmutableEditorCell(action.changes as EditorCell))
+          value.merge(makeImmutableEditorCell(action.cell as EditorCell))
         ),
       };
     }
