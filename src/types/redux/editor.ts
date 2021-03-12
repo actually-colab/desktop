@@ -200,6 +200,7 @@ type NotebooksOpenDemoAction = {
 
 type LockCellStartAction = {
   type: typeof CELL.LOCK.START;
+  cell_id: EditorCell['cell_id'];
 };
 
 type LockCellSuccessAction = {
@@ -215,6 +216,7 @@ type LockCellFailureAction = {
 
 type UnlockCellStartAction = {
   type: typeof CELL.UNLOCK.START;
+  cell_id: EditorCell['cell_id'];
 };
 
 type UnlockCellSuccessAction = {
@@ -230,6 +232,7 @@ type UnlockCellFailureAction = {
 
 type AddCellStartAction = {
   type: typeof CELL.ADD.START;
+  index: number;
 };
 
 type AddCellSuccessAction = {
@@ -245,6 +248,7 @@ type AddCellFailureAction = {
 
 type DeleteCellStartAction = {
   type: typeof CELL.DELETE.START;
+  cell_id: EditorCell['cell_id'];
 };
 
 type DeleteCellSuccessAction = {
@@ -273,6 +277,8 @@ type MoveCellFailureAction = {
 
 type EditCellStartAction = {
   type: typeof CELL.EDIT.START;
+  cell_id: EditorCell['cell_id'];
+  changes: Partial<EditorCell>;
 };
 
 type EditCellSuccessAction = {

@@ -360,18 +360,23 @@ export const openNotebook = (nb_id: client.Notebook['nb_id']): EditorAsyncAction
   }
 };
 
-const lockCellStart = (): EditorActionTypes => ({
+const lockCellStart = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
   type: CELL.LOCK.START,
+  cell_id,
 });
 
-const lockCellSuccess = (isMe: boolean, uid: User['uid'], cell_id: EditorCell['cell_id']): EditorActionTypes => ({
+export const lockCellSuccess = (
+  isMe: boolean,
+  uid: User['uid'],
+  cell_id: EditorCell['cell_id']
+): EditorActionTypes => ({
   type: CELL.LOCK.SUCCESS,
   isMe,
   uid,
   cell_id,
 });
 
-const lockCellFailure = (errorMessage: string): EditorActionTypes => ({
+export const lockCellFailure = (errorMessage: string): EditorActionTypes => ({
   type: CELL.LOCK.FAILURE,
   error: {
     message: errorMessage,
@@ -382,25 +387,31 @@ const lockCellFailure = (errorMessage: string): EditorActionTypes => ({
  * Try to lock a given cell
  */
 export const lockCell = (user: User, cell_id: EditorCell['cell_id']): EditorAsyncActionTypes => async (dispatch) => {
-  dispatch(lockCellStart());
+  dispatch(lockCellStart(cell_id));
   dispatch(selectCell(cell_id));
 
-  // TODO: make request
-  dispatch(lockCellSuccess(true, user.uid, cell_id));
+  if (cell_id.startsWith('DEMO')) {
+    dispatch(lockCellSuccess(true, user.uid, cell_id));
+  }
 };
 
-const unlockCellStart = (): EditorActionTypes => ({
+const unlockCellStart = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
   type: CELL.UNLOCK.START,
+  cell_id,
 });
 
-const unlockCellSuccess = (isMe: boolean, uid: User['uid'], cell_id: EditorCell['cell_id']): EditorActionTypes => ({
+export const unlockCellSuccess = (
+  isMe: boolean,
+  uid: User['uid'],
+  cell_id: EditorCell['cell_id']
+): EditorActionTypes => ({
   type: CELL.UNLOCK.SUCCESS,
   isMe,
   uid,
   cell_id,
 });
 
-const unlockCellFailure = (errorMessage: string) => ({
+export const unlockCellFailure = (errorMessage: string) => ({
   type: CELL.UNLOCK.FAILURE,
   error: {
     message: errorMessage,
@@ -411,24 +422,27 @@ const unlockCellFailure = (errorMessage: string) => ({
  * Try to unlock the given cell
  */
 export const unlockCell = (user: User, cell_id: EditorCell['cell_id']): EditorAsyncActionTypes => async (dispatch) => {
-  dispatch(unlockCellStart());
+  dispatch(unlockCellStart(cell_id));
 
   // TODO: make request
-  dispatch(unlockCellSuccess(true, user.uid, cell_id));
+  if (cell_id.startsWith('DEMO')) {
+    dispatch(unlockCellSuccess(true, user.uid, cell_id));
+  }
 };
 
-const addCellStart = (): EditorActionTypes => ({
+const addCellStart = (index: number): EditorActionTypes => ({
   type: CELL.ADD.START,
+  index,
 });
 
-const addCellSuccess = (isMe: boolean, cell_id: EditorCell['cell_id'], index: number): EditorActionTypes => ({
+export const addCellSuccess = (isMe: boolean, cell_id: EditorCell['cell_id'], index: number): EditorActionTypes => ({
   type: CELL.ADD.SUCCESS,
   isMe,
   cell_id,
   index,
 });
 
-const addCellFailure = (errorMessage: string): EditorActionTypes => ({
+export const addCellFailure = (errorMessage: string): EditorActionTypes => ({
   type: CELL.ADD.FAILURE,
   error: {
     message: errorMessage,
@@ -439,23 +453,21 @@ const addCellFailure = (errorMessage: string): EditorActionTypes => ({
  * Try to create a new cell at a given index. Use -1 to add to the end
  */
 export const addCell = (index: number): EditorAsyncActionTypes => async (dispatch) => {
-  dispatch(addCellStart());
-
-  // TODO: make request
-  dispatch(addCellSuccess(true, `CELL-${uuid()}`, index));
+  dispatch(addCellStart(index));
 };
 
-const deleteCellStart = (): EditorActionTypes => ({
+const deleteCellStart = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
   type: CELL.DELETE.START,
+  cell_id,
 });
 
-const deleteCellSuccess = (isMe: boolean, cell_id: EditorCell['cell_id']): EditorActionTypes => ({
+export const deleteCellSuccess = (isMe: boolean, cell_id: EditorCell['cell_id']): EditorActionTypes => ({
   type: CELL.DELETE.SUCCESS,
   isMe,
   cell_id,
 });
 
-const deleteCellFailure = (errorMessage: string): EditorActionTypes => ({
+export const deleteCellFailure = (errorMessage: string): EditorActionTypes => ({
   type: CELL.DELETE.FAILURE,
   error: {
     message: errorMessage,
@@ -466,17 +478,21 @@ const deleteCellFailure = (errorMessage: string): EditorActionTypes => ({
  * Try to delete a given cell
  */
 export const deleteCell = (cell_id: EditorCell['cell_id']): EditorAsyncActionTypes => async (dispatch) => {
-  dispatch(deleteCellStart());
+  dispatch(deleteCellStart(cell_id));
 
   // TODO: make request
-  dispatch(deleteCellSuccess(true, cell_id));
+  if (cell_id.startsWith('DEMO')) {
+    dispatch(deleteCellSuccess(true, cell_id));
+  }
 };
 
-const editCellStart = (): EditorActionTypes => ({
+const editCellStart = (cell_id: EditorCell['cell_id'], changes: Partial<EditorCell>): EditorActionTypes => ({
   type: CELL.EDIT.START,
+  cell_id,
+  changes,
 });
 
-const editCellSuccess = (
+export const editCellSuccess = (
   isMe: boolean,
   cell_id: EditorCell['cell_id'],
   changes: Partial<EditorCell>
@@ -487,7 +503,7 @@ const editCellSuccess = (
   changes,
 });
 
-const editCellFailure = (errorMessage: string): EditorActionTypes => {
+export const editCellFailure = (errorMessage: string): EditorActionTypes => {
   return {
     type: CELL.EDIT.FAILURE,
     error: {
@@ -503,10 +519,12 @@ export const editCell = (
   cell_id: EditorCell['cell_id'],
   changes: Partial<EditorCell>
 ): EditorAsyncActionTypes => async (dispatch) => {
-  dispatch(editCellStart());
+  dispatch(editCellStart(cell_id, changes));
 
   // TODO: make debounced request
-  dispatch(editCellSuccess(true, cell_id, changes));
+  if (cell_id.startsWith('DEMO')) {
+    dispatch(editCellSuccess(true, cell_id, changes));
+  }
 };
 
 /**
