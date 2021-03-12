@@ -11,7 +11,7 @@ import { isDemo } from '../../utils/redux';
 import { _editor } from '../actions';
 import { cleanDCell } from '../../utils/notebook';
 
-const baseURL = httpToWebSocket(process.env.REACT_APP_AC_API_URI ?? 'http://localhost:3001/dev');
+const baseURL = httpToWebSocket(process.env.REACT_APP_AC_WS_URI ?? 'http://localhost:3001/dev');
 
 /**
  * A redux middleware for the Actually Colab socket client
