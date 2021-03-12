@@ -78,7 +78,7 @@ export interface EditorState {
 }
 
 const initialState: EditorState = {
-  autoConnectToKernel: true,
+  autoConnectToKernel: process.env.REACT_APP_KERNEL_AUTO_CONNECT !== 'off',
   isEditingGatewayUri: false,
 
   isConnectingToKernel: false,
