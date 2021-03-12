@@ -7,7 +7,7 @@ import { AuthActionTypes, SIGN_IN } from '../../types/redux/auth';
 import { CELL, EditorActionTypes, NOTEBOOKS } from '../../types/redux/editor';
 import { EXAMPLE_PROJECT } from '../../constants/demo';
 import { httpToWebSocket } from '../../utils/request';
-import { isCellOwner, isDemo } from '../../utils/redux';
+import { isDemo } from '../../utils/redux';
 import { _editor } from '../actions';
 import { cleanDCell } from '../../utils/notebook';
 
@@ -32,36 +32,43 @@ const ReduxSocketClient = (): Middleware<{}, ReduxState> => {
         client.on('error', (error) => console.error(error));
 
         client.on('notebook_opened', (user) => console.log('Notebook opened by', user));
-        client.on('cell_created', (dcell) => {
+        client.on('cell_created', (dcell, triggered_by) => {
           console.log('Cell created', dcell);
-          store.dispatch(_editor.addCellSuccess(true, dcell.cell_id, -1, cleanDCell(dcell)));
+          store.dispatch(
+            _editor.addCellSuccess(
+              triggered_by === store.getState().auth.user?.uid,
+              dcell.cell_id,
+              -1,
+              cleanDCell(dcell)
+            )
+          );
         });
-        client.on('cell_locked', (dcell) => {
+        client.on('cell_locked', (dcell, triggered_by) => {
           console.log('Cell locked', dcell);
           store.dispatch(
             _editor.lockCellSuccess(
-              isCellOwner(store.getState(), dcell),
+              triggered_by === store.getState().auth.user?.uid,
               dcell.lock_held_by ?? '',
               dcell.cell_id,
               cleanDCell(dcell)
             )
           );
         });
-        client.on('cell_unlocked', (dcell) => {
+        client.on('cell_unlocked', (dcell, triggered_by) => {
           console.log('Cell unlocked', dcell);
           store.dispatch(
             _editor.unlockCellSuccess(
-              isCellOwner(store.getState(), dcell),
+              triggered_by === store.getState().auth.user?.uid,
               store.getState().auth.user?.uid ?? '',
               dcell.cell_id,
               cleanDCell(dcell)
             )
           );
         });
-        client.on('cell_edited', (dcell) => {
+        client.on('cell_edited', (dcell, triggered_by) => {
           console.log('Cell edited', dcell);
           store.dispatch(
-            _editor.editCellSuccess(isCellOwner(store.getState(), dcell), dcell.cell_id, cleanDCell(dcell))
+            _editor.editCellSuccess(triggered_by === store.getState().auth.user?.uid, dcell.cell_id, cleanDCell(dcell))
           );
         });
         break;
