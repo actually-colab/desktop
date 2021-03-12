@@ -38,6 +38,20 @@ yarn upgrade:client
 
 This will automatically pull the latest client (assuming proper directory structure), install and build it, remove it from `desktop` and add it back. This complicated process seems to be required from an issue where `yarn install` doesn't pick up the latest build of the local package.
 
+### Environment
+
+You need to create a file `.env.local`:
+
+```
+REACT_APP_GOOGLE_CLIENT_ID="<CHANGE_ME>"
+```
+
+Optionally you can also disable auto connecting during development to avoid spam:
+
+```
+REACT_APP_KERNEL_AUTO_CONNECT="off"
+```
+
 ## Starting Development
 
 1. Start the website locally to sign in (see: `www` repo)
@@ -48,6 +62,14 @@ This will automatically pull the latest client (assuming proper directory struct
    ```
 
 ## Deploying to Production
+
+Create a file `.env.production.local`:
+
+```
+REACT_APP_GOOGLE_CLIENT_ID="<CHANGE_ME>"
+REACT_APP_AC_API_URI="<CHANGE_ME>"
+REACT_APP_AC_WS_URI="<CHANGE_ME>"
+```
 
 ```bash
 yarn deploy

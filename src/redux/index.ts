@@ -1,18 +1,10 @@
 import { combineReducers, createStore, applyMiddleware } from 'redux';
 import ReduxThunk from 'redux-thunk';
 
-import auth, { AuthState } from './auth';
-import editor, { EditorState } from './editor';
-import ui, { UIState } from './ui';
-
-/**
- * The type of the combined reducer
- */
-export type ReduxState = {
-  auth: AuthState;
-  editor: EditorState;
-  ui: UIState;
-};
+import ReduxSocketClient from './middleware/ReduxSocketClient';
+import auth from './auth';
+import editor from './editor';
+import ui from './ui';
 
 /**
  * The combined redux store
@@ -26,4 +18,4 @@ export const reducers = combineReducers({
 /**
  * The combined redux store with support for async actions
  */
-export default createStore(reducers, applyMiddleware(ReduxThunk));
+export default createStore(reducers, applyMiddleware(ReduxThunk, ReduxSocketClient()));

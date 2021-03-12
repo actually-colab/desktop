@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import AceEditor from 'react-ace';
 
-import { ReduxState } from '../redux';
+import { ReduxState } from '../types/redux';
 import { EditorCell, ImmutableEditorCell } from '../types/notebook';
 import { editorOptionsActive, editorOptionsInactive } from '../constants/editorOptions';
 import { palette } from '../constants/theme';

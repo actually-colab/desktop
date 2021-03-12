@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import { Icon } from 'rsuite';
 
-import { ReduxState } from '../redux';
+import { ReduxState } from '../types/redux';
 import { _editor } from '../redux/actions';
 import { EditorCell, ImmutableEditorCell } from '../types/notebook';
 import { palette, spacing } from '../constants/theme';
@@ -212,12 +212,12 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
           {ownsLock ? (
             <IconTextButton
               icon="unlock-alt"
-              text="Unlock"
+              text={isUnlockingCell ? 'Unlocking...' : 'Unlock'}
               bgColor="transparent"
               tooltipText="Allow others to edit"
               tooltipDirection="bottom"
               color={palette.PRIMARY}
-              loading={isUnlockingCell}
+              disabled={isUnlockingCell}
               onClick={dispatchUnlockCell}
             />
           ) : lockOwner !== null ? (
@@ -228,13 +228,12 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
           ) : (
             <IconTextButton
               icon="lock"
-              text="Lock"
+              text={isLockingCell ? 'Locking...' : 'Lock'}
               bgColor="transparent"
               tooltipText="Lock for editing"
               tooltipDirection="bottom"
               color={palette.GRAY}
-              loading={isLockingCell}
-              disabled={!canLock}
+              disabled={!canLock || isLockingCell}
               onClick={onFocusEditor}
             />
           )}

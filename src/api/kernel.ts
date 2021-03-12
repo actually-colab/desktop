@@ -1,6 +1,7 @@
 import { IKernel, Kernel } from 'jupyter-js-services';
 
 import { GATEWAY_BASE_URI } from '../constants/jupyter';
+import { httpToWebSocket } from '../utils/request';
 
 const GATEWAY_STEM = `${GATEWAY_BASE_URI}:`;
 
@@ -15,13 +16,6 @@ export const extractGatewayUri = (message: string) => {
   }
 
   return '';
-};
-
-/**
- * Convert the gateway uri to a websocket uri
- */
-export const getGatewayWebSocketUri = (uri: string) => {
-  return uri.replace('http://', 'ws://');
 };
 
 /**
@@ -64,7 +58,7 @@ export const connectToKernel = async (
   try {
     const kernel = await Kernel.startNew({
       baseUrl: uri,
-      wsUrl: getGatewayWebSocketUri(uri),
+      wsUrl: httpToWebSocket(uri),
       name: 'python3',
     });
 

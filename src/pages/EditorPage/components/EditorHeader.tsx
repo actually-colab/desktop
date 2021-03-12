@@ -4,7 +4,7 @@ import { StyleSheet, css } from 'aphrodite';
 import { Button, Divider, Dropdown, Modal } from 'rsuite';
 
 import { palette, spacing } from '../../../constants/theme';
-import { ReduxState } from '../../../redux';
+import { ReduxState } from '../../../types/redux';
 import { _editor } from '../../../redux/actions';
 import { EditorCell } from '../../../types/notebook';
 import useKernelStatus from '../../../kernel/useKernelStatus';

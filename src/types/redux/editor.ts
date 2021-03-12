@@ -200,6 +200,7 @@ type NotebooksOpenDemoAction = {
 
 type LockCellStartAction = {
   type: typeof CELL.LOCK.START;
+  cell_id: EditorCell['cell_id'];
 };
 
 type LockCellSuccessAction = {
@@ -207,6 +208,7 @@ type LockCellSuccessAction = {
   isMe: boolean;
   uid: User['uid'];
   cell_id: EditorCell['cell_id'];
+  cell: Partial<EditorCell>;
 };
 
 type LockCellFailureAction = {
@@ -215,6 +217,7 @@ type LockCellFailureAction = {
 
 type UnlockCellStartAction = {
   type: typeof CELL.UNLOCK.START;
+  cell_id: EditorCell['cell_id'];
 };
 
 type UnlockCellSuccessAction = {
@@ -222,6 +225,7 @@ type UnlockCellSuccessAction = {
   isMe: boolean;
   uid: User['uid'];
   cell_id: EditorCell['cell_id'];
+  cell: Partial<EditorCell>;
 };
 
 type UnlockCellFailureAction = {
@@ -230,6 +234,7 @@ type UnlockCellFailureAction = {
 
 type AddCellStartAction = {
   type: typeof CELL.ADD.START;
+  index: number;
 };
 
 type AddCellSuccessAction = {
@@ -237,6 +242,7 @@ type AddCellSuccessAction = {
   isMe: boolean;
   cell_id: EditorCell['cell_id'];
   index: number;
+  cell: Partial<EditorCell>;
 };
 
 type AddCellFailureAction = {
@@ -245,6 +251,7 @@ type AddCellFailureAction = {
 
 type DeleteCellStartAction = {
   type: typeof CELL.DELETE.START;
+  cell_id: EditorCell['cell_id'];
 };
 
 type DeleteCellSuccessAction = {
@@ -273,13 +280,15 @@ type MoveCellFailureAction = {
 
 type EditCellStartAction = {
   type: typeof CELL.EDIT.START;
+  cell_id: EditorCell['cell_id'];
+  changes: Partial<EditorCell>;
 };
 
 type EditCellSuccessAction = {
   type: typeof CELL.EDIT.SUCCESS;
   isMe: boolean;
   cell_id: EditorCell['cell_id'];
-  changes: Partial<EditorCell>;
+  cell: Partial<EditorCell>;
 };
 
 type EditCellFailureAction = {

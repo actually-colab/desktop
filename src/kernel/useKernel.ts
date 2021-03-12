@@ -3,7 +3,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { EXAMPLE_PROJECT } from '../constants/demo';
 
-import { ReduxState } from '../redux';
+import { ReduxState } from '../types/redux';
 import { _editor } from '../redux/actions';
 import { ImmutableEditorCell } from '../types/notebook';
 

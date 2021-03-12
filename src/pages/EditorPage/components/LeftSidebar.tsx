@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import { Button, Icon, IconButton, IconProps, Tooltip, Whisper } from 'rsuite';
 
-import { ReduxState } from '../../../redux';
+import { ReduxState } from '../../../types/redux';
 import { _auth } from '../../../redux/actions';
 import { palette, spacing, timing } from '../../../constants/theme';
 import { openCompanion } from '../../../utils/redirect';

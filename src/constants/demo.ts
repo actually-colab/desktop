@@ -18,7 +18,7 @@ export const EXAMPLE_PROJECT: Notebook = {
 export const EXAMPLE_PROJECT_CELLS: EditorCell[] = [
   {
     ...BASE_CELL,
-    cell_id: '0',
+    cell_id: 'DEMO-0',
     language: 'markdown',
     contents: `# Welcome to Actually Colab
 
@@ -39,7 +39,7 @@ If you've setup the companion or are running the kernel yourself, you should see
   },
   {
     ...BASE_CELL,
-    cell_id: '1',
+    cell_id: 'DEMO-1',
     contents: `import numpy as np
 import matplotlib.pyplot as plt
 %matplotlib inline
@@ -47,14 +47,14 @@ import matplotlib.pyplot as plt
   },
   {
     ...BASE_CELL,
-    cell_id: '2',
+    cell_id: 'DEMO-2',
     language: 'markdown',
     contents: `Did you notice the \`%matplotlib inline\`? That tells the kernel that you are using an editor that supports displaying your graphs! You only need this line once. Now lets demonstrate, run the next few cells.`,
     rendered: true,
   },
   {
     ...BASE_CELL,
-    cell_id: '3',
+    cell_id: 'DEMO-3',
     contents: `def fib(n):
     """
     A recursive implementation of finding the nth number in the fibonacci sequence
@@ -66,7 +66,7 @@ import matplotlib.pyplot as plt
   },
   {
     ...BASE_CELL,
-    cell_id: '4',
+    cell_id: 'DEMO-4',
     contents: `xpoints = np.arange(0, 10)
 ypoints = np.array([fib(i) for i in range(10)])
 
@@ -75,12 +75,12 @@ print(ypoints)`,
   },
   {
     ...BASE_CELL,
-    cell_id: '5',
+    cell_id: 'DEMO-5',
     contents: `plt.plot(xpoints, ypoints)`,
   },
   {
     ...BASE_CELL,
-    cell_id: '6',
+    cell_id: 'DEMO-6',
     language: 'markdown',
     contents: `You should see a graph of the fibonacci sequence above! That's all we have so now it's your turn, good luck!`,
     rendered: true,
