@@ -79,7 +79,7 @@ const AuthPage: React.FC = () => {
         <div className={css(styles.signInContainerBackground)}>
           <div className={css(styles.signInContainer)}>
             <span className={css(styles.title)}>actually colab</span>
-            <p className={css(styles.subtitle)}>built by jeff taylor-chang and bailey tincher</p>
+            <p className={css(styles.subtitle)}>built by Jeff Taylor-Chang and Bailey Tincher</p>
 
             <div className={css(styles.signInButton)}>
               <GoogleSignInButton onSuccess={onGoogleSignInSuccess} onFailure={onGoogleSignInFailure} />

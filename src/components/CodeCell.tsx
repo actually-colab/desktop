@@ -34,40 +34,45 @@ const CodeCell: React.FC<{
   onBlur?(cell_id: EditorCell['cell_id']): void;
   onChange(cell_id: EditorCell['cell_id'], newValue: string): void;
 }> = ({ cell, onFocus, onBlur, onChange }) => {
-  const lockedCellId = useSelector((state: ReduxState) => state.editor.lockedCellId);
+  const user = useSelector((state: ReduxState) => state.auth.user);
 
-  const isEditable = React.useMemo(() => lockedCellId === cell.get('cell_id'), [cell, lockedCellId]);
+  const isEditable = React.useMemo(() => cell.get('lock_held_by') === user?.uid, [cell, user?.uid]);
+  const aceOptions = React.useMemo(() => (isEditable ? editorOptionsActive : editorOptionsInactive), [isEditable]);
+  const cell_id = React.useMemo(() => cell.get('cell_id'), [cell]);
+  const language = React.useMemo(() => cell.get('language'), [cell]);
+  const contents = React.useMemo(() => cell.get('contents'), [cell]);
+  const wrapEnabled = React.useMemo(() => language === 'markdown', [language]);
 
   const handleFocus = React.useCallback(() => {
-    onFocus?.(cell.get('cell_id'));
-  }, [cell, onFocus]);
+    onFocus?.(cell_id);
+  }, [cell_id, onFocus]);
 
   const handleBlur = React.useCallback(() => {
-    onBlur?.(cell.get('cell_id'));
-  }, [cell, onBlur]);
+    onBlur?.(cell_id);
+  }, [cell_id, onBlur]);
 
   const handleChange = React.useCallback(
     (newValue: string) => {
-      onChange(cell.get('cell_id'), newValue);
+      onChange(cell_id, newValue);
     },
-    [cell, onChange]
+    [cell_id, onChange]
   );
 
   return (
     <div className={css(styles.container, isEditable ? styles.containerFocused : styles.containerBlurred)}>
       <AceEditor
         style={{ width: '100%' }}
-        name={cell.get('cell_id')}
-        mode={cell.get('language')}
+        name={cell_id}
+        mode={language}
         theme="xcode"
-        setOptions={isEditable ? editorOptionsActive : editorOptionsInactive}
+        setOptions={aceOptions}
         minLines={1}
         maxLines={Infinity}
-        value={cell.get('contents')}
+        value={contents}
         onFocus={handleFocus}
         onBlur={handleBlur}
         onChange={handleChange}
-        wrapEnabled={cell.get('language') === 'markdown'}
+        wrapEnabled={wrapEnabled}
       />
     </div>
   );

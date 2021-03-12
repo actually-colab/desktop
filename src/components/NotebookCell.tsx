@@ -153,12 +153,12 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
   }, [cell, dispatch]);
 
   const onChange = React.useCallback(
-    (_: string, newValue: string) => {
-      dispatchEditCell(cell.get('cell_id'), {
+    (cell_id: string, newValue: string) => {
+      dispatchEditCell(cell_id, {
         contents: newValue,
       });
     },
-    [cell, dispatchEditCell]
+    [dispatchEditCell]
   );
 
   return (
@@ -202,8 +202,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
             size="xs"
             loading={isRunning}
             disabled={
-              (cell.get('language') === 'python' && isQueued) ||
-              !kernelIsConnected ||
+              (!kernelIsConnected && cell.get('language') === 'python') ||
               (cell.get('language') === 'markdown' && cell.get('rendered'))
             }
             onClick={onClickPlay}
