@@ -11,8 +11,13 @@ import { UserAvatar } from '../../../components';
 
 import { KernelPanel, ProjectsPanel } from '../LeftSidebar';
 
+export const LEFT_SIDEBAR_TRAY_WIDTH = 46;
+export const LEFT_SIDEBAR_PANEL_WIDTH = 220;
+export const LEFT_SIDEBAR_WIDTH = 266;
+
 const styles = StyleSheet.create({
   container: {
+    width: LEFT_SIDEBAR_WIDTH,
     display: 'flex',
     flexDirection: 'column',
     backgroundColor: palette.BASE_FADED,
@@ -34,7 +39,7 @@ const styles = StyleSheet.create({
     overflowY: 'hidden',
   },
   categoryContainer: {
-    width: 46,
+    width: LEFT_SIDEBAR_TRAY_WIDTH,
     paddingBottom: spacing.DEFAULT / 2,
     display: 'flex',
     flexDirection: 'column',
@@ -75,7 +80,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   bodyContainer: {
-    width: 220,
+    width: LEFT_SIDEBAR_PANEL_WIDTH,
     paddingLeft: spacing.DEFAULT,
     paddingRight: spacing.DEFAULT,
     display: 'flex',

@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, css } from 'aphrodite';
 
 import { palette, spacing } from '../../../constants/theme';
+import { HEADER_HEIGHT, RIGHT_SIDEBAR_TRAY_WIDTH } from '../../../constants/dimensions';
 import { ColoredIconButton } from '../../../components';
 import {
   CollaboratorsPanel,
@@ -14,6 +15,12 @@ import {
 
 const styles = StyleSheet.create({
   container: {
+    position: 'absolute',
+    right: 0,
+    top: HEADER_HEIGHT,
+    bottom: 0,
+    backgroundColor: `${palette.GRAY}15`,
+    'backdrop-filter': 'blur(16px)',
     borderLeftWidth: 1,
     borderLeftStyle: 'solid',
     borderColor: palette.BASE_BORDER,
@@ -26,6 +33,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   menuButtons: {
+    width: RIGHT_SIDEBAR_TRAY_WIDTH,
     display: 'flex',
     flexDirection: 'column',
   },
@@ -33,7 +41,6 @@ const styles = StyleSheet.create({
     width: 320,
     height: '100%',
     ...spacing.pad({ top: spacing.DEFAULT / 2 }),
-    backgroundColor: palette.BASE_FADED,
     overflowY: 'auto',
   },
   paneBody: {

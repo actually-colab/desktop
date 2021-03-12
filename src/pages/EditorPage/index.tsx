@@ -4,6 +4,7 @@ import { StyleSheet, css } from 'aphrodite';
 
 import AceImports from '../../utils/AceImports';
 import { palette, spacing } from '../../constants/theme';
+import { HEADER_HEIGHT, RIGHT_SIDEBAR_TRAY_WIDTH } from '../../constants/dimensions';
 import { ReduxState } from '../../types/redux';
 import useKernel from '../../kernel/useKernel';
 import { NotebookCell } from '../../components';
@@ -30,6 +31,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   bodyContainer: {
+    marginRight: RIGHT_SIDEBAR_TRAY_WIDTH,
     display: 'flex',
     flex: 1,
     backgroundColor: palette.BASE,
@@ -38,8 +40,12 @@ const styles = StyleSheet.create({
   },
   body: {
     flex: 1,
-    padding: spacing.DEFAULT,
+    ...spacing.pad({ top: spacing.DEFAULT + HEADER_HEIGHT }),
     overflowY: 'auto',
+  },
+  rightContainer: {
+    marginTop: HEADER_HEIGHT,
+    display: 'flex',
   },
 });
 
@@ -70,7 +76,9 @@ const EditorPage: React.FC = () => {
             </div>
           </div>
 
-          <RightSidebar />
+          <div className={css(styles.rightContainer)}>
+            <RightSidebar />
+          </div>
         </div>
       </div>
     </div>
