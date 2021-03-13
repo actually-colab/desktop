@@ -1,13 +1,35 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import { Button, Dropdown, Icon, IconButton, Input, InputGroup, Modal } from 'rsuite';
+import {
+  Button,
+  Dropdown,
+  Form,
+  FormControl,
+  FormGroup,
+  HelpBlock,
+  Icon,
+  IconButton,
+  Input,
+  InputGroup,
+  Modal,
+  Schema,
+} from 'rsuite';
 import { Notebook } from '@actually-colab/editor-client';
 
 import { ReduxState } from '../../../types/redux';
 import { _editor } from '../../../redux/actions';
 import { palette, spacing } from '../../../constants/theme';
 import { PopoverDropdown } from '../../../components';
+import { FormInstance } from 'rsuite/lib/Form';
+
+type NewProjectFormValue = {
+  name: string;
+};
+
+const newProjectModel = Schema.Model({
+  name: Schema.Types.StringType().containsLetter('This field is required').isRequired('This field is required'),
+});
 
 const styles = StyleSheet.create({
   newProjectContainer: {
@@ -35,6 +57,8 @@ const styles = StyleSheet.create({
  * The projects panel for the left sidebar of the editor page
  */
 const ProjectsPanel: React.FC = () => {
+  const newProjectFormRef = React.useRef<FormInstance>();
+
   const isGettingNotebooks = useSelector((state: ReduxState) => state.editor.isGettingNotebooks);
   const isCreatingNotebook = useSelector((state: ReduxState) => state.editor.isCreatingNotebook);
   const isOpeningNotebook = useSelector((state: ReduxState) => state.editor.isOpeningNotebook);
@@ -43,17 +67,27 @@ const ProjectsPanel: React.FC = () => {
   const notebook = useSelector((state: ReduxState) => state.editor.notebook);
 
   const [showCreateProject, setShowCreateProject] = React.useState<boolean>(false);
-  const [newProjectName, setNewProjectName] = React.useState<string>('');
+  const [newProjectFormValue, setNewProjectFormValue] = React.useState<NewProjectFormValue>({
+    name: '',
+  });
 
   const dispatch = useDispatch();
   const dispatchGetNotebooks = React.useCallback(() => dispatch(_editor.getNotebooks()), [dispatch]);
-  const dispatchCreateNotebook = React.useCallback(() => dispatch(_editor.createNotebook(newProjectName)), [
-    dispatch,
-    newProjectName,
-  ]);
+  const dispatchCreateNotebook = React.useCallback(
+    () => newProjectFormRef.current?.check() && dispatch(_editor.createNotebook(newProjectFormValue.name)),
+    [dispatch, newProjectFormValue.name]
+  );
   const dispatchOpenNotebook = React.useCallback((nb_id: Notebook['nb_id']) => dispatch(_editor.openNotebook(nb_id)), [
     dispatch,
   ]);
+
+  const handleNewProjectFormSubmit = React.useCallback(
+    (_, event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      dispatchCreateNotebook();
+    },
+    [dispatchCreateNotebook]
+  );
 
   /**
    * Auto close modal when create project switches to false
@@ -73,7 +107,7 @@ const ProjectsPanel: React.FC = () => {
           block
           onClick={() => {
             setShowCreateProject(true);
-            setNewProjectName('');
+            setNewProjectFormValue({ name: '' });
           }}
         >
           <Icon icon="edit" size="lg" />
@@ -137,16 +171,29 @@ const ProjectsPanel: React.FC = () => {
         </div>
       ))}
 
-      <Modal size="xs" show={showCreateProject} onHide={() => !isCreatingNotebook && setShowCreateProject(false)}>
+      <Modal
+        size="xs"
+        autoFocus
+        show={showCreateProject}
+        onHide={() => !isCreatingNotebook && setShowCreateProject(false)}
+      >
         <Modal.Header>
           <Modal.Title>New Project Details</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Input
-            value={newProjectName}
-            onChange={(value: string) => setNewProjectName(value)}
-            placeholder="Project name"
-          />
+          <Form
+            ref={newProjectFormRef}
+            autoComplete="off"
+            fluid
+            model={newProjectModel}
+            onChange={(formValue) => setNewProjectFormValue(formValue as NewProjectFormValue)}
+            onSubmit={handleNewProjectFormSubmit}
+          >
+            <FormGroup>
+              <FormControl name="name" label="Project Name" placeholder="Project Name" />
+              <HelpBlock>Required</HelpBlock>
+            </FormGroup>
+          </Form>
         </Modal.Body>
         <Modal.Footer>
           <Button appearance="subtle" disabled={isCreatingNotebook} onClick={() => setShowCreateProject(false)}>
