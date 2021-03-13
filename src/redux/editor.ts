@@ -248,14 +248,29 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
           state.notebooks.find((notebook) => notebook.get('nb_id') === action.nb_id) ?? null
         ),
       };
-    case NOTEBOOKS.OPEN.SUCCESS:
+    case NOTEBOOKS.OPEN.SUCCESS: {
+      const dcells = Object.values(action.notebook.cells);
+
       return {
         ...state,
         isOpeningNotebook: false,
         openingNotebookId: '',
+        lockingCellId: '',
+        unlockingCellId: '',
+        lockedCells: ImmutableList(
+          dcells
+            .filter((dcell) => (dcell.lock_held_by ?? '') !== '')
+            .map((dcell) =>
+              makeImmutableLock({
+                cell_id: dcell.cell_id,
+                uid: dcell.lock_held_by ?? '',
+              })
+            )
+        ),
         notebook: makeImmutableReducedNotebook(reduceNotebookContents(action.notebook)),
-        cells: cellArrayToImmutableMap(Object.values(action.notebook.cells).map((dcell) => cleanDCell(dcell))),
+        cells: cellArrayToImmutableMap(dcells.map((dcell) => cleanDCell(dcell))),
       };
+    }
     case NOTEBOOKS.OPEN.FAILURE:
       return {
         ...state,
