@@ -1,7 +1,6 @@
 import { Notebook } from '@actually-colab/editor-client';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { EXAMPLE_PROJECT } from '../constants/demo';
 
 import { ReduxState } from '../types/redux';
 import { _editor } from '../redux/actions';
@@ -53,7 +52,7 @@ const useKernel = () => {
   );
 
   const timeout = React.useRef<NodeJS.Timeout | null>(null);
-  const currentNotebookId = React.useRef<Notebook['nb_id']>(EXAMPLE_PROJECT.nb_id);
+  const currentNotebookId = React.useRef<Notebook['nb_id']>('');
 
   /**
    * Manage the kernel connection
@@ -92,7 +91,7 @@ const useKernel = () => {
    * Automatically restart kernel on notebook change
    */
   React.useEffect(() => {
-    if (notebook.get('nb_id') !== currentNotebookId.current) {
+    if (currentNotebookId.current !== '' && notebook !== null && notebook.get('nb_id') !== currentNotebookId.current) {
       dispatchRestartKernel();
       currentNotebookId.current = notebook.get('nb_id');
     }

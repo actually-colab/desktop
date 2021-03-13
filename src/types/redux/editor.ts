@@ -53,7 +53,6 @@ export const NOTEBOOKS = {
     START: 'NOTEBOOKS_OPEN_START',
     SUCCESS: 'NOTEBOOKS_OPEN_SUCCESS',
     FAILURE: 'NOTEBOOKS_OPEN_FAILURE',
-    DEMO: 'NOTEBOOKS_OPEN_DEMO',
   },
 } as const;
 export const CELL = {
@@ -193,10 +192,6 @@ type NotebooksOpenSuccessAction = {
 type NotebooksOpenFailureAction = {
   type: typeof NOTEBOOKS.OPEN.FAILURE;
 } & ActionError;
-
-type NotebooksOpenDemoAction = {
-  type: typeof NOTEBOOKS.OPEN.DEMO;
-};
 
 type LockCellStartAction = {
   type: typeof CELL.LOCK.START;
@@ -374,7 +369,6 @@ export type EditorActionTypes =
   | NotebooksOpenStartAction
   | NotebooksOpenSuccessAction
   | NotebooksOpenFailureAction
-  | NotebooksOpenDemoAction
   | LockCellStartAction
   | LockCellSuccessAction
   | LockCellFailureAction

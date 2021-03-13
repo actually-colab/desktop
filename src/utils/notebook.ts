@@ -40,8 +40,8 @@ export const reduceNotebook = (notebook: Notebook): ReducedNotebook => ({
 /**
  * Convert an immutable notebook to an immutable reduced notebook
  */
-export const reduceImmutableNotebook = (notebook: ImmutableNotebook) =>
-  makeImmutableReducedNotebook(reduceNotebook(notebook.toJS() as any));
+export const reduceImmutableNotebook = (notebook: ImmutableNotebook | null) =>
+  notebook !== null ? makeImmutableReducedNotebook(reduceNotebook(notebook.toJS() as any)) : null;
 
 /**
  * Convert a notebook contents object to a reduced notebook

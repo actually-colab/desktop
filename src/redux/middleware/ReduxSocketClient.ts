@@ -1,15 +1,12 @@
 import { Middleware } from 'redux';
-import { v4 as uuid } from 'uuid';
 import { ActuallyColabSocketClient } from '@actually-colab/editor-client';
 
 import { ReduxState } from '../../types/redux';
 import { AuthActionTypes, SIGN_IN } from '../../types/redux/auth';
 import { CELL, EditorActionTypes, NOTEBOOKS } from '../../types/redux/editor';
-import { EXAMPLE_PROJECT } from '../../constants/demo';
 import { httpToWebSocket } from '../../utils/request';
-import { isDemo } from '../../utils/redux';
-import { _editor } from '../actions';
 import { cleanDCell } from '../../utils/notebook';
+import { _editor } from '../actions';
 
 const baseURL = httpToWebSocket(process.env.REACT_APP_AC_WS_URI ?? 'http://localhost:3001/dev');
 
@@ -75,65 +72,53 @@ const ReduxSocketClient = (): Middleware<{}, ReduxState> => {
       }
 
       case NOTEBOOKS.OPEN.START: {
-        if (action.nb_id === EXAMPLE_PROJECT.nb_id) {
-          break;
-        }
-
         client?.openNotebook(action.nb_id);
         break;
       }
       case CELL.ADD.START: {
-        if (isDemo(store.getState())) {
-          const cell_id = `DEMO-${uuid()}`;
-          store.dispatch(_editor.addCellSuccess(true, cell_id, action.index, { cell_id }));
-          return;
+        const notebook = store.getState().editor.notebook;
+        if (notebook === null) {
+          console.error('Notebook was null');
+          break;
         }
 
-        client?.createCell(store.getState().editor.notebook.get('nb_id'), 'python');
+        client?.createCell(notebook.get('nb_id'), 'python');
         break;
       }
       case CELL.DELETE.START: {
-        if (isDemo(store.getState())) {
-          store.dispatch(_editor.deleteCellSuccess(true, action.cell_id));
-          return;
-        }
-
         // TODO: delete cell
         break;
       }
       case CELL.LOCK.START: {
-        if (isDemo(store.getState())) {
-          store.dispatch(
-            _editor.lockCellSuccess(true, store.getState().auth.user?.uid ?? '', action.cell_id, {
-              lock_held_by: store.getState().auth.user?.uid ?? '',
-            })
-          );
-          return;
+        const notebook = store.getState().editor.notebook;
+        if (notebook === null) {
+          console.error('Notebook was null');
+          break;
         }
 
-        client?.lockCell(store.getState().editor.notebook.get('nb_id'), action.cell_id);
+        client?.lockCell(notebook.get('nb_id'), action.cell_id);
         break;
       }
       case CELL.UNLOCK.START: {
-        if (isDemo(store.getState())) {
-          store.dispatch(
-            _editor.unlockCellSuccess(true, store.getState().auth.user?.uid ?? '', action.cell_id, { lock_held_by: '' })
-          );
-          return;
+        const notebook = store.getState().editor.notebook;
+        if (notebook === null) {
+          console.error('Notebook was null');
+          break;
         }
 
-        client?.unlockCell(store.getState().editor.notebook.get('nb_id'), action.cell_id);
+        client?.unlockCell(notebook.get('nb_id'), action.cell_id);
         break;
       }
       case CELL.EDIT.START: {
-        if (isDemo(store.getState())) {
-          store.dispatch(_editor.editCellSuccess(true, action.cell_id, action.changes));
-          return;
+        const notebook = store.getState().editor.notebook;
+        if (notebook === null) {
+          console.error('Notebook was null');
+          break;
         }
 
         // TODO: need to be able to change more than just contents
         if (action.changes.contents !== undefined) {
-          client?.editCell(store.getState().editor.notebook.get('nb_id'), action.cell_id, action.changes.contents);
+          client?.editCell(notebook.get('nb_id'), action.cell_id, action.changes.contents);
         }
         break;
       }

@@ -54,7 +54,8 @@ const EditorHeader: React.FC = () => {
   const selectedCell = React.useMemo(
     () =>
       cells.get(selectedCellId) ??
-      (notebook.get('cell_ids').size > 0 ? cells.get(notebook.get('cell_ids').get(0) ?? '') ?? null : null),
+      (notebook &&
+        (notebook.get('cell_ids').size > 0 ? cells.get(notebook.get('cell_ids').get(0) ?? '') ?? null : null)),
     [cells, notebook, selectedCellId]
   );
 
