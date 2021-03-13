@@ -38,19 +38,28 @@ const styles = StyleSheet.create({
 const EditorHeader: React.FC = () => {
   const { kernel, kernelStatus, kernelStatusColor, kernelIsConnected } = useKernelStatus();
 
+  const user = useSelector((state: ReduxState) => state.auth.user);
   const gatewayUri = useSelector((state: ReduxState) => state.editor.gatewayUri);
   const notebook = useSelector((state: ReduxState) => state.editor.notebook);
+  const lockedCells = useSelector((state: ReduxState) => state.editor.lockedCells);
   const cells = useSelector((state: ReduxState) => state.editor.cells);
   const connectToKernelErrorMessage = useSelector((state: ReduxState) => state.editor.connectToKernelErrorMessage);
   const isAddingCell = useSelector((state: ReduxState) => state.editor.isAddingCell);
   const isDeletingCell = useSelector((state: ReduxState) => state.editor.isDeletingCell);
-  const lockedCellId = useSelector((state: ReduxState) => state.editor.lockedCellId);
   const selectedCellId = useSelector((state: ReduxState) => state.editor.selectedCellId);
 
   const [outputSelection, setOutputSelection] = React.useState<string>(gatewayUri);
   const [showDeleteCell, setShowDeleteCell] = React.useState<boolean>(false);
 
-  const lockedCell = React.useMemo(() => cells.get(lockedCellId) ?? null, [cells, lockedCellId]);
+  const ownedCells = React.useMemo(() => lockedCells.filter((lock) => lock.get('uid') === user?.uid), [
+    lockedCells,
+    user?.uid,
+  ]);
+  const lockedCell = React.useMemo(
+    () => (ownedCells.size > 0 ? cells.get(ownedCells.get(0)?.get('cell_id') ?? '') ?? null : null),
+    [cells, ownedCells]
+  );
+  const lockedCellId = React.useMemo(() => lockedCell?.get('cell_id') ?? '', [lockedCell]);
   const selectedCell = React.useMemo(
     () =>
       cells.get(selectedCellId) ??
@@ -91,8 +100,9 @@ const EditorHeader: React.FC = () => {
     dispatch(_editor.selectNextCell());
   }, [dispatch, selectedCell]);
   const dispatchStopCodeExecution = React.useCallback(
-    () => lockedCell !== null && kernel !== null && dispatch(_editor.stopCodeExecution(gatewayUri, kernel, lockedCell)),
-    [dispatch, gatewayUri, kernel, lockedCell]
+    () =>
+      lockedCellId !== '' && kernel !== null && dispatch(_editor.stopCodeExecution(gatewayUri, kernel, lockedCellId)),
+    [dispatch, gatewayUri, kernel, lockedCellId]
   );
 
   const handleLanguageSelect = React.useCallback(

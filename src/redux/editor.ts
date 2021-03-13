@@ -46,14 +46,13 @@ export interface EditorState {
   isOpeningNotebook: boolean;
   openingNotebookId: string;
 
-  isLockingCell: boolean;
-  isUnlockingCell: boolean;
   isAddingCell: boolean;
   isDeletingCell: boolean;
   isEditingCell: boolean;
   isExecutingCode: boolean;
 
-  lockedCellId: EditorCell['cell_id'];
+  lockingCellId: EditorCell['cell_id'];
+  unlockingCellId: EditorCell['cell_id'];
   lockedCells: ImmutableList<ImmutableLock>;
 
   selectedCellId: EditorCell['cell_id'];
@@ -86,14 +85,13 @@ const initialState: EditorState = {
   isOpeningNotebook: false,
   openingNotebookId: '',
 
-  isLockingCell: false,
-  isUnlockingCell: false,
   isAddingCell: false,
   isDeletingCell: false,
   isEditingCell: false,
   isExecutingCode: false,
 
-  lockedCellId: '',
+  lockingCellId: '',
+  unlockingCellId: '',
   lockedCells: ImmutableList(),
 
   selectedCellId: '',
@@ -268,13 +266,12 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
     case CELL.LOCK.START:
       return {
         ...state,
-        isLockingCell: true,
+        lockingCellId: action.cell_id,
       };
     case CELL.LOCK.SUCCESS:
       return {
         ...state,
-        isLockingCell: action.isMe ? false : state.isLockingCell,
-        lockedCellId: action.isMe ? action.cell_id : state.lockedCellId === action.cell_id ? '' : state.lockedCellId,
+        lockingCellId: action.isMe ? '' : state.lockingCellId,
         lockedCells: state.lockedCells
           .filter((lock) => lock.get('cell_id') !== action.cell_id)
           .push(
@@ -290,19 +287,18 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
     case CELL.LOCK.FAILURE:
       return {
         ...state,
-        isLockingCell: false,
+        lockingCellId: '',
       };
 
     case CELL.UNLOCK.START:
       return {
         ...state,
-        isUnlockingCell: true,
+        unlockingCellId: '',
       };
     case CELL.UNLOCK.SUCCESS:
       return {
         ...state,
-        isUnlockingCell: action.isMe ? false : state.isUnlockingCell,
-        lockedCellId: action.isMe ? '' : state.lockedCellId,
+        unlockingCellId: action.isMe ? '' : state.unlockingCellId,
         lockedCells: state.lockedCells.filter(
           (lock) => lock.get('cell_id') !== action.cell_id || lock.get('uid') !== action.uid
         ),
@@ -313,7 +309,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
     case CELL.UNLOCK.FAILURE:
       return {
         ...state,
-        isUnlockingCell: false,
+        unlockingCellId: '',
       };
 
     case CELL.ADD.START:
@@ -375,7 +371,6 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...state,
         ...selectionChanges,
         isDeletingCell: action.isMe ? false : state.isDeletingCell,
-        lockedCellId: action.isMe ? '' : state.lockedCellId,
         lockedCells: state.lockedCells.filter((lock) => lock.get('cell_id') !== action.cell_id),
         cells: state.cells.delete(action.cell_id),
         outputs: state.outputs.remove(action.cell_id),

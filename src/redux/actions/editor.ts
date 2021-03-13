@@ -709,9 +709,9 @@ export const executeCode = (user: User, kernel: IKernel, cell: ImmutableEditorCe
   }
 };
 
-const executeCodeStopped = (cell: ImmutableEditorCell): EditorActionTypes => ({
+const executeCodeStopped = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
   type: KERNEL.EXECUTE.STOPPED,
-  cell_id: cell.get('cell_id'),
+  cell_id,
 });
 
 /**
@@ -720,13 +720,13 @@ const executeCodeStopped = (cell: ImmutableEditorCell): EditorActionTypes => ({
 export const stopCodeExecution = (
   gatewayUri: string,
   kernel: IKernel,
-  cell: ImmutableEditorCell
+  cell_id: EditorCell['cell_id']
 ): EditorAsyncActionTypes => async (dispatch) => {
   try {
     await KernelApi.interrupt(gatewayUri, kernel);
 
     console.log('Kernel was interrupted');
-    dispatch(executeCodeStopped(cell));
+    dispatch(executeCodeStopped(cell_id));
   } catch (error) {
     console.error(error);
   }
