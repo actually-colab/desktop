@@ -70,7 +70,7 @@ const EditorPage: React.FC = () => {
         <div className={css(styles.page)}>
           <div className={css(styles.bodyContainer)}>
             <div className={css(styles.body)}>
-              {notebook.get('cell_ids').map((cell_id) => (
+              {notebook?.get('cell_ids').map((cell_id) => (
                 <NotebookCell key={cell_id} cell_id={cell_id} />
               ))}
             </div>

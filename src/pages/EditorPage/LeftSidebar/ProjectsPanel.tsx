@@ -118,7 +118,7 @@ const ProjectsPanel: React.FC = () => {
             block
             style={{
               textAlign: 'left',
-              ...(project.get('nb_id') === notebook.get('nb_id')
+              ...(project.get('nb_id') === notebook?.get('nb_id')
                 ? {
                     background: palette.PRIMARY_LIGHT,
                     color: palette.PRIMARY,
@@ -128,7 +128,7 @@ const ProjectsPanel: React.FC = () => {
             loading={project.get('nb_id') === openingNotebookId}
             onClick={() =>
               !isOpeningNotebook &&
-              project.get('nb_id') !== notebook.get('nb_id') &&
+              project.get('nb_id') !== notebook?.get('nb_id') &&
               dispatchOpenNotebook(project.get('nb_id'))
             }
           >

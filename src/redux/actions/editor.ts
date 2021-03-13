@@ -6,10 +6,9 @@ import { CELL, EditorActionTypes, EditorAsyncActionTypes, KERNEL, NOTEBOOKS } fr
 import { User } from '../../types/user';
 import { IpynbOutput } from '../../types/ipynb';
 import { BaseKernelOutput, EditorCell, ImmutableEditorCell, KernelOutput } from '../../types/notebook';
-import { _ui } from '.';
 import { KernelLog } from '../../types/kernel';
 import { KernelApi } from '../../api';
-import { EXAMPLE_PROJECT } from '../../constants/demo';
+import { _ui } from '.';
 
 /**
  * Add a new log message
@@ -326,19 +325,10 @@ const openNotebookFailure = (errorMessage: string): EditorActionTypes => ({
   },
 });
 
-const openNotebookDemo = (): EditorActionTypes => ({
-  type: NOTEBOOKS.OPEN.DEMO,
-});
-
 /**
  * Open the notebook with the given id
  */
 export const openNotebook = (nb_id: client.Notebook['nb_id']): EditorAsyncActionTypes => async (dispatch) => {
-  if (nb_id === EXAMPLE_PROJECT.nb_id) {
-    dispatch(openNotebookDemo());
-    return;
-  }
-
   dispatch(openNotebookStart(nb_id));
 
   try {
@@ -515,11 +505,6 @@ export const editCell = (
   changes: Partial<EditorCell>
 ): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(editCellStart(cell_id, changes));
-
-  // TODO: make debounced request
-  if (cell_id.startsWith('DEMO')) {
-    dispatch(editCellSuccess(true, cell_id, changes));
-  }
 };
 
 /**

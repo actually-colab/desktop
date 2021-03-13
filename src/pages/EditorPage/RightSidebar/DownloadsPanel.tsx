@@ -30,7 +30,9 @@ const DownloadsPanel: React.FC = () => {
   const uid = React.useMemo(() => user?.uid ?? '', [user?.uid]);
 
   const onClickDownload = React.useCallback(() => {
-    download(notebook, uid, cells, outputs);
+    if (notebook !== null) {
+      download(notebook, uid, cells, outputs);
+    }
   }, [cells, notebook, outputs, uid]);
 
   return (

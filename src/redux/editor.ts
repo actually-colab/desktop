@@ -12,12 +12,6 @@ import {
 } from '../types/notebook';
 import { ImmutableKernelLog } from '../types/kernel';
 import { BASE_CELL, IMMUTABLE_BASE_CELL } from '../constants/notebook';
-import {
-  EXAMPLE_PROJECT,
-  EXAMPLE_PROJECT_CELLS,
-  IMMUTABLE_EXAMPLE_PROJECT,
-  IMMUTABLE_REDUCED_EXAMPLE_PROJECT,
-} from '../constants/demo';
 import { DEFAULT_GATEWAY_URI } from '../constants/jupyter';
 import {
   cellArrayToImmutableMap,
@@ -71,7 +65,7 @@ export interface EditorState {
   kernel: IKernel | null;
 
   notebooks: ImmutableList<ImmutableNotebook>;
-  notebook: ImmutableReducedNotebook;
+  notebook: ImmutableReducedNotebook | null;
   cells: ImmutableMap<EditorCell['cell_id'], ImmutableEditorCell>;
   outputs: ImmutableMap<EditorCell['cell_id'], ImmutableList<ImmutableKernelOutput>>;
   logs: ImmutableList<ImmutableKernelLog>;
@@ -110,9 +104,9 @@ const initialState: EditorState = {
   gatewayUri: DEFAULT_GATEWAY_URI,
   kernel: null,
 
-  notebooks: ImmutableList([makeImmutableNotebook(EXAMPLE_PROJECT)]),
-  notebook: IMMUTABLE_REDUCED_EXAMPLE_PROJECT,
-  cells: cellArrayToImmutableMap(EXAMPLE_PROJECT_CELLS),
+  notebooks: ImmutableList(),
+  notebook: null,
+  cells: ImmutableMap(),
   outputs: ImmutableMap(),
   logs: ImmutableList(),
 };
@@ -220,10 +214,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
       return {
         ...state,
         isGettingNotebooks: false,
-        notebooks: ImmutableList([
-          IMMUTABLE_EXAMPLE_PROJECT,
-          ...action.notebooks.map((notebook) => makeImmutableNotebook(notebook)),
-        ]),
+        notebooks: ImmutableList(action.notebooks.map((notebook) => makeImmutableNotebook(notebook))),
         getNotebooksTimestamp: new Date(),
       };
     case NOTEBOOKS.GET.FAILURE:
@@ -256,7 +247,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         isOpeningNotebook: true,
         openingNotebookId: action.nb_id,
         notebook: reduceImmutableNotebook(
-          state.notebooks.find((notebook) => notebook.get('nb_id') === action.nb_id) ?? IMMUTABLE_EXAMPLE_PROJECT
+          state.notebooks.find((notebook) => notebook.get('nb_id') === action.nb_id) ?? null
         ),
       };
     case NOTEBOOKS.OPEN.SUCCESS:
@@ -273,13 +264,6 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         isOpeningNotebook: false,
         openingNotebookId: '',
       };
-    case NOTEBOOKS.OPEN.DEMO: {
-      return {
-        ...state,
-        notebook: IMMUTABLE_REDUCED_EXAMPLE_PROJECT,
-        cells: cellArrayToImmutableMap(EXAMPLE_PROJECT_CELLS),
-      };
-    }
 
     case CELL.LOCK.START:
       return {
@@ -338,11 +322,18 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         isAddingCell: true,
       };
     case CELL.ADD.SUCCESS: {
+      if (state.notebook === null) {
+        console.error('Notebook was null');
+        return state;
+      }
+
+      const notebook = state.notebook;
+
       return {
         ...state,
         isAddingCell: action.isMe ? false : state.isAddingCell,
         notebook: state.notebook.update('cell_ids', ImmutableList(), (cell_ids) =>
-          cell_ids.splice(action.index === -1 ? state.notebook.get('cell_ids').size : action.index, 0, action.cell_id)
+          cell_ids.splice(action.index === -1 ? notebook.get('cell_ids').size ?? 0 : action.index, 0, action.cell_id)
         ),
         cells: state.cells.set(action.cell_id, makeImmutableEditorCell({ ...BASE_CELL, ...action.cell })),
       };
@@ -359,6 +350,11 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         isDeletingCell: true,
       };
     case CELL.DELETE.SUCCESS: {
+      if (state.notebook === null) {
+        console.error('Notebook was null');
+        return state;
+      }
+
       const selectionChanges: Partial<EditorState> = {};
 
       // If the selected cell is deleted, the selected cell should become the next cell or remain the last
@@ -433,6 +429,11 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         selectedCellId: action.cell_id,
       };
     case CELL.SELECT.NEXT: {
+      if (state.notebook === null) {
+        console.error('Notebook was null');
+        return state;
+      }
+
       const currentIndex =
         state.selectedCellId === ''
           ? -1
