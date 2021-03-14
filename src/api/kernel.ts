@@ -1,4 +1,4 @@
-import { IKernel, Kernel } from 'jupyter-js-services';
+import { IKernel, Kernel as JupyterKernel } from 'jupyter-js-services';
 
 import { GATEWAY_BASE_URI } from '../constants/jupyter';
 import { httpToWebSocket } from '../utils/request';
@@ -35,10 +35,10 @@ export const connectToKernel = async (
       };
     }
 > => {
-  let kernelSpecs: Kernel.ISpecModels | undefined;
+  let kernelSpecs: JupyterKernel.ISpecModels | undefined;
 
   try {
-    kernelSpecs = await Kernel.getSpecs({
+    kernelSpecs = await JupyterKernel.getSpecs({
       baseUrl: uri,
     });
   } catch (error) {
@@ -56,7 +56,7 @@ export const connectToKernel = async (
   console.log('Available kernelspecs', kernelSpecs);
 
   try {
-    const kernel = await Kernel.startNew({
+    const kernel = await JupyterKernel.startNew({
       baseUrl: uri,
       wsUrl: httpToWebSocket(uri),
       name: 'python3',
@@ -95,20 +95,20 @@ export const connectToKernel = async (
 /**
  * Interrupt the given kernel
  */
-export const interrupt = (gatewayUri: string, kernel: IKernel) =>
-  fetch(`${gatewayUri}/api/kernels/${kernel.id}/interrupt`, { method: 'POST' });
+export const interrupt = (gatewayUri: string, kernel_id: string) =>
+  fetch(`${gatewayUri}/api/kernels/${kernel_id}/interrupt`, { method: 'POST' });
 
 /**
  * Restart the given kernel
  */
-export const restart = (gatewayUri: string, kernel: IKernel) =>
-  fetch(`${gatewayUri}/api/kernels/${kernel.id}/restart`, { method: 'POST' });
+export const restart = (gatewayUri: string, kernel_id: string) =>
+  fetch(`${gatewayUri}/api/kernels/${kernel_id}/restart`, { method: 'POST' });
 
 /**
  * Kill the given kernel
  */
-export const kill = (gatewayUri: string, kernel: IKernel) =>
-  fetch(`${gatewayUri}/api/kernels/${kernel.id}`, { method: 'DELETE' });
+export const kill = (gatewayUri: string, kernel_id: string) =>
+  fetch(`${gatewayUri}/api/kernels/${kernel_id}`, { method: 'DELETE' });
 
 /**
  * Sleep in-sync to delay close

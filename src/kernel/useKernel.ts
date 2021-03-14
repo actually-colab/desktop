@@ -37,15 +37,10 @@ const useKernel = () => {
     (uri: string, displayError?: boolean) => dispatch(_editor.connectToKernel(uri, displayError)),
     [dispatch]
   );
-  const dispatchExecuteCode = React.useCallback(
-    (cell: ImmutableEditorCell) =>
-      user !== null && kernel !== null && dispatch(_editor.executeCode(user, kernel, cell)),
-    [dispatch, kernel, user]
-  );
-  const dispatchDisconnectFromKernel = React.useCallback(
-    () => kernel !== null && dispatch(_editor.disconnectFromKernel(kernel)),
-    [dispatch, kernel]
-  );
+  const dispatchExecuteCode = React.useCallback((cell: ImmutableEditorCell) => dispatch(_editor.executeCode(cell)), [
+    dispatch,
+  ]);
+  const dispatchDisconnectFromKernel = React.useCallback(() => dispatch(_editor.disconnectFromKernel()), [dispatch]);
   const dispatchRestartKernel = React.useCallback(
     () => kernel !== null && dispatch(_editor.restartKernel(gatewayUri, kernel)),
     [dispatch, gatewayUri, kernel]

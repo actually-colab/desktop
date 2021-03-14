@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
  * The header for the editor page
  */
 const EditorHeader: React.FC = () => {
-  const { kernel, kernelStatus, kernelStatusColor, kernelIsConnected } = useKernelStatus();
+  const { kernelStatus, kernelStatusColor, kernelIsConnected } = useKernelStatus();
 
   const user = useSelector((state: ReduxState) => state.auth.user);
   const gatewayUri = useSelector((state: ReduxState) => state.editor.gatewayUri);
@@ -100,9 +100,8 @@ const EditorHeader: React.FC = () => {
     dispatch(_editor.selectNextCell());
   }, [dispatch, selectedCell]);
   const dispatchStopCodeExecution = React.useCallback(
-    () =>
-      lockedCellId !== '' && kernel !== null && dispatch(_editor.stopCodeExecution(gatewayUri, kernel, lockedCellId)),
-    [dispatch, gatewayUri, kernel, lockedCellId]
+    () => lockedCellId !== '' && dispatch(_editor.stopCodeExecution(lockedCellId)),
+    [dispatch, lockedCellId]
   );
 
   const handleLanguageSelect = React.useCallback(

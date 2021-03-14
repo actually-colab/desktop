@@ -93,7 +93,7 @@ const KeyValue: React.FC<{ attributeKey: string | React.ReactNode; attributeValu
 const KernelPanel: React.FC = () => {
   const logsAnchorRef = React.useRef<HTMLDivElement | null>(null);
 
-  const { kernel, kernelStatus, kernelStatusColor } = useKernelStatus();
+  const { kernelStatus, kernelStatusColor } = useKernelStatus();
 
   const autoConnectToKernel = useSelector((state: ReduxState) => state.editor.autoConnectToKernel);
   const isEditingGatewayUri = useSelector((state: ReduxState) => state.editor.isEditingGatewayUri);
@@ -112,10 +112,7 @@ const KernelPanel: React.FC = () => {
     (enable: boolean) => dispatch(_editor.connectToKernelAuto(enable)),
     [dispatch]
   );
-  const dispatchDisconnectFromKernel = React.useCallback(
-    () => kernel !== null && dispatch(_editor.disconnectFromKernel(kernel)),
-    [dispatch, kernel]
-  );
+  const dispatchDisconnectFromKernel = React.useCallback(() => dispatch(_editor.disconnectFromKernel()), [dispatch]);
   const dispatchSetKernelGateway = React.useCallback((uri: string) => dispatch(_editor.setKernelGateway(uri)), [
     dispatch,
   ]);
