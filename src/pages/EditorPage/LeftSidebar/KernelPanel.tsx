@@ -8,7 +8,7 @@ import { _editor } from '../../../redux/actions';
 import { palette, spacing, timing } from '../../../constants/theme';
 import { DEFAULT_GATEWAY_URI } from '../../../constants/jupyter';
 import useKernelStatus from '../../../kernel/useKernelStatus';
-import { StatusIndicator } from '../../../components';
+import { BorderContainer, StatusIndicator } from '../../../components';
 import { openCompanionDownloadsPage } from '../../../utils/redirect';
 
 const styles = StyleSheet.create({
@@ -136,10 +136,12 @@ const KernelPanel: React.FC = () => {
   return (
     <div className={css(styles.container)}>
       <div className={css(styles.downloadContainer)}>
-        <Button appearance="primary" block onClick={() => openCompanionDownloadsPage()}>
-          <Icon icon="download2" style={{ marginRight: spacing.DEFAULT / 2 }} />
-          Download Companion
-        </Button>
+        <BorderContainer>
+          <Button block onClick={() => openCompanionDownloadsPage()}>
+            <Icon icon="download2" style={{ marginRight: spacing.DEFAULT / 2 }} />
+            Download Companion
+          </Button>
+        </BorderContainer>
 
         <p className={css(styles.description)}>
           Our Kernel Companion manages the kernel process and allows you to run code locally. If we don't support your
