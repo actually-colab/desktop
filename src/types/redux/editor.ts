@@ -1,11 +1,10 @@
-import { IKernel } from 'jupyter-js-services';
 import { Action } from 'redux';
 import { ThunkAction } from 'redux-thunk';
 import { Notebook, NotebookContents } from '@actually-colab/editor-client';
 
 import { User } from '../user';
-import { EditorCell, KernelOutput } from '../notebook';
-import { KernelLog } from '../kernel';
+import { EditorCell, ImmutableEditorCell, KernelOutput } from '../notebook';
+import { Kernel, KernelLog } from '../kernel';
 
 export const KERNEL = {
   LOG: {
@@ -23,15 +22,24 @@ export const KERNEL = {
     FAILURE: 'KERNEL_CONNECT_FAILURE',
     RECONNECTING: 'KERNEL_CONNECT_RECONNECTING',
     RECONNECTED: 'KERNEL_CONNECT_RECONNECTED',
-    DISCONNECTED: 'KERNEL_CONNECT_DISCONNECTED',
-    RESTARTED: 'KERNEL_CONNECT_RESTARTED',
+  },
+  DISCONNECT: {
+    START: 'KERNEL_DISCONNECT_START',
+    SUCCESS: 'KERNEL_DISCONNECT_SUCCESS',
+  },
+  RESTART: {
+    START: 'KERNEL_RESTART_START',
+    SUCCESS: 'KERNEL_RESTART_SUCCESS',
   },
   EXECUTE: {
-    QUEUE: 'EXECUTE_CODE_QUEUE',
-    START: 'EXECUTE_CODE_START',
-    SUCCESS: 'EXECUTE_CODE_SUCCESS',
-    FAILURE: 'EXECUTE_CODE_FAILURE',
-    STOPPED: 'EXECUTE_CODE_STOPPED',
+    QUEUE: 'KERNEL_EXECUTE_CODE_QUEUE',
+    START: 'KERNEL_EXECUTE_CODE_START',
+    SUCCESS: 'KERNEL_EXECUTE_CODE_SUCCESS',
+    FAILURE: 'KERNEL_EXECUTE_CODE_FAILURE',
+  },
+  INTERRUPT: {
+    START: 'KERNEL_INTERRUPT_START',
+    SUCCESS: 'KERNEL_INTERRUPT_SUCCESS',
   },
   MESSAGE: {
     RECEIVE: 'KERNEL_MESSAGE_RECEIVE',
@@ -125,11 +133,13 @@ type ConnectToKernelAutoAction = {
 
 type ConnectToKernelStartAction = {
   type: typeof KERNEL.CONNECT.START;
+  uri: string;
+  displayError: boolean;
 };
 
 type ConnectToKernelSuccessAction = {
   type: typeof KERNEL.CONNECT.SUCCESS;
-  kernel: IKernel;
+  kernel: Kernel;
 };
 
 type ConnectToKernelFailureAction = {
@@ -144,13 +154,21 @@ type ConnectToKernelReconnectedAction = {
   type: typeof KERNEL.CONNECT.RECONNECTED;
 };
 
-type ConnectToKernelDisconnectedAction = {
-  type: typeof KERNEL.CONNECT.DISCONNECTED;
+type DisconnectFromKernelStartAction = {
+  type: typeof KERNEL.DISCONNECT.START;
   retry: boolean;
 };
 
-type ConnectToKernelRestartedAction = {
-  type: typeof KERNEL.CONNECT.RESTARTED;
+type DisconnectFromKernelSuccessAction = {
+  type: typeof KERNEL.DISCONNECT.SUCCESS;
+};
+
+type RestartKernelStartAction = {
+  type: typeof KERNEL.RESTART.START;
+};
+
+type RestartKernelSuccessAction = {
+  type: typeof KERNEL.RESTART.SUCCESS;
 };
 
 type NotebooksGetStartAction = {
@@ -312,7 +330,7 @@ type ExecuteCodeQueueAction = {
 
 type ExecuteCodeStartAction = {
   type: typeof KERNEL.EXECUTE.START;
-  cell_id: EditorCell['cell_id'];
+  cell: ImmutableEditorCell;
 };
 
 type ExecuteCodeSuccessAction = {
@@ -327,8 +345,13 @@ type ExecuteCodeFailureAction = {
   runIndex: number;
 } & ActionError;
 
-type ExecuteCodeStoppedAction = {
-  type: typeof KERNEL.EXECUTE.STOPPED;
+type InterruptKernelStartAction = {
+  type: typeof KERNEL.INTERRUPT.START;
+  cell_id: EditorCell['cell_id'];
+};
+
+type InterruptKernelSuccessAction = {
+  type: typeof KERNEL.INTERRUPT.SUCCESS;
   cell_id: EditorCell['cell_id'];
 };
 
@@ -358,8 +381,10 @@ export type EditorActionTypes =
   | ConnectToKernelFailureAction
   | ConnectToKernelReconnectingAction
   | ConnectToKernelReconnectedAction
-  | ConnectToKernelDisconnectedAction
-  | ConnectToKernelRestartedAction
+  | DisconnectFromKernelStartAction
+  | DisconnectFromKernelSuccessAction
+  | RestartKernelStartAction
+  | RestartKernelSuccessAction
   | NotebooksGetStartAction
   | NotebooksGetSuccessAction
   | NotebooksGetFailureAction
@@ -394,7 +419,8 @@ export type EditorActionTypes =
   | ExecuteCodeStartAction
   | ExecuteCodeSuccessAction
   | ExecuteCodeFailureAction
-  | ExecuteCodeStoppedAction
+  | InterruptKernelStartAction
+  | InterruptKernelSuccessAction
   | KernelMessageReceiveAction
   | KernelMessageUpdateRunIndexAction;
 

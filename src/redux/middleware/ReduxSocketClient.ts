@@ -2,21 +2,21 @@ import { Middleware } from 'redux';
 import { ActuallyColabSocketClient } from '@actually-colab/editor-client';
 
 import { ReduxState } from '../../types/redux';
-import { AuthActionTypes, SIGN_IN } from '../../types/redux/auth';
-import { CELL, EditorActionTypes, NOTEBOOKS } from '../../types/redux/editor';
+import { SIGN_IN } from '../../types/redux/auth';
+import { CELL, NOTEBOOKS } from '../../types/redux/editor';
 import { httpToWebSocket } from '../../utils/request';
 import { cleanDCell } from '../../utils/notebook';
-import { _editor } from '../actions';
+import { ReduxActions, _editor } from '../actions';
 
 const baseURL = httpToWebSocket(process.env.REACT_APP_AC_WS_URI ?? 'http://localhost:3001/dev');
 
 /**
  * A redux middleware for the Actually Colab socket client
  */
-const ReduxSocketClient = (): Middleware<{}, ReduxState> => {
+const ReduxSocketClient = (): Middleware<{}, ReduxState, any> => {
   let client: ActuallyColabSocketClient | null = null;
 
-  return (store) => (next) => (action: AuthActionTypes | EditorActionTypes) => {
+  return (store) => (next) => (action: ReduxActions) => {
     switch (action.type) {
       case SIGN_IN.SUCCESS: {
         client = new ActuallyColabSocketClient({

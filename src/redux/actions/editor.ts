@@ -1,13 +1,10 @@
-import { IKernel } from 'jupyter-js-services';
 import { format } from 'date-fns';
 import * as client from '@actually-colab/editor-client';
 
 import { CELL, EditorActionTypes, EditorAsyncActionTypes, KERNEL, NOTEBOOKS } from '../../types/redux/editor';
 import { User } from '../../types/user';
-import { IpynbOutput } from '../../types/ipynb';
-import { BaseKernelOutput, EditorCell, ImmutableEditorCell, KernelOutput } from '../../types/notebook';
-import { KernelLog } from '../../types/kernel';
-import { KernelApi } from '../../api';
+import { EditorCell, ImmutableEditorCell, KernelOutput } from '../../types/notebook';
+import { Kernel, KernelLog } from '../../types/kernel';
 import { _ui } from '.';
 
 /**
@@ -57,175 +54,67 @@ export const connectToKernelAuto = (enable: boolean) => ({
   enable,
 });
 
-const connectToKernelStart = (): EditorActionTypes => ({
+const connectToKernelStart = (uri: string, displayError: boolean): EditorActionTypes => ({
   type: KERNEL.CONNECT.START,
+  uri,
+  displayError,
 });
 
-const connectToKernelSuccess = (kernel: IKernel): EditorActionTypes => ({
+export const connectToKernelSuccess = (kernel: Kernel): EditorActionTypes => ({
   type: KERNEL.CONNECT.SUCCESS,
   kernel,
 });
 
-const connectToKernelFailure = (errorMessage: string): EditorActionTypes => ({
+export const connectToKernelFailure = (errorMessage: string): EditorActionTypes => ({
   type: KERNEL.CONNECT.FAILURE,
   error: {
     message: errorMessage,
   },
 });
 
-const connectToKernelReconnecting = (): EditorActionTypes => ({
+export const connectToKernelReconnecting = (): EditorActionTypes => ({
   type: KERNEL.CONNECT.RECONNECTING,
 });
 
-const connectToKernelReconnected = (): EditorActionTypes => ({
+export const connectToKernelReconnected = (): EditorActionTypes => ({
   type: KERNEL.CONNECT.RECONNECTED,
 });
 
-const connectToKernelDisconnected = (retry: boolean = true): EditorActionTypes => ({
-  type: KERNEL.CONNECT.DISCONNECTED,
+const disconnectFromKernelStart = (retry: boolean = true): EditorActionTypes => ({
+  type: KERNEL.DISCONNECT.START,
   retry,
 });
-
-/**
- * Handle changes to the kernel status
- */
-const monitorKernelStatus = (kernel: IKernel): EditorAsyncActionTypes => async (dispatch) => {
-  let disconnected = false;
-
-  kernel.statusChanged.connect((newKernel) => {
-    if (newKernel.status === 'reconnecting') {
-      disconnected = true;
-
-      dispatch(
-        _ui.notify({
-          level: 'warning',
-          title: 'Kernel connection lost',
-          message:
-            'The kernel disconnected, attempting to reconnect. If the kernel does not reconnect in the next couple minutes, the connection is dead.',
-          duration: 5000,
-        })
-      );
-      dispatch(
-        appendKernelLog({
-          status: 'Warning',
-          message: `Kernel ${newKernel.id} connection lost`,
-        })
-      );
-
-      dispatch(connectToKernelReconnecting());
-    } else if (newKernel.status === 'dead') {
-      dispatch(
-        _ui.notify({
-          level: 'error',
-          title: 'Kernel connection died',
-          message: 'Could not reconnect to the kernel after multiple tries. The connection is now dead.',
-          duration: 5000,
-        })
-      );
-      dispatch(
-        appendKernelLog({
-          status: 'Error',
-          message: `Kernel ${newKernel.id} connection died`,
-        })
-      );
-
-      dispatch(connectToKernelDisconnected());
-    } else {
-      if (disconnected) {
-        disconnected = false;
-
-        dispatch(
-          _ui.notify({
-            level: 'success',
-            title: 'Kernel reconnected',
-            message: 'The kernel reconnected, kernel state should be intact',
-            duration: 5000,
-          })
-        );
-        dispatch(
-          appendKernelLog({
-            status: 'Success',
-            message: `Kernel ${newKernel.id} reconnected`,
-          })
-        );
-
-        dispatch(connectToKernelReconnected());
-      }
-    }
-  });
-};
+export const disconnectFromKernelSuccess = (): EditorActionTypes => ({
+  type: KERNEL.DISCONNECT.SUCCESS,
+});
 
 /**
  * Attempt to connect to the jupyter kernel gateway. In the future this can also hook into the hidden renderer
  */
 export const connectToKernel = (uri: string, displayError = false): EditorAsyncActionTypes => async (dispatch) => {
-  dispatch(connectToKernelStart());
-
-  const res = await KernelApi.connectToKernel(uri);
-
-  if (res.success) {
-    dispatch(connectToKernelSuccess(res.kernel));
-
-    dispatch(monitorKernelStatus(res.kernel));
-
-    dispatch(
-      appendKernelLog({
-        status: 'Success',
-        message: `Kernel ${res.kernel.id} connected`,
-      })
-    );
-  } else {
-    if (displayError) {
-      dispatch(
-        _ui.notify({
-          level: 'error',
-          title: "Couldn't connect to the kernel",
-          message: res.error.message,
-          duration: 5000,
-        })
-      );
-    }
-
-    dispatch(connectToKernelFailure(res.error.message));
-  }
+  dispatch(connectToKernelStart(uri, displayError));
 };
 
-const connectToKernelRestarted = (): EditorActionTypes => ({
-  type: KERNEL.CONNECT.RESTARTED,
+const restartKernelStart = (): EditorActionTypes => ({
+  type: KERNEL.RESTART.START,
+});
+
+export const restartKernelSuccess = (): EditorActionTypes => ({
+  type: KERNEL.RESTART.SUCCESS,
 });
 
 /**
  * Restart the given kernel
  */
-export const restartKernel = (gatewayUri: string, kernel: IKernel): EditorAsyncActionTypes => async (dispatch) => {
-  try {
-    await KernelApi.restart(gatewayUri, kernel);
-
-    console.log('Kernel was restarted');
-    dispatch(connectToKernelRestarted());
-  } catch (error) {
-    console.error(error);
-  }
+export const restartKernel = (gatewayUri: string, kernel: Kernel): EditorAsyncActionTypes => async (dispatch) => {
+  dispatch(restartKernelStart());
 };
 
 /**
  * Shutdown a live kernel or disconnect from a dying one.
  */
-export const disconnectFromKernel = (kernel: IKernel): EditorAsyncActionTypes => async (dispatch) => {
-  try {
-    await kernel.shutdown();
-  } catch (error) {
-    kernel.dispose();
-  }
-
-  dispatch(
-    appendKernelLog({
-      status: 'Success',
-      message: `Kernel ${kernel.id} disconnected`,
-    })
-  );
-
-  dispatch(connectToKernelDisconnected(false));
+export const disconnectFromKernel = (): EditorAsyncActionTypes => async (dispatch) => {
+  dispatch(disconnectFromKernelStart(false));
 };
 
 const getNotebooksStart = (): EditorActionTypes => ({
@@ -554,18 +443,18 @@ export const addCellToQueue = (cell: ImmutableEditorCell): EditorAsyncActionType
   dispatch(executeCodeQueue(cell.get('cell_id')));
 };
 
-const executeCodeStart = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
+const executeCodeStart = (cell: ImmutableEditorCell): EditorActionTypes => ({
   type: KERNEL.EXECUTE.START,
-  cell_id,
+  cell,
 });
 
-const executeCodeSuccess = (cell_id: EditorCell['cell_id'], runIndex: number): EditorActionTypes => ({
+export const executeCodeSuccess = (cell_id: EditorCell['cell_id'], runIndex: number): EditorActionTypes => ({
   type: KERNEL.EXECUTE.SUCCESS,
   cell_id,
   runIndex,
 });
 
-const executeCodeFailure = (
+export const executeCodeFailure = (
   cell_id: EditorCell['cell_id'],
   runIndex: number,
   errorMessage: string
@@ -578,13 +467,13 @@ const executeCodeFailure = (
   },
 });
 
-const receiveKernelMessage = (cell_id: EditorCell['cell_id'], messages: KernelOutput[]): EditorActionTypes => ({
+export const receiveKernelMessage = (cell_id: EditorCell['cell_id'], messages: KernelOutput[]): EditorActionTypes => ({
   type: KERNEL.MESSAGE.RECEIVE,
   cell_id,
   messages,
 });
 
-const updateRunIndex = (cell_id: EditorCell['cell_id'], runIndex: number): EditorActionTypes => ({
+export const updateRunIndex = (cell_id: EditorCell['cell_id'], runIndex: number): EditorActionTypes => ({
   type: KERNEL.MESSAGE.UPDATE_RUN_INDEX,
   cell_id,
   runIndex,
@@ -593,141 +482,27 @@ const updateRunIndex = (cell_id: EditorCell['cell_id'], runIndex: number): Edito
 /**
  * Run code against the kernel and asynchronously process kernel messages
  */
-export const executeCode = (user: User, kernel: IKernel, cell: ImmutableEditorCell): EditorAsyncActionTypes => async (
-  dispatch
-) => {
+export const executeCode = (cell: ImmutableEditorCell): EditorAsyncActionTypes => async (dispatch) => {
   if (cell.get('language') !== 'python' || cell.get('contents').trim() === '') {
     return;
   }
 
-  dispatch(executeCodeStart(cell.get('cell_id')));
-
-  const future = kernel.execute({
-    code: cell.get('contents'),
-  });
-
-  let runIndex = -1;
-  let messageIndex = 0;
-  const messageQueue: KernelOutput[] = [];
-  let threwError = false;
-
-  future.onIOPub = (message) => {
-    let kernelOutput: KernelOutput | null = null;
-
-    try {
-      if (message.content.execution_count !== undefined && runIndex === -1) {
-        // execution metadata
-        runIndex = message.content.execution_count as number;
-
-        // Update the current run
-        dispatch(updateRunIndex(cell.get('cell_id'), runIndex));
-        dispatch(
-          appendKernelLog({
-            status: 'Info',
-            message: `Started run #${runIndex} on cell ${cell.get('cell_id')}`,
-          })
-        );
-      }
-
-      const baseKernelOutput: BaseKernelOutput = {
-        uid: user.uid,
-        output_id: message.header.msg_id,
-        cell_id: cell.get('cell_id'),
-        runIndex: -1,
-        messageIndex,
-      };
-
-      switch (message.header.msg_type) {
-        case 'stream':
-        case 'display_data':
-        case 'execute_result':
-        case 'error':
-          kernelOutput = {
-            ...baseKernelOutput,
-            output: {
-              ...((message.content as unknown) as IpynbOutput),
-              output_type: message.header.msg_type,
-            } as IpynbOutput,
-          };
-          break;
-      }
-
-      if (message.header.msg_type === 'error') {
-        threwError = true;
-      }
-
-      console.log({ message, kernelOutput });
-    } catch (error) {
-      console.error(error);
-    }
-
-    if (kernelOutput !== null) {
-      messageIndex++;
-
-      if (runIndex !== -1) {
-        // No need to queue
-        dispatch(
-          receiveKernelMessage(cell.get('cell_id'), [
-            {
-              ...kernelOutput,
-              runIndex,
-            },
-          ])
-        );
-      } else {
-        // Store messages until execution count message is received
-        messageQueue.push(kernelOutput);
-      }
-    } else if (runIndex !== -1 && messageQueue.length > 0) {
-      // process any messages in queue
-      dispatch(
-        receiveKernelMessage(
-          cell.get('cell_id'),
-          messageQueue.map((oldMessage) => ({ ...oldMessage, runIndex }))
-        )
-      );
-    }
-  };
-
-  await new Promise<void>((resolve) => {
-    future.onDone = () => {
-      resolve();
-    };
-  });
-
-  dispatch(
-    appendKernelLog({
-      status: threwError ? 'Error' : 'Success',
-      message: `Finished run #${runIndex} on cell ${cell.get('cell_id')}`,
-    })
-  );
-
-  if (threwError) {
-    dispatch(executeCodeFailure(cell.get('cell_id'), runIndex, 'Code threw an error'));
-  } else {
-    dispatch(executeCodeSuccess(cell.get('cell_id'), runIndex));
-  }
+  dispatch(executeCodeStart(cell));
 };
 
-const executeCodeStopped = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
-  type: KERNEL.EXECUTE.STOPPED,
+const interruptKernelStart = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
+  type: KERNEL.INTERRUPT.START,
+  cell_id,
+});
+
+export const interruptKernelSuccess = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
+  type: KERNEL.INTERRUPT.SUCCESS,
   cell_id,
 });
 
 /**
  * Interrupt the kernel execution
  */
-export const stopCodeExecution = (
-  gatewayUri: string,
-  kernel: IKernel,
-  cell_id: EditorCell['cell_id']
-): EditorAsyncActionTypes => async (dispatch) => {
-  try {
-    await KernelApi.interrupt(gatewayUri, kernel);
-
-    console.log('Kernel was interrupted');
-    dispatch(executeCodeStopped(cell_id));
-  } catch (error) {
-    console.error(error);
-  }
+export const stopCodeExecution = (cell_id: EditorCell['cell_id']): EditorAsyncActionTypes => async (dispatch) => {
+  dispatch(interruptKernelStart(cell_id));
 };

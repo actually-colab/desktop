@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 
-import { KERNEL_STATUS } from '../types/kernel';
+import { KernelStatus } from '../types/kernel';
 import { ReduxState } from '../types/redux';
 import { palette } from '../constants/theme';
 
@@ -11,10 +11,9 @@ import { palette } from '../constants/theme';
 const useKernelStatus = () => {
   const isConnectingToKernel = useSelector((state: ReduxState) => state.editor.isConnectingToKernel);
   const isReconnectingToKernel = useSelector((state: ReduxState) => state.editor.isReconnectingToKernel);
-  const isExecutingCode = useSelector((state: ReduxState) => state.editor.isExecutingCode);
   const kernel = useSelector((state: ReduxState) => state.editor.kernel);
 
-  const kernelStatus = React.useMemo<KERNEL_STATUS>(
+  const kernelStatus = React.useMemo<KernelStatus>(
     () =>
       isConnectingToKernel
         ? 'Connecting'
@@ -22,10 +21,8 @@ const useKernelStatus = () => {
         ? 'Reconnecting'
         : kernel === null
         ? 'Offline'
-        : isExecutingCode
-        ? 'Busy'
-        : 'Idle',
-    [isConnectingToKernel, isExecutingCode, isReconnectingToKernel, kernel]
+        : kernel.status,
+    [isConnectingToKernel, isReconnectingToKernel, kernel]
   );
 
   const kernelStatusColor = React.useMemo(() => {

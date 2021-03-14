@@ -1,5 +1,4 @@
 import { List as ImmutableList, Map as ImmutableMap } from 'immutable';
-import { IKernel } from 'jupyter-js-services';
 
 import { CELL, EditorActionTypes, KERNEL, NOTEBOOKS } from '../types/redux/editor';
 import {
@@ -10,7 +9,7 @@ import {
   ImmutableNotebook,
   ImmutableReducedNotebook,
 } from '../types/notebook';
-import { ImmutableKernelLog } from '../types/kernel';
+import { ImmutableKernelLog, Kernel } from '../types/kernel';
 import { BASE_CELL, IMMUTABLE_BASE_CELL } from '../constants/notebook';
 import { DEFAULT_GATEWAY_URI } from '../constants/jupyter';
 import {
@@ -61,7 +60,7 @@ export interface EditorState {
   runQueue: ImmutableList<EditorCell['cell_id']>;
 
   gatewayUri: string;
-  kernel: IKernel | null;
+  kernel: Kernel | null;
 
   notebooks: ImmutableList<ImmutableNotebook>;
   notebook: ImmutableReducedNotebook | null;
@@ -179,10 +178,14 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         ...state,
         isReconnectingToKernel: false,
       };
-    case KERNEL.CONNECT.DISCONNECTED:
+    case KERNEL.DISCONNECT.START:
       return {
         ...state,
         autoConnectToKernel: action.retry,
+      };
+    case KERNEL.DISCONNECT.SUCCESS:
+      return {
+        ...state,
         isConnectingToKernel: false,
         isReconnectingToKernel: false,
         isExecutingCode: false,
@@ -191,7 +194,7 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
         runQueue: state.runQueue.clear(),
         kernel: null,
       };
-    case KERNEL.CONNECT.RESTARTED:
+    case KERNEL.RESTART.SUCCESS:
       return {
         ...state,
         isExecutingCode: false,
@@ -475,14 +478,28 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
     case KERNEL.EXECUTE.START:
       return {
         ...state,
-        runQueue: state.runQueue.filter((cell_id) => cell_id !== action.cell_id),
+        kernel:
+          state.kernel !== null
+            ? {
+                ...state.kernel,
+                status: 'Busy',
+              }
+            : null,
+        runQueue: state.runQueue.filter((cell_id) => cell_id !== action.cell.get('cell_id')),
         isExecutingCode: true,
-        runningCellId: action.cell_id,
-        outputs: state.outputs.update(action.cell_id, ImmutableList(), (outputs) => outputs.clear()),
+        runningCellId: action.cell.get('cell_id'),
+        outputs: state.outputs.update(action.cell.get('cell_id'), ImmutableList(), (outputs) => outputs.clear()),
       };
     case KERNEL.EXECUTE.SUCCESS:
       return {
         ...state,
+        kernel:
+          state.kernel !== null
+            ? {
+                ...state.kernel,
+                status: 'Idle',
+              }
+            : null,
         isExecutingCode: false,
         runningCellId: '',
         executionCount: action.runIndex,
@@ -493,6 +510,13 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
     case KERNEL.EXECUTE.FAILURE:
       return {
         ...state,
+        kernel:
+          state.kernel !== null
+            ? {
+                ...state.kernel,
+                status: 'Idle',
+              }
+            : null,
         isExecutingCode: false,
         runningCellId: '',
         executionCount: action.runIndex,
