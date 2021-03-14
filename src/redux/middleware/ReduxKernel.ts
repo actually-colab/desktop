@@ -74,6 +74,9 @@ const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
                   })
                 );
 
+                kernel = null;
+                kernelUri = '';
+
                 store.dispatch(_editor.disconnectFromKernelSuccess());
               } else {
                 if (disconnected) {
