@@ -129,6 +129,7 @@ const EditorHeader: React.FC = () => {
       <div className={css(styles.header)}>
         <div className={css(styles.headerNoDrag)}>
           <ColoredIconButton
+            size="sm"
             icon="step-forward"
             tooltipText="Run and advance"
             tooltipDirection="bottom"
@@ -136,6 +137,7 @@ const EditorHeader: React.FC = () => {
             onClick={onClickPlayNext}
           />
           <ColoredIconButton
+            size="sm"
             icon="stop"
             tooltipText="Interrupt the kernel"
             tooltipDirection="bottom"
@@ -146,6 +148,7 @@ const EditorHeader: React.FC = () => {
           <Divider vertical />
 
           <ColoredIconButton
+            size="sm"
             icon="plus"
             tooltipText="Create a new cell"
             tooltipDirection="bottom"
@@ -153,16 +156,23 @@ const EditorHeader: React.FC = () => {
             onClick={() => dispatchAddCell(-1)}
           />
           <ColoredIconButton
-            icon="trash2"
-            tooltipText="Delete the current cell"
+            size="sm"
+            icon="arrow-up2"
+            tooltipText="Move the cell up"
             tooltipDirection="bottom"
-            loading={isDeletingCell}
-            disabled={lockedCellId === ''}
-            onClick={() => setShowDeleteCell(true)}
+            loading={false}
+            disabled={true}
+            onClick={() => console.log('TODO')}
           />
-
-          <Divider vertical />
-
+          <ColoredIconButton
+            size="sm"
+            icon="arrow-down2"
+            tooltipText="Move the cell down"
+            tooltipDirection="bottom"
+            loading={false}
+            disabled={true}
+            onClick={() => console.log('TODO')}
+          />
           <PopoverDropdown
             placement="bottomEnd"
             activeKey={lockedCell?.get('language') ?? 'python'}
@@ -175,6 +185,18 @@ const EditorHeader: React.FC = () => {
             <Dropdown.Item eventKey="python">python3</Dropdown.Item>
             <Dropdown.Item eventKey="markdown">markdown</Dropdown.Item>
           </PopoverDropdown>
+
+          <Divider vertical />
+
+          <ColoredIconButton
+            size="sm"
+            icon="trash2"
+            tooltipText="Delete the current cell"
+            tooltipDirection="bottom"
+            loading={isDeletingCell}
+            disabled={lockedCellId === ''}
+            onClick={() => setShowDeleteCell(true)}
+          />
         </div>
 
         <div className={css(styles.headerNoDrag)}>
