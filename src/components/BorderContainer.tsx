@@ -11,6 +11,9 @@ const styles = StyleSheet.create({
   },
 });
 
+/**
+ * A simple wrapper div with a gradient border
+ */
 const BorderContainer: React.FC<{ visible?: boolean }> = ({ visible = true, children }) => {
   return <div className={css(styles.container, visible && styles.border)}>{children}</div>;
 };
