@@ -7,6 +7,7 @@ import { makeImmutableEditorCell } from '../utils/immutable/notebook';
 export const BASE_CELL: EditorCell = {
   nb_id: '',
   cell_id: '',
+  position: -1,
   time_modified: -1,
   lock_held_by: '',
   language: 'python',
