@@ -51,7 +51,9 @@ export const reduceNotebookContents = (notebook: NotebookContents): ReducedNoteb
 
   return {
     ...rest,
-    cell_ids: Object.keys(cells),
+    cell_ids: Object.values(cells)
+      .sort((a, b) => a.position - b.position)
+      .map((cell) => cell.cell_id),
   };
 };
 
