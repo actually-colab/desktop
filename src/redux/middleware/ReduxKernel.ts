@@ -4,13 +4,24 @@ import { IKernel } from 'jupyter-js-services';
 import { ReduxState } from '../../types/redux';
 import { KERNEL } from '../../types/redux/editor';
 import { KernelApi } from '../../api';
-import { ReduxActions, _editor, _ui } from '../actions';
 import { BaseKernelOutput, KernelOutput } from '../../types/notebook';
 import { IpynbOutput } from '../../types/ipynb';
+import { syncSleep } from '../../utils/sleep';
+import { ReduxActions, _editor, _ui } from '../actions';
 
 const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
   let kernel: IKernel | null = null;
   let kernelUri: string = '';
+
+  /**
+   * Attempt to shutdown the kernel on page exit
+   */
+  const shutdownOnUnmount = () => {
+    try {
+      kernel?.shutdown();
+      syncSleep(1000);
+    } catch (error) {}
+  };
 
   return (store) => (next) => (action: ReduxActions) => {
     switch (action.type) {
@@ -27,6 +38,9 @@ const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
             kernel = res.kernel;
             kernelUri = action.uri;
 
+            // Kernel needs to be shutdown on close
+            window.addEventListener('unload', shutdownOnUnmount);
+
             store.dispatch(
               _editor.connectToKernelSuccess({
                 uri: action.uri,
@@ -35,8 +49,10 @@ const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
               })
             );
 
+            // Allows us to track if the kernel was in the disconnect state before this message
             let disconnected = false;
 
+            // Listen to the kernel status
             res.kernel.statusChanged.connect((newKernel) => {
               if (newKernel.status === 'reconnecting') {
                 disconnected = true;
@@ -138,6 +154,9 @@ const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
             kernel.dispose();
           }
 
+          // Kernel needs to be shutdown on close
+          window.removeEventListener('unload', shutdownOnUnmount);
+
           store.dispatch(
             _editor.appendKernelLog({
               status: 'Success',
@@ -145,6 +164,7 @@ const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
             })
           );
 
+          // Clear the stored values
           kernel = null;
           kernelUri = '';
 
@@ -212,6 +232,7 @@ const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
                 messageIndex,
               };
 
+              // Only catch valid message types
               switch (message.header.msg_type) {
                 case 'stream':
                 case 'display_data':
@@ -227,6 +248,7 @@ const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
                   break;
               }
 
+              // Errors need to be separated so it knows to cancel the run queue
               if (message.header.msg_type === 'error') {
                 threwError = true;
               }
