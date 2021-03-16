@@ -56,16 +56,9 @@ const RightSidebar: React.FC = () => {
     'Collaborators' | 'Comments' | 'Stats' | 'Downloads' | 'Settings' | 'Help' | ''
   >('');
 
-  const openMenu = React.useCallback(
-    (menu: typeof visibleMenu) => {
-      if (visibleMenu === menu) {
-        setVisibleMenu('');
-      } else {
-        setVisibleMenu(menu);
-      }
-    },
-    [visibleMenu]
-  );
+  const openMenu = React.useCallback((menu: typeof visibleMenu) => {
+    setVisibleMenu((prevMenu) => (prevMenu === menu ? '' : menu));
+  }, []);
 
   return (
     <div className={css(styles.container)}>

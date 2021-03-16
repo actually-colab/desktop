@@ -252,7 +252,7 @@ const KernelPanel: React.FC = () => {
 
       <p className={css(styles.keyText)}>
         Kernel Logs
-        <Button appearance="subtle" size="xs" onClick={() => setIsLogsPinned(!isLogsPinned)}>
+        <Button appearance="subtle" size="xs" onClick={() => setIsLogsPinned((prevIsLogsPinned) => !prevIsLogsPinned)}>
           <Icon icon="thumb-tack" style={isLogsPinned ? { color: palette.PRIMARY } : undefined} />
         </Button>
       </p>
