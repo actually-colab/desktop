@@ -9,6 +9,9 @@ import { IpynbOutput } from '../../types/ipynb';
 import { syncSleep } from '../../utils/sleep';
 import { ReduxActions, _editor, _ui } from '../actions';
 
+/**
+ * A redux middleware to manage the Jupyter Kernel
+ */
 const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
   let kernel: IKernel | null = null;
   let kernelUri: string = '';
