@@ -40,7 +40,7 @@ This will automatically pull the latest client (assuming proper directory struct
 
 ### Environment
 
-You need to create a file `.env.local`:
+You need to create a file `.env.development.local`:
 
 ```
 REACT_APP_GOOGLE_CLIENT_ID="<CHANGE_ME>"
