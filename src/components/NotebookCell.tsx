@@ -7,13 +7,13 @@ import { ReduxState } from '../types/redux';
 import { _editor } from '../redux/actions';
 import { EditorCell, ImmutableEditorCell } from '../types/notebook';
 import { palette, spacing } from '../constants/theme';
+import useKernelStatus from '../kernel/useKernelStatus';
 
 import CodeCell from './CodeCell';
 import MarkdownCell from './MarkdownCell';
 import OutputCell from './OutputCell';
 import ColoredIconButton from './ColoredIconButton';
 import IconTextButton from './IconTextButton';
-import useKernelStatus from '../kernel/useKernelStatus';
 
 const styles = StyleSheet.create({
   container: {

@@ -15,13 +15,13 @@ import {
   Modal,
   Schema,
 } from 'rsuite';
+import { FormInstance } from 'rsuite/lib/Form';
 import { Notebook } from '@actually-colab/editor-client';
 
 import { ReduxState } from '../../../types/redux';
 import { _editor } from '../../../redux/actions';
 import { palette, spacing } from '../../../constants/theme';
 import { PopoverDropdown } from '../../../components';
-import { FormInstance } from 'rsuite/lib/Form';
 
 type NewProjectFormValue = {
   name: string;

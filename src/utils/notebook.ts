@@ -13,10 +13,10 @@ import {
   ReducedNotebook,
 } from '../types/notebook';
 import { User } from '../types/user';
+import { BASE_CELL } from '../constants/notebook';
 import { filterUndefined } from './filter';
 import { SPLIT_KEEP_NEWLINE } from './regex';
 import { makeImmutableEditorCell, makeImmutableReducedNotebook } from './immutable/notebook';
-import { BASE_CELL } from '../constants/notebook';
 
 /**
  * A comparator for sorting kernel outputs by their message indices
