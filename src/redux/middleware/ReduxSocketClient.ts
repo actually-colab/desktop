@@ -6,6 +6,7 @@ import { SIGN_IN } from '../../types/redux/auth';
 import { CELL, NOTEBOOKS } from '../../types/redux/editor';
 import { httpToWebSocket } from '../../utils/request';
 import { cleanDCell } from '../../utils/notebook';
+import { syncSleep } from '../../utils/sleep';
 import { ReduxActions, _editor } from '../actions';
 
 const baseURL = httpToWebSocket(process.env.REACT_APP_AC_WS_URI ?? 'http://localhost:3001/dev');
@@ -16,6 +17,16 @@ const baseURL = httpToWebSocket(process.env.REACT_APP_AC_WS_URI ?? 'http://local
 const ReduxSocketClient = (): Middleware<{}, ReduxState, any> => {
   let client: ActuallyColabSocketClient | null = null;
 
+  /**
+   * Attempt to close the websocket on page exit
+   */
+  const closeOnUnmount = () => {
+    try {
+      client?.disconnectAndRemoveAllListeners();
+      syncSleep(250);
+    } catch (error) {}
+  };
+
   return (store) => (next) => (action: ReduxActions) => {
     switch (action.type) {
       case SIGN_IN.SUCCESS: {
@@ -24,8 +35,16 @@ const ReduxSocketClient = (): Middleware<{}, ReduxState, any> => {
           sessionToken: action.token,
         });
 
-        client.on('connect', () => console.log('Connected to AC socket'));
-        client.on('close', (event) => console.log('Disconnected from AC socket', event));
+        client.on('connect', () => {
+          console.log('Connected to AC socket');
+          window.addEventListener('beforeunload', closeOnUnmount);
+        });
+
+        client.on('close', (event) => {
+          console.log('Disconnected from AC socket', event);
+          window.removeEventListener('beforeunload', closeOnUnmount);
+        });
+
         client.on('error', (error) => console.error(error));
 
         const currentUser = action.user;

@@ -22,7 +22,7 @@ const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
   const shutdownOnUnmount = () => {
     try {
       kernel?.shutdown();
-      syncSleep(1000);
+      syncSleep(400);
     } catch (error) {}
   };
 
@@ -42,7 +42,7 @@ const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
             kernelUri = action.uri;
 
             // Kernel needs to be shutdown on close
-            window.addEventListener('unload', shutdownOnUnmount);
+            window.addEventListener('beforeunload', shutdownOnUnmount);
 
             store.dispatch(
               _editor.connectToKernelSuccess({
@@ -158,7 +158,7 @@ const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
           }
 
           // Kernel needs to be shutdown on close
-          window.removeEventListener('unload', shutdownOnUnmount);
+          window.removeEventListener('beforeunload', shutdownOnUnmount);
 
           store.dispatch(
             _editor.appendKernelLog({
