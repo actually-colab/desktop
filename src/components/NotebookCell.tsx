@@ -14,6 +14,7 @@ import MarkdownCell from './MarkdownCell';
 import OutputCell from './OutputCell';
 import ColoredIconButton from './ColoredIconButton';
 import IconTextButton from './IconTextButton';
+import Timer from './Timer';
 
 const styles = StyleSheet.create({
   container: {
@@ -68,7 +69,19 @@ const styles = StyleSheet.create({
   cellToolbar: {
     display: 'flex',
     flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  cellToolbarStart: {
+    display: 'flex',
+    flexDirection: 'row',
     justifyContent: 'flex-start',
+    alignItems: 'center',
+  },
+  cellToolbarEnd: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
     alignItems: 'center',
   },
   lockOwnerContainer: {
@@ -207,46 +220,52 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
         )}
 
         <div className={css(styles.cellToolbar)}>
-          <ColoredIconButton
-            icon="play"
-            color={palette.SUCCESS}
-            size="xs"
-            loading={isRunning}
-            disabled={
-              (!kernelIsConnected && cell.get('language') === 'python') ||
-              (cell.get('language') === 'markdown' && cell.get('rendered'))
-            }
-            onClick={onClickPlay}
-          />
+          <div className={css(styles.cellToolbarStart)}>
+            <ColoredIconButton
+              icon="play"
+              color={palette.SUCCESS}
+              size="xs"
+              loading={isRunning}
+              disabled={
+                (!kernelIsConnected && cell.get('language') === 'python') ||
+                (cell.get('language') === 'markdown' && cell.get('rendered'))
+              }
+              onClick={onClickPlay}
+            />
 
-          {ownsCell ? (
-            <IconTextButton
-              icon="unlock-alt"
-              text={isUnlocking ? 'Unlocking...' : 'Unlock'}
-              bgColor="transparent"
-              tooltipText="Allow others to edit"
-              tooltipDirection="bottom"
-              color={palette.PRIMARY}
-              disabled={isUnlocking}
-              onClick={dispatchUnlockCell}
-            />
-          ) : lockOwner !== null ? (
-            <div className={css(styles.lockOwnerContainer)}>
-              <Icon icon="pencil" />
-              <span className={css(styles.lockOwnerText)}>Bailey Tincher</span>
-            </div>
-          ) : (
-            <IconTextButton
-              icon="lock"
-              text={isLocking ? 'Locking...' : 'Lock'}
-              bgColor="transparent"
-              tooltipText="Lock for editing"
-              tooltipDirection="bottom"
-              color={palette.GRAY}
-              disabled={!canLock || isLocking}
-              onClick={onClickLock}
-            />
-          )}
+            {ownsCell ? (
+              <IconTextButton
+                icon="unlock-alt"
+                text={isUnlocking ? 'Unlocking...' : 'Unlock'}
+                bgColor="transparent"
+                tooltipText="Allow others to edit"
+                tooltipDirection="bottom"
+                color={palette.PRIMARY}
+                disabled={isUnlocking}
+                onClick={dispatchUnlockCell}
+              />
+            ) : lockOwner !== null ? (
+              <div className={css(styles.lockOwnerContainer)}>
+                <Icon icon="pencil" />
+                <span className={css(styles.lockOwnerText)}>Bailey Tincher</span>
+              </div>
+            ) : (
+              <IconTextButton
+                icon="lock"
+                text={isLocking ? 'Locking...' : 'Lock'}
+                bgColor="transparent"
+                tooltipText="Lock for editing"
+                tooltipDirection="bottom"
+                color={palette.GRAY}
+                disabled={!canLock || isLocking}
+                onClick={onClickLock}
+              />
+            )}
+          </div>
+
+          <div className={css(styles.cellToolbarEnd)}>
+            <Timer active={isRunning} alwaysRender={cell.get('runIndex') !== -1} nonce={cell.get('runIndex')} />
+          </div>
         </div>
 
         <OutputCell cell={cell} uid={user?.uid} />

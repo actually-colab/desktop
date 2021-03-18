@@ -9,6 +9,7 @@ import NotebookCell from './NotebookCell';
 import OutputCell from './OutputCell';
 import PopoverDropdown from './PopoverDropdown';
 import StatusIndicator from './StatusIndicator';
+import Timer from './Timer';
 import UserAvatar from './UserAvatar';
 
 export {
@@ -23,5 +24,6 @@ export {
   OutputCell,
   PopoverDropdown,
   StatusIndicator,
+  Timer,
   UserAvatar,
 };

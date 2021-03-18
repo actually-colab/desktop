@@ -204,6 +204,8 @@ const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
             code: action.cell.get('contents'),
           });
 
+          const startTimestamp = Date.now();
+
           let runIndex = -1;
           let messageIndex = 0;
           const messageQueue: KernelOutput[] = [];
@@ -289,24 +291,22 @@ const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
             }
           };
 
-          await new Promise<void>((resolve) => {
-            future.onDone = () => {
-              resolve();
-            };
-          });
+          future.onDone = () => {
+            store.dispatch(
+              _editor.appendKernelLog({
+                status: threwError ? 'Error' : 'Success',
+                message: `Finished run #${runIndex} on cell ${action.cell.get('cell_id')} in ${
+                  (Date.now() - startTimestamp) / 1000
+                }s`,
+              })
+            );
 
-          store.dispatch(
-            _editor.appendKernelLog({
-              status: threwError ? 'Error' : 'Success',
-              message: `Finished run #${runIndex} on cell ${action.cell.get('cell_id')}`,
-            })
-          );
-
-          if (threwError) {
-            store.dispatch(_editor.executeCodeFailure(action.cell.get('cell_id'), runIndex, 'Code threw an error'));
-          } else {
-            store.dispatch(_editor.executeCodeSuccess(action.cell.get('cell_id'), runIndex));
-          }
+            if (threwError) {
+              store.dispatch(_editor.executeCodeFailure(action.cell.get('cell_id'), runIndex, 'Code threw an error'));
+            } else {
+              store.dispatch(_editor.executeCodeSuccess(action.cell.get('cell_id'), runIndex));
+            }
+          };
         })();
         break;
       }
