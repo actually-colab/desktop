@@ -369,7 +369,7 @@ const editCellStart = (cell_id: EditorCell['cell_id'], changes: Partial<EditorCe
 export const editCellSuccess = (
   isMe: boolean,
   cell_id: EditorCell['cell_id'],
-  cell: Partial<EditorCell>
+  cell: Required<client.DCell>
 ): EditorActionTypes => ({
   type: CELL.EDIT.SUCCESS,
   isMe,
