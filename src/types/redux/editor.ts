@@ -1,6 +1,6 @@
 import { Action } from 'redux';
 import { ThunkAction } from 'redux-thunk';
-import { Notebook, NotebookContents } from '@actually-colab/editor-client';
+import { DCell, Notebook, NotebookContents } from '@actually-colab/editor-client';
 
 import { User } from '../user';
 import { EditorCell, ImmutableEditorCell, KernelOutput } from '../notebook';
@@ -301,7 +301,7 @@ type EditCellSuccessAction = {
   type: typeof CELL.EDIT.SUCCESS;
   isMe: boolean;
   cell_id: EditorCell['cell_id'];
-  cell: Partial<EditorCell>;
+  cell: Required<DCell>;
 };
 
 type EditCellFailureAction = {

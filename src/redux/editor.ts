@@ -402,15 +402,10 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
       };
 
     case CELL.EDIT.START:
-      return {
-        ...state,
-        isEditingCell: true,
-      };
-    case CELL.EDIT.SUCCESS: {
       const runQueueChanges: Partial<EditorState> = {};
 
       // If a cell in the runQueue is no longer python, it should not be executed
-      if (action.cell.language === 'markdown') {
+      if (action.changes.language === 'markdown') {
         if (state.runQueue.includes(action.cell_id)) {
           runQueueChanges.runQueue = state.runQueue.filter((cell_id) => cell_id !== action.cell_id);
         }
@@ -419,10 +414,39 @@ const reducer = (state = initialState, action: EditorActionTypes): EditorState =
       return {
         ...state,
         ...runQueueChanges,
-        isEditingCell: action.isMe ? false : state.isDeletingCell,
+        isEditingCell: true,
         cells: state.cells.update(action.cell_id, IMMUTABLE_BASE_CELL, (value) =>
-          value.merge(makeImmutableEditorCell(action.cell as EditorCell))
+          value.merge(
+            makeImmutableEditorCell({
+              ...action.changes,
+              time_modified: Date.now(),
+            } as EditorCell)
+          )
         ),
+      };
+    case CELL.EDIT.SUCCESS: {
+      const oldDate = state.cells.get(action.cell_id)?.get('time_modified') ?? -1;
+      const newDate = action.cell.time_modified;
+      const changesAreNewer = newDate > oldDate;
+
+      const runQueueChanges: Partial<EditorState> = {};
+
+      // If a cell in the runQueue is no longer python, it should not be executed
+      if (changesAreNewer && action.cell.language === 'markdown') {
+        if (state.runQueue.includes(action.cell_id)) {
+          runQueueChanges.runQueue = state.runQueue.filter((cell_id) => cell_id !== action.cell_id);
+        }
+      }
+
+      return {
+        ...state,
+        ...runQueueChanges,
+        isEditingCell: action.isMe ? false : state.isEditingCell,
+        cells: changesAreNewer
+          ? state.cells.update(action.cell_id, IMMUTABLE_BASE_CELL, (value) =>
+              value.merge(makeImmutableEditorCell(action.cell as EditorCell))
+            )
+          : state.cells,
       };
     }
     case CELL.EDIT.FAILURE:
