@@ -1,4 +1,5 @@
 import { combineReducers, createStore, applyMiddleware } from 'redux';
+import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
 import ReduxThunk from 'redux-thunk';
 
 import ReduxSocketClient from './middleware/ReduxSocketClient';
@@ -19,4 +20,7 @@ export const reducers = combineReducers({
 /**
  * The combined redux store with support for async actions
  */
-export default createStore(reducers, applyMiddleware(ReduxThunk, ReduxSocketClient(), ReduxKernel()));
+export default createStore(
+  reducers,
+  composeWithDevTools(applyMiddleware(ReduxThunk, ReduxSocketClient(), ReduxKernel()))
+);
