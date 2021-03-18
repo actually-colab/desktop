@@ -38,7 +38,7 @@ jobs:
 
       - name: Build desktop
         working-directory: ./desktop
-        id: build_desktop
+        id: build-desktop
         run: |
           echo "::set-output name=BUILD_OUTPUT::$(yarn build)"
 
@@ -51,5 +51,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '${{ steps.build_desktop.BUILD_OUTPUT }}'
+              body: '${{ steps.build-desktop.outputs.BUILD_OUTPUT }}'
             })
