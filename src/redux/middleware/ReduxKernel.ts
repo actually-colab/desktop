@@ -289,24 +289,20 @@ const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
             }
           };
 
-          await new Promise<void>((resolve) => {
-            future.onDone = () => {
-              resolve();
-            };
-          });
+          future.onDone = () => {
+            store.dispatch(
+              _editor.appendKernelLog({
+                status: threwError ? 'Error' : 'Success',
+                message: `Finished run #${runIndex} on cell ${action.cell.get('cell_id')}`,
+              })
+            );
 
-          store.dispatch(
-            _editor.appendKernelLog({
-              status: threwError ? 'Error' : 'Success',
-              message: `Finished run #${runIndex} on cell ${action.cell.get('cell_id')}`,
-            })
-          );
-
-          if (threwError) {
-            store.dispatch(_editor.executeCodeFailure(action.cell.get('cell_id'), runIndex, 'Code threw an error'));
-          } else {
-            store.dispatch(_editor.executeCodeSuccess(action.cell.get('cell_id'), runIndex));
-          }
+            if (threwError) {
+              store.dispatch(_editor.executeCodeFailure(action.cell.get('cell_id'), runIndex, 'Code threw an error'));
+            } else {
+              store.dispatch(_editor.executeCodeSuccess(action.cell.get('cell_id'), runIndex));
+            }
+          };
         })();
         break;
       }
