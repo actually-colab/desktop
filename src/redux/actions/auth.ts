@@ -2,6 +2,7 @@ import * as client from '@actually-colab/editor-client';
 
 import { AuthActionTypes, AuthAsyncActionTypes, LOAD_SESSION, SIGN_IN, SIGN_OUT } from '../../types/redux/auth';
 import { User } from '../../types/user';
+import { _editor } from '.';
 
 const signInStart = (): AuthActionTypes => ({
   type: SIGN_IN.START,
@@ -95,4 +96,5 @@ export const signOut = (): AuthAsyncActionTypes => async (dispatch) => {
   localStorage.removeItem('token');
 
   dispatch(signOutSuccess());
+  dispatch(_editor.disconnectFromKernel());
 };

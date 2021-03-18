@@ -1,5 +1,6 @@
-import { NOTIFICATION, UIActionTypes } from '../types/redux/ui';
+import { NOTIFICATION } from '../types/redux/ui';
 import { UINotification } from '../types/ui';
+import { ReduxActions } from './actions';
 
 /**
  * The UI redux state
@@ -18,7 +19,7 @@ const initialState: UIState = {
 /**
  * The UI reducer
  */
-const reducer = (state = initialState, action: UIActionTypes): UIState => {
+const reducer = (state = initialState, action: ReduxActions): UIState => {
   switch (action.type) {
     /**
      * Add a notification to the notification list

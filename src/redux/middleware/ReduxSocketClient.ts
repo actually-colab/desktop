@@ -2,7 +2,7 @@ import { Middleware } from 'redux';
 import { ActuallyColabSocketClient } from '@actually-colab/editor-client';
 
 import { ReduxState } from '../../types/redux';
-import { SIGN_IN } from '../../types/redux/auth';
+import { SIGN_IN, SIGN_OUT } from '../../types/redux/auth';
 import { CELL, NOTEBOOKS } from '../../types/redux/editor';
 import { httpToWebSocket } from '../../utils/request';
 import { cleanDCell } from '../../utils/notebook';
@@ -86,6 +86,11 @@ const ReduxSocketClient = (): Middleware<{}, ReduxState, any> => {
           console.log('Cell edited', dcell);
           store.dispatch(_editor.editCellSuccess(triggered_by === currentUser.uid, dcell.cell_id, cleanDCell(dcell)));
         });
+        break;
+      }
+      case SIGN_OUT.SUCCESS: {
+        client?.disconnectAndRemoveAllListeners();
+        client = null;
         break;
       }
 
