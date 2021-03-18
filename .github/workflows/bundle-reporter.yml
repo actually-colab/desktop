@@ -52,9 +52,13 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const build_output = `\`\`\`\n${{ steps.build-desktop.outputs.BUILD_OUTPUT }}\n\`\`\``
+            const start_selector = "File sizes after gzip:"
+            const end_selector = "The project was built assuming"
+
             github.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `\`\`\`\n${{ steps.build-desktop.outputs.BUILD_OUTPUT }}\n\`\`\``
+              body: build_output.substring(build_output.indexOf(start_selector) + start_selector.length, build_output.indexOf(end_selector))
             })
