@@ -1,5 +1,4 @@
 import React from 'react';
-import { differenceInMilliseconds } from 'date-fns';
 
 const MILLISECONDS_PER_HOUR = 3600000;
 const MILLISECONDS_PER_MINUTE = 60000;
@@ -13,7 +12,7 @@ const Timer: React.FC<{ active: boolean; alwaysRender?: boolean; nonce: string |
   alwaysRender = true,
   nonce,
 }) => {
-  const startTime = React.useRef<Date | null>(null);
+  const startTime = React.useRef<number | null>(null);
   const intervalRef = React.useRef<NodeJS.Timeout | null>(null);
 
   const [elapsedMilliseconds, setElapsedMilliseconds] = React.useState<number>(0);
@@ -48,15 +47,15 @@ const Timer: React.FC<{ active: boolean; alwaysRender?: boolean; nonce: string |
   React.useEffect(() => {
     if (active) {
       if (intervalRef.current === null) {
-        startTime.current = new Date();
+        startTime.current = Date.now();
         intervalRef.current = setInterval(() => {
-          setElapsedMilliseconds(differenceInMilliseconds(new Date(), startTime.current ?? new Date()));
+          setElapsedMilliseconds(startTime.current !== null ? Date.now() - startTime.current : 0);
         }, 500);
       }
     } else if (nonce !== null) {
       // Update the time upon finishing
       if (startTime.current !== null) {
-        setElapsedMilliseconds(differenceInMilliseconds(new Date(), startTime.current ?? new Date()));
+        setElapsedMilliseconds(startTime.current !== null ? Date.now() - startTime.current : 0);
       }
 
       // Clear the interval

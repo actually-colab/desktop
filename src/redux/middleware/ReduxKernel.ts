@@ -204,6 +204,8 @@ const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
             code: action.cell.get('contents'),
           });
 
+          const startTimestamp = Date.now();
+
           let runIndex = -1;
           let messageIndex = 0;
           const messageQueue: KernelOutput[] = [];
@@ -293,7 +295,9 @@ const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
             store.dispatch(
               _editor.appendKernelLog({
                 status: threwError ? 'Error' : 'Success',
-                message: `Finished run #${runIndex} on cell ${action.cell.get('cell_id')}`,
+                message: `Finished run #${runIndex} on cell ${action.cell.get('cell_id')} in ${
+                  (Date.now() - startTimestamp) / 1000
+                }s`,
               })
             );
 
