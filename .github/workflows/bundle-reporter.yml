@@ -56,5 +56,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '\`\`\`\n${{ steps.build-desktop.outputs.BUILD_OUTPUT }}\n\`\`\`'
+              body: '${{ steps.build-desktop.outputs.BUILD_OUTPUT }}'
             })
