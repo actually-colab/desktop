@@ -35,7 +35,7 @@ export const signIn = (token: string): AuthAsyncActionTypes => async (dispatch) 
   dispatch(signInStart());
 
   try {
-    const res = await client.devLogin('jeff@test.com', 'Jeff Taylor-Chang');
+    const res = await client.login(token);
 
     console.log('Signed in', res);
 
