@@ -1,8 +1,9 @@
 import React from 'react';
-import { differenceInSeconds } from 'date-fns';
+import { differenceInMilliseconds } from 'date-fns';
 
-const SECONDS_PER_HOUR = 3600;
-const SECONDS_PER_MINUTE = 60;
+const MILLISECONDS_PER_HOUR = 3600000;
+const MILLISECONDS_PER_MINUTE = 60000;
+const MILLISECONDS_PER_SECOND = 1000;
 
 /**
  * A basic timer component that counts from 0 up and renders hours, minutes, and seconds
@@ -15,18 +16,19 @@ const Timer: React.FC<{ active: boolean; alwaysRender?: boolean; nonce: string |
   const startTime = React.useRef<Date | null>(null);
   const intervalRef = React.useRef<NodeJS.Timeout | null>(null);
 
-  const [elapsedSeconds, setElapsedSeconds] = React.useState<number>(0);
+  const [elapsedMilliseconds, setElapsedMilliseconds] = React.useState<number>(0);
 
-  const hours = React.useMemo(() => Math.floor(elapsedSeconds / SECONDS_PER_HOUR), [elapsedSeconds]);
-  const minutes = React.useMemo(() => Math.floor((elapsedSeconds - hours * SECONDS_PER_HOUR) / SECONDS_PER_MINUTE), [
-    elapsedSeconds,
-    hours,
-  ]);
-  const seconds = React.useMemo(() => elapsedSeconds - hours * SECONDS_PER_HOUR - minutes * SECONDS_PER_MINUTE, [
-    elapsedSeconds,
-    hours,
-    minutes,
-  ]);
+  const hours = React.useMemo(() => Math.floor(elapsedMilliseconds / MILLISECONDS_PER_HOUR), [elapsedMilliseconds]);
+  const minutes = React.useMemo(
+    () => Math.floor((elapsedMilliseconds - hours * MILLISECONDS_PER_HOUR) / MILLISECONDS_PER_MINUTE),
+    [elapsedMilliseconds, hours]
+  );
+  const seconds = React.useMemo(
+    () =>
+      (elapsedMilliseconds - hours * MILLISECONDS_PER_HOUR - minutes * MILLISECONDS_PER_MINUTE) /
+      MILLISECONDS_PER_SECOND,
+    [elapsedMilliseconds, hours, minutes]
+  );
 
   const shouldRenderHours = React.useMemo(() => hours > 0, [hours]);
   const shouldRenderMinutes = React.useMemo(() => hours > 0 || minutes > 0, [hours, minutes]);
@@ -36,6 +38,9 @@ const Timer: React.FC<{ active: boolean; alwaysRender?: boolean; nonce: string |
     minutes,
     seconds,
   ]);
+  const renderFractionalSeconds = React.useMemo(() => elapsedMilliseconds < MILLISECONDS_PER_SECOND, [
+    elapsedMilliseconds,
+  ]);
 
   /**
    * Start and stop the timer based on the active flag
@@ -43,40 +48,30 @@ const Timer: React.FC<{ active: boolean; alwaysRender?: boolean; nonce: string |
   React.useEffect(() => {
     if (active) {
       if (intervalRef.current === null) {
-        console.log('Start');
         startTime.current = new Date();
         intervalRef.current = setInterval(() => {
-          console.log('Test');
-          setElapsedSeconds(differenceInSeconds(new Date(), startTime.current ?? new Date()));
-        }, 1000);
+          setElapsedMilliseconds(differenceInMilliseconds(new Date(), startTime.current ?? new Date()));
+        }, 500);
       }
-    } else {
-      console.log('Stop', intervalRef.current, startTime.current);
+    } else if (nonce !== null) {
+      // Update the time upon finishing
+      if (startTime.current !== null) {
+        setElapsedMilliseconds(differenceInMilliseconds(new Date(), startTime.current ?? new Date()));
+      }
+
+      // Clear the interval
       if (intervalRef.current !== null) {
         clearTimeout(intervalRef.current);
         intervalRef.current = null;
       }
     }
-  }, [active]);
+  }, [active, nonce]);
 
   /**
-   * Reset the timer based on the nonce
+   * Clear interval on unmount
    */
   React.useEffect(() => {
-    console.log(nonce);
-    if (nonce !== '' && nonce !== -1) {
-      if (intervalRef.current !== null) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-        startTime.current = null;
-      }
-    }
-  }, [nonce]);
-
-  React.useEffect(() => {
-    console.log('Mount');
     return () => {
-      console.log('unmount');
       if (intervalRef.current !== null) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
@@ -88,7 +83,7 @@ const Timer: React.FC<{ active: boolean; alwaysRender?: boolean; nonce: string |
     <code>
       {shouldRenderHours && `${hours}h`}
       {shouldRenderMinutes && `${minutes}m`}
-      {shouldRenderSeconds && `${seconds}s`}
+      {shouldRenderSeconds && `${renderFractionalSeconds ? seconds.toFixed(1) : Math.round(seconds)}s`}
     </code>
   );
 };
