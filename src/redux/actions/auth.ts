@@ -35,11 +35,17 @@ export const signIn = (token: string): AuthAsyncActionTypes => async (dispatch) 
   dispatch(signInStart());
 
   try {
-    const res = await client.login(token);
+    try {
+      const res = await client.login(token);
 
-    console.log('Signed in', res);
+      console.log('Signed in', res);
+      dispatch(signInSuccess(res.user, res.sessionToken));
+    } catch (_) {
+      const devRes = await client.devLogin('jeff@test.com', 'Jeff Taylor-Chang');
 
-    dispatch(signInSuccess(res.user, res.sessionToken));
+      console.warn('SIGNED IN FOR DEVELOPMENT ONLY. REMOVE ONCE SESSION REFRESH IS READY.');
+      dispatch(signInSuccess(devRes.user, devRes.sessionToken));
+    }
   } catch (error) {
     console.error(error);
     dispatch(signInFailure(error.message));
