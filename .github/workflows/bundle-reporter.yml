@@ -1,0 +1,64 @@
+name: Bundle Reporter
+
+on: pull_request
+
+jobs:
+  bundle-reporter:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.release.target_commitish }}
+          path: desktop
+
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.release.target_commitish }}
+          repository: actually-colab/editor
+          path: editor
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+
+      - name: Install editor client
+        working-directory: ./editor/client
+        run: yarn install
+
+      - name: Build editor client
+        working-directory: ./editor/client
+        run: yarn build
+
+      - name: Install dependencies
+        working-directory: ./desktop
+        run: yarn install
+
+      - name: Build desktop
+        working-directory: ./desktop
+        id: build-desktop
+        run: |
+          build_output="$(yarn build)"
+          echo "$build_output"
+          build_output="${build_output//'%'/'%25'}"
+          build_output="${build_output//$'\n'/'%0A'}"
+          build_output="${build_output//$'\r'/'%0D'}"
+          echo "::set-output name=BUILD_OUTPUT::$build_output"
+
+      - name: Comment on PR
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const build_output = `${{ steps.build-desktop.outputs.BUILD_OUTPUT }}`
+            const start_selector = "File sizes after gzip:"
+            const end_selector = "The project was built assuming"
+
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: "\`\`\`\n" + build_output.substring(build_output.indexOf(start_selector) + start_selector.length, build_output.indexOf(end_selector)) + "\n\`\`\`"
+            })
