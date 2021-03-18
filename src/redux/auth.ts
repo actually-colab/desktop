@@ -49,23 +49,35 @@ const initialState: AuthState = {
  */
 const reducer = (state = initialState, action: AuthActionTypes): AuthState => {
   switch (action.type) {
+    /**
+     * A session is successfully loaded from local storage
+     */
     case LOAD_SESSION.SUCCESS:
       return {
         ...state,
         isSessionLoaded: true,
         token: action.token,
       };
+    /**
+     * A session was not stored in local storage
+     */
     case LOAD_SESSION.FAILURE:
       return {
         ...state,
         isSessionLoaded: true,
       };
+    /**
+     * The user has started signing in
+     */
     case SIGN_IN.START:
       return {
         ...state,
         isSigningIn: true,
         signInErrorMessage: '',
       };
+    /**
+     * The user has signed in successfully
+     */
     case SIGN_IN.SUCCESS:
       return {
         ...state,
@@ -74,12 +86,18 @@ const reducer = (state = initialState, action: AuthActionTypes): AuthState => {
         user: action.user,
         token: action.token,
       };
+    /**
+     * The user failed to sign in
+     */
     case SIGN_IN.FAILURE:
       return {
         ...state,
         isSigningIn: false,
         signInErrorMessage: action.error.message,
       };
+    /**
+     * The user has signed out successfully
+     */
     case SIGN_OUT.SUCCESS:
       return {
         ...state,
