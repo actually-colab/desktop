@@ -5,6 +5,9 @@ import { UINotification } from '../types/ui';
  * The UI redux state
  */
 export interface UIState {
+  /**
+   * An array of notifications being displayed to the user
+   */
   notifications: UINotification[];
 }
 

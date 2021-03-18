@@ -5,13 +5,31 @@ import { User } from '../types/user';
  * The auth redux state
  */
 export interface AuthState {
+  /**
+   * If the session information has been loaded from local storage yet
+   */
   isSessionLoaded: boolean;
 
+  /**
+   * If the editor is currently signing in
+   */
   isSigningIn: boolean;
+  /**
+   * An error message if sign in fails
+   */
   signInErrorMessage: string;
 
+  /**
+   * If the user is currently authenticated
+   */
   isAuthenticated: boolean;
+  /**
+   * The user if the user is signed in, otherwise null
+   */
   user: User | null;
+  /**
+   * The session token if the user is signed in, otherwise the empty string
+   */
   token: string;
 }
 

@@ -31,41 +31,128 @@ import {
  * The editor redux state
  */
 export interface EditorState {
+  /**
+   * If the application should continuously try to connect to the kernel
+   */
   autoConnectToKernel: boolean;
+  /**
+   * If the user is currently editing the gateway URI. Should disable connecting to the kernel when this is happening
+   */
   isEditingGatewayUri: boolean;
 
+  /**
+   * If the editor is currently connecting to a kernel
+   */
   isConnectingToKernel: boolean;
+  /**
+   * If the editor is trying to reconnect to a kernel
+   */
   isReconnectingToKernel: boolean;
+  /**
+   * An error message if the kernel connection fails
+   */
   connectToKernelErrorMessage: string;
 
+  /**
+   * If the editor is currently fetching the latest notebooks
+   */
   isGettingNotebooks: boolean;
+  /**
+   * Error message if fetching the notebooks fails
+   */
   getNotebooksErrorMessage: string;
+  /**
+   * The timestamp of the last time the notebooks were fetched
+   */
   getNotebooksTimestamp: Date | null;
+  /**
+   * If the editor is creating a notebook
+   */
   isCreatingNotebook: boolean;
+  /**
+   * If the editor is opening a notebook
+   */
   isOpeningNotebook: boolean;
+  /**
+   * The `nb_id` of the notebook being opened
+   */
   openingNotebookId: string;
 
+  /**
+   * If the editor is currently adding a cell
+   */
   isAddingCell: boolean;
+  /**
+   * If the editor is currently deleting a cell
+   */
   isDeletingCell: boolean;
+  /**
+   * If the editor is currently editing a cell
+   */
   isEditingCell: boolean;
+  /**
+   * If the editor is currently executing a cell
+   */
   isExecutingCode: boolean;
 
+  /**
+   * The `cell_id` of the cell being locked
+   */
   lockingCellId: EditorCell['cell_id'];
+  /**
+   * The `cell_id` of the cell being unlocked
+   */
   unlockingCellId: EditorCell['cell_id'];
+  /**
+   * A list of locked cells and user ID's
+   */
   lockedCells: ImmutableList<ImmutableLock>;
 
+  /**
+   * The `cell_id` of the currently selected cell
+   */
   selectedCellId: EditorCell['cell_id'];
+  /**
+   * The latest execution count from the kernel
+   */
   executionCount: number;
+  /**
+   * The `cell_id` of the currently running code
+   */
   runningCellId: EditorCell['cell_id'];
+  /**
+   * A queue of `cell_id`'s to run on the kernel
+   */
   runQueue: ImmutableList<EditorCell['cell_id']>;
 
+  /**
+   * The URI of the kernel gateway
+   */
   gatewayUri: string;
+  /**
+   * The basic information of the connected kernel or null if there is none
+   */
   kernel: Kernel | null;
 
+  /**
+   * A list of notebooks the user has access to without their contents
+   */
   notebooks: ImmutableList<ImmutableNotebook>;
+  /**
+   * The currently open notebook with ordered `cell_id`'s
+   */
   notebook: ImmutableReducedNotebook | null;
+  /**
+   * A map of `cell_id`'s to cells in the currently open notebook
+   */
   cells: ImmutableMap<EditorCell['cell_id'], ImmutableEditorCell>;
+  /**
+   * A map of `cell_id`'s to outputs for each cell
+   */
   outputs: ImmutableMap<EditorCell['cell_id'], ImmutableList<ImmutableKernelOutput>>;
+  /**
+   * A list of logs from various kernel interactions
+   */
   logs: ImmutableList<ImmutableKernelLog>;
 }
 
