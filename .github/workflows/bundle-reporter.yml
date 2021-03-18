@@ -39,11 +39,12 @@ jobs:
       - name: Build desktop
         working-directory: ./desktop
         id: build_desktop
-        run: echo "##[set-output name=build;]$(yarn build)"
+        run: |
+          echo "::set-output name=BUILD_OUTPUT::$(yarn build)"
 
       - name: Comment
-        uses: unsplash/comment-on-pr@master
+        uses: unsplash/comment-on-pr@v1.2.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          msg: '${{ steps.build_desktop.build }}'
+          msg: '${{ steps.build_desktop.BUILD_OUTPUT }}'
