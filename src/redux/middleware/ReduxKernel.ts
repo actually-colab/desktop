@@ -31,7 +31,7 @@ const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
       case KERNEL.CONNECT.START: {
         if (kernel !== null) {
           console.error('Already connected to kernel');
-          return;
+          return; // Cancel the action
         }
 
         (async () => {
@@ -147,7 +147,7 @@ const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
       case KERNEL.DISCONNECT.START: {
         if (kernel === null) {
           console.error('Not connected to a kernel');
-          return;
+          return; // Cancel the action
         }
 
         (async () => {
@@ -178,7 +178,7 @@ const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
       case KERNEL.RESTART.START: {
         if (kernel === null) {
           console.error('Not connected to a kernel');
-          return;
+          return; // Cancel the action
         }
 
         (async () => {
@@ -196,7 +196,7 @@ const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
       case KERNEL.EXECUTE.START: {
         if (kernel === null) {
           console.error('Not connected to a kernel');
-          return;
+          return; // Cancel the action
         }
 
         (async () => {
@@ -313,7 +313,7 @@ const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
       case KERNEL.INTERRUPT.START: {
         if (kernel === null) {
           console.error('Not connected to a kernel');
-          return;
+          return; // Cancel the action
         }
 
         (async () => {
