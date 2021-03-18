@@ -15,7 +15,7 @@ import {
 import { User } from '../types/user';
 import { BASE_CELL } from '../constants/notebook';
 import { filterUndefined } from './filter';
-import { SPLIT_KEEP_NEWLINE } from './regex';
+import { splitKeepNewlines } from './regex';
 import { makeImmutableEditorCell, makeImmutableReducedNotebook } from './immutable/notebook';
 
 /**
@@ -115,7 +115,7 @@ const convertToIpynb = (
       ? {
           cell_type: 'markdown',
           metadata: {},
-          source: cell.get('contents').split(SPLIT_KEEP_NEWLINE),
+          source: splitKeepNewlines(cell.get('contents')),
         }
       : {
           cell_type: 'code',
@@ -132,7 +132,7 @@ const convertToIpynb = (
                 })
               )
               ?.toJS() ?? [],
-          source: cell.get('contents').split(SPLIT_KEEP_NEWLINE),
+          source: splitKeepNewlines(cell.get('contents')),
         }
   ),
 });
