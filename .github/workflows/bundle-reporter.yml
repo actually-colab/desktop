@@ -42,9 +42,14 @@ jobs:
         run: |
           echo "::set-output name=BUILD_OUTPUT::$(yarn build)"
 
-      - name: Comment
-        uses: unsplash/comment-on-pr@v1.2.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Comment on PR
+        uses: actions/github-script@v3
         with:
-          msg: '${{ steps.build_desktop.BUILD_OUTPUT }}'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '${{ steps.build_desktop.BUILD_OUTPUT }}'
+            })
