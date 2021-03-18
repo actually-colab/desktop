@@ -5,13 +5,31 @@ import { User } from '../types/user';
  * The auth redux state
  */
 export interface AuthState {
+  /**
+   * If the session information has been loaded from local storage yet
+   */
   isSessionLoaded: boolean;
 
+  /**
+   * If the editor is currently signing in
+   */
   isSigningIn: boolean;
+  /**
+   * An error message if sign in fails
+   */
   signInErrorMessage: string;
 
+  /**
+   * If the user is currently authenticated
+   */
   isAuthenticated: boolean;
+  /**
+   * The user if the user is signed in, otherwise null
+   */
   user: User | null;
+  /**
+   * The session token if the user is signed in, otherwise the empty string
+   */
   token: string;
 }
 
@@ -31,23 +49,35 @@ const initialState: AuthState = {
  */
 const reducer = (state = initialState, action: AuthActionTypes): AuthState => {
   switch (action.type) {
+    /**
+     * A session is successfully loaded from local storage
+     */
     case LOAD_SESSION.SUCCESS:
       return {
         ...state,
         isSessionLoaded: true,
         token: action.token,
       };
+    /**
+     * A session was not stored in local storage
+     */
     case LOAD_SESSION.FAILURE:
       return {
         ...state,
         isSessionLoaded: true,
       };
+    /**
+     * The user has started signing in
+     */
     case SIGN_IN.START:
       return {
         ...state,
         isSigningIn: true,
         signInErrorMessage: '',
       };
+    /**
+     * The user has signed in successfully
+     */
     case SIGN_IN.SUCCESS:
       return {
         ...state,
@@ -56,12 +86,18 @@ const reducer = (state = initialState, action: AuthActionTypes): AuthState => {
         user: action.user,
         token: action.token,
       };
+    /**
+     * The user failed to sign in
+     */
     case SIGN_IN.FAILURE:
       return {
         ...state,
         isSigningIn: false,
         signInErrorMessage: action.error.message,
       };
+    /**
+     * The user has signed out successfully
+     */
     case SIGN_OUT.SUCCESS:
       return {
         ...state,
