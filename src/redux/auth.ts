@@ -1,5 +1,6 @@
-import { AuthActionTypes, LOAD_SESSION, SIGN_IN, SIGN_OUT } from '../types/redux/auth';
+import { LOAD_SESSION, SIGN_IN, SIGN_OUT } from '../types/redux/auth';
 import { User } from '../types/user';
+import { ReduxActions } from './actions';
 
 /**
  * The auth redux state
@@ -47,7 +48,7 @@ const initialState: AuthState = {
 /**
  * The auth reducer
  */
-const reducer = (state = initialState, action: AuthActionTypes): AuthState => {
+const reducer = (state = initialState, action: ReduxActions): AuthState => {
   switch (action.type) {
     /**
      * A session is successfully loaded from local storage

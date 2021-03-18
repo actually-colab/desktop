@@ -1,6 +1,7 @@
 import { List as ImmutableList, Map as ImmutableMap } from 'immutable';
 
-import { CELL, EditorActionTypes, KERNEL, NOTEBOOKS } from '../types/redux/editor';
+import { CELL, KERNEL, NOTEBOOKS } from '../types/redux/editor';
+import { SIGN_OUT } from '../types/redux/auth';
 import {
   EditorCell,
   ImmutableEditorCell,
@@ -26,6 +27,7 @@ import {
   makeImmutableNotebook,
   makeImmutableReducedNotebook,
 } from '../utils/immutable/notebook';
+import { ReduxActions } from './actions';
 
 /**
  * The editor redux state
@@ -198,8 +200,13 @@ const initialState: EditorState = {
 /**
  * The editor reducer
  */
-const reducer = (state = initialState, action: EditorActionTypes): EditorState => {
+const reducer = (state = initialState, action: ReduxActions): EditorState => {
   switch (action.type) {
+    case SIGN_OUT.SUCCESS:
+      return {
+        ...initialState,
+      };
+
     /**
      * Append a log item to the kernel logs
      */
