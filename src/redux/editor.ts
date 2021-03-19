@@ -721,15 +721,26 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
     /**
      * Add a cell to the execution queue
      */
-    case KERNEL.EXECUTE.QUEUE:
+    case KERNEL.EXECUTE.QUEUE: {
+      // Do not add the currently running cell to the queue
+      if (state.runningCellId === action.cell_id) {
+        return state;
+      }
+
       return {
         ...state,
         runQueue: state.runQueue.filter((cell_id) => cell_id !== action.cell_id).push(action.cell_id),
       };
+    }
     /**
      * Started executing a given cell against the kernel
      */
-    case KERNEL.EXECUTE.START:
+    case KERNEL.EXECUTE.START: {
+      if (state.runningCellId !== '') {
+        console.error('Attempted to run a cell when one is already running!');
+        return state;
+      }
+
       return {
         ...state,
         kernel:
@@ -744,6 +755,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         runningCellId: action.cell.get('cell_id'),
         outputs: state.outputs.update(action.cell.get('cell_id'), ImmutableList(), (outputs) => outputs.clear()),
       };
+    }
     /**
      * Successfully executed a cell against the kernel
      */
