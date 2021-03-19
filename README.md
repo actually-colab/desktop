@@ -1,6 +1,14 @@
-# desktop
+<img src=".readme/img/header.png" width="100%">
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/8dd233ec-aeab-42f6-b94c-8966c12d2ce7/deploy-status)](https://app.netlify.com/sites/actually-colab-app/deploys) [![Validation](https://github.com/actually-colab/desktop/actions/workflows/validation.yml/badge.svg)](https://github.com/actually-colab/desktop/actions/workflows/validation.yml) [![Bundle Reporter](https://github.com/actually-colab/desktop/actions/workflows/bundle-reporter.yml/badge.svg)](https://github.com/actually-colab/desktop/actions/workflows/bundle-reporter.yml) ![GitHub](https://img.shields.io/github/license/actually-colab/desktop) [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/actually-colab/desktop.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/actually-colab/desktop/context:javascript) ![GitHub repo size](https://img.shields.io/github/repo-size/actually-colab/desktop) [![Lines of Code](https://tokei.rs/b1/github/actually-colab/desktop)](https://github.com/actually-colab/desktop) ![GitHub issues](https://img.shields.io/github/issues/actually-colab/desktop) ![GitHub closed issues](https://img.shields.io/github/issues-closed/actually-colab/desktop)
+<div align="center">
+
+[![Netlify Status](https://api.netlify.com/api/v1/badges/8dd233ec-aeab-42f6-b94c-8966c12d2ce7/deploy-status)](https://app.netlify.com/sites/actually-colab-app/deploys) [![Validation](https://github.com/actually-colab/desktop/actions/workflows/validation.yml/badge.svg)](https://github.com/actually-colab/desktop/actions/workflows/validation.yml) [![Bundle Reporter](https://github.com/actually-colab/desktop/actions/workflows/bundle-reporter.yml/badge.svg)](https://github.com/actually-colab/desktop/actions/workflows/bundle-reporter.yml) ![GitHub](https://img.shields.io/github/license/actually-colab/desktop) [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/actually-colab/desktop.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/actually-colab/desktop/context:javascript)
+
+![GitHub repo size](https://img.shields.io/github/repo-size/actually-colab/desktop) [![Lines of Code](https://tokei.rs/b1/github/actually-colab/desktop)](https://github.com/actually-colab/desktop) ![GitHub issues](https://img.shields.io/github/issues/actually-colab/desktop) ![GitHub closed issues](https://img.shields.io/github/issues-closed/actually-colab/desktop)
+
+</div>
+
+# desktop
 
 ### The Kernel Gateway
 
