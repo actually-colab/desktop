@@ -30,7 +30,7 @@ const signInFailure = (errorMessage: string): AuthActionTypes => {
 /**
  * Sign in with the given session token
  *
- * Intended for signing in from cached session, or signing in from an ID token
+ * Intended for signing in from cached session
  */
 export const refreshSessionToken = (sessionToken: string): AuthAsyncActionTypes => async (dispatch) => {
   dispatch(signInStart());
