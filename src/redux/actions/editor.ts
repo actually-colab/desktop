@@ -1,11 +1,10 @@
 import { format } from 'date-fns';
-import * as client from '@actually-colab/editor-client';
+import { DCell, Notebook, NotebookContents } from '@actually-colab/editor-client';
 
 import { CELL, EditorActionTypes, EditorAsyncActionTypes, KERNEL, NOTEBOOKS } from '../../types/redux/editor';
 import { User } from '../../types/user';
 import { EditorCell, EditorCellMeta, ImmutableEditorCell, KernelOutput } from '../../types/notebook';
 import { Kernel, KernelLog } from '../../types/kernel';
-import { _ui } from '.';
 
 /**
  * Add a new log message
@@ -121,12 +120,12 @@ const getNotebooksStart = (): EditorActionTypes => ({
   type: NOTEBOOKS.GET.START,
 });
 
-const getNotebooksSuccess = (notebooks: client.Notebook[]): EditorActionTypes => ({
+export const getNotebooksSuccess = (notebooks: Notebook[]): EditorActionTypes => ({
   type: NOTEBOOKS.GET.SUCCESS,
   notebooks,
 });
 
-const getNotebooksFailure = (errorMessage: string): EditorActionTypes => ({
+export const getNotebooksFailure = (errorMessage: string): EditorActionTypes => ({
   type: NOTEBOOKS.GET.FAILURE,
   error: {
     message: errorMessage,
@@ -138,35 +137,19 @@ const getNotebooksFailure = (errorMessage: string): EditorActionTypes => ({
  */
 export const getNotebooks = (): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(getNotebooksStart());
-
-  try {
-    const notebooks = await client.getNotebooksForUser();
-
-    dispatch(getNotebooksSuccess(notebooks));
-  } catch (error) {
-    console.error(error);
-    dispatch(getNotebooksFailure(error.message));
-    dispatch(
-      _ui.notify({
-        level: 'error',
-        title: 'Error',
-        message: 'Failed to get your notebooks!',
-        duration: 3000,
-      })
-    );
-  }
 };
 
-const createNotebookStart = (): EditorActionTypes => ({
+const createNotebookStart = (name: string): EditorActionTypes => ({
   type: NOTEBOOKS.CREATE.START,
+  name,
 });
 
-const createNotebookSuccess = (notebook: client.Notebook): EditorActionTypes => ({
+export const createNotebookSuccess = (notebook: Notebook): EditorActionTypes => ({
   type: NOTEBOOKS.CREATE.SUCCESS,
   notebook,
 });
 
-const createNotebookFailure = (errorMessage: string): EditorActionTypes => ({
+export const createNotebookFailure = (errorMessage: string): EditorActionTypes => ({
   type: NOTEBOOKS.CREATE.FAILURE,
   error: {
     message: errorMessage,
@@ -177,37 +160,20 @@ const createNotebookFailure = (errorMessage: string): EditorActionTypes => ({
  * Create a notebook with the given name
  */
 export const createNotebook = (name: string): EditorAsyncActionTypes => async (dispatch) => {
-  dispatch(createNotebookStart());
-
-  try {
-    const notebook = await client.createNotebook(name);
-
-    dispatch(createNotebookSuccess(notebook));
-  } catch (error) {
-    console.error(error);
-    dispatch(createNotebookFailure(error.message));
-    dispatch(
-      _ui.notify({
-        level: 'error',
-        title: 'Error',
-        message: 'Failed to create your notebook!',
-        duration: 3000,
-      })
-    );
-  }
+  dispatch(createNotebookStart(name));
 };
 
-const openNotebookStart = (nb_id: client.Notebook['nb_id']): EditorActionTypes => ({
+const openNotebookStart = (nb_id: Notebook['nb_id']): EditorActionTypes => ({
   type: NOTEBOOKS.OPEN.START,
   nb_id,
 });
 
-const openNotebookSuccess = (notebook: client.NotebookContents): EditorActionTypes => ({
+export const openNotebookSuccess = (notebook: NotebookContents): EditorActionTypes => ({
   type: NOTEBOOKS.OPEN.SUCCESS,
   notebook,
 });
 
-const openNotebookFailure = (errorMessage: string): EditorActionTypes => ({
+export const openNotebookFailure = (errorMessage: string): EditorActionTypes => ({
   type: NOTEBOOKS.OPEN.FAILURE,
   error: {
     message: errorMessage,
@@ -217,25 +183,8 @@ const openNotebookFailure = (errorMessage: string): EditorActionTypes => ({
 /**
  * Open the notebook with the given id
  */
-export const openNotebook = (nb_id: client.Notebook['nb_id']): EditorAsyncActionTypes => async (dispatch) => {
+export const openNotebook = (nb_id: Notebook['nb_id']): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(openNotebookStart(nb_id));
-
-  try {
-    const notebook = await client.getNotebookContents(nb_id);
-
-    dispatch(openNotebookSuccess(notebook));
-  } catch (error) {
-    console.error(error);
-    dispatch(openNotebookFailure(error.message));
-    dispatch(
-      _ui.notify({
-        level: 'error',
-        title: 'Error',
-        message: 'Failed to open your notebook!',
-        duration: 3000,
-      })
-    );
-  }
 };
 
 const lockCellStart = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
@@ -362,7 +311,7 @@ export const deleteCell = (cell_id: EditorCell['cell_id']): EditorAsyncActionTyp
 
 const editCellStart = (
   cell_id: EditorCell['cell_id'],
-  changes?: Partial<client.DCell>,
+  changes?: Partial<DCell>,
   metaChanges?: Partial<EditorCellMeta>
 ): EditorActionTypes => ({
   type: CELL.EDIT.START,
@@ -374,7 +323,7 @@ const editCellStart = (
 export const editCellSuccess = (
   isMe: boolean,
   cell_id: EditorCell['cell_id'],
-  cell: Required<client.DCell>
+  cell: Required<DCell>
 ): EditorActionTypes => ({
   type: CELL.EDIT.SUCCESS,
   isMe,
@@ -395,7 +344,7 @@ export const editCellFailure = (errorMessage: string): EditorActionTypes => {
  * Updates to DCell and Metadata properties
  */
 export type EditCellUpdates = {
-  changes?: Partial<client.DCell>;
+  changes?: Partial<DCell>;
   metaChanges?: Partial<EditorCellMeta>;
 };
 

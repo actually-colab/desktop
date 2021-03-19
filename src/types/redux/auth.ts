@@ -33,6 +33,8 @@ type LoadSessionFailureAction = {
 
 type SignInStartAction = {
   type: typeof SIGN_IN.START;
+  tokenType: 'id' | 'session';
+  token: string;
 };
 
 type SignInSuccessAction = {
