@@ -29,9 +29,9 @@ export interface AuthState {
    */
   user: User | null;
   /**
-   * The session token if the user is signed in, otherwise the empty string
+   * The session token if the user is signed in
    */
-  token: string;
+  sessionToken: string | null;
 }
 
 const initialState: AuthState = {
@@ -42,7 +42,7 @@ const initialState: AuthState = {
 
   isAuthenticated: false,
   user: null,
-  token: '',
+  sessionToken: null,
 };
 
 /**
@@ -57,7 +57,7 @@ const reducer = (state = initialState, action: ReduxActions): AuthState => {
       return {
         ...state,
         isSessionLoaded: true,
-        token: action.token,
+        sessionToken: action.sessionToken,
       };
     /**
      * A session was not stored in local storage
@@ -85,7 +85,7 @@ const reducer = (state = initialState, action: ReduxActions): AuthState => {
         isSigningIn: false,
         isAuthenticated: true,
         user: action.user,
-        token: action.token,
+        sessionToken: action.sessionToken,
       };
     /**
      * The user failed to sign in
@@ -104,7 +104,7 @@ const reducer = (state = initialState, action: ReduxActions): AuthState => {
         ...state,
         isAuthenticated: false,
         user: null,
-        token: '',
+        sessionToken: null,
       };
     default:
       return state;
