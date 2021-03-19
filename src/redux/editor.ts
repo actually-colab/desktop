@@ -606,11 +606,14 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       const runQueueChanges: Partial<EditorState> = {};
 
       // If a cell in the runQueue is no longer python, it should not be executed
-      if (action.changes.language === 'markdown') {
+      if (action.changes?.language === 'markdown') {
         if (state.runQueue.includes(action.cell_id)) {
           runQueueChanges.runQueue = state.runQueue.filter((cell_id) => cell_id !== action.cell_id);
         }
       }
+
+      // Only update the timestamp if actual DCell properties are changed
+      const shouldUpdateTimestamp = action.changes !== undefined;
 
       return {
         ...state,
@@ -620,7 +623,8 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
           value.merge(
             makeImmutableEditorCell({
               ...action.changes,
-              time_modified: Date.now(),
+              ...action.metaChanges,
+              time_modified: shouldUpdateTimestamp ? Date.now() : value.get('time_modified'),
             } as EditorCell)
           )
         ),

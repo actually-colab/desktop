@@ -3,7 +3,7 @@ import * as client from '@actually-colab/editor-client';
 
 import { CELL, EditorActionTypes, EditorAsyncActionTypes, KERNEL, NOTEBOOKS } from '../../types/redux/editor';
 import { User } from '../../types/user';
-import { EditorCell, ImmutableEditorCell, KernelOutput } from '../../types/notebook';
+import { EditorCell, EditorCellMeta, ImmutableEditorCell, KernelOutput } from '../../types/notebook';
 import { Kernel, KernelLog } from '../../types/kernel';
 import { _ui } from '.';
 
@@ -360,10 +360,15 @@ export const deleteCell = (cell_id: EditorCell['cell_id']): EditorAsyncActionTyp
   dispatch(deleteCellStart(cell_id));
 };
 
-const editCellStart = (cell_id: EditorCell['cell_id'], changes: Partial<EditorCell>): EditorActionTypes => ({
+const editCellStart = (
+  cell_id: EditorCell['cell_id'],
+  changes?: Partial<client.DCell>,
+  metaChanges?: Partial<EditorCellMeta>
+): EditorActionTypes => ({
   type: CELL.EDIT.START,
   cell_id,
   changes,
+  metaChanges,
 });
 
 export const editCellSuccess = (
@@ -387,13 +392,20 @@ export const editCellFailure = (errorMessage: string): EditorActionTypes => {
 };
 
 /**
+ * Updates to DCell and Metadata properties
+ */
+export type EditCellUpdates = {
+  changes?: Partial<client.DCell>;
+  metaChanges?: Partial<EditorCellMeta>;
+};
+
+/**
  * Edit a cell locally and make a debounced socket request to update it remotely
  */
-export const editCell = (
-  cell_id: EditorCell['cell_id'],
-  changes: Partial<EditorCell>
-): EditorAsyncActionTypes => async (dispatch) => {
-  dispatch(editCellStart(cell_id, changes));
+export const editCell = (cell_id: EditorCell['cell_id'], updates: EditCellUpdates): EditorAsyncActionTypes => async (
+  dispatch
+) => {
+  dispatch(editCellStart(cell_id, updates.changes, updates.metaChanges));
 };
 
 /**

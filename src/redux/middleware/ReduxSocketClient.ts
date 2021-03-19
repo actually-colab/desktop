@@ -140,7 +140,7 @@ const ReduxSocketClient = (): Middleware<{}, ReduxState, any> => {
         }
 
         // TODO: need to be able to change more than just contents
-        if (action.changes.contents !== undefined) {
+        if (action.changes?.contents !== undefined) {
           client?.editCell(notebook.get('nb_id'), action.cell_id, action.changes.contents);
         }
         break;
