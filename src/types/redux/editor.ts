@@ -186,6 +186,7 @@ type NotebooksGetFailureAction = {
 
 type NotebooksCreateStartAction = {
   type: typeof NOTEBOOKS.CREATE.START;
+  name: string;
 };
 
 type NotebooksCreateSuccessAction = {

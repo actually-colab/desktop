@@ -2,7 +2,7 @@ import { combineReducers, createStore, applyMiddleware } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
 import ReduxThunk from 'redux-thunk';
 
-import ReduxSocketClient from './middleware/ReduxSocketClient';
+import ReduxEditorClient from './middleware/ReduxEditorClient';
 import ReduxKernel from './middleware/ReduxKernel';
 import auth from './auth';
 import editor from './editor';
@@ -22,5 +22,5 @@ export const reducers = combineReducers({
  */
 export default createStore(
   reducers,
-  composeWithDevTools(applyMiddleware(ReduxThunk, ReduxSocketClient(), ReduxKernel()))
+  composeWithDevTools(applyMiddleware(ReduxThunk, ReduxEditorClient(), ReduxKernel()))
 );

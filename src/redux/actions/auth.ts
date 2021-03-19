@@ -1,14 +1,14 @@
-import * as client from '@actually-colab/editor-client';
-
 import { AuthActionTypes, AuthAsyncActionTypes, LOAD_SESSION, SIGN_IN, SIGN_OUT } from '../../types/redux/auth';
 import { User } from '../../types/user';
 import { _editor } from '.';
 
-const signInStart = (): AuthActionTypes => ({
+const signInStart = (tokenType: 'id' | 'session', token: string): AuthActionTypes => ({
   type: SIGN_IN.START,
+  tokenType,
+  token,
 });
 
-const signInSuccess = (user: User, sessionToken: string): AuthActionTypes => {
+export const signInSuccess = (user: User, sessionToken: string): AuthActionTypes => {
   localStorage.setItem('sessionToken', sessionToken);
 
   return {
@@ -18,7 +18,7 @@ const signInSuccess = (user: User, sessionToken: string): AuthActionTypes => {
   };
 };
 
-const signInFailure = (errorMessage: string): AuthActionTypes => {
+export const signInFailure = (errorMessage: string): AuthActionTypes => {
   return {
     type: SIGN_IN.FAILURE,
     error: {
@@ -33,17 +33,7 @@ const signInFailure = (errorMessage: string): AuthActionTypes => {
  * Intended for signing in from cached session
  */
 export const refreshSessionToken = (sessionToken: string): AuthAsyncActionTypes => async (dispatch) => {
-  dispatch(signInStart());
-
-  try {
-    const res = await client.refreshSessionToken(sessionToken);
-
-    console.log('Signed in', res);
-    dispatch(signInSuccess(res.user, res.sessionToken));
-  } catch (error) {
-    console.error(error);
-    dispatch(signInFailure(error.message));
-  }
+  dispatch(signInStart('session', sessionToken));
 };
 
 const loadSessionSuccess = (sessionToken: string): AuthActionTypes => ({
@@ -75,17 +65,7 @@ export const loadSession = (): AuthAsyncActionTypes => async (dispatch) => {
  * Sign in with the google token
  */
 export const googleSignIn = (idToken: string): AuthAsyncActionTypes => async (dispatch) => {
-  dispatch(signInStart());
-
-  try {
-    const res = await client.loginWithGoogleIdToken(idToken);
-
-    console.log('Signed in', res);
-    dispatch(signInSuccess(res.user, res.sessionToken));
-  } catch (error) {
-    console.error(error);
-    dispatch(signInFailure(error.message));
-  }
+  dispatch(signInStart('id', idToken));
 };
 
 const signOutSuccess = (): AuthActionTypes => ({
