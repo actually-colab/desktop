@@ -60,7 +60,9 @@ const styles = StyleSheet.create({
  */
 const AuthPage: React.FC = () => {
   const dispatch = useDispatch();
-  const dispatchGoogleSignIn = React.useCallback((token: string) => dispatch(_auth.googleSignIn(token)), [dispatch]);
+  const dispatchGoogleSignIn = React.useCallback((idToken: string) => dispatch(_auth.googleSignIn(idToken)), [
+    dispatch,
+  ]);
 
   const onGoogleSignInSuccess = React.useCallback(
     (payload: GoogleLoginResponse) => {

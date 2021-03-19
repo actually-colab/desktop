@@ -32,7 +32,7 @@ const ReduxSocketClient = (): Middleware<{}, ReduxState, any> => {
       case SIGN_IN.SUCCESS: {
         client = new ActuallyColabSocketClient({
           baseURL,
-          sessionToken: action.token,
+          sessionToken: action.sessionToken,
         });
 
         client.on('connect', () => {

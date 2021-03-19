@@ -24,7 +24,7 @@ type ActionError = {
 
 type LoadSessionSuccessAction = {
   type: typeof LOAD_SESSION.SUCCESS;
-  token: string;
+  sessionToken: string;
 };
 
 type LoadSessionFailureAction = {
@@ -38,7 +38,7 @@ type SignInStartAction = {
 type SignInSuccessAction = {
   type: typeof SIGN_IN.SUCCESS;
   user: User;
-  token: string;
+  sessionToken: string;
 };
 
 type SignInFailureAction = {

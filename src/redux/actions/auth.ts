@@ -8,13 +8,13 @@ const signInStart = (): AuthActionTypes => ({
   type: SIGN_IN.START,
 });
 
-const signInSuccess = (user: User, token: string): AuthActionTypes => {
-  localStorage.setItem('token', token);
+const signInSuccess = (user: User, sessionToken: string): AuthActionTypes => {
+  localStorage.setItem('sessionToken', sessionToken);
 
   return {
     type: SIGN_IN.SUCCESS,
     user,
-    token,
+    sessionToken,
   };
 };
 
@@ -32,30 +32,23 @@ const signInFailure = (errorMessage: string): AuthActionTypes => {
  *
  * Intended for signing in from cached session, or signing in from an ID token
  */
-export const signIn = (token: string): AuthAsyncActionTypes => async (dispatch) => {
+export const refreshSessionToken = (sessionToken: string): AuthAsyncActionTypes => async (dispatch) => {
   dispatch(signInStart());
 
   try {
-    try {
-      const res = await client.login(token);
+    const res = await client.refreshSessionToken(sessionToken);
 
-      console.log('Signed in', res);
-      dispatch(signInSuccess(res.user, res.sessionToken));
-    } catch (_) {
-      const devRes = await client.devLogin('jeff@test.com', 'Jeff Taylor-Chang');
-
-      console.warn('SIGNED IN FOR DEVELOPMENT ONLY. REMOVE ONCE SESSION REFRESH IS READY.');
-      dispatch(signInSuccess(devRes.user, devRes.sessionToken));
-    }
+    console.log('Signed in', res);
+    dispatch(signInSuccess(res.user, res.sessionToken));
   } catch (error) {
     console.error(error);
     dispatch(signInFailure(error.message));
   }
 };
 
-const loadSessionSuccess = (token: string): AuthActionTypes => ({
+const loadSessionSuccess = (sessionToken: string): AuthActionTypes => ({
   type: LOAD_SESSION.SUCCESS,
-  token,
+  sessionToken,
 });
 
 const loadSessionFailure = (): AuthActionTypes => ({
@@ -66,13 +59,13 @@ const loadSessionFailure = (): AuthActionTypes => ({
  * Try to load the saved session from storage
  */
 export const loadSession = (): AuthAsyncActionTypes => async (dispatch) => {
-  const token = localStorage.getItem('token');
+  const sessionToken = localStorage.getItem('sessionToken');
 
-  console.log('Local storage session', { token });
+  console.log('Local storage session', { sessionToken });
 
-  if (token) {
-    dispatch(loadSessionSuccess(token));
-    dispatch(signIn(token));
+  if (sessionToken) {
+    dispatch(loadSessionSuccess(sessionToken));
+    dispatch(refreshSessionToken(sessionToken));
   } else {
     dispatch(loadSessionFailure());
   }
@@ -81,8 +74,18 @@ export const loadSession = (): AuthAsyncActionTypes => async (dispatch) => {
 /**
  * Sign in with the google token
  */
-export const googleSignIn = (token: string): AuthAsyncActionTypes => async (dispatch) => {
-  dispatch(signIn(token));
+export const googleSignIn = (idToken: string): AuthAsyncActionTypes => async (dispatch) => {
+  dispatch(signInStart());
+
+  try {
+    const res = await client.loginWithGoogleIdToken(idToken);
+
+    console.log('Signed in', res);
+    dispatch(signInSuccess(res.user, res.sessionToken));
+  } catch (error) {
+    console.error(error);
+    dispatch(signInFailure(error.message));
+  }
 };
 
 const signOutSuccess = (): AuthActionTypes => ({
@@ -93,7 +96,7 @@ const signOutSuccess = (): AuthActionTypes => ({
  * Clear session information
  */
 export const signOut = (): AuthAsyncActionTypes => async (dispatch) => {
-  localStorage.removeItem('token');
+  localStorage.removeItem('sessionToken');
 
   dispatch(signOutSuccess());
   dispatch(_editor.disconnectFromKernel());
