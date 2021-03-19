@@ -10,4 +10,9 @@ const buildLocalStorage = (key: string) => ({
 /**
  * Store the session token
  */
-export const SessionStorage = buildLocalStorage('auth.sessionToken');
+export const SessionTokenStorage = buildLocalStorage('auth.sessionToken');
+
+/**
+ * Store the most recently opened notebook
+ */
+export const LatestNotebookIdStorage = buildLocalStorage('editor.notebook.latest.nb_id');

@@ -6,6 +6,7 @@ import { SIGN_IN, SIGN_OUT } from '../../types/redux/auth';
 import { CELL, NOTEBOOKS } from '../../types/redux/editor';
 import { httpToWebSocket } from '../../utils/request';
 import { cleanDCell } from '../../utils/notebook';
+import { LatestNotebookIdStorage } from '../../utils/storage';
 import { syncSleep } from '../../utils/sleep';
 import { ReduxActions, _auth, _editor, _ui } from '../actions';
 
@@ -106,6 +107,9 @@ const ReduxEditorClient = (): Middleware<{}, ReduxState, any> => {
       case SIGN_OUT.SUCCESS: {
         socketClient?.disconnectAndRemoveAllListeners();
         socketClient = null;
+
+        // Clear most recent notebook
+        LatestNotebookIdStorage.remove();
         break;
       }
 
@@ -115,6 +119,15 @@ const ReduxEditorClient = (): Middleware<{}, ReduxState, any> => {
             const notebooks = await restClient.getNotebooksForUser();
 
             store.dispatch(_editor.getNotebooksSuccess(notebooks));
+
+            // If no notebook is open, automatically open the most recent
+            if (store.getState().editor.notebook === null && !store.getState().editor.isOpeningNotebook) {
+              const mostRecentNotebookId = LatestNotebookIdStorage.get();
+
+              if (mostRecentNotebookId && notebooks.find((notebook) => notebook.nb_id === mostRecentNotebookId)) {
+                store.dispatch(_editor.openNotebook(mostRecentNotebookId));
+              }
+            }
           } catch (error) {
             console.error(error);
             store.dispatch(_editor.getNotebooksFailure(error.message));
@@ -159,6 +172,9 @@ const ReduxEditorClient = (): Middleware<{}, ReduxState, any> => {
 
           try {
             const notebook = await restClient.getNotebookContents(action.nb_id);
+
+            // Remember the most recently opened notebook
+            LatestNotebookIdStorage.set(notebook.nb_id);
 
             store.dispatch(_editor.openNotebookSuccess(notebook));
           } catch (error) {

@@ -1,6 +1,6 @@
 import { AuthActionTypes, AuthAsyncActionTypes, LOAD_SESSION, SIGN_IN, SIGN_OUT } from '../../types/redux/auth';
 import { User } from '../../types/user';
-import { SessionStorage } from '../../utils/storage';
+import { SessionTokenStorage } from '../../utils/storage';
 import { _editor } from '.';
 
 const signInStart = (tokenType: 'id' | 'session', token: string): AuthActionTypes => ({
@@ -10,7 +10,7 @@ const signInStart = (tokenType: 'id' | 'session', token: string): AuthActionType
 });
 
 export const signInSuccess = (user: User, sessionToken: string): AuthActionTypes => {
-  SessionStorage.set(sessionToken);
+  SessionTokenStorage.set(sessionToken);
 
   return {
     type: SIGN_IN.SUCCESS,
@@ -50,7 +50,7 @@ const loadSessionFailure = (): AuthActionTypes => ({
  * Try to load the saved session from storage
  */
 export const loadSession = (): AuthAsyncActionTypes => async (dispatch) => {
-  const sessionToken = SessionStorage.get();
+  const sessionToken = SessionTokenStorage.get();
 
   console.log('Local storage session', { sessionToken });
 
@@ -77,7 +77,7 @@ const signOutSuccess = (): AuthActionTypes => ({
  * Clear session information
  */
 export const signOut = (): AuthAsyncActionTypes => async (dispatch) => {
-  SessionStorage.remove();
+  SessionTokenStorage.remove();
 
   dispatch(signOutSuccess());
   dispatch(_editor.disconnectFromKernel());
