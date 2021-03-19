@@ -36,7 +36,7 @@
     "format": "prettier --config .prettierrc.js --write \"**/*.{ts,js,tsx,css,html,md}\"",
     "lint": "eslint --config ./.eslintrc.js --ext .js,.ts,.jsx,.tsx src/",
     "lint:aggressive": "eslint --config ./.eslintrc.aggressive.js --ext .js,.ts,.jsx,.tsx src/",
-    "validate": "yarn tsc --noEmit",
+    "validate": "yarn tsc --project ./tsconfig.json --noEmit",
     "analyze": "yarn build && source-map-explorer build/static/js/*.js"
   },
   "dependencies": {
