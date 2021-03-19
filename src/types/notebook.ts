@@ -28,10 +28,7 @@ export type KernelOutput = BaseKernelOutput & {
 
 export type ImmutableKernelOutput = ImmutableObject<KernelOutput>;
 
-/**
- * An editor cell in a notebook
- */
-export type EditorCell = Required<DCell> & {
+export type EditorCellMeta = {
   /**
    * If the cell is markdown, this indicates if the markdown is rendered or editable
    */
@@ -41,6 +38,11 @@ export type EditorCell = Required<DCell> & {
    */
   runIndex: number;
 };
+
+/**
+ * An editor cell in a notebook
+ */
+export type EditorCell = Required<DCell> & EditorCellMeta;
 
 export type ImmutableEditorCell = ImmutableObject<EditorCell>;
 

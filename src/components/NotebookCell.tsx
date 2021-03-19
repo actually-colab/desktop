@@ -139,14 +139,20 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
     user,
   ]);
   const dispatchEditCell = React.useCallback(
-    (cell_id: EditorCell['cell_id'], changes: Partial<EditorCell>) => dispatch(_editor.editCell(cell_id, changes)),
+    (cell_id: EditorCell['cell_id'], updates: _editor.EditCellUpdates) => dispatch(_editor.editCell(cell_id, updates)),
     [dispatch]
   );
   const dispatchEditMarkdownCell = React.useCallback(
     () =>
       cell.get('language') === 'markdown' &&
       cell.get('rendered') &&
-      dispatch(_editor.editCell(cell.get('cell_id'), { rendered: false })),
+      dispatch(
+        _editor.editCell(cell.get('cell_id'), {
+          metaChanges: {
+            rendered: false,
+          },
+        })
+      ),
     [cell, dispatch]
   );
 
@@ -169,7 +175,15 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
     if (cell.get('language') === 'python') {
       dispatch(_editor.addCellToQueue(cell));
     } else {
-      dispatch(_editor.editCell(cell.get('cell_id'), { rendered: true }));
+      if (!cell.get('rendered')) {
+        dispatch(
+          _editor.editCell(cell.get('cell_id'), {
+            metaChanges: {
+              rendered: true,
+            },
+          })
+        );
+      }
     }
 
     dispatch(_editor.selectCell(cell.get('cell_id')));
@@ -179,7 +193,9 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
   const onChange = React.useCallback(
     (cell_id: string, newValue: string) => {
       dispatchEditCell(cell_id, {
-        contents: newValue,
+        changes: {
+          contents: newValue,
+        },
       });
     },
     [dispatchEditCell]

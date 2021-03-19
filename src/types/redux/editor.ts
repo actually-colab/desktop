@@ -3,7 +3,7 @@ import { ThunkAction } from 'redux-thunk';
 import { DCell, Notebook, NotebookContents } from '@actually-colab/editor-client';
 
 import { User } from '../user';
-import { EditorCell, ImmutableEditorCell, KernelOutput } from '../notebook';
+import { EditorCell, EditorCellMeta, ImmutableEditorCell, KernelOutput } from '../notebook';
 import { Kernel, KernelLog } from '../kernel';
 
 export const KERNEL = {
@@ -294,7 +294,8 @@ type MoveCellFailureAction = {
 type EditCellStartAction = {
   type: typeof CELL.EDIT.START;
   cell_id: EditorCell['cell_id'];
-  changes: Partial<EditorCell>;
+  changes?: Partial<DCell>;
+  metaChanges?: Partial<EditorCellMeta>;
 };
 
 type EditCellSuccessAction = {

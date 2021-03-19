@@ -83,7 +83,7 @@ const EditorHeader: React.FC = () => {
     lockedCellId,
   ]);
   const dispatchEditCell = React.useCallback(
-    (cell_id: EditorCell['cell_id'], changes: Partial<EditorCell>) => dispatch(_editor.editCell(cell_id, changes)),
+    (cell_id: EditorCell['cell_id'], updates: _editor.EditCellUpdates) => dispatch(_editor.editCell(cell_id, updates)),
     [dispatch]
   );
   const onClickPlayNext = React.useCallback(() => {
@@ -94,7 +94,15 @@ const EditorHeader: React.FC = () => {
     if (selectedCell.get('language') === 'python') {
       dispatch(_editor.addCellToQueue(selectedCell));
     } else {
-      dispatch(_editor.editCell(selectedCell.get('cell_id'), { rendered: true }));
+      if (!selectedCell.get('rendered')) {
+        dispatch(
+          _editor.editCell(selectedCell.get('cell_id'), {
+            metaChanges: {
+              rendered: true,
+            },
+          })
+        );
+      }
     }
 
     dispatch(_editor.selectNextCell());
@@ -107,7 +115,9 @@ const EditorHeader: React.FC = () => {
   const handleLanguageSelect = React.useCallback(
     (eventKey: EditorCell['language']) => {
       dispatchEditCell(lockedCellId, {
-        language: eventKey,
+        changes: {
+          language: eventKey,
+        },
       });
     },
     [dispatchEditCell, lockedCellId]
