@@ -63,6 +63,7 @@ export const reduceNotebookContents = (notebook: NotebookContents): ReducedNoteb
 export const cleanDCell = (cell: DCell): Required<DCell> => {
   return {
     ...cell,
+    cursor_pos: cell.cursor_pos ?? null,
     lock_held_by: cell.lock_held_by ?? '',
   };
 };

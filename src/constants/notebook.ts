@@ -10,6 +10,7 @@ export const BASE_CELL: EditorCell = {
   position: -1,
   time_modified: -1,
   lock_held_by: '',
+  cursor_pos: null,
   language: 'python',
   rendered: true,
   runIndex: -1,
