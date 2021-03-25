@@ -1,13 +1,10 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { StyleSheet, css } from 'aphrodite';
 import { Button, Icon } from 'rsuite';
 
 import { spacing } from '../../../constants/theme';
 import { ReduxState } from '../../../types/redux';
 import { download } from '../../../utils/notebook';
-
-const styles = StyleSheet.create({});
 
 /**
  * The Downloads panel for the right sidebar
