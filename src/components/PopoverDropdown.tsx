@@ -67,8 +67,7 @@ const PopoverDropdown: React.FC<PopoverDropdownProps> = ({
       >
         <Button
           {...{
-            appearance: 'subtle',
-            size: 'md',
+            size: 'sm',
             style: { alignSelf: 'flex-start' },
             ...buttonProps,
           }}

@@ -8,7 +8,7 @@ import { ReduxState } from '../../../types/redux';
 import { _editor } from '../../../redux/actions';
 import { EditorCell } from '../../../types/notebook';
 import useKernelStatus from '../../../kernel/useKernelStatus';
-import { ColoredIconButton, Header, PopoverDropdown, StatusIndicator, UserAvatar } from '../../../components';
+import { Header, PopoverDropdown, RegularIconButton, StatusIndicator, UserAvatar } from '../../../components';
 import { StatusIndicatorProps } from '../../../components/StatusIndicator';
 
 const styles = StyleSheet.create({
@@ -137,7 +137,7 @@ const EditorHeader: React.FC = () => {
     <Header>
       <div className={css(styles.header)}>
         <div className={css(styles.headerNoDrag)}>
-          <ColoredIconButton
+          <RegularIconButton
             size="sm"
             icon="step-forward"
             tooltipText="Run and advance"
@@ -145,7 +145,7 @@ const EditorHeader: React.FC = () => {
             disabled={!kernelIsConnected && selectedCell?.get('language') !== 'markdown'}
             onClick={onClickPlayNext}
           />
-          <ColoredIconButton
+          <RegularIconButton
             size="sm"
             icon="stop"
             tooltipText="Interrupt the kernel"
@@ -156,7 +156,7 @@ const EditorHeader: React.FC = () => {
 
           <Divider vertical />
 
-          <ColoredIconButton
+          <RegularIconButton
             size="sm"
             icon="plus"
             tooltipText="Create a new cell"
@@ -164,7 +164,7 @@ const EditorHeader: React.FC = () => {
             loading={isAddingCell}
             onClick={() => dispatchAddCell(-1)}
           />
-          <ColoredIconButton
+          <RegularIconButton
             size="sm"
             icon="arrow-up2"
             tooltipText="Move the cell up"
@@ -173,7 +173,7 @@ const EditorHeader: React.FC = () => {
             disabled={true}
             onClick={() => console.log('TODO')}
           />
-          <ColoredIconButton
+          <RegularIconButton
             size="sm"
             icon="arrow-down2"
             tooltipText="Move the cell down"
@@ -197,7 +197,7 @@ const EditorHeader: React.FC = () => {
 
           <Divider vertical />
 
-          <ColoredIconButton
+          <RegularIconButton
             size="sm"
             icon="trash2"
             tooltipText="Delete the current cell"

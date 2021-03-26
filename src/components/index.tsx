@@ -8,6 +8,7 @@ import MarkdownCell from './MarkdownCell';
 import NotebookCell from './NotebookCell';
 import OutputCell from './OutputCell';
 import PopoverDropdown from './PopoverDropdown';
+import RegularIconButton from './RegularIconButton';
 import StatusIndicator from './StatusIndicator';
 import Timer from './Timer';
 import UserAvatar from './UserAvatar';
@@ -23,6 +24,7 @@ export {
   NotebookCell,
   OutputCell,
   PopoverDropdown,
+  RegularIconButton,
   StatusIndicator,
   Timer,
   UserAvatar,
