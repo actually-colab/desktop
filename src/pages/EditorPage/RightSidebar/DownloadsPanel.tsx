@@ -42,7 +42,7 @@ const DownloadsPanel: React.FC = () => {
       </p>
 
       <Button appearance="ghost" block disabled={!isDownloadSupported} onClick={onClickDownload}>
-        <Icon icon="download2" style={{ marginRight: spacing.DEFAULT / 2 }} />
+        <Icon icon="file-download" size="lg" style={{ marginRight: spacing.DEFAULT / 2 }} />
         Download Notebook
       </Button>
     </div>
