@@ -33,6 +33,9 @@ const ReduxEditorClient = (): Middleware<{}, ReduxState, any> => {
 
   return (store) => (next) => (action: ReduxActions) => {
     switch (action.type) {
+      /**
+       * The user has started signing in
+       */
       case SIGN_IN.START: {
         (async () => {
           try {
@@ -49,6 +52,9 @@ const ReduxEditorClient = (): Middleware<{}, ReduxState, any> => {
         })();
         break;
       }
+      /**
+       * The user has signed in successfully
+       */
       case SIGN_IN.SUCCESS: {
         socketClient = new ActuallyColabSocketClient(baseSocketURL, action.sessionToken);
 
@@ -105,6 +111,9 @@ const ReduxEditorClient = (): Middleware<{}, ReduxState, any> => {
         });
         break;
       }
+      /**
+       * The user has signed out successfully
+       */
       case SIGN_OUT.SUCCESS: {
         socketClient?.disconnectAndRemoveAllListeners();
         socketClient = null;
@@ -114,6 +123,9 @@ const ReduxEditorClient = (): Middleware<{}, ReduxState, any> => {
         break;
       }
 
+      /**
+       * Started fetching the user's notebooks
+       */
       case NOTEBOOKS.GET.START: {
         (async () => {
           try {
@@ -152,6 +164,9 @@ const ReduxEditorClient = (): Middleware<{}, ReduxState, any> => {
         break;
       }
 
+      /**
+       * Started creating a notebook
+       */
       case NOTEBOOKS.CREATE.START: {
         (async () => {
           try {
@@ -174,6 +189,9 @@ const ReduxEditorClient = (): Middleware<{}, ReduxState, any> => {
         break;
       }
 
+      /**
+       * Started opening a given notebook
+       */
       case NOTEBOOKS.OPEN.START: {
         (async () => {
           socketClient?.openNotebook(action.nb_id);
@@ -201,6 +219,9 @@ const ReduxEditorClient = (): Middleware<{}, ReduxState, any> => {
         break;
       }
 
+      /**
+       * Started adding a new cell
+       */
       case CELL.ADD.START: {
         const notebook = store.getState().editor.notebook;
         if (notebook === null) {
@@ -212,11 +233,17 @@ const ReduxEditorClient = (): Middleware<{}, ReduxState, any> => {
         break;
       }
 
+      /**
+       * Started deleting a cell
+       */
       case CELL.DELETE.START: {
         // TODO: delete cell
         break;
       }
 
+      /**
+       * Started locking a given cell
+       */
       case CELL.LOCK.START: {
         const notebook = store.getState().editor.notebook;
         if (notebook === null) {
@@ -228,6 +255,9 @@ const ReduxEditorClient = (): Middleware<{}, ReduxState, any> => {
         break;
       }
 
+      /**
+       * Started to unlock a cell
+       */
       case CELL.UNLOCK.START: {
         const notebook = store.getState().editor.notebook;
         if (notebook === null) {
@@ -239,6 +269,11 @@ const ReduxEditorClient = (): Middleware<{}, ReduxState, any> => {
         break;
       }
 
+      /**
+       * Started editing a cell.
+       *
+       * Edit request is debounced so success will be delayed
+       */
       case CELL.EDIT.START: {
         const notebook = store.getState().editor.notebook;
         if (notebook === null) {
