@@ -19,7 +19,6 @@ import { KernelPanel, ProjectsPanel } from '../LeftSidebar';
 
 const styles = StyleSheet.create({
   container: {
-    width: LEFT_SIDEBAR_WIDTH,
     display: 'flex',
     flexDirection: 'column',
     backgroundColor: palette.BASE_FADED,
