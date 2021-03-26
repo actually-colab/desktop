@@ -42,6 +42,8 @@ const styles = StyleSheet.create({
     marginBottom: spacing.DEFAULT,
   },
   projectListHeader: {
+    marginLeft: -spacing.DEFAULT / 2,
+    marginRight: -spacing.DEFAULT / 2,
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
@@ -49,7 +51,37 @@ const styles = StyleSheet.create({
   },
   sortText: {},
   project: {
-    marginBottom: spacing.DEFAULT / 2,
+    marginLeft: -spacing.DEFAULT / 2,
+    marginRight: -spacing.DEFAULT / 2,
+    marginBottom: spacing.DEFAULT / 4,
+  },
+  projectButton: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  projectActive: {
+    background: palette.PRIMARY_LIGHT,
+    color: palette.PRIMARY,
+  },
+  projectTitleContainer: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  projectTitle: {
+    marginLeft: spacing.DEFAULT / 2,
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
+  },
+  lastModifiedText: {
+    marginLeft: spacing.DEFAULT / 4,
+    color: palette.GRAY,
   },
 });
 
@@ -146,30 +178,26 @@ const ProjectsPanel: React.FC = () => {
         />
       </div>
 
-      {notebooks.map((project) => (
-        <div key={project.get('nb_id')} className={css(styles.project)}>
-          <Button
-            block
-            style={{
-              textAlign: 'left',
-              ...(project.get('nb_id') === notebook?.get('nb_id')
-                ? {
-                    background: palette.PRIMARY_LIGHT,
-                    color: palette.PRIMARY,
-                  }
-                : {}),
-            }}
-            loading={project.get('nb_id') === openingNotebookId}
-            onClick={() =>
-              !isOpeningNotebook &&
-              project.get('nb_id') !== notebook?.get('nb_id') &&
-              dispatchOpenNotebook(project.get('nb_id'))
-            }
-          >
-            {project.get('name')}
-          </Button>
-        </div>
-      ))}
+      {notebooks.map((project) => {
+        const active = project.get('nb_id') === notebook?.get('nb_id');
+
+        return (
+          <div key={project.get('nb_id')} className={css(styles.project)}>
+            <Button
+              block
+              className={css(styles.projectButton, active && styles.projectActive)}
+              loading={project.get('nb_id') === openingNotebookId}
+              onClick={() => !isOpeningNotebook && !active && dispatchOpenNotebook(project.get('nb_id'))}
+            >
+              <div className={css(styles.projectTitleContainer)}>
+                <Icon icon={active ? 'file' : 'file-o'} />
+                <span className={css(styles.projectTitle)}>{project.get('name')}</span>
+              </div>
+              <span className={css(styles.lastModifiedText)}>10m</span>
+            </Button>
+          </div>
+        );
+      })}
 
       <Modal
         size="xs"
