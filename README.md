@@ -10,6 +10,12 @@
 
 # desktop
 
+## Motivation
+
+The tools available for real time collaboration between individuals or small teams are often lacking or expensive. Our goal is to build a lightweight collaborative cloud-based Jupyter editor to allow individuals and teams to work on notebooks without the high price tag. The system should "just work" with minimal setup overhead and allow users to collaborate on projects anytime, anywhere. Rather than trying to build a full environment to execute code, we allow you to bring your own compute. You can execute code against your local machine or configure the editor to connect to a remote server if you need more horsepower. By allowing you to bring your own compute, we can focus on delivering a better collaboration experience without high costs. We build the editor from the ground up to create an experience that is familiar to Jupyter users but focuses on collaboration by design and stores everything in the cloud. Users can create notebooks, share them with their team, and edit together live. By separating the kernel to each user's machine instead of a shared server, you can run the code independently of other users and even view their results. If you need a deliverable notebook to submit or store in source control, you can export the notebook in the `ipynb` format straight from the editor.
+
+## Repository Setup
+
 ### The Kernel Gateway
 
 This process is started by the kernel hidden renderer process and communicates with the main process via IPC.
