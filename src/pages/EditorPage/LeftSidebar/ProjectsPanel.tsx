@@ -159,6 +159,7 @@ const ProjectsPanel: React.FC = () => {
 
       <div className={css(styles.projectListHeader)}>
         <PopoverDropdown
+          appearance="subtle"
           placement="rightStart"
           buttonContent={<span className={css(styles.sortText)}>Sort by name</span>}
           activeKey="name"
