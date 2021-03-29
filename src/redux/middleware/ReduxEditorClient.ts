@@ -229,7 +229,7 @@ const ReduxEditorClient = (): Middleware<{}, ReduxState, any> => {
           break;
         }
 
-        socketClient?.createCell(notebook.get('nb_id'), 'python');
+        socketClient?.createCell(notebook.nb_id, 'python');
         break;
       }
 
@@ -251,7 +251,7 @@ const ReduxEditorClient = (): Middleware<{}, ReduxState, any> => {
           break;
         }
 
-        socketClient?.lockCell(notebook.get('nb_id'), action.cell_id);
+        socketClient?.lockCell(notebook.nb_id, action.cell_id);
         break;
       }
 
@@ -265,7 +265,7 @@ const ReduxEditorClient = (): Middleware<{}, ReduxState, any> => {
           break;
         }
 
-        socketClient?.unlockCell(notebook.get('nb_id'), action.cell_id);
+        socketClient?.unlockCell(notebook.nb_id, action.cell_id);
         break;
       }
 
@@ -282,7 +282,7 @@ const ReduxEditorClient = (): Middleware<{}, ReduxState, any> => {
         }
 
         if (action.changes !== undefined) {
-          socketClient?.editCell(notebook.get('nb_id'), action.cell_id, action.changes);
+          socketClient?.editCell(notebook.nb_id, action.cell_id, action.changes);
         }
         break;
       }

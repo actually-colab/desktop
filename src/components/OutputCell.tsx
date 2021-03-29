@@ -28,10 +28,10 @@ const OutputCell: React.FC<{ cell: ImmutableEditorCell; uid?: User['uid'] }> = (
   const cellOutputs = React.useMemo(
     () =>
       outputs
-        .get(cell.get('cell_id'))
-        ?.filter((output) => output.get('runIndex') === cell.get('runIndex') && output.get('uid') === uid)
+        .get(cell.cell_id)
+        ?.filter((output) => output.runIndex === cell.runIndex && output.uid === uid)
         ?.sort(sortImmutableOutputByMessageIndex) ?? null,
-    [cell, outputs, uid]
+    [cell.cell_id, cell.runIndex, outputs, uid]
   );
 
   return (
@@ -39,7 +39,7 @@ const OutputCell: React.FC<{ cell: ImmutableEditorCell; uid?: User['uid'] }> = (
       {cellOutputs !== null && cellOutputs.size > 0 && (
         <pre className={css(styles.output)}>
           {cellOutputs.map((output) => (
-            <Output key={output.get('output_id')} output={output.get('output')}>
+            <Output key={output.output_id} output={output.output}>
               <DisplayData>
                 <Media.HTML />
                 <Media.Image mediaType="image/png" />

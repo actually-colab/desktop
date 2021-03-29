@@ -22,7 +22,7 @@ import { splitKeepNewlines } from './regex';
  * A comparator for sorting kernel outputs by their message indices
  */
 export const sortImmutableOutputByMessageIndex = (a: ImmutableKernelOutput, b: ImmutableKernelOutput) =>
-  a.get('messageIndex') - b.get('messageIndex');
+  a.messageIndex - b.messageIndex;
 
 /**
  * A comparator for sorting immutable kernel outputs by their message indices
@@ -120,15 +120,15 @@ const convertToIpynb = (
     },
   },
   cells: notebookCells.map<IpynbCell>(({ cell, outputs }) =>
-    cell.get('language') === 'markdown'
+    cell.language === 'markdown'
       ? {
           cell_type: 'markdown',
           metadata: {},
-          source: splitKeepNewlines(cell.get('contents')),
+          source: splitKeepNewlines(cell.contents),
         }
       : {
           cell_type: 'code',
-          execution_count: cell.get('runIndex') !== -1 ? cell.get('runIndex') : null,
+          execution_count: cell.runIndex !== -1 ? cell.runIndex : null,
           metadata: {
             tags: [],
           },
@@ -136,12 +136,12 @@ const convertToIpynb = (
             outputs
               ?.map<IpynbOutput>((output) =>
                 filterUndefined<IpynbOutput & { transient?: any }, IpynbOutput>({
-                  ...output.get('output'),
+                  ...output.output,
                   transient: undefined,
                 })
               )
               ?.toJS() ?? [],
-          source: splitKeepNewlines(cell.get('contents')),
+          source: splitKeepNewlines(cell.contents),
         }
   ),
 });
@@ -157,7 +157,7 @@ export const download = (
 ) => {
   const notebookData: { cell: ImmutableEditorCell; outputs?: ImmutableList<ImmutableKernelOutput> }[] = [];
 
-  notebook.get('cell_ids').forEach((cell_id) => {
+  notebook.cell_ids.forEach((cell_id) => {
     const cell = cells.get(cell_id);
     const cellOutputs = outputs.get(cell_id);
 
@@ -165,7 +165,7 @@ export const download = (
       notebookData.push({
         cell,
         outputs: cellOutputs
-          ?.filter((output) => output.get('uid') === uid && output.get('runIndex') === cell.get('runIndex'))
+          ?.filter((output) => output.uid === uid && output.runIndex === cell.runIndex)
           ?.sort(sortImmutableOutputByMessageIndex),
       });
     }
@@ -177,5 +177,5 @@ export const download = (
     type: 'charset=utf-8',
   });
 
-  saveAs(blob, `${notebook.get('name')}.ipynb`);
+  saveAs(blob, `${notebook.name}.ipynb`);
 };

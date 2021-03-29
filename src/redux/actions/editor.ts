@@ -391,18 +391,18 @@ const executeCodeQueue = (cell_id: EditorCell['cell_id']): EditorActionTypes => 
  * Add a cell to the execution queue
  */
 export const addCellToQueue = (cell: ImmutableEditorCell): EditorAsyncActionTypes => async (dispatch) => {
-  if (cell.get('language') !== 'python' || cell.get('contents').trim() === '') {
+  if (cell.language !== 'python' || cell.contents.trim() === '') {
     return;
   }
 
   dispatch(
     appendKernelLog({
       status: 'Info',
-      message: `Added cell ${cell.get('cell_id')} to queue`,
+      message: `Added cell ${cell.cell_id} to queue`,
     })
   );
 
-  dispatch(executeCodeQueue(cell.get('cell_id')));
+  dispatch(executeCodeQueue(cell.cell_id));
 };
 
 const executeCodeStart = (cell: ImmutableEditorCell): EditorActionTypes => ({
@@ -445,7 +445,7 @@ export const updateRunIndex = (cell_id: EditorCell['cell_id'], runIndex: number)
  * Run code against the kernel and asynchronously process kernel messages
  */
 export const executeCode = (cell: ImmutableEditorCell): EditorAsyncActionTypes => async (dispatch) => {
-  if (cell.get('language') !== 'python' || cell.get('contents').trim() === '') {
+  if (cell.language !== 'python' || cell.contents.trim() === '') {
     return;
   }
 
