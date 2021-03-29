@@ -1,4 +1,4 @@
-import { Notebook, NotebookAccessLevel } from '@actually-colab/editor-client';
+import { Notebook, NotebookAccessLevel } from '@actually-colab/editor-types';
 import { List as ImmutableList } from 'immutable';
 
 import {

@@ -27,8 +27,8 @@
     "prebuild": "less-watch-compiler --config less-watcher.config.prod.json",
     "build": "react-scripts build",
     "build:client": "cd ../editor/client && git pull && yarn install && yarn build",
-    "upgrade:client": "yarn build:client && yarn upgrade @actually-colab/editor-client",
-    "install:client": "yarn build:client && yarn remove @actually-colab/editor-client && yarn add file:../editor/client",
+    "upgrade:client": "yarn build:client && yarn upgrade @actually-colab/editor-client @actually-colab/editor-types",
+    "install:client": "yarn build:client && yarn remove @actually-colab/editor-client && yarn add file:../editor/client && yarn add -D file:../editor/types",
     "postinstall": "husky install && yarn yarn-deduplicate yarn.lock",
     "predeploy": "yarn build",
     "deploy": "netlify deploy --prod",
@@ -65,6 +65,7 @@
     "web-vitals": "^1.0.1"
   },
   "devDependencies": {
+    "@actually-colab/editor-types": "file:../editor/types",
     "@types/file-saver": "^2.0.1",
     "@types/lodash.debounce": "^4.0.6",
     "@types/node": "^12.0.0",

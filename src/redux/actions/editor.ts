@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { DCell, Notebook, NotebookContents } from '@actually-colab/editor-client';
+import { DCell, Notebook, NotebookContents } from '@actually-colab/editor-types';
 
 import { CELL, EditorActionTypes, EditorAsyncActionTypes, KERNEL, NOTEBOOKS } from '../../types/redux/editor';
 import { User } from '../../types/user';

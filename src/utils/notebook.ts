@@ -1,4 +1,4 @@
-import { DCell, Notebook, NotebookContents } from '@actually-colab/editor-client';
+import { DCell, Notebook, NotebookContents } from '@actually-colab/editor-types';
 import { List as ImmutableList, Map as ImmutableMap } from 'immutable';
 import { saveAs } from 'file-saver';
 

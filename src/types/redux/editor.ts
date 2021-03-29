@@ -1,6 +1,6 @@
 import { Action } from 'redux';
 import { ThunkAction } from 'redux-thunk';
-import { DCell, Notebook, NotebookContents } from '@actually-colab/editor-client';
+import { DCell, Notebook, NotebookContents } from '@actually-colab/editor-types';
 
 import { User } from '../user';
 import { EditorCell, EditorCellMeta, ImmutableEditorCell, KernelOutput } from '../notebook';
