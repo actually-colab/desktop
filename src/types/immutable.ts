@@ -1,6 +1,6 @@
 import { Map as ImmutableMap } from 'immutable';
 
-type ValueOf<T> = T[keyof T];
+import { ValueOf } from './generics';
 
 /**
  * An ImmutableMap override that is aware of your object properties.
@@ -9,8 +9,7 @@ type ValueOf<T> = T[keyof T];
  */
 export interface ImmutableObject<T>
   extends Omit<ImmutableMap<string, any>, 'get' | 'set' | 'update' | 'merge' | 'toJS'> {
-  cell_ids: any;
-  get<K extends keyof T>(key: K): T[K];
+  get<K extends keyof T>(key: K): ValueOf<Pick<T, K>>;
   set<K extends keyof T>(key: K, value: ValueOf<Pick<T, K>>): ImmutableObject<T>;
   update<K extends keyof T>(key: K, updater: (value: ValueOf<Pick<T, K>>) => ValueOf<Pick<T, K>>): ImmutableObject<T>;
   update<K extends keyof T>(

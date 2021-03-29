@@ -3,7 +3,7 @@
 
 
 "@actually-colab/editor-client@file:../editor/client":
-  version "0.0.8"
+  version "0.1.0"
   dependencies:
     axios "^0.21.1"
     axios-retry "^3.1.9"

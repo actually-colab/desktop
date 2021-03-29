@@ -4,6 +4,7 @@ import { DCell, Notebook, NotebookAccessLevel } from '@actually-colab/editor-cli
 import { ImmutableObject } from './immutable';
 import { IpynbOutput } from './ipynb';
 import { User } from './user';
+import { RemoveIndex } from './generics';
 
 export type BaseKernelOutput = {
   uid: User['uid'];
@@ -42,7 +43,7 @@ export type EditorCellMeta = {
 /**
  * An editor cell in a notebook
  */
-export type EditorCell = Required<DCell> & EditorCellMeta;
+export type EditorCell = Required<RemoveIndex<DCell>> & EditorCellMeta;
 
 export type ImmutableEditorCell = ImmutableObject<EditorCell>;
 
@@ -56,9 +57,9 @@ export type Lock = {
 
 export type ImmutableLock = ImmutableObject<Lock>;
 
-export type ImmutableNotebookAccessLevel = ImmutableObject<NotebookAccessLevel>;
+export type ImmutableNotebookAccessLevel = ImmutableObject<RemoveIndex<NotebookAccessLevel>>;
 
-export type PseudoImmutableNotebook = Omit<Notebook, 'users'> & {
+export type PseudoImmutableNotebook = Omit<RemoveIndex<Notebook>, 'users'> & {
   users: ImmutableList<ImmutableNotebookAccessLevel>;
 };
 
@@ -67,7 +68,7 @@ export type ImmutableNotebook = ImmutableObject<PseudoImmutableNotebook>;
 /**
  * Notebooks are separated so the cells are stored in redux on their own
  */
-export type ReducedNotebook = Notebook & {
+export type ReducedNotebook = RemoveIndex<Notebook> & {
   cell_ids: EditorCell['cell_id'][];
 };
 
