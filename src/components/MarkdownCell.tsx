@@ -2,7 +2,7 @@ import React from 'react';
 import MarkdownRender from '@nteract/markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 
-import { ImmutableEditorCell } from '../utils/immutable/notebook';
+import { ImmutableEditorCell } from '../immutable';
 
 const renderers = {
   code: ({ language, value }: { language: string; value: string }) => (

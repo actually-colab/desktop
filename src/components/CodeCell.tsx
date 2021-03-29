@@ -5,7 +5,7 @@ import AceEditor from 'react-ace';
 
 import { ReduxState } from '../types/redux';
 import { EditorCell } from '../types/notebook';
-import { ImmutableEditorCell } from '../utils/immutable/notebook';
+import { ImmutableEditorCell } from '../immutable';
 import { editorOptionsActive, editorOptionsInactive } from '../constants/editorOptions';
 import { palette } from '../constants/theme';
 

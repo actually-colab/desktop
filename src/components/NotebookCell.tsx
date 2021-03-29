@@ -6,7 +6,7 @@ import { Icon } from 'rsuite';
 import { ReduxState } from '../types/redux';
 import { _editor } from '../redux/actions';
 import { EditorCell } from '../types/notebook';
-import { ImmutableEditorCell } from '../utils/immutable/notebook';
+import { ImmutableEditorCell } from '../immutable';
 import { palette, spacing } from '../constants/theme';
 import useKernelStatus from '../kernel/useKernelStatus';
 

@@ -1,9 +1,9 @@
 import { Notebook, NotebookAccessLevel } from '@actually-colab/editor-types';
 import { List as ImmutableList, Record as ImmutableRecord } from 'immutable';
 
-import { RemoveIndex } from '../../types/generics';
-import { ImmutableRecordOf } from '../../types/immutable';
-import { EditorCell, KernelOutput, Lock, ReducedNotebook } from '../../types/notebook';
+import { RemoveIndex } from '../types/generics';
+import { ImmutableRecordOf } from '../types/immutable';
+import { EditorCell, KernelOutput, Lock, ReducedNotebook } from '../types/notebook';
 
 export type ImmutableKernelOutput = ImmutableRecordOf<KernelOutput>;
 export const ImmutableKernelOutputFactory = ImmutableRecord<KernelOutput>({

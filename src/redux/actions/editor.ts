@@ -3,9 +3,9 @@ import { DCell, Notebook, NotebookContents } from '@actually-colab/editor-types'
 
 import { CELL, EditorActionTypes, EditorAsyncActionTypes, KERNEL, NOTEBOOKS } from '../../types/redux/editor';
 import { User } from '../../types/user';
-import { ImmutableEditorCell } from '../../utils/immutable/notebook';
 import { EditorCell, EditorCellMeta, KernelOutput } from '../../types/notebook';
 import { Kernel, KernelLog } from '../../types/kernel';
+import { ImmutableEditorCell } from '../../immutable';
 
 /**
  * Add a new log message

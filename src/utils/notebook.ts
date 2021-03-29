@@ -4,6 +4,7 @@ import { saveAs } from 'file-saver';
 
 import { IpynbCell, IpynbNotebook, IpynbOutput } from '../types/ipynb';
 import { EditorCell, KernelOutput, ReducedNotebook } from '../types/notebook';
+import { User } from '../types/user';
 import {
   ImmutableEditorCell,
   ImmutableEditorCellFactory,
@@ -11,8 +12,7 @@ import {
   ImmutableNotebook,
   ImmutableReducedNotebook,
   ImmutableReducedNotebookFactory,
-} from '../utils/immutable/notebook';
-import { User } from '../types/user';
+} from '../immutable';
 import { filterUndefined } from './filter';
 import { splitKeepNewlines } from './regex';
 

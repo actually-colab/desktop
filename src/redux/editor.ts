@@ -8,6 +8,8 @@ import { DEFAULT_GATEWAY_URI } from '../constants/jupyter';
 import {
   ImmutableEditorCell,
   ImmutableEditorCellFactory,
+  ImmutableKernelLog,
+  ImmutableKernelLogFactory,
   ImmutableKernelOutput,
   ImmutableKernelOutputFactory,
   ImmutableLock,
@@ -17,9 +19,7 @@ import {
   ImmutableNotebookFactory,
   ImmutableReducedNotebook,
   ImmutableReducedNotebookFactory,
-} from '../utils/immutable/notebook';
-import { ImmutableKernelLog } from '../utils/immutable/kernel';
-import { ImmutableKernelLogFactory } from '../utils/immutable/kernel';
+} from '../immutable';
 import {
   cellArrayToImmutableMap,
   cleanDCell,
