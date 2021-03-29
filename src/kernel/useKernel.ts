@@ -4,7 +4,7 @@ import { Notebook } from '@actually-colab/editor-types';
 
 import { ReduxState } from '../types/redux';
 import { _editor } from '../redux/actions';
-import { ImmutableEditorCell } from '../types/notebook';
+import { ImmutableEditorCell } from '../immutable';
 
 /**
  * Hook to connect to a kernel
@@ -86,9 +86,9 @@ const useKernel = () => {
    * Automatically restart kernel on notebook change
    */
   React.useEffect(() => {
-    if (currentNotebookId.current !== '' && notebook !== null && notebook.get('nb_id') !== currentNotebookId.current) {
+    if (currentNotebookId.current !== '' && notebook !== null && notebook.nb_id !== currentNotebookId.current) {
       dispatchRestartKernel();
-      currentNotebookId.current = notebook.get('nb_id');
+      currentNotebookId.current = notebook.nb_id;
     }
   }, [dispatchRestartKernel, notebook]);
 

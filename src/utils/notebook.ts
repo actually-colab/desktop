@@ -1,28 +1,28 @@
-import { DCell, Notebook, NotebookContents } from '@actually-colab/editor-types';
+import { DCell, Notebook, NotebookAccessLevel, NotebookContents } from '@actually-colab/editor-types';
 import { List as ImmutableList, Map as ImmutableMap } from 'immutable';
 import { saveAs } from 'file-saver';
 
 import { IpynbCell, IpynbNotebook, IpynbOutput } from '../types/ipynb';
+import { EditorCell, KernelOutput, ReducedNotebook } from '../types/notebook';
+import { User } from '../types/user';
 import {
-  EditorCell,
   ImmutableEditorCell,
+  ImmutableEditorCellFactory,
   ImmutableKernelOutput,
   ImmutableNotebook,
+  ImmutableNotebookAccessLevel,
+  ImmutableNotebookAccessLevelFactory,
   ImmutableReducedNotebook,
-  KernelOutput,
-  ReducedNotebook,
-} from '../types/notebook';
-import { User } from '../types/user';
-import { BASE_CELL } from '../constants/notebook';
+  ImmutableReducedNotebookFactory,
+} from '../immutable';
 import { filterUndefined } from './filter';
 import { splitKeepNewlines } from './regex';
-import { makeImmutableEditorCell, makeImmutableReducedNotebook } from './immutable/notebook';
 
 /**
  * A comparator for sorting kernel outputs by their message indices
  */
 export const sortImmutableOutputByMessageIndex = (a: ImmutableKernelOutput, b: ImmutableKernelOutput) =>
-  a.get('messageIndex') - b.get('messageIndex');
+  a.messageIndex - b.messageIndex;
 
 /**
  * A comparator for sorting immutable kernel outputs by their message indices
@@ -41,7 +41,7 @@ export const reduceNotebook = (notebook: Notebook): ReducedNotebook => ({
  * Convert an immutable notebook to an immutable reduced notebook
  */
 export const reduceImmutableNotebook = (notebook: ImmutableNotebook | null) =>
-  notebook !== null ? makeImmutableReducedNotebook(reduceNotebook(notebook.toJS() as any)) : null;
+  notebook !== null ? new ImmutableReducedNotebookFactory(notebook.toObject()) : null;
 
 /**
  * Convert a notebook contents object to a reduced notebook
@@ -56,6 +56,12 @@ export const reduceNotebookContents = (notebook: NotebookContents): ReducedNoteb
       .map((cell) => cell.cell_id),
   };
 };
+
+/**
+ * Convert an array of access levels to an immutable list of immutable access levels
+ */
+export const makeAccessLevelsImmutable = (users: NotebookAccessLevel[]): ImmutableList<ImmutableNotebookAccessLevel> =>
+  ImmutableList(users.map((user) => new ImmutableNotebookAccessLevelFactory(user)));
 
 /**
  * Given a DCell, make sure all values exist
@@ -76,8 +82,10 @@ export const cellArrayToImmutableMap = (
 ): ImmutableMap<EditorCell['cell_id'], ImmutableEditorCell> => {
   let map = ImmutableMap<EditorCell['cell_id'], ImmutableEditorCell>();
 
-  cells.forEach((cell) => {
-    map = map.set(cell.cell_id, makeImmutableEditorCell({ ...BASE_CELL, ...cell }));
+  map = map.withMutations((map) => {
+    cells.forEach((cell) => {
+      map = map.set(cell.cell_id, new ImmutableEditorCellFactory(cell));
+    });
   });
 
   return map;
@@ -112,15 +120,15 @@ const convertToIpynb = (
     },
   },
   cells: notebookCells.map<IpynbCell>(({ cell, outputs }) =>
-    cell.get('language') === 'markdown'
+    cell.language === 'markdown'
       ? {
           cell_type: 'markdown',
           metadata: {},
-          source: splitKeepNewlines(cell.get('contents')),
+          source: splitKeepNewlines(cell.contents),
         }
       : {
           cell_type: 'code',
-          execution_count: cell.get('runIndex') !== -1 ? cell.get('runIndex') : null,
+          execution_count: cell.runIndex !== -1 ? cell.runIndex : null,
           metadata: {
             tags: [],
           },
@@ -128,12 +136,12 @@ const convertToIpynb = (
             outputs
               ?.map<IpynbOutput>((output) =>
                 filterUndefined<IpynbOutput & { transient?: any }, IpynbOutput>({
-                  ...output.get('output'),
+                  ...output.output,
                   transient: undefined,
                 })
               )
               ?.toJS() ?? [],
-          source: splitKeepNewlines(cell.get('contents')),
+          source: splitKeepNewlines(cell.contents),
         }
   ),
 });
@@ -149,7 +157,7 @@ export const download = (
 ) => {
   const notebookData: { cell: ImmutableEditorCell; outputs?: ImmutableList<ImmutableKernelOutput> }[] = [];
 
-  notebook.get('cell_ids').forEach((cell_id) => {
+  notebook.cell_ids.forEach((cell_id) => {
     const cell = cells.get(cell_id);
     const cellOutputs = outputs.get(cell_id);
 
@@ -157,7 +165,7 @@ export const download = (
       notebookData.push({
         cell,
         outputs: cellOutputs
-          ?.filter((output) => output.get('uid') === uid && output.get('runIndex') === cell.get('runIndex'))
+          ?.filter((output) => output.uid === uid && output.runIndex === cell.runIndex)
           ?.sort(sortImmutableOutputByMessageIndex),
       });
     }
@@ -169,5 +177,5 @@ export const download = (
     type: 'charset=utf-8',
   });
 
-  saveAs(blob, `${notebook.get('name')}.ipynb`);
+  saveAs(blob, `${notebook.name}.ipynb`);
 };

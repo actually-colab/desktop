@@ -1,7 +1,5 @@
-import { List as ImmutableList } from 'immutable';
-import { DCell, Notebook, NotebookAccessLevel } from '@actually-colab/editor-types';
+import { DCell, Notebook } from '@actually-colab/editor-types';
 
-import { ImmutableObject } from './immutable';
 import { IpynbOutput } from './ipynb';
 import { User } from './user';
 import { RemoveIndex } from './generics';
@@ -27,8 +25,6 @@ export type KernelOutput = BaseKernelOutput & {
   output: IpynbOutput;
 };
 
-export type ImmutableKernelOutput = ImmutableObject<KernelOutput>;
-
 export type EditorCellMeta = {
   /**
    * If the cell is markdown, this indicates if the markdown is rendered or editable
@@ -45,8 +41,6 @@ export type EditorCellMeta = {
  */
 export type EditorCell = Required<RemoveIndex<DCell>> & EditorCellMeta;
 
-export type ImmutableEditorCell = ImmutableObject<EditorCell>;
-
 /**
  * A lock that indicates which user owns which cell
  */
@@ -55,26 +49,9 @@ export type Lock = {
   cell_id: EditorCell['cell_id'];
 };
 
-export type ImmutableLock = ImmutableObject<Lock>;
-
-export type ImmutableNotebookAccessLevel = ImmutableObject<RemoveIndex<NotebookAccessLevel>>;
-
-export type PseudoImmutableNotebook = Omit<RemoveIndex<Notebook>, 'users'> & {
-  users: ImmutableList<ImmutableNotebookAccessLevel>;
-};
-
-export type ImmutableNotebook = ImmutableObject<PseudoImmutableNotebook>;
-
 /**
  * Notebooks are separated so the cells are stored in redux on their own
  */
 export type ReducedNotebook = RemoveIndex<Notebook> & {
   cell_ids: EditorCell['cell_id'][];
 };
-
-export type PseudoImmutableReducedNotebook = Omit<ReducedNotebook, 'users' | 'cell_ids'> & {
-  users: ImmutableList<ImmutableNotebookAccessLevel>;
-  cell_ids: ImmutableList<EditorCell['cell_id']>;
-};
-
-export type ImmutableReducedNotebook = ImmutableObject<PseudoImmutableReducedNotebook>;

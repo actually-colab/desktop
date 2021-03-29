@@ -51,21 +51,24 @@ const EditorHeader: React.FC = () => {
   const [outputSelection, setOutputSelection] = React.useState<string>(gatewayUri);
   const [showDeleteCell, setShowDeleteCell] = React.useState<boolean>(false);
 
-  const ownedCells = React.useMemo(() => lockedCells.filter((lock) => lock.get('uid') === user?.uid), [
+  const ownedCells = React.useMemo(() => lockedCells.filter((lock) => lock.uid === user?.uid), [
     lockedCells,
     user?.uid,
   ]);
   const lockedCell = React.useMemo(
-    () => (ownedCells.size > 0 ? cells.get(ownedCells.get(0)?.get('cell_id') ?? '') ?? null : null),
+    () => (ownedCells.size > 0 ? cells.get(ownedCells.get(0)?.cell_id ?? '') ?? null : null),
     [cells, ownedCells]
   );
-  const lockedCellId = React.useMemo(() => lockedCell?.get('cell_id') ?? '', [lockedCell]);
+  const lockedCellId = React.useMemo(() => lockedCell?.cell_id ?? '', [lockedCell?.cell_id]);
   const selectedCell = React.useMemo(
     () =>
       cells.get(selectedCellId) ??
-      (notebook &&
-        (notebook.get('cell_ids').size > 0 ? cells.get(notebook.get('cell_ids').get(0) ?? '') ?? null : null)),
-    [cells, notebook, selectedCellId]
+      (notebook?.cell_ids
+        ? notebook.cell_ids.size > 0
+          ? cells.get(notebook.cell_ids.get(0) ?? '') ?? null
+          : null
+        : null),
+    [cells, notebook?.cell_ids, selectedCellId]
   );
 
   const statusTooltip = React.useMemo<StatusIndicatorProps['tooltipOptions']>(
@@ -91,12 +94,12 @@ const EditorHeader: React.FC = () => {
       return;
     }
 
-    if (selectedCell.get('language') === 'python') {
+    if (selectedCell.language === 'python') {
       dispatch(_editor.addCellToQueue(selectedCell));
     } else {
-      if (!selectedCell.get('rendered')) {
+      if (!selectedCell.rendered) {
         dispatch(
-          _editor.editCell(selectedCell.get('cell_id'), {
+          _editor.editCell(selectedCell.cell_id, {
             metaChanges: {
               rendered: true,
             },
@@ -142,7 +145,7 @@ const EditorHeader: React.FC = () => {
             icon="step-forward"
             tooltipText="Run and advance"
             tooltipDirection="bottom"
-            disabled={!kernelIsConnected && selectedCell?.get('language') !== 'markdown'}
+            disabled={!kernelIsConnected && selectedCell?.language !== 'markdown'}
             onClick={onClickPlayNext}
           />
           <RegularIconButton
@@ -184,11 +187,9 @@ const EditorHeader: React.FC = () => {
           />
           <PopoverDropdown
             placement="bottomEnd"
-            activeKey={lockedCell?.get('language') ?? 'python'}
+            activeKey={lockedCell?.language ?? 'python'}
             buttonProps={{ disabled: lockedCell === null }}
-            buttonContent={
-              (lockedCell?.get('language') === 'python' ? 'python3' : lockedCell?.get('language')) ?? 'python3'
-            }
+            buttonContent={(lockedCell?.language === 'python' ? 'python3' : lockedCell?.language) ?? 'python3'}
             onSelect={handleLanguageSelect}
           >
             <Dropdown.Item eventKey="python">python3</Dropdown.Item>

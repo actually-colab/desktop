@@ -5,7 +5,8 @@ import { Icon } from 'rsuite';
 
 import { ReduxState } from '../types/redux';
 import { _editor } from '../redux/actions';
-import { EditorCell, ImmutableEditorCell } from '../types/notebook';
+import { EditorCell } from '../types/notebook';
+import { ImmutableEditorCell } from '../immutable';
 import { palette, spacing } from '../constants/theme';
 import useKernelStatus from '../kernel/useKernelStatus';
 
@@ -105,19 +106,19 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
   const runningCellId = useSelector((state: ReduxState) => state.editor.runningCellId);
   const runQueue = useSelector((state: ReduxState) => state.editor.runQueue);
 
-  const cell_id = React.useMemo(() => cell.get('cell_id'), [cell]);
-  const ownedCells = React.useMemo(() => lockedCells.filter((lock) => lock.get('uid') === user?.uid), [
+  const cell_id = React.useMemo(() => cell.cell_id, [cell.cell_id]);
+  const ownedCells = React.useMemo(() => lockedCells.filter((lock) => lock.uid === user?.uid), [
     lockedCells,
     user?.uid,
   ]);
   const lockOwner = React.useMemo(
     () =>
-      cell.get('lock_held_by') !== ''
+      cell.lock_held_by !== ''
         ? {
-            uid: cell.get('lock_held_by'),
+            uid: cell.lock_held_by,
           }
         : null,
-    [cell]
+    [cell.lock_held_by]
   );
   const ownsCell = React.useMemo(() => lockOwner?.uid === user?.uid, [lockOwner?.uid, user?.uid]);
   const lockedByOtherUser = React.useMemo(() => !ownsCell && lockOwner !== null, [lockOwner, ownsCell]);
@@ -144,22 +145,22 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
   );
   const dispatchEditMarkdownCell = React.useCallback(
     () =>
-      cell.get('language') === 'markdown' &&
-      cell.get('rendered') &&
+      cell.language === 'markdown' &&
+      cell.rendered &&
       dispatch(
-        _editor.editCell(cell.get('cell_id'), {
+        _editor.editCell(cell.cell_id, {
           metaChanges: {
             rendered: false,
           },
         })
       ),
-    [cell, dispatch]
+    [cell.cell_id, cell.language, cell.rendered, dispatch]
   );
 
   const onFocusEditor = React.useCallback(
     (cell_id: string) => {
       if (canLock && user !== null) {
-        ownedCells.forEach((ownedCell) => dispatch(_editor.unlockCell(user, ownedCell.get('cell_id'))));
+        ownedCells.forEach((ownedCell) => dispatch(_editor.unlockCell(user, ownedCell.cell_id)));
 
         dispatch(_editor.lockCell(user, cell_id));
       }
@@ -172,12 +173,12 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
   const onClickLock = React.useCallback(() => onFocusEditor(cell_id), [cell_id, onFocusEditor]);
 
   const onClickPlay = React.useCallback(() => {
-    if (cell.get('language') === 'python') {
+    if (cell.language === 'python') {
       dispatch(_editor.addCellToQueue(cell));
     } else {
-      if (!cell.get('rendered')) {
+      if (!cell.rendered) {
         dispatch(
-          _editor.editCell(cell.get('cell_id'), {
+          _editor.editCell(cell.cell_id, {
             metaChanges: {
               rendered: true,
             },
@@ -186,7 +187,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
       }
     }
 
-    dispatch(_editor.selectCell(cell.get('cell_id')));
+    dispatch(_editor.selectCell(cell.cell_id));
     dispatch(_editor.selectNextCell());
   }, [cell, dispatch]);
 
@@ -205,11 +206,11 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
     <div className={css(styles.container, ownsCell && styles.containerLocked, isSelected && styles.containerSelected)}>
       <div className={css(styles.controls)}>
         <div className={css(styles.runIndexContainer)}>
-          {cell.get('language') !== 'markdown' && (
+          {cell.language !== 'markdown' && (
             <React.Fragment>
               <code>[</code>
               <code className={css(styles.runIndex)}>
-                {isRunning || isQueued ? '*' : cell.get('runIndex') === -1 ? '' : cell.get('runIndex')}
+                {isRunning || isQueued ? '*' : cell.runIndex === -1 ? '' : cell.runIndex}
               </code>
               <code>]</code>
             </React.Fragment>
@@ -218,7 +219,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
       </div>
 
       <div className={css(styles.content)}>
-        {cell.get('language') === 'python' || !cell.get('rendered') ? (
+        {cell.language === 'python' || !cell.rendered ? (
           <div
             className={css(
               styles.codeContainer,
@@ -243,8 +244,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
               size="xs"
               loading={isRunning}
               disabled={
-                (!kernelIsConnected && cell.get('language') === 'python') ||
-                (cell.get('language') === 'markdown' && cell.get('rendered'))
+                (!kernelIsConnected && cell.language === 'python') || (cell.language === 'markdown' && cell.rendered)
               }
               onClick={onClickPlay}
             />
@@ -280,7 +280,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
           </div>
 
           <div className={css(styles.cellToolbarEnd)}>
-            <Timer active={isRunning} alwaysRender={cell.get('runIndex') !== -1} nonce={cell.get('runIndex')} />
+            <Timer active={isRunning} alwaysRender={cell.runIndex !== -1} nonce={cell.runIndex} />
           </div>
         </div>
 

@@ -3,8 +3,9 @@ import { DCell, Notebook, NotebookContents } from '@actually-colab/editor-types'
 
 import { CELL, EditorActionTypes, EditorAsyncActionTypes, KERNEL, NOTEBOOKS } from '../../types/redux/editor';
 import { User } from '../../types/user';
-import { EditorCell, EditorCellMeta, ImmutableEditorCell, KernelOutput } from '../../types/notebook';
+import { EditorCell, EditorCellMeta, KernelOutput } from '../../types/notebook';
 import { Kernel, KernelLog } from '../../types/kernel';
+import { ImmutableEditorCell } from '../../immutable';
 
 /**
  * Add a new log message
@@ -390,18 +391,18 @@ const executeCodeQueue = (cell_id: EditorCell['cell_id']): EditorActionTypes => 
  * Add a cell to the execution queue
  */
 export const addCellToQueue = (cell: ImmutableEditorCell): EditorAsyncActionTypes => async (dispatch) => {
-  if (cell.get('language') !== 'python' || cell.get('contents').trim() === '') {
+  if (cell.language !== 'python' || cell.contents.trim() === '') {
     return;
   }
 
   dispatch(
     appendKernelLog({
       status: 'Info',
-      message: `Added cell ${cell.get('cell_id')} to queue`,
+      message: `Added cell ${cell.cell_id} to queue`,
     })
   );
 
-  dispatch(executeCodeQueue(cell.get('cell_id')));
+  dispatch(executeCodeQueue(cell.cell_id));
 };
 
 const executeCodeStart = (cell: ImmutableEditorCell): EditorActionTypes => ({
@@ -444,7 +445,7 @@ export const updateRunIndex = (cell_id: EditorCell['cell_id'], runIndex: number)
  * Run code against the kernel and asynchronously process kernel messages
  */
 export const executeCode = (cell: ImmutableEditorCell): EditorAsyncActionTypes => async (dispatch) => {
-  if (cell.get('language') !== 'python' || cell.get('contents').trim() === '') {
+  if (cell.language !== 'python' || cell.contents.trim() === '') {
     return;
   }
 

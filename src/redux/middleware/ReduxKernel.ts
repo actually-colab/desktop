@@ -213,7 +213,7 @@ const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
 
         (async () => {
           const future = kernel.execute({
-            code: action.cell.get('contents'),
+            code: action.cell.contents,
           });
 
           const startTimestamp = Date.now();
@@ -232,11 +232,11 @@ const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
                 runIndex = message.content.execution_count as number;
 
                 // Update the current run
-                store.dispatch(_editor.updateRunIndex(action.cell.get('cell_id'), runIndex));
+                store.dispatch(_editor.updateRunIndex(action.cell.cell_id, runIndex));
                 store.dispatch(
                   _editor.appendKernelLog({
                     status: 'Info',
-                    message: `Started run #${runIndex} on cell ${action.cell.get('cell_id')}`,
+                    message: `Started run #${runIndex} on cell ${action.cell.cell_id}`,
                   })
                 );
               }
@@ -244,7 +244,7 @@ const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
               const baseKernelOutput: BaseKernelOutput = {
                 uid: store.getState().auth.user?.uid ?? '',
                 output_id: message.header.msg_id,
-                cell_id: action.cell.get('cell_id'),
+                cell_id: action.cell.cell_id,
                 runIndex: -1,
                 messageIndex,
               };
@@ -281,7 +281,7 @@ const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
               if (runIndex !== -1) {
                 // No need to queue
                 store.dispatch(
-                  _editor.receiveKernelMessage(action.cell.get('cell_id'), [
+                  _editor.receiveKernelMessage(action.cell.cell_id, [
                     {
                       ...kernelOutput,
                       runIndex,
@@ -296,7 +296,7 @@ const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
               // process any messages in queue
               store.dispatch(
                 _editor.receiveKernelMessage(
-                  action.cell.get('cell_id'),
+                  action.cell.cell_id,
                   messageQueue.map((oldMessage) => ({ ...oldMessage, runIndex }))
                 )
               );
@@ -307,16 +307,16 @@ const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
             store.dispatch(
               _editor.appendKernelLog({
                 status: threwError ? 'Error' : 'Success',
-                message: `Finished run #${runIndex} on cell ${action.cell.get('cell_id')} in ${
+                message: `Finished run #${runIndex} on cell ${action.cell.cell_id} in ${
                   (Date.now() - startTimestamp) / 1000
                 }s`,
               })
             );
 
             if (threwError) {
-              store.dispatch(_editor.executeCodeFailure(action.cell.get('cell_id'), runIndex, 'Code threw an error'));
+              store.dispatch(_editor.executeCodeFailure(action.cell.cell_id, runIndex, 'Code threw an error'));
             } else {
-              store.dispatch(_editor.executeCodeSuccess(action.cell.get('cell_id'), runIndex));
+              store.dispatch(_editor.executeCodeSuccess(action.cell.cell_id, runIndex));
             }
           };
         })();

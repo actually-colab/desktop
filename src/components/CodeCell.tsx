@@ -4,7 +4,8 @@ import { StyleSheet, css } from 'aphrodite';
 import AceEditor from 'react-ace';
 
 import { ReduxState } from '../types/redux';
-import { EditorCell, ImmutableEditorCell } from '../types/notebook';
+import { EditorCell } from '../types/notebook';
+import { ImmutableEditorCell } from '../immutable';
 import { editorOptionsActive, editorOptionsInactive } from '../constants/editorOptions';
 import { palette } from '../constants/theme';
 
@@ -36,11 +37,11 @@ const CodeCell: React.FC<{
 }> = ({ cell, onFocus, onBlur, onChange }) => {
   const user = useSelector((state: ReduxState) => state.auth.user);
 
-  const isEditable = React.useMemo(() => cell.get('lock_held_by') === user?.uid, [cell, user?.uid]);
+  const isEditable = React.useMemo(() => cell.lock_held_by === user?.uid, [cell.lock_held_by, user?.uid]);
   const aceOptions = React.useMemo(() => (isEditable ? editorOptionsActive : editorOptionsInactive), [isEditable]);
-  const cell_id = React.useMemo(() => cell.get('cell_id'), [cell]);
-  const language = React.useMemo(() => cell.get('language'), [cell]);
-  const contents = React.useMemo(() => cell.get('contents'), [cell]);
+  const cell_id = React.useMemo(() => cell.cell_id, [cell.cell_id]);
+  const language = React.useMemo(() => cell.language, [cell.language]);
+  const contents = React.useMemo(() => cell.contents, [cell.contents]);
   const wrapEnabled = React.useMemo(() => language === 'markdown', [language]);
 
   const handleFocus = React.useCallback(() => {

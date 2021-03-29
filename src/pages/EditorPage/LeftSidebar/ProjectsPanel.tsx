@@ -180,19 +180,19 @@ const ProjectsPanel: React.FC = () => {
       </div>
 
       {notebooks.map((project) => {
-        const active = project.get('nb_id') === notebook?.get('nb_id');
+        const active = project.nb_id === notebook?.nb_id;
 
         return (
-          <div key={project.get('nb_id')} className={css(styles.project)}>
+          <div key={project.nb_id} className={css(styles.project)}>
             <Button
               block
               className={css(styles.projectButton, active && styles.projectActive)}
-              loading={project.get('nb_id') === openingNotebookId}
-              onClick={() => !isOpeningNotebook && !active && dispatchOpenNotebook(project.get('nb_id'))}
+              loading={project.nb_id === openingNotebookId}
+              onClick={() => !isOpeningNotebook && !active && dispatchOpenNotebook(project.nb_id)}
             >
               <div className={css(styles.projectTitleContainer)}>
                 <Icon icon={active ? 'file' : 'file-o'} />
-                <span className={css(styles.projectTitle)}>{project.get('name')}</span>
+                <span className={css(styles.projectTitle)}>{project.name}</span>
               </div>
               <span className={css(styles.lastModifiedText)}>10m</span>
             </Button>

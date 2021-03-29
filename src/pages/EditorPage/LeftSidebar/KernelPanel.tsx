@@ -258,20 +258,20 @@ const KernelPanel: React.FC = () => {
       </p>
       <pre className={css(styles.output)}>
         {logs.map((log) => (
-          <React.Fragment key={log.get('id')}>
-            <span className={css(styles.bold)}>{log.get('dateString')}</span>
+          <React.Fragment key={log.id}>
+            <span className={css(styles.bold)}>{log.dateString}</span>
             {'\n'}
 
-            {log.get('status') === 'Success' && (
+            {log.status === 'Success' && (
               <Icon icon="check-circle" style={{ color: palette.SUCCESS, marginRight: spacing.DEFAULT / 4 }} />
             )}
-            {log.get('status') === 'Warning' && (
+            {log.status === 'Warning' && (
               <Icon icon="exclamation-triangle" style={{ color: palette.WARNING, marginRight: spacing.DEFAULT / 4 }} />
             )}
-            {log.get('status') === 'Error' && (
+            {log.status === 'Error' && (
               <Icon icon="close-circle" style={{ color: palette.ERROR, marginRight: spacing.DEFAULT / 4 }} />
             )}
-            {log.get('message')}
+            {log.message}
             {'\n\n'}
           </React.Fragment>
         ))}
