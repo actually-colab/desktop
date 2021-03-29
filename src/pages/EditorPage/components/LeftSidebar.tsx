@@ -6,12 +6,7 @@ import { Button, Icon, IconButton, IconProps, Tooltip, Whisper } from 'rsuite';
 import { ReduxState } from '../../../types/redux';
 import { _auth } from '../../../redux/actions';
 import { palette, spacing, timing } from '../../../constants/theme';
-import {
-  HEADER_HEIGHT,
-  LEFT_SIDEBAR_PANEL_WIDTH,
-  LEFT_SIDEBAR_TRAY_WIDTH,
-  LEFT_SIDEBAR_WIDTH,
-} from '../../../constants/dimensions';
+import { HEADER_HEIGHT, LEFT_SIDEBAR_PANEL_WIDTH, LEFT_SIDEBAR_TRAY_WIDTH } from '../../../constants/dimensions';
 import { openCompanion } from '../../../utils/redirect';
 import { UserAvatar } from '../../../components';
 
