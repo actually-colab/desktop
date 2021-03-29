@@ -15,7 +15,6 @@ import {
   ImmutableLock,
   ImmutableLockFactory,
   ImmutableNotebook,
-  ImmutableNotebookAccessLevelFactory,
   ImmutableNotebookFactory,
   ImmutableReducedNotebook,
   ImmutableReducedNotebookFactory,
@@ -23,6 +22,7 @@ import {
 import {
   cellArrayToImmutableMap,
   cleanDCell,
+  makeAccessLevelsImmutable,
   reduceImmutableNotebook,
   reduceNotebookContents,
 } from '../utils/notebook';
@@ -358,7 +358,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
             (notebook) =>
               new ImmutableNotebookFactory({
                 ...notebook,
-                users: ImmutableList(notebook.users.map((user) => new ImmutableNotebookAccessLevelFactory(user))),
+                users: makeAccessLevelsImmutable(notebook.users),
               })
           )
         ),
@@ -392,7 +392,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         notebooks: state.notebooks.push(
           new ImmutableNotebookFactory({
             ...action.notebook,
-            users: ImmutableList(action.notebook.users.map((user) => new ImmutableNotebookAccessLevelFactory(user))),
+            users: makeAccessLevelsImmutable(action.notebook.users),
           })
         ),
       };
@@ -443,7 +443,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ),
         notebook: new ImmutableReducedNotebookFactory({
           ...reducedNotebook,
-          users: ImmutableList(reducedNotebook.users.map((user) => new ImmutableNotebookAccessLevelFactory(user))),
+          users: makeAccessLevelsImmutable(reducedNotebook.users),
           cell_ids: ImmutableList(reducedNotebook.cell_ids),
         }),
         cells: cellArrayToImmutableMap(dcells.map((dcell) => cleanDCell(dcell))),

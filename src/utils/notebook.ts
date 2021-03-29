@@ -1,4 +1,4 @@
-import { DCell, Notebook, NotebookContents } from '@actually-colab/editor-types';
+import { DCell, Notebook, NotebookAccessLevel, NotebookContents } from '@actually-colab/editor-types';
 import { List as ImmutableList, Map as ImmutableMap } from 'immutable';
 import { saveAs } from 'file-saver';
 
@@ -10,6 +10,8 @@ import {
   ImmutableEditorCellFactory,
   ImmutableKernelOutput,
   ImmutableNotebook,
+  ImmutableNotebookAccessLevel,
+  ImmutableNotebookAccessLevelFactory,
   ImmutableReducedNotebook,
   ImmutableReducedNotebookFactory,
 } from '../immutable';
@@ -54,6 +56,12 @@ export const reduceNotebookContents = (notebook: NotebookContents): ReducedNoteb
       .map((cell) => cell.cell_id),
   };
 };
+
+/**
+ * Convert an array of access levels to an immutable list of immutable access levels
+ */
+export const makeAccessLevelsImmutable = (users: NotebookAccessLevel[]): ImmutableList<ImmutableNotebookAccessLevel> =>
+  ImmutableList(users.map((user) => new ImmutableNotebookAccessLevelFactory(user)));
 
 /**
  * Given a DCell, make sure all values exist
