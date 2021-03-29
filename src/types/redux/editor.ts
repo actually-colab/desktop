@@ -2,8 +2,9 @@ import { Action } from 'redux';
 import { ThunkAction } from 'redux-thunk';
 import { DCell, Notebook, NotebookContents } from '@actually-colab/editor-types';
 
+import { ImmutableEditorCell } from '../../utils/immutable/notebook';
 import { User } from '../user';
-import { EditorCell, EditorCellMeta, ImmutableEditorCell, KernelOutput } from '../notebook';
+import { EditorCell, EditorCellMeta, KernelOutput } from '../notebook';
 import { Kernel, KernelLog } from '../kernel';
 
 export const KERNEL = {

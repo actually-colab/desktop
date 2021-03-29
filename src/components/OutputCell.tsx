@@ -5,8 +5,8 @@ import { DisplayData, ExecuteResult, KernelOutputError, Media, Output, StreamTex
 
 import { ReduxState } from '../types/redux';
 import { User } from '../types/user';
-import { ImmutableEditorCell } from '../types/notebook';
 import { spacing } from '../constants/theme';
+import { ImmutableEditorCell } from '../utils/immutable/notebook';
 import { sortImmutableOutputByMessageIndex } from '../utils/notebook';
 
 const styles = StyleSheet.create({

@@ -1,43 +1,73 @@
 import { Notebook, NotebookAccessLevel } from '@actually-colab/editor-types';
-import { List as ImmutableList } from 'immutable';
+import { List as ImmutableList, Record as ImmutableRecord } from 'immutable';
 
-import {
-  EditorCell,
-  ImmutableEditorCell,
-  ImmutableKernelOutput,
-  ImmutableLock,
-  ImmutableNotebook,
-  ImmutableNotebookAccessLevel,
-  ImmutableReducedNotebook,
-  KernelOutput,
-  Lock,
-  PseudoImmutableNotebook,
-  PseudoImmutableReducedNotebook,
-  ReducedNotebook,
-} from '../../types/notebook';
-import { makeImmutableObject } from './helper';
+import { RemoveIndex } from '../../types/generics';
+import { ImmutableRecordOf } from '../../types/immutable';
+import { EditorCell, KernelOutput, Lock, ReducedNotebook } from '../../types/notebook';
 
-export const makeImmutableKernelOutput = (kernelOutput: KernelOutput): ImmutableKernelOutput =>
-  makeImmutableObject<KernelOutput, ImmutableKernelOutput>(kernelOutput);
+export type ImmutableKernelOutput = ImmutableRecordOf<KernelOutput>;
+export const ImmutableKernelOutputFactory = ImmutableRecord<KernelOutput>({
+  uid: '',
+  output_id: '',
+  cell_id: '',
+  runIndex: -1,
+  messageIndex: -1,
+  output: {
+    output_type: 'error',
+    ename: 'No output',
+    evalue: 'No output',
+    traceback: [],
+  },
+});
 
-export const makeImmutableEditorCell = (editorCell: EditorCell): ImmutableEditorCell =>
-  makeImmutableObject<EditorCell, ImmutableEditorCell>(editorCell);
+export type ImmutableEditorCell = ImmutableRecordOf<EditorCell>;
+export const ImmutableEditorCellFactory = ImmutableRecord<EditorCell>({
+  nb_id: '',
+  lock_held_by: null,
+  cell_id: '',
+  time_modified: -1,
+  contents: '',
+  cursor_pos: null,
+  language: 'python',
+  position: -1,
+  rendered: true,
+  runIndex: -1,
+});
 
-export const makeImmutableLock = (lock: Lock): ImmutableLock => makeImmutableObject<Lock, ImmutableLock>(lock);
+export type ImmutableLock = ImmutableRecordOf<Lock>;
+export const ImmutableLockFactory = ImmutableRecord<Lock>({
+  uid: '',
+  cell_id: '',
+});
 
-export const makeImmutableNotebookAccessLevel = (
-  accessLevel: Required<NotebookAccessLevel>
-): ImmutableNotebookAccessLevel => makeImmutableObject<NotebookAccessLevel, ImmutableNotebookAccessLevel>(accessLevel);
+export type ImmutableNotebookAccessLevel = ImmutableRecordOf<RemoveIndex<NotebookAccessLevel>>;
+export const ImmutableNotebookAccessLevelFactory = ImmutableRecord<RemoveIndex<NotebookAccessLevel>>({
+  uid: '',
+  name: '',
+  email: '',
+  access_level: 'Read Only',
+});
 
-export const makeImmutableNotebook = (notebook: Notebook): ImmutableNotebook =>
-  makeImmutableObject<PseudoImmutableNotebook, ImmutableNotebook>({
-    ...notebook,
-    users: ImmutableList(notebook.users.map((user) => makeImmutableNotebookAccessLevel(user))),
-  });
+export type PseudoImmutableNotebook = Omit<RemoveIndex<Notebook>, 'users'> & {
+  users: ImmutableList<ImmutableNotebookAccessLevel>;
+};
+export type ImmutableNotebook = ImmutableRecordOf<PseudoImmutableNotebook>;
+export const ImmutableNotebookFactory = ImmutableRecord<PseudoImmutableNotebook>({
+  nb_id: '',
+  name: '',
+  language: 'python',
+  users: ImmutableList(),
+});
 
-export const makeImmutableReducedNotebook = (notebook: ReducedNotebook): ImmutableReducedNotebook =>
-  makeImmutableObject<PseudoImmutableReducedNotebook, ImmutableReducedNotebook>({
-    ...notebook,
-    users: ImmutableList(notebook.users.map((user) => makeImmutableNotebookAccessLevel(user))),
-    cell_ids: ImmutableList(notebook.cell_ids),
-  });
+export type PseudoImmutableReducedNotebook = Omit<ReducedNotebook, 'users' | 'cell_ids'> & {
+  users: ImmutableList<ImmutableNotebookAccessLevel>;
+  cell_ids: ImmutableList<EditorCell['cell_id']>;
+};
+export type ImmutableReducedNotebook = ImmutableRecordOf<PseudoImmutableReducedNotebook>;
+export const ImmutableReducedNotebookFactory = ImmutableRecord<PseudoImmutableReducedNotebook>({
+  nb_id: '',
+  name: '',
+  language: 'python',
+  users: ImmutableList(),
+  cell_ids: ImmutableList(),
+});

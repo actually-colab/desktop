@@ -4,7 +4,7 @@ import { Notebook } from '@actually-colab/editor-types';
 
 import { ReduxState } from '../types/redux';
 import { _editor } from '../redux/actions';
-import { ImmutableEditorCell } from '../types/notebook';
+import { ImmutableEditorCell } from '../utils/immutable/notebook';
 
 /**
  * Hook to connect to a kernel

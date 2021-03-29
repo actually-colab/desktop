@@ -2,31 +2,30 @@ import { List as ImmutableList, Map as ImmutableMap } from 'immutable';
 
 import { CELL, KERNEL, NOTEBOOKS } from '../types/redux/editor';
 import { SIGN_OUT } from '../types/redux/auth';
-import {
-  EditorCell,
-  ImmutableEditorCell,
-  ImmutableKernelOutput,
-  ImmutableLock,
-  ImmutableNotebook,
-  ImmutableReducedNotebook,
-} from '../types/notebook';
-import { ImmutableKernelLog, Kernel } from '../types/kernel';
-import { BASE_CELL, IMMUTABLE_BASE_CELL } from '../constants/notebook';
+import { EditorCell } from '../types/notebook';
+import { Kernel } from '../types/kernel';
 import { DEFAULT_GATEWAY_URI } from '../constants/jupyter';
+import {
+  ImmutableEditorCell,
+  ImmutableEditorCellFactory,
+  ImmutableKernelOutput,
+  ImmutableKernelOutputFactory,
+  ImmutableLock,
+  ImmutableLockFactory,
+  ImmutableNotebook,
+  ImmutableNotebookAccessLevelFactory,
+  ImmutableNotebookFactory,
+  ImmutableReducedNotebook,
+  ImmutableReducedNotebookFactory,
+} from '../utils/immutable/notebook';
+import { ImmutableKernelLog } from '../utils/immutable/kernel';
+import { ImmutableKernelLogFactory } from '../utils/immutable/kernel';
 import {
   cellArrayToImmutableMap,
   cleanDCell,
   reduceImmutableNotebook,
   reduceNotebookContents,
 } from '../utils/notebook';
-import { makeImmutableKernelLog } from '../utils/immutable/kernel';
-import {
-  makeImmutableEditorCell,
-  makeImmutableKernelOutput,
-  makeImmutableLock,
-  makeImmutableNotebook,
-  makeImmutableReducedNotebook,
-} from '../utils/immutable/notebook';
 import { ReduxActions } from './actions';
 
 /**
@@ -214,7 +213,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         logs: state.logs.push(
-          makeImmutableKernelLog({
+          new ImmutableKernelLogFactory({
             ...action.log,
             id: state.logs.size,
           })
@@ -334,7 +333,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         executionCount: 0,
         runningCellId: '',
         runQueue: state.runQueue.clear(),
-        cells: state.cells.map((cell) => cell.set('runIndex', BASE_CELL.runIndex)),
+        cells: state.cells.map((cell) => cell.set('runIndex', -1)),
         outputs: state.outputs.clear(),
       };
 
@@ -354,7 +353,15 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         isGettingNotebooks: false,
-        notebooks: ImmutableList(action.notebooks.map((notebook) => makeImmutableNotebook(notebook))),
+        notebooks: ImmutableList(
+          action.notebooks.map(
+            (notebook) =>
+              new ImmutableNotebookFactory({
+                ...notebook,
+                users: ImmutableList(notebook.users.map((user) => new ImmutableNotebookAccessLevelFactory(user))),
+              })
+          )
+        ),
         getNotebooksTimestamp: new Date(),
       };
     /**
@@ -382,7 +389,12 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         isCreatingNotebook: false,
-        notebooks: state.notebooks.push(makeImmutableNotebook(action.notebook)),
+        notebooks: state.notebooks.push(
+          new ImmutableNotebookFactory({
+            ...action.notebook,
+            users: ImmutableList(action.notebook.users.map((user) => new ImmutableNotebookAccessLevelFactory(user))),
+          })
+        ),
       };
     /**
      * Failed to create a new notebook
@@ -410,6 +422,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
      */
     case NOTEBOOKS.OPEN.SUCCESS: {
       const dcells = Object.values(action.notebook.cells);
+      const reducedNotebook = reduceNotebookContents(action.notebook);
 
       return {
         ...state,
@@ -420,14 +433,19 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         lockedCells: ImmutableList(
           dcells
             .filter((dcell) => (dcell.lock_held_by ?? '') !== '')
-            .map((dcell) =>
-              makeImmutableLock({
-                cell_id: dcell.cell_id,
-                uid: dcell.lock_held_by ?? '',
-              })
+            .map(
+              (dcell) =>
+                new ImmutableLockFactory({
+                  cell_id: dcell.cell_id,
+                  uid: dcell.lock_held_by ?? '',
+                })
             )
         ),
-        notebook: makeImmutableReducedNotebook(reduceNotebookContents(action.notebook)),
+        notebook: new ImmutableReducedNotebookFactory({
+          ...reducedNotebook,
+          users: ImmutableList(reducedNotebook.users.map((user) => new ImmutableNotebookAccessLevelFactory(user))),
+          cell_ids: ImmutableList(reducedNotebook.cell_ids),
+        }),
         cells: cellArrayToImmutableMap(dcells.map((dcell) => cleanDCell(dcell))),
       };
     }
@@ -459,14 +477,12 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         lockedCells: state.lockedCells
           .filter((lock) => lock.get('cell_id') !== action.cell_id)
           .push(
-            makeImmutableLock({
+            new ImmutableLockFactory({
               uid: action.uid,
               cell_id: action.cell_id,
             })
           ),
-        cells: state.cells.update(action.cell_id, IMMUTABLE_BASE_CELL, (cell) =>
-          cell.merge(makeImmutableEditorCell(action.cell as EditorCell))
-        ),
+        cells: state.cells.update(action.cell_id, new ImmutableEditorCellFactory(), (cell) => cell.merge(action.cell)),
       };
     /**
      * Failed to lock a cell, for instance another user has the lock or there was some error
@@ -495,9 +511,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         lockedCells: state.lockedCells.filter(
           (lock) => lock.get('cell_id') !== action.cell_id || lock.get('uid') !== action.uid
         ),
-        cells: state.cells.update(action.cell_id, IMMUTABLE_BASE_CELL, (cell) =>
-          cell.merge(makeImmutableEditorCell(action.cell as EditorCell))
-        ),
+        cells: state.cells.update(action.cell_id, new ImmutableEditorCellFactory(), (cell) => cell.merge(action.cell)),
       };
     /**
      * Failed to unlock the cell
@@ -530,10 +544,10 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         isAddingCell: action.isMe ? false : state.isAddingCell,
-        notebook: state.notebook.update('cell_ids', ImmutableList(), (cell_ids) =>
+        notebook: state.notebook.update('cell_ids', (cell_ids) =>
           cell_ids.splice(action.index === -1 ? notebook.get('cell_ids').size ?? 0 : action.index, 0, action.cell_id)
         ),
-        cells: state.cells.set(action.cell_id, makeImmutableEditorCell({ ...BASE_CELL, ...action.cell })),
+        cells: state.cells.set(action.cell_id, new ImmutableEditorCellFactory(action.cell)),
       };
     }
     /**
@@ -619,14 +633,12 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ...state,
         ...runQueueChanges,
         isEditingCell: true,
-        cells: state.cells.update(action.cell_id, IMMUTABLE_BASE_CELL, (value) =>
-          value.merge(
-            makeImmutableEditorCell({
-              ...action.changes,
-              ...action.metaChanges,
-              time_modified: shouldUpdateTimestamp ? Date.now() : value.get('time_modified'),
-            } as EditorCell)
-          )
+        cells: state.cells.update(action.cell_id, new ImmutableEditorCellFactory(), (value) =>
+          value.merge({
+            ...action.changes,
+            ...action.metaChanges,
+            time_modified: shouldUpdateTimestamp ? Date.now() : value.get('time_modified'),
+          })
         ),
       };
 
@@ -654,9 +666,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ...runQueueChanges,
         isEditingCell: action.isMe ? false : state.isEditingCell,
         cells: changesAreNewer
-          ? state.cells.update(action.cell_id, IMMUTABLE_BASE_CELL, (value) =>
-              value.merge(makeImmutableEditorCell(action.cell as EditorCell))
-            )
+          ? state.cells.update(action.cell_id, new ImmutableEditorCellFactory(), (value) => value.merge(action.cell))
           : state.cells,
       };
     }
@@ -674,7 +684,9 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
     case CELL.EDIT.UPDATE_CODE:
       return {
         ...state,
-        cells: state.cells.update(action.cell_id, IMMUTABLE_BASE_CELL, (value) => value.set('contents', action.code)),
+        cells: state.cells.update(action.cell_id, new ImmutableEditorCellFactory(), (value) =>
+          value.set('contents', action.code)
+        ),
       };
 
     /**
@@ -772,7 +784,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         isExecutingCode: false,
         runningCellId: '',
         executionCount: action.runIndex,
-        cells: state.cells.update(action.cell_id, IMMUTABLE_BASE_CELL, (value) =>
+        cells: state.cells.update(action.cell_id, new ImmutableEditorCellFactory(), (value) =>
           value.set('runIndex', action.runIndex > state.executionCount ? action.runIndex : value.get('runIndex'))
         ),
       };
@@ -792,7 +804,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         isExecutingCode: false,
         runningCellId: '',
         executionCount: action.runIndex,
-        cells: state.cells.update(action.cell_id, IMMUTABLE_BASE_CELL, (value) =>
+        cells: state.cells.update(action.cell_id, new ImmutableEditorCellFactory(), (value) =>
           value.set('runIndex', action.runIndex > state.executionCount ? action.runIndex : value.get('runIndex'))
         ),
         runQueue: state.runQueue.clear(),
@@ -807,7 +819,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         outputs: state.outputs.update(action.cell_id, ImmutableList(), (outputs) =>
           outputs.concat(
             ImmutableList<ImmutableKernelOutput>(
-              action.messages.map<ImmutableKernelOutput>((message) => makeImmutableKernelOutput(message))
+              action.messages.map<ImmutableKernelOutput>((message) => new ImmutableKernelOutputFactory(message))
             )
           )
         ),
@@ -818,7 +830,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
     case KERNEL.MESSAGE.UPDATE_RUN_INDEX:
       return {
         ...state,
-        cells: state.cells.update(action.cell_id, IMMUTABLE_BASE_CELL, (value) =>
+        cells: state.cells.update(action.cell_id, new ImmutableEditorCellFactory(), (value) =>
           value.set('runIndex', action.runIndex > state.executionCount ? action.runIndex : value.get('runIndex'))
         ),
       };

@@ -3,20 +3,18 @@ import { List as ImmutableList, Map as ImmutableMap } from 'immutable';
 import { saveAs } from 'file-saver';
 
 import { IpynbCell, IpynbNotebook, IpynbOutput } from '../types/ipynb';
+import { EditorCell, KernelOutput, ReducedNotebook } from '../types/notebook';
 import {
-  EditorCell,
   ImmutableEditorCell,
+  ImmutableEditorCellFactory,
   ImmutableKernelOutput,
   ImmutableNotebook,
   ImmutableReducedNotebook,
-  KernelOutput,
-  ReducedNotebook,
-} from '../types/notebook';
+  ImmutableReducedNotebookFactory,
+} from '../utils/immutable/notebook';
 import { User } from '../types/user';
-import { BASE_CELL } from '../constants/notebook';
 import { filterUndefined } from './filter';
 import { splitKeepNewlines } from './regex';
-import { makeImmutableEditorCell, makeImmutableReducedNotebook } from './immutable/notebook';
 
 /**
  * A comparator for sorting kernel outputs by their message indices
@@ -41,7 +39,7 @@ export const reduceNotebook = (notebook: Notebook): ReducedNotebook => ({
  * Convert an immutable notebook to an immutable reduced notebook
  */
 export const reduceImmutableNotebook = (notebook: ImmutableNotebook | null) =>
-  notebook !== null ? makeImmutableReducedNotebook(reduceNotebook(notebook.toJS() as any)) : null;
+  notebook !== null ? new ImmutableReducedNotebookFactory(notebook.toObject()) : null;
 
 /**
  * Convert a notebook contents object to a reduced notebook
@@ -76,8 +74,10 @@ export const cellArrayToImmutableMap = (
 ): ImmutableMap<EditorCell['cell_id'], ImmutableEditorCell> => {
   let map = ImmutableMap<EditorCell['cell_id'], ImmutableEditorCell>();
 
-  cells.forEach((cell) => {
-    map = map.set(cell.cell_id, makeImmutableEditorCell({ ...BASE_CELL, ...cell }));
+  map = map.withMutations((map) => {
+    cells.forEach((cell) => {
+      map = map.set(cell.cell_id, new ImmutableEditorCellFactory(cell));
+    });
   });
 
   return map;
