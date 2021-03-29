@@ -1,4 +1,4 @@
-import { DCell } from '@actually-colab/editor-client';
+import { DCell } from '@actually-colab/editor-types';
 
 import { ReduxState } from '../types/redux';
 

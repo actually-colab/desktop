@@ -1,6 +1,6 @@
-import { Notebook } from '@actually-colab/editor-client';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Notebook } from '@actually-colab/editor-types';
 
 import { ReduxState } from '../types/redux';
 import { _editor } from '../redux/actions';

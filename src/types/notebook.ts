@@ -1,5 +1,5 @@
 import { List as ImmutableList } from 'immutable';
-import { DCell, Notebook, NotebookAccessLevel } from '@actually-colab/editor-client';
+import { DCell, Notebook, NotebookAccessLevel } from '@actually-colab/editor-types';
 
 import { ImmutableObject } from './immutable';
 import { IpynbOutput } from './ipynb';

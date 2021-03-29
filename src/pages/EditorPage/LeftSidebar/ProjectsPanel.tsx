@@ -16,7 +16,7 @@ import {
   Schema,
 } from 'rsuite';
 import { FormInstance } from 'rsuite/lib/Form';
-import { Notebook } from '@actually-colab/editor-client';
+import { Notebook } from '@actually-colab/editor-types';
 
 import { ReduxState } from '../../../types/redux';
 import { _editor } from '../../../redux/actions';
