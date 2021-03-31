@@ -622,9 +622,6 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         }
       }
 
-      // Only update the timestamp if actual DCell properties are changed
-      const shouldUpdateTimestamp = action.changes !== undefined;
-
       return {
         ...state,
         ...runQueueChanges,
@@ -633,7 +630,6 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
           value.merge({
             ...action.changes,
             ...action.metaChanges,
-            time_modified: shouldUpdateTimestamp ? Date.now() : value.time_modified,
           })
         ),
       };
@@ -644,6 +640,14 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
      * The changes may be older due to debouncing, only apply if they are newer
      */
     case CELL.EDIT.SUCCESS: {
+      if (action.isMe) {
+        // Ignore success if you created the edit
+        return {
+          ...state,
+          isEditingCell: false,
+        };
+      }
+
       const oldDate = state.cells.get(action.cell_id)?.time_modified ?? -1;
       const newDate = action.cell.time_modified;
       const changesAreNewer = newDate > oldDate;
@@ -660,7 +664,6 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         ...runQueueChanges,
-        isEditingCell: action.isMe ? false : state.isEditingCell,
         cells: changesAreNewer
           ? state.cells.update(action.cell_id, new ImmutableEditorCellFactory(), (value) => value.merge(action.cell))
           : state.cells,
