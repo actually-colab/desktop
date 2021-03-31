@@ -14,9 +14,14 @@ const renderers = {
  * A component to render a markdown cell
  */
 const MarkdownCell: React.FC<{ cell: ImmutableEditorCell; onDoubleClick(): void }> = ({ cell, onDoubleClick }) => {
+  const contents = React.useMemo(
+    () => (cell.contents.trim() !== '' ? cell.contents : 'This markdown cell is empty. Double click to edit.'),
+    [cell.contents]
+  );
+
   return (
     <div className="markdown-container" onDoubleClick={onDoubleClick}>
-      <MarkdownRender renderers={renderers} source={cell.contents} escapeHtml={false} />
+      <MarkdownRender renderers={renderers} source={contents} escapeHtml={false} />
     </div>
   );
 };
