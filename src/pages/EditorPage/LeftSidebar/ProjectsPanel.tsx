@@ -27,6 +27,9 @@ type NewProjectFormValue = {
   name: string;
 };
 
+/**
+ * The rsuite model to check if the new project form is valid
+ */
 const newProjectModel = Schema.Model({
   name: Schema.Types.StringType().containsLetter('This field is required').isRequired('This field is required'),
 });

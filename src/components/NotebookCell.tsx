@@ -95,6 +95,9 @@ const styles = StyleSheet.create({
   },
 });
 
+/**
+ * A component to render all the content for a cell in a notebook including an editor, a toolbar, and cell outputs
+ */
 const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
   const { kernelIsConnected } = useKernelStatus();
 

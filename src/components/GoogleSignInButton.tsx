@@ -7,6 +7,9 @@ if (!GOOGLE_CLIENT_ID) {
   throw new Error('Invalid Google client ID');
 }
 
+/**
+ * Render a standard Sign in with Google button
+ */
 const GoogleSignInButton: React.FC<{
   onSuccess(payload: GoogleLoginResponse | GoogleLoginResponseOffline): void;
   onFailure(error: any): void;

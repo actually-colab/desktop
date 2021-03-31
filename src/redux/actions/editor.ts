@@ -60,11 +60,17 @@ const connectToKernelStart = (uri: string, displayError: boolean): EditorActionT
   displayError,
 });
 
+/**
+ * Successfully connected to a kernel
+ */
 export const connectToKernelSuccess = (kernel: Kernel): EditorActionTypes => ({
   type: KERNEL.CONNECT.SUCCESS,
   kernel,
 });
 
+/**
+ * Failed to connect to a kernel
+ */
 export const connectToKernelFailure = (errorMessage: string): EditorActionTypes => ({
   type: KERNEL.CONNECT.FAILURE,
   error: {
@@ -72,10 +78,16 @@ export const connectToKernelFailure = (errorMessage: string): EditorActionTypes 
   },
 });
 
+/**
+ * Reconnecting to a kernel
+ */
 export const connectToKernelReconnecting = (): EditorActionTypes => ({
   type: KERNEL.CONNECT.RECONNECTING,
 });
 
+/**
+ * Reconnected to a kernel
+ */
 export const connectToKernelReconnected = (): EditorActionTypes => ({
   type: KERNEL.CONNECT.RECONNECTED,
 });
@@ -84,6 +96,10 @@ const disconnectFromKernelStart = (retry: boolean = true): EditorActionTypes => 
   type: KERNEL.DISCONNECT.START,
   retry,
 });
+
+/**
+ * Successfully disconnected from a kernel
+ */
 export const disconnectFromKernelSuccess = (): EditorActionTypes => ({
   type: KERNEL.DISCONNECT.SUCCESS,
 });
@@ -99,6 +115,9 @@ const restartKernelStart = (): EditorActionTypes => ({
   type: KERNEL.RESTART.START,
 });
 
+/**
+ * Successfully restarted a kernel
+ */
 export const restartKernelSuccess = (): EditorActionTypes => ({
   type: KERNEL.RESTART.SUCCESS,
 });
@@ -121,11 +140,17 @@ const getNotebooksStart = (): EditorActionTypes => ({
   type: NOTEBOOKS.GET.START,
 });
 
+/**
+ * Successfully got the notebooks
+ */
 export const getNotebooksSuccess = (notebooks: Notebook[]): EditorActionTypes => ({
   type: NOTEBOOKS.GET.SUCCESS,
   notebooks,
 });
 
+/**
+ * Failed to get the notebooks
+ */
 export const getNotebooksFailure = (errorMessage: string): EditorActionTypes => ({
   type: NOTEBOOKS.GET.FAILURE,
   error: {
@@ -145,11 +170,17 @@ const createNotebookStart = (name: string): EditorActionTypes => ({
   name,
 });
 
+/**
+ * Successfully created a notebook
+ */
 export const createNotebookSuccess = (notebook: Notebook): EditorActionTypes => ({
   type: NOTEBOOKS.CREATE.SUCCESS,
   notebook,
 });
 
+/**
+ * Failed to create a notebook
+ */
 export const createNotebookFailure = (errorMessage: string): EditorActionTypes => ({
   type: NOTEBOOKS.CREATE.FAILURE,
   error: {
@@ -169,11 +200,17 @@ const openNotebookStart = (nb_id: Notebook['nb_id']): EditorActionTypes => ({
   nb_id,
 });
 
+/**
+ * Successfully opened a notebook
+ */
 export const openNotebookSuccess = (notebook: NotebookContents): EditorActionTypes => ({
   type: NOTEBOOKS.OPEN.SUCCESS,
   notebook,
 });
 
+/**
+ * Failed to open a notebook
+ */
 export const openNotebookFailure = (errorMessage: string): EditorActionTypes => ({
   type: NOTEBOOKS.OPEN.FAILURE,
   error: {
@@ -193,6 +230,9 @@ const lockCellStart = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
   cell_id,
 });
 
+/**
+ * Successfully locked a cell
+ */
 export const lockCellSuccess = (
   isMe: boolean,
   uid: User['uid'],
@@ -206,6 +246,9 @@ export const lockCellSuccess = (
   cell,
 });
 
+/**
+ * Failed to lock a cell
+ */
 export const lockCellFailure = (errorMessage: string): EditorActionTypes => ({
   type: CELL.LOCK.FAILURE,
   error: {
@@ -226,6 +269,9 @@ const unlockCellStart = (cell_id: EditorCell['cell_id']): EditorActionTypes => (
   cell_id,
 });
 
+/**
+ * Successfully unlocked a cell
+ */
 export const unlockCellSuccess = (
   isMe: boolean,
   uid: User['uid'],
@@ -239,6 +285,9 @@ export const unlockCellSuccess = (
   cell,
 });
 
+/**
+ * Failed to unlock a cell
+ */
 export const unlockCellFailure = (errorMessage: string) => ({
   type: CELL.UNLOCK.FAILURE,
   error: {
@@ -258,6 +307,9 @@ const addCellStart = (index: number): EditorActionTypes => ({
   index,
 });
 
+/**
+ * Successfully added a new cell
+ */
 export const addCellSuccess = (
   isMe: boolean,
   cell_id: EditorCell['cell_id'],
@@ -271,6 +323,9 @@ export const addCellSuccess = (
   cell,
 });
 
+/**
+ * Failed to add a new cell
+ */
 export const addCellFailure = (errorMessage: string): EditorActionTypes => ({
   type: CELL.ADD.FAILURE,
   error: {
@@ -290,12 +345,18 @@ const deleteCellStart = (cell_id: EditorCell['cell_id']): EditorActionTypes => (
   cell_id,
 });
 
+/**
+ * Successfully deleted a cell
+ */
 export const deleteCellSuccess = (isMe: boolean, cell_id: EditorCell['cell_id']): EditorActionTypes => ({
   type: CELL.DELETE.SUCCESS,
   isMe,
   cell_id,
 });
 
+/**
+ * Failed to delete a cell
+ */
 export const deleteCellFailure = (errorMessage: string): EditorActionTypes => ({
   type: CELL.DELETE.FAILURE,
   error: {
@@ -321,6 +382,9 @@ const editCellStart = (
   metaChanges,
 });
 
+/**
+ * Successfully edited a cell
+ */
 export const editCellSuccess = (
   isMe: boolean,
   cell_id: EditorCell['cell_id'],
@@ -332,6 +396,9 @@ export const editCellSuccess = (
   cell,
 });
 
+/**
+ * Failed to edit a cell
+ */
 export const editCellFailure = (errorMessage: string): EditorActionTypes => {
   return {
     type: CELL.EDIT.FAILURE,
@@ -410,12 +477,18 @@ const executeCodeStart = (cell: ImmutableEditorCell): EditorActionTypes => ({
   cell,
 });
 
+/**
+ * Successfully executed a cell
+ */
 export const executeCodeSuccess = (cell_id: EditorCell['cell_id'], runIndex: number): EditorActionTypes => ({
   type: KERNEL.EXECUTE.SUCCESS,
   cell_id,
   runIndex,
 });
 
+/**
+ * Failed to execute a cell (or ran into an error)
+ */
 export const executeCodeFailure = (
   cell_id: EditorCell['cell_id'],
   runIndex: number,
@@ -429,12 +502,18 @@ export const executeCodeFailure = (
   },
 });
 
+/**
+ * Received a message from the kernel
+ */
 export const receiveKernelMessage = (cell_id: EditorCell['cell_id'], messages: KernelOutput[]): EditorActionTypes => ({
   type: KERNEL.MESSAGE.RECEIVE,
   cell_id,
   messages,
 });
 
+/**
+ * Update the run index for a cell
+ */
 export const updateRunIndex = (cell_id: EditorCell['cell_id'], runIndex: number): EditorActionTypes => ({
   type: KERNEL.MESSAGE.UPDATE_RUN_INDEX,
   cell_id,
@@ -457,6 +536,9 @@ const interruptKernelStart = (cell_id: EditorCell['cell_id']): EditorActionTypes
   cell_id,
 });
 
+/**
+ * Successfully interrupted a kernel
+ */
 export const interruptKernelSuccess = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
   type: KERNEL.INTERRUPT.SUCCESS,
   cell_id,

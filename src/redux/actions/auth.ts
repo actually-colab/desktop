@@ -9,6 +9,9 @@ const signInStart = (tokenType: 'id' | 'session', token: string): AuthActionType
   token,
 });
 
+/**
+ * Successfully signed in
+ */
 export const signInSuccess = (user: User, sessionToken: string): AuthActionTypes => {
   SessionTokenStorage.set(sessionToken);
 
@@ -19,6 +22,9 @@ export const signInSuccess = (user: User, sessionToken: string): AuthActionTypes
   };
 };
 
+/**
+ * Failed to sign in
+ */
 export const signInFailure = (errorMessage: string): AuthActionTypes => {
   return {
     type: SIGN_IN.FAILURE,
