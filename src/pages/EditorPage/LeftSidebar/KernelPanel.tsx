@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import { Button, Icon, IconButton, Input, Modal, Popover, Whisper } from 'rsuite';
+import { Button, Icon, IconButton, Input, Modal, Popover, Toggle, Whisper } from 'rsuite';
 
 import { ReduxState } from '../../../types/redux';
 import { _editor } from '../../../redux/actions';
@@ -67,8 +67,15 @@ const styles = StyleSheet.create({
   bold: {
     fontWeight: 'bold',
   },
-  disconnectContainer: {
+  connectionContainer: {
     marginBottom: spacing.DEFAULT / 2,
+  },
+  autoConnectContainer: {
+    marginBottom: spacing.DEFAULT / 2,
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
 });
 
@@ -279,16 +286,17 @@ const KernelPanel: React.FC = () => {
         <div ref={logsAnchorRef} />
       </pre>
 
-      <div className={css(styles.disconnectContainer)}>
-        <Button
-          appearance="ghost"
-          block
-          disabled={kernelActiveIsh}
-          onClick={() => dispatchConnectToKernelAuto(!autoConnectToKernel)}
-        >
-          {autoConnectToKernel ? 'Disable Auto Connect' : 'Enable Auto Connect'}
-        </Button>
-        <Button appearance="subtle" block disabled={!kernelActiveIsh} onClick={dispatchDisconnectFromKernel}>
+      <div className={css(styles.connectionContainer)}>
+        <div className={css(styles.autoConnectContainer)}>
+          <h6>Auto Connect</h6>
+          <Toggle
+            checked={autoConnectToKernel}
+            disabled={kernelActiveIsh}
+            onChange={(checked) => dispatchConnectToKernelAuto(checked)}
+          />
+        </div>
+
+        <Button block disabled={!kernelActiveIsh} onClick={dispatchDisconnectFromKernel}>
           <Icon icon="ban" style={{ marginRight: spacing.DEFAULT / 2 }} />
           Disconnect
         </Button>
