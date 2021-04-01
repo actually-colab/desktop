@@ -18,7 +18,7 @@ export const appendKernelLog = (log: Omit<KernelLog, 'id' | 'date'>): EditorActi
     log: {
       ...log,
       date,
-      dateString: format(date, 'Pp'),
+      dateString: format(date, 'pp'),
     },
   };
 };
@@ -465,7 +465,7 @@ export const addCellToQueue = (cell: ImmutableEditorCell): EditorAsyncActionType
   dispatch(
     appendKernelLog({
       status: 'Info',
-      message: `Added cell ${cell.cell_id} to queue`,
+      message: `Queued cell ${cell.cell_id}`,
     })
   );
 
