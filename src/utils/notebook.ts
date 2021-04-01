@@ -92,59 +92,98 @@ export const cellArrayToImmutableMap = (
 };
 
 /**
- * Given a cells and output, convert the notebook to a JSON ipynb format
+ * Given cells and outputs, convert the notebook to a JSON ipynb format
  */
 const convertToIpynb = (
   notebookCells: {
     cell: ImmutableEditorCell;
     outputs?: ImmutableList<ImmutableKernelOutput>;
   }[]
-): IpynbNotebook => ({
-  nbformat: 4,
-  nbformat_minor: 1,
-  metadata: {
-    kernelspec: {
-      display_name: 'Python 3',
-      language: 'python',
-      name: 'python3',
-    },
-    language_info: {
-      codemirror_mode: {
-        name: 'ipython',
-        version: 3,
+): string => {
+  const ipynb: IpynbNotebook = {
+    nbformat: 4,
+    nbformat_minor: 1,
+    metadata: {
+      kernelspec: {
+        display_name: 'Python 3',
+        language: 'python',
+        name: 'python3',
       },
-      file_extension: '.py',
-      mimetype: 'text/x-python',
-      name: 'python',
-      pygments_lexer: 'ipython3',
+      language_info: {
+        codemirror_mode: {
+          name: 'ipython',
+          version: 3,
+        },
+        file_extension: '.py',
+        mimetype: 'text/x-python',
+        name: 'python',
+        pygments_lexer: 'ipython3',
+      },
     },
-  },
-  cells: notebookCells.map<IpynbCell>(({ cell, outputs }) =>
-    cell.language === 'markdown'
-      ? {
-          cell_type: 'markdown',
-          metadata: {},
-          source: splitKeepNewlines(cell.contents),
-        }
-      : {
-          cell_type: 'code',
-          execution_count: cell.runIndex !== -1 ? cell.runIndex : null,
-          metadata: {
-            tags: [],
-          },
-          outputs:
-            outputs
-              ?.map<IpynbOutput>((output) =>
-                filterUndefined<IpynbOutput & { transient?: any }, IpynbOutput>({
-                  ...output.output,
-                  transient: undefined,
-                })
-              )
-              ?.toJS() ?? [],
-          source: splitKeepNewlines(cell.contents),
-        }
-  ),
-});
+    cells: notebookCells.map<IpynbCell>(({ cell, outputs }) =>
+      cell.language === 'markdown'
+        ? {
+            cell_type: 'markdown',
+            metadata: {},
+            source: splitKeepNewlines(cell.contents),
+          }
+        : {
+            cell_type: 'code',
+            execution_count: cell.runIndex !== -1 ? cell.runIndex : null,
+            metadata: {
+              tags: [],
+            },
+            outputs:
+              outputs
+                ?.map<IpynbOutput>((output) =>
+                  filterUndefined<IpynbOutput & { transient?: any }, IpynbOutput>({
+                    ...output.output,
+                    transient: undefined,
+                  })
+                )
+                ?.toJS() ?? [],
+            source: splitKeepNewlines(cell.contents),
+          }
+    ),
+  };
+
+  return JSON.stringify(ipynb);
+};
+
+/**
+ * Given cells and outputs, convert the notebook to a python file
+ */
+const convertToPy = (
+  notebookCells: {
+    cell: ImmutableEditorCell;
+    outputs?: ImmutableList<ImmutableKernelOutput>;
+  }[]
+): string => {
+  return notebookCells
+    .map(({ cell }) =>
+      cell.language === 'python'
+        ? cell.contents
+        : cell.contents
+            .split('\n')
+            .map((line) => `# ${line}`)
+            .join('\n')
+    )
+    .join('\n\n');
+};
+
+/**
+ * Given cells and outputs, convert the notebook to a markdown file
+ */
+const convertToMd = (
+  notebookCells: {
+    cell: ImmutableEditorCell;
+    outputs?: ImmutableList<ImmutableKernelOutput>;
+  }[]
+): string => {
+  return notebookCells
+    .map(({ cell }) => (cell.language === 'python' ? `\`\`\`python\n${cell.contents}\n\`\`\`` : cell.contents))
+    .join('\n\n');
+};
 
 /**
  * Download the given notebook data to an ipynb file. Only include outputs with the given uid and latest run index
@@ -153,7 +192,8 @@ export const download = (
   notebook: ImmutableReducedNotebook,
   uid: User['uid'],
   cells: ImmutableMap<EditorCell['cell_id'], ImmutableEditorCell>,
-  outputs: ImmutableMap<EditorCell['cell_id'], ImmutableList<ImmutableKernelOutput>>
+  outputs: ImmutableMap<EditorCell['cell_id'], ImmutableList<ImmutableKernelOutput>>,
+  extension: 'ipynb' | 'py' | 'md' = 'ipynb'
 ) => {
   const notebookData: { cell: ImmutableEditorCell; outputs?: ImmutableList<ImmutableKernelOutput> }[] = [];
 
@@ -171,11 +211,26 @@ export const download = (
     }
   });
 
-  const ipynb = convertToIpynb(notebookData);
+  let content: string = '';
 
-  const blob = new Blob([JSON.stringify(ipynb)], {
+  switch (extension) {
+    case 'ipynb': {
+      content = convertToIpynb(notebookData);
+      break;
+    }
+    case 'py': {
+      content = convertToPy(notebookData);
+      break;
+    }
+    case 'md': {
+      content = convertToMd(notebookData);
+      break;
+    }
+  }
+
+  const blob = new Blob([content], {
     type: 'charset=utf-8',
   });
 
-  saveAs(blob, `${notebook.name}.ipynb`);
+  saveAs(blob, `${notebook.name}.${extension}`);
 };
