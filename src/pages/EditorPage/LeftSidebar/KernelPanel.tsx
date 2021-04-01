@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import { Button, Icon, IconButton, Input, Modal, Popover, Toggle, Whisper } from 'rsuite';
+import { Button, Icon, IconButton, Input, Modal, Popover, Timeline, Toggle, Whisper } from 'rsuite';
 
 import { ReduxState } from '../../../types/redux';
 import { _editor } from '../../../redux/actions';
@@ -56,16 +56,17 @@ const styles = StyleSheet.create({
     paddingLeft: spacing.DEFAULT / 2,
     paddingRight: spacing.DEFAULT / 4,
     borderRadius: 4,
-    backgroundColor: palette.LIGHT_GRAY,
     color: palette.ALMOST_BLACK,
     overflowX: 'auto',
     overflowY: 'auto',
     fontSize: 12,
+    lineHeight: '12px',
     whiteSpace: 'pre-wrap',
     wordBreak: 'break-word',
   },
   bold: {
     fontWeight: 'bold',
+    lineHeight: '18px',
   },
   connectionContainer: {
     marginBottom: spacing.DEFAULT / 2,
@@ -264,24 +265,24 @@ const KernelPanel: React.FC = () => {
         </Button>
       </p>
       <pre className={css(styles.output)}>
-        {logs.map((log) => (
-          <React.Fragment key={log.id}>
-            <span className={css(styles.bold)}>{log.dateString}</span>
-            {'\n'}
-
-            {log.status === 'Success' && (
-              <Icon icon="check-circle" style={{ color: palette.SUCCESS, marginRight: spacing.DEFAULT / 4 }} />
-            )}
-            {log.status === 'Warning' && (
-              <Icon icon="exclamation-triangle" style={{ color: palette.WARNING, marginRight: spacing.DEFAULT / 4 }} />
-            )}
-            {log.status === 'Error' && (
-              <Icon icon="close-circle" style={{ color: palette.ERROR, marginRight: spacing.DEFAULT / 4 }} />
-            )}
-            {log.message}
-            {'\n\n'}
-          </React.Fragment>
-        ))}
+        <Timeline className="icon-timeline">
+          {logs.map((log) => (
+            <Timeline.Item
+              dot={
+                log.status === 'Success' ? (
+                  <Icon icon="check" style={{ background: palette.SUCCESS, color: palette.BASE }} />
+                ) : log.status === 'Warning' ? (
+                  <Icon icon="exclamation" style={{ background: palette.WARNING, color: palette.BASE }} />
+                ) : log.status === 'Error' ? (
+                  <Icon icon="close" style={{ background: palette.ERROR, color: palette.BASE }} />
+                ) : undefined
+              }
+            >
+              <p className={css(styles.bold)}>{log.dateString}</p>
+              <p>{log.message}</p>
+            </Timeline.Item>
+          ))}
+        </Timeline>
 
         <div ref={logsAnchorRef} />
       </pre>
