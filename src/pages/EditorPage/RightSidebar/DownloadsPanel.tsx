@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Button, Icon } from 'rsuite';
+import { Button, Dropdown, Icon } from 'rsuite';
 
 import { spacing } from '../../../constants/theme';
 import { ReduxState } from '../../../types/redux';
@@ -26,11 +26,16 @@ const DownloadsPanel: React.FC = () => {
   }, []);
   const uid = React.useMemo(() => user?.uid ?? '', [user?.uid]);
 
-  const onClickDownload = React.useCallback(() => {
-    if (notebook !== null) {
-      download(notebook, uid, cells, outputs);
-    }
-  }, [cells, notebook, outputs, uid]);
+  const onClickDownload = React.useCallback(
+    (type: 'ipynb' | 'py' | 'md') => {
+      if (notebook === null) {
+        return;
+      }
+
+      download(notebook, uid, cells, outputs, type);
+    },
+    [cells, notebook, outputs, uid]
+  );
 
   return (
     <div className="markdown-container">
@@ -41,10 +46,17 @@ const DownloadsPanel: React.FC = () => {
         other people make edits that haven't propagated they will not be included. What you see is what you get!
       </p>
 
-      <Button appearance="ghost" block disabled={!isDownloadSupported} onClick={onClickDownload}>
-        <Icon icon="file-download" size="lg" style={{ marginRight: spacing.DEFAULT / 2 }} />
-        Download Notebook
-      </Button>
+      <Dropdown
+        title="Download"
+        menuStyle={{ border: '1px solid #ddd' }}
+        icon={<Icon icon="file-download" size="lg" style={{ marginRight: spacing.DEFAULT / 2 }} />}
+        disabled={!isDownloadSupported}
+        onSelect={onClickDownload}
+      >
+        <Dropdown.Item eventKey="ipynb">as Notebook (.ipynb)</Dropdown.Item>
+        <Dropdown.Item eventKey="py">as Python (.py)</Dropdown.Item>
+        <Dropdown.Item eventKey="md">as Markdown (.md)</Dropdown.Item>
+      </Dropdown>
     </div>
   );
 };
