@@ -210,8 +210,8 @@ const ReduxEditorClient = (): Middleware<{}, ReduxState, any> => {
               _ui.notify({
                 level: 'error',
                 title: 'Error',
-                message: 'Failed to open your notebook!',
-                duration: 3000,
+                message: 'Failed to open your notebook! Are you sure the user exists?',
+                duration: 4000,
               })
             );
           }
@@ -227,7 +227,7 @@ const ReduxEditorClient = (): Middleware<{}, ReduxState, any> => {
           try {
             const notebook = await restClient.shareNotebook(action.email, action.nb_id, action.access_level);
 
-            store.dispatch(_editor.shareNotebookSuccess());
+            store.dispatch(_editor.shareNotebookSuccess(notebook));
           } catch (error) {
             console.error(error);
             store.dispatch(_editor.shareNotebooksFailure(error.message));

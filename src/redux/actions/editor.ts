@@ -239,8 +239,9 @@ const shareNotebookStart = (
 /**
  * Successfully shared a notebook
  */
-export const shareNotebookSuccess = (): EditorActionTypes => ({
+export const shareNotebookSuccess = (notebook: Notebook): EditorActionTypes => ({
   type: NOTEBOOKS.SHARE.SUCCESS,
+  notebook,
 });
 
 /**

@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     color: palette.GRAY,
   },
   accessLevelIconDisabled: {
-    opacity: 0.5,
+    opacity: 0.3,
   },
 });
 
@@ -112,6 +112,10 @@ const CollaboratorsPanel: React.FC = () => {
     (_, event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       dispatchShareNotebook();
+      setShareFormValue({
+        email: '',
+        accessLevel: 'Read Only',
+      });
     },
     [dispatchShareNotebook]
   );

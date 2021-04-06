@@ -471,11 +471,25 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ...state,
         isSharingNotebook: true,
       };
-    case NOTEBOOKS.SHARE.SUCCESS:
+    case NOTEBOOKS.SHARE.SUCCESS: {
       return {
         ...state,
         isSharingNotebook: false,
+        notebooks: state.notebooks
+          .filter((notebook) => notebook.nb_id !== action.notebook.nb_id)
+          .push(
+            new ImmutableNotebookFactory({
+              ...action.notebook,
+              users: makeAccessLevelsImmutable(action.notebook.users),
+            })
+          ),
+        notebook:
+          state.notebook?.merge({
+            time_modified: action.notebook.time_modified,
+            users: makeAccessLevelsImmutable(action.notebook.users),
+          }) ?? null,
       };
+    }
     case NOTEBOOKS.SHARE.FAILURE:
       return {
         ...state,

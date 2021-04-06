@@ -227,6 +227,7 @@ type NotebooksShareStartAction = {
 
 type NotebooksShareSuccessAction = {
   type: typeof NOTEBOOKS.SHARE.SUCCESS;
+  notebook: Notebook;
 };
 
 type NotebooksShareFailureAction = {
