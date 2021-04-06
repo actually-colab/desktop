@@ -21,6 +21,7 @@ import { Notebook } from '@actually-colab/editor-types';
 
 import { ReduxState } from '../../../types/redux';
 import { _editor } from '../../../redux/actions';
+import { timeSince } from '../../../utils/date';
 import { palette, spacing } from '../../../constants/theme';
 import { PopoverDropdown } from '../../../components';
 
@@ -192,6 +193,7 @@ const ProjectsPanel: React.FC = () => {
 
       {notebooks.map((project) => {
         const active = project.nb_id === notebook?.nb_id;
+        const timeSinceModification = timeSince(project.time_modified);
 
         return (
           <div key={project.nb_id} className={css(styles.project)}>
@@ -205,7 +207,7 @@ const ProjectsPanel: React.FC = () => {
                 <Icon icon={active ? 'file' : 'file-o'} />
                 <span className={css(styles.projectTitle)}>{project.name}</span>
               </div>
-              <span className={css(styles.lastModifiedText)}>10m</span>
+              <span className={css(styles.lastModifiedText)}>{timeSinceModification}</span>
             </Button>
           </div>
         );

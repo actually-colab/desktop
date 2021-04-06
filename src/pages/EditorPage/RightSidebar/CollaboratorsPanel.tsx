@@ -77,6 +77,9 @@ const styles = StyleSheet.create({
   accessLevelIcon: {
     color: palette.GRAY,
   },
+  accessLevelIconDisabled: {
+    opacity: 0.5,
+  },
 });
 
 /**
@@ -160,8 +163,11 @@ const CollaboratorsPanel: React.FC = () => {
 
                 <FlexboxGrid.Item colspan={2}>
                   <Icon
-                    className={css(styles.accessLevelIcon)}
-                    icon={item.access_level === 'Read Only' ? 'eye' : 'pencil'}
+                    className={css(
+                      styles.accessLevelIcon,
+                      item.access_level === 'Read Only' && styles.accessLevelIconDisabled
+                    )}
+                    icon="pencil"
                     size="lg"
                   />
                 </FlexboxGrid.Item>
