@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { DCell, Notebook, NotebookContents } from '@actually-colab/editor-types';
+import { DCell, Notebook, NotebookAccessLevelType, NotebookContents } from '@actually-colab/editor-types';
 
 import { CELL, EditorActionTypes, EditorAsyncActionTypes, KERNEL, NOTEBOOKS } from '../../types/redux/editor';
 import { User } from '../../types/user';
@@ -223,6 +223,45 @@ export const openNotebookFailure = (errorMessage: string): EditorActionTypes => 
  */
 export const openNotebook = (nb_id: Notebook['nb_id']): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(openNotebookStart(nb_id));
+};
+
+const shareNotebookStart = (
+  nb_id: Notebook['nb_id'],
+  email: string,
+  access_level: NotebookAccessLevelType
+): EditorActionTypes => ({
+  type: NOTEBOOKS.SHARE.START,
+  nb_id,
+  email,
+  access_level,
+});
+
+/**
+ * Successfully shared a notebook
+ */
+export const shareNotebookSuccess = (): EditorActionTypes => ({
+  type: NOTEBOOKS.SHARE.SUCCESS,
+});
+
+/**
+ * Failed to share a notebook
+ */
+export const shareNotebooksFailure = (errorMessage: string): EditorActionTypes => ({
+  type: NOTEBOOKS.SHARE.FAILURE,
+  error: {
+    message: errorMessage,
+  },
+});
+
+/**
+ * Share a notebook with a given user
+ */
+export const shareNotebook = (
+  nb_id: Notebook['nb_id'],
+  email: string,
+  access_level: NotebookAccessLevelType
+): EditorAsyncActionTypes => async (dispatch) => {
+  dispatch(shareNotebookStart(nb_id, email, access_level));
 };
 
 const lockCellStart = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({

@@ -19,6 +19,7 @@ import { NotebookAccessLevelType } from '@actually-colab/editor-types';
 
 import { palette, spacing } from '../../../constants/theme';
 import { ReduxState } from '../../../types/redux';
+import { _editor } from '../../../redux/actions';
 import { UserAvatar } from '../../../components';
 
 type ShareFormValue = {
@@ -89,6 +90,7 @@ const CollaboratorsPanel: React.FC = () => {
   const shareFormRef = React.useRef<FormInstance>();
 
   const notebook = useSelector((state: ReduxState) => state.editor.notebook);
+  const isSharingNotebook = useSelector((state: ReduxState) => state.editor.isSharingNotebook);
 
   const [shareFormValue, setShareFormValue] = React.useState<ShareFormValue>({
     email: '',
@@ -98,7 +100,13 @@ const CollaboratorsPanel: React.FC = () => {
   const sharedUsers = React.useMemo(() => notebook?.users, [notebook?.users]);
 
   const dispatch = useDispatch();
-  const dispatchShareNotebook = React.useCallback(() => shareFormRef.current?.check(), []);
+  const dispatchShareNotebook = React.useCallback(
+    () =>
+      shareFormRef.current?.check() &&
+      notebook &&
+      dispatch(_editor.shareNotebook(notebook?.nb_id, shareFormValue.email, shareFormValue.accessLevel)),
+    [dispatch, notebook, shareFormValue.accessLevel, shareFormValue.email]
+  );
 
   const handleShareFormSubmit = React.useCallback(
     (_, event: React.FormEvent<HTMLFormElement>) => {
@@ -137,7 +145,13 @@ const CollaboratorsPanel: React.FC = () => {
           </FormGroup>
         </Form>
 
-        <Button className={css(styles.shareButton)} appearance="primary" block onClick={dispatchShareNotebook}>
+        <Button
+          className={css(styles.shareButton)}
+          appearance="primary"
+          block
+          loading={isSharingNotebook}
+          onClick={dispatchShareNotebook}
+        >
           <Icon icon="share" size="lg" />
           <span className={css(styles.shareText)}>Share</span>
         </Button>

@@ -220,6 +220,31 @@ const ReduxEditorClient = (): Middleware<{}, ReduxState, any> => {
       }
 
       /**
+       * Started sharing a given notebook
+       */
+      case NOTEBOOKS.SHARE.START: {
+        (async () => {
+          try {
+            const notebook = await restClient.shareNotebook(action.email, action.nb_id, action.access_level);
+
+            store.dispatch(_editor.shareNotebookSuccess());
+          } catch (error) {
+            console.error(error);
+            store.dispatch(_editor.shareNotebooksFailure(error.message));
+            store.dispatch(
+              _ui.notify({
+                level: 'error',
+                title: 'Error',
+                message: 'Failed to share notebook!',
+                duration: 3000,
+              })
+            );
+          }
+        })();
+        break;
+      }
+
+      /**
        * Started adding a new cell
        */
       case CELL.ADD.START: {
