@@ -12,7 +12,7 @@ if (!GOOGLE_CLIENT_ID) {
  */
 const GoogleSignInButton: React.FC<{
   onSuccess(payload: GoogleLoginResponse | GoogleLoginResponseOffline): void;
-  onFailure(error: any): void;
+  onFailure(error: Error): void;
 }> = ({ onSuccess, onFailure }) => {
   return (
     <GoogleLogin

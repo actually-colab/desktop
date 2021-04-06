@@ -1,9 +1,8 @@
-import type { DUser } from '@actually-colab/editor-types';
-
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import { DisplayData, ExecuteResult, KernelOutputError, Media, Output, StreamText } from '@nteract/outputs';
+import type { DUser } from '@actually-colab/editor-types';
 
 import { ReduxState } from '../types/redux';
 import { spacing } from '../constants/theme';

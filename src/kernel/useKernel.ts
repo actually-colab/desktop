@@ -9,7 +9,7 @@ import { ImmutableEditorCell } from '../immutable';
 /**
  * Hook to connect to a kernel
  */
-const useKernel = () => {
+const useKernel = (): null => {
   const user = useSelector((state: ReduxState) => state.auth.user);
   const autoConnectToKernel = useSelector((state: ReduxState) => state.editor.autoConnectToKernel);
   const isEditingGatewayUri = useSelector((state: ReduxState) => state.editor.isEditingGatewayUri);

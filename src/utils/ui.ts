@@ -5,7 +5,7 @@ import { UINotification } from '../types/ui';
 /**
  * Send a notification that isn't tracked in redux
  */
-export const notifyUntraced = (notification: UINotification, onClose?: (id: string) => void) => {
+export const notifyUntraced = (notification: UINotification, onClose?: (id: string) => void): void => {
   Notification[notification.level]({
     key: notification.id,
     title: notification.title,
@@ -18,13 +18,13 @@ export const notifyUntraced = (notification: UINotification, onClose?: (id: stri
 /**
  * Hide a notification with the given id
  */
-export const closeNotification = (id: UINotification['id']) => {
+export const closeNotification = (id: UINotification['id']): void => {
   Notification.close(id);
 };
 
 /**
  * Hide all notifications
  */
-export const closeAllNotifications = () => {
+export const closeAllNotifications = (): void => {
   Notification.closeAll();
 };

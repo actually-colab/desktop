@@ -12,7 +12,7 @@ import { ReduxActions, _editor, _ui } from '../actions';
 /**
  * A redux middleware to manage the Jupyter Kernel
  */
-const ReduxKernel = (): Middleware<{}, ReduxState, any> => {
+const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => {
   let kernel: IKernel | null = null;
   let kernelUri: string = '';
 

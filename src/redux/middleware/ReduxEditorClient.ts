@@ -17,7 +17,7 @@ const baseSocketURL = httpToWebSocket(process.env.REACT_APP_AC_WS_URI ?? 'http:/
 /**
  * A redux middleware for the Actually Colab REST and Socket clients
  */
-const ReduxEditorClient = (): Middleware<{}, ReduxState, any> => {
+const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, any> => {
   const restClient: ActuallyColabRESTClient = new ActuallyColabRESTClient(baseRestURL);
   let socketClient: ActuallyColabSocketClient | null = null;
 

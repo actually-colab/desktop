@@ -71,7 +71,7 @@ const AuthPage: React.FC = () => {
     [dispatchGoogleSignIn]
   );
 
-  const onGoogleSignInFailure = React.useCallback((error: any) => {
+  const onGoogleSignInFailure = React.useCallback((error: Error) => {
     console.log(error);
   }, []);
 

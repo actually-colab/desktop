@@ -20,13 +20,13 @@ import { splitKeepNewlines } from './regex';
 /**
  * A comparator for sorting kernel outputs by their message indices
  */
-export const sortImmutableOutputByMessageIndex = (a: ImmutableKernelOutput, b: ImmutableKernelOutput) =>
+export const sortImmutableOutputByMessageIndex = (a: ImmutableKernelOutput, b: ImmutableKernelOutput): number =>
   a.messageIndex - b.messageIndex;
 
 /**
  * A comparator for sorting immutable kernel outputs by their message indices
  */
-export const sortOutputByMessageIndex = (a: KernelOutput, b: KernelOutput) => a.messageIndex - b.messageIndex;
+export const sortOutputByMessageIndex = (a: KernelOutput, b: KernelOutput): number => a.messageIndex - b.messageIndex;
 
 /**
  * Convert a notebook to a reduced notebook
@@ -39,7 +39,7 @@ export const reduceNotebook = (notebook: Notebook): ReducedNotebook => ({
 /**
  * Convert an immutable notebook to an immutable reduced notebook
  */
-export const reduceImmutableNotebook = (notebook: ImmutableNotebook | null) =>
+export const reduceImmutableNotebook = (notebook: ImmutableNotebook | null): ImmutableReducedNotebook | null =>
   notebook !== null ? new ImmutableReducedNotebookFactory(notebook.toObject()) : null;
 
 /**
@@ -193,7 +193,7 @@ export const download = (
   cells: ImmutableMap<EditorCell['cell_id'], ImmutableEditorCell>,
   outputs: ImmutableMap<EditorCell['cell_id'], ImmutableList<ImmutableKernelOutput>>,
   extension: 'ipynb' | 'py' | 'md' = 'ipynb'
-) => {
+): void => {
   const notebookData: { cell: ImmutableEditorCell; outputs?: ImmutableList<ImmutableKernelOutput> }[] = [];
 
   notebook.cell_ids.forEach((cell_id) => {

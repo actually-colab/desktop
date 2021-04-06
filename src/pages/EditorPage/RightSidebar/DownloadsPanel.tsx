@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Button, Dropdown, Icon } from 'rsuite';
+import { Dropdown, Icon } from 'rsuite';
 
 import { spacing } from '../../../constants/theme';
 import { ReduxState } from '../../../types/redux';
