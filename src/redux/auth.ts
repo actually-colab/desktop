@@ -1,5 +1,6 @@
+import type { DUser } from '@actually-colab/editor-types';
+
 import { LOAD_SESSION, SIGN_IN, SIGN_OUT } from '../types/redux/auth';
-import { User } from '../types/user';
 import { ReduxActions } from './actions';
 
 /**
@@ -27,7 +28,7 @@ export interface AuthState {
   /**
    * The user if the user is signed in, otherwise null
    */
-  user: User | null;
+  user: DUser | null;
   /**
    * The session token if the user is signed in
    */

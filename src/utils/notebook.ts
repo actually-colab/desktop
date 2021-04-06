@@ -1,10 +1,9 @@
-import { DCell, Notebook, NotebookAccessLevel, NotebookContents } from '@actually-colab/editor-types';
+import { DCell, Notebook, NotebookAccessLevel, NotebookContents, DUser } from '@actually-colab/editor-types';
 import { List as ImmutableList, Map as ImmutableMap } from 'immutable';
 import { saveAs } from 'file-saver';
 
 import { IpynbCell, IpynbNotebook, IpynbOutput } from '../types/ipynb';
 import { EditorCell, KernelOutput, ReducedNotebook } from '../types/notebook';
-import { User } from '../types/user';
 import {
   ImmutableEditorCell,
   ImmutableEditorCellFactory,
@@ -190,7 +189,7 @@ const convertToMd = (
  */
 export const download = (
   notebook: ImmutableReducedNotebook,
-  uid: User['uid'],
+  uid: DUser['uid'],
   cells: ImmutableMap<EditorCell['cell_id'], ImmutableEditorCell>,
   outputs: ImmutableMap<EditorCell['cell_id'], ImmutableList<ImmutableKernelOutput>>,
   extension: 'ipynb' | 'py' | 'md' = 'ipynb'

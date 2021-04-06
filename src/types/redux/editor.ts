@@ -1,9 +1,8 @@
 import { Action } from 'redux';
 import { ThunkAction } from 'redux-thunk';
-import { DCell, Notebook, NotebookAccessLevelType, NotebookContents } from '@actually-colab/editor-types';
+import { DCell, Notebook, NotebookAccessLevelType, NotebookContents, DUser } from '@actually-colab/editor-types';
 
 import { ImmutableEditorCell } from '../../immutable';
-import { User } from '../user';
 import { EditorCell, EditorCellMeta, KernelOutput } from '../notebook';
 import { Kernel, KernelLog } from '../kernel';
 
@@ -242,7 +241,7 @@ type LockCellStartAction = {
 type LockCellSuccessAction = {
   type: typeof CELL.LOCK.SUCCESS;
   isMe: boolean;
-  uid: User['uid'];
+  uid: DUser['uid'];
   cell_id: EditorCell['cell_id'];
   cell: Partial<EditorCell>;
 };
@@ -259,7 +258,7 @@ type UnlockCellStartAction = {
 type UnlockCellSuccessAction = {
   type: typeof CELL.UNLOCK.SUCCESS;
   isMe: boolean;
-  uid: User['uid'];
+  uid: DUser['uid'];
   cell_id: EditorCell['cell_id'];
   cell: Partial<EditorCell>;
 };
