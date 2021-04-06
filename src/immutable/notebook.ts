@@ -8,11 +8,11 @@ import { EditorCell, KernelOutput, Lock, ReducedNotebook } from '../types/notebo
 /**
  * An Immutable Record for a kernel output
  */
-export type ImmutableKernelOutput = ImmutableRecordOf<KernelOutput>;
+export type ImmutableKernelOutput = ImmutableRecordOf<Required<KernelOutput>>;
 /**
  * An Immutable Record Factory for a kernel output
  */
-export const ImmutableKernelOutputFactory = ImmutableRecord<KernelOutput>({
+export const ImmutableKernelOutputFactory = ImmutableRecord<Required<KernelOutput>>({
   uid: '',
   output_id: '',
   cell_id: '',
@@ -29,11 +29,11 @@ export const ImmutableKernelOutputFactory = ImmutableRecord<KernelOutput>({
 /**
  * An Immutable Record for an editor cell
  */
-export type ImmutableEditorCell = ImmutableRecordOf<EditorCell>;
+export type ImmutableEditorCell = ImmutableRecordOf<Required<EditorCell>>;
 /**
  * An Immutable Record Factory for an editor cell
  */
-export const ImmutableEditorCellFactory = ImmutableRecord<EditorCell>({
+export const ImmutableEditorCellFactory = ImmutableRecord<Required<EditorCell>>({
   nb_id: '',
   lock_held_by: null,
   cell_id: '',
@@ -49,11 +49,11 @@ export const ImmutableEditorCellFactory = ImmutableRecord<EditorCell>({
 /**
  * An Immutable Record for a lock
  */
-export type ImmutableLock = ImmutableRecordOf<Lock>;
+export type ImmutableLock = ImmutableRecordOf<Required<Lock>>;
 /**
  * An Immutable Record Factory for a lock
  */
-export const ImmutableLockFactory = ImmutableRecord<Lock>({
+export const ImmutableLockFactory = ImmutableRecord<Required<Lock>>({
   uid: '',
   cell_id: '',
 });
@@ -61,14 +61,15 @@ export const ImmutableLockFactory = ImmutableRecord<Lock>({
 /**
  * An Immutable Record for an access level
  */
-export type ImmutableNotebookAccessLevel = ImmutableRecordOf<RemoveIndex<NotebookAccessLevel>>;
+export type ImmutableNotebookAccessLevel = ImmutableRecordOf<RemoveIndex<Required<NotebookAccessLevel>>>;
 /**
  * An Immutable Record Factory for an access level
  */
-export const ImmutableNotebookAccessLevelFactory = ImmutableRecord<RemoveIndex<NotebookAccessLevel>>({
+export const ImmutableNotebookAccessLevelFactory = ImmutableRecord<RemoveIndex<Required<NotebookAccessLevel>>>({
   uid: '',
   name: '',
   email: '',
+  image_url: '',
   access_level: 'Read Only',
 });
 
@@ -81,11 +82,11 @@ export type PseudoImmutableNotebook = Omit<RemoveIndex<Notebook>, 'users'> & {
 /**
  * An Immutable Record for a notebook
  */
-export type ImmutableNotebook = ImmutableRecordOf<PseudoImmutableNotebook>;
+export type ImmutableNotebook = ImmutableRecordOf<Required<PseudoImmutableNotebook>>;
 /**
  * An Immutable Record Factory for a notebook
  */
-export const ImmutableNotebookFactory = ImmutableRecord<PseudoImmutableNotebook>({
+export const ImmutableNotebookFactory = ImmutableRecord<Required<PseudoImmutableNotebook>>({
   nb_id: '',
   name: '',
   language: 'python',
@@ -103,11 +104,11 @@ export type PseudoImmutableReducedNotebook = Omit<ReducedNotebook, 'users' | 'ce
 /**
  * An Immutable Record for a reduced notebook
  */
-export type ImmutableReducedNotebook = ImmutableRecordOf<PseudoImmutableReducedNotebook>;
+export type ImmutableReducedNotebook = ImmutableRecordOf<Required<PseudoImmutableReducedNotebook>>;
 /**
  * An Immutable Record Factory for a reduced notebook
  */
-export const ImmutableReducedNotebookFactory = ImmutableRecord<PseudoImmutableReducedNotebook>({
+export const ImmutableReducedNotebookFactory = ImmutableRecord<Required<PseudoImmutableReducedNotebook>>({
   nb_id: '',
   name: '',
   language: 'python',
