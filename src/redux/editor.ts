@@ -15,6 +15,7 @@ import {
   ImmutableLock,
   ImmutableLockFactory,
   ImmutableNotebook,
+  ImmutableNotebookAccessLevelFactory,
   ImmutableNotebookFactory,
   ImmutableReducedNotebook,
   ImmutableReducedNotebookFactory,
@@ -78,6 +79,10 @@ export interface EditorState {
    * The `nb_id` of the notebook being opened
    */
   openingNotebookId: string;
+  /**
+   * If the editor is sharing a notebook
+   */
+  isSharingNotebook: boolean;
 
   /**
    * If the editor is currently adding a cell
@@ -171,6 +176,7 @@ const initialState: EditorState = {
   isCreatingNotebook: false,
   isOpeningNotebook: false,
   openingNotebookId: '',
+  isSharingNotebook: false,
 
   isAddingCell: false,
   isDeletingCell: false,
@@ -455,6 +461,39 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ...state,
         isOpeningNotebook: false,
         openingNotebookId: '',
+      };
+
+    /**
+     * Started sharing a notebook
+     */
+    case NOTEBOOKS.SHARE.START:
+      return {
+        ...state,
+        isSharingNotebook: true,
+      };
+    case NOTEBOOKS.SHARE.SUCCESS: {
+      return {
+        ...state,
+        isSharingNotebook: false,
+        notebooks: state.notebooks
+          .filter((notebook) => notebook.nb_id !== action.notebook.nb_id)
+          .push(
+            new ImmutableNotebookFactory({
+              ...action.notebook,
+              users: makeAccessLevelsImmutable(action.notebook.users),
+            })
+          ),
+        notebook:
+          state.notebook?.merge({
+            time_modified: action.notebook.time_modified,
+            users: makeAccessLevelsImmutable(action.notebook.users),
+          }) ?? null,
+      };
+    }
+    case NOTEBOOKS.SHARE.FAILURE:
+      return {
+        ...state,
+        isSharingNotebook: false,
       };
 
     /**

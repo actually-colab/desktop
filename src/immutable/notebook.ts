@@ -89,6 +89,7 @@ export const ImmutableNotebookFactory = ImmutableRecord<PseudoImmutableNotebook>
   nb_id: '',
   name: '',
   language: 'python',
+  time_modified: Date.now(),
   users: ImmutableList(),
 });
 
@@ -110,6 +111,7 @@ export const ImmutableReducedNotebookFactory = ImmutableRecord<PseudoImmutableRe
   nb_id: '',
   name: '',
   language: 'python',
+  time_modified: Date.now(),
   users: ImmutableList(),
   cell_ids: ImmutableList(),
 });

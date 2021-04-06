@@ -21,9 +21,6 @@ const styles = StyleSheet.create({
   containerFocused: {
     borderColor: palette.PRIMARY,
   },
-  editor: {
-    width: '100%',
-  },
 });
 
 /**

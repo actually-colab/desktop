@@ -16,11 +16,12 @@ const styles = StyleSheet.create({
  */
 const UserAvatar: React.FC<{
   user: User;
+  hover?: boolean;
   placement?: WhisperProps['placement'];
   userColor?: string;
   statusColor?: string;
   title?: React.ReactNode;
-}> = ({ user, placement, userColor = palette.TANGERINE, statusColor, title, children }) => {
+}> = ({ user, hover = true, placement, userColor = palette.TANGERINE, statusColor, title, children }) => {
   const userInitials = React.useMemo(() => {
     const piecesOfName = user.name.split(' ');
 
@@ -30,6 +31,29 @@ const UserAvatar: React.FC<{
 
     return `${piecesOfName[0][0]}${piecesOfName[1][0]}`.toUpperCase();
   }, [user.name]);
+
+  const CoreAvatar = (
+    <div className={css(styles.container)}>
+      <Avatar style={{ background: userColor }} size="sm" circle>
+        {userInitials}
+      </Avatar>
+
+      {statusColor !== undefined && (
+        <Badge
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            right: 0,
+            background: statusColor,
+          }}
+        />
+      )}
+    </div>
+  );
+
+  if (!hover) {
+    return CoreAvatar;
+  }
 
   return (
     <Whisper
@@ -42,22 +66,7 @@ const UserAvatar: React.FC<{
         </Popover>
       }
     >
-      <div className={css(styles.container)}>
-        <Avatar style={{ background: userColor }} size="sm" circle>
-          {userInitials}
-        </Avatar>
-
-        {statusColor !== undefined && (
-          <Badge
-            style={{
-              position: 'absolute',
-              bottom: 0,
-              right: 0,
-              background: statusColor,
-            }}
-          />
-        )}
-      </div>
+      {CoreAvatar}
     </Whisper>
   );
 };

@@ -1,6 +1,6 @@
 import { Action } from 'redux';
 import { ThunkAction } from 'redux-thunk';
-import { DCell, Notebook, NotebookContents } from '@actually-colab/editor-types';
+import { DCell, Notebook, NotebookAccessLevelType, NotebookContents } from '@actually-colab/editor-types';
 
 import { ImmutableEditorCell } from '../../immutable';
 import { User } from '../user';
@@ -62,6 +62,11 @@ export const NOTEBOOKS = {
     START: 'NOTEBOOKS_OPEN_START',
     SUCCESS: 'NOTEBOOKS_OPEN_SUCCESS',
     FAILURE: 'NOTEBOOKS_OPEN_FAILURE',
+  },
+  SHARE: {
+    START: 'NOTEBOOKS_SHARE_START',
+    SUCCESS: 'NOTEBOOKS_SHARE_SUCCESS',
+    FAILURE: 'NOTEBOOKS_SHARE_FAILURE',
   },
 } as const;
 export const CELL = {
@@ -211,6 +216,22 @@ type NotebooksOpenSuccessAction = {
 
 type NotebooksOpenFailureAction = {
   type: typeof NOTEBOOKS.OPEN.FAILURE;
+} & ActionError;
+
+type NotebooksShareStartAction = {
+  type: typeof NOTEBOOKS.SHARE.START;
+  nb_id: string;
+  email: string;
+  access_level: NotebookAccessLevelType;
+};
+
+type NotebooksShareSuccessAction = {
+  type: typeof NOTEBOOKS.SHARE.SUCCESS;
+  notebook: Notebook;
+};
+
+type NotebooksShareFailureAction = {
+  type: typeof NOTEBOOKS.SHARE.FAILURE;
 } & ActionError;
 
 type LockCellStartAction = {
@@ -397,6 +418,9 @@ export type EditorActionTypes =
   | NotebooksOpenStartAction
   | NotebooksOpenSuccessAction
   | NotebooksOpenFailureAction
+  | NotebooksShareStartAction
+  | NotebooksShareSuccessAction
+  | NotebooksShareFailureAction
   | LockCellStartAction
   | LockCellSuccessAction
   | LockCellFailureAction
