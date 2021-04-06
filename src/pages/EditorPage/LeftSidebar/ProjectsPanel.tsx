@@ -45,6 +45,9 @@ const styles = StyleSheet.create({
   searchContainer: {
     marginBottom: spacing.DEFAULT,
   },
+  searchAddon: {
+    backgroundColor: palette.BASE,
+  },
   projectListHeader: {
     marginLeft: -spacing.DEFAULT / 2,
     marginRight: -spacing.DEFAULT / 2,
@@ -157,9 +160,9 @@ const ProjectsPanel: React.FC = () => {
 
       <div className={css(styles.searchContainer)}>
         <InputGroup>
-          <Input style={{ backgroundColor: palette.BASE_FADED }} size="lg" placeholder="Search projects" />
+          <Input size="lg" placeholder="Search projects" />
 
-          <InputGroup.Addon>
+          <InputGroup.Addon className={css(styles.searchAddon)}>
             <Icon icon="search" />
           </InputGroup.Addon>
         </InputGroup>
@@ -222,13 +225,15 @@ const ProjectsPanel: React.FC = () => {
             ref={newProjectFormRef}
             autoComplete="off"
             fluid
+            checkTrigger="none"
             model={newProjectModel}
+            formValue={newProjectFormValue}
             onChange={(formValue) => setNewProjectFormValue(formValue as NewProjectFormValue)}
             onSubmit={handleNewProjectFormSubmit}
           >
             <FormGroup>
               <ControlLabel>
-                Project Name <span className={css(styles.requiredText)}>Required</span>
+                Project name <span className={css(styles.requiredText)}>Required</span>
               </ControlLabel>
               <FormControl name="name" label="Project Name" placeholder="Project Name" />
               <HelpBlock>This will be the name of your new notebook</HelpBlock>
