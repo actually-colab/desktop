@@ -9,6 +9,8 @@ import { palette } from '../constants/theme';
 const styles = StyleSheet.create({
   container: {
     position: 'relative',
+    width: 30,
+    height: 30,
   },
 });
 
@@ -35,9 +37,13 @@ const UserAvatar: React.FC<{
 
   const CoreAvatar = (
     <div className={css(styles.container)}>
-      <Avatar style={{ background: userColor }} size="sm" circle>
-        {userInitials}
-      </Avatar>
+      {user.image_url ? (
+        <Avatar size="sm" circle src={user.image_url} alt={userInitials} />
+      ) : (
+        <Avatar style={{ background: userColor }} size="sm" circle>
+          {userInitials}
+        </Avatar>
+      )}
 
       {statusColor !== undefined && (
         <Badge
