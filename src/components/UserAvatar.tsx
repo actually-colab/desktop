@@ -24,7 +24,7 @@ const UserAvatar: React.FC<{
   userColor?: string;
   statusColor?: string;
   title?: React.ReactNode;
-}> = ({ user, hover = true, placement, userColor = palette.TANGERINE, statusColor, title, children }) => {
+}> = ({ user, hover = true, placement, userColor = palette.CHARCOAL, statusColor, title, children }) => {
   const userInitials = React.useMemo(() => {
     const piecesOfName = (user.name ?? 'Unknown').split(' ');
 
