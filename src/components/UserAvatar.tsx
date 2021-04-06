@@ -1,10 +1,9 @@
 import React from 'react';
 import { StyleSheet, css } from 'aphrodite';
 import { Avatar, Badge, Popover, Whisper, WhisperProps } from 'rsuite';
-
 import type { DUser } from '@actually-colab/editor-types';
-import type { ImmutableNotebookAccessLevel } from '../immutable';
 
+import type { ImmutableNotebookAccessLevel } from '../immutable';
 import { palette } from '../constants/theme';
 
 const styles = StyleSheet.create({

@@ -15,7 +15,6 @@ import {
   ImmutableLock,
   ImmutableLockFactory,
   ImmutableNotebook,
-  ImmutableNotebookAccessLevelFactory,
   ImmutableNotebookFactory,
   ImmutableReducedNotebook,
   ImmutableReducedNotebookFactory,

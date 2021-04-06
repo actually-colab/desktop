@@ -8,7 +8,7 @@ const GATEWAY_STEM = `${GATEWAY_BASE_URI}:`;
 /**
  * Get the gateway URI from the kernel message
  */
-export const extractGatewayUri = (message: string) => {
+export const extractGatewayUri = (message: string): string => {
   const index = message.indexOf(GATEWAY_STEM);
 
   if (index >= 0) {
@@ -83,17 +83,17 @@ export const connectToKernel = async (
 /**
  * Interrupt the given kernel
  */
-export const interrupt = (gatewayUri: string, kernel_id: string) =>
+export const interrupt = (gatewayUri: string, kernel_id: string): Promise<Response> =>
   fetch(`${gatewayUri}/api/kernels/${kernel_id}/interrupt`, { method: 'POST' });
 
 /**
  * Restart the given kernel
  */
-export const restart = (gatewayUri: string, kernel_id: string) =>
+export const restart = (gatewayUri: string, kernel_id: string): Promise<Response> =>
   fetch(`${gatewayUri}/api/kernels/${kernel_id}/restart`, { method: 'POST' });
 
 /**
  * Kill the given kernel
  */
-export const kill = (gatewayUri: string, kernel_id: string) =>
+export const kill = (gatewayUri: string, kernel_id: string): Promise<Response> =>
   fetch(`${gatewayUri}/api/kernels/${kernel_id}`, { method: 'DELETE' });

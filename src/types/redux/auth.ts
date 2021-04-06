@@ -1,6 +1,5 @@
 import type { Action } from 'redux';
 import type { ThunkAction } from 'redux-thunk';
-
 import type { DUser } from '@actually-colab/editor-types';
 
 export const LOAD_SESSION = {

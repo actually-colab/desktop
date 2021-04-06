@@ -54,7 +54,10 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function App() {
+/**
+ * The main app wrapper component
+ */
+const App: React.FC = () => {
   return (
     <div className={css(styles.container)}>
       <Provider store={store}>
@@ -64,4 +67,6 @@ export default function App() {
       </Provider>
     </div>
   );
-}
+};
+
+export default App;

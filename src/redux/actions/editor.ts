@@ -1,5 +1,4 @@
 import type { DCell, Notebook, NotebookAccessLevelType, NotebookContents, DUser } from '@actually-colab/editor-types';
-
 import { format } from 'date-fns';
 
 import { CELL, EditorActionTypes, EditorAsyncActionTypes, KERNEL, NOTEBOOKS } from '../../types/redux/editor';
@@ -49,7 +48,7 @@ export const editKernelGateway = (editing: boolean): EditorActionTypes => ({
 /**
  * Enable or disable connecting to the kernel automatically
  */
-export const connectToKernelAuto = (enable: boolean) => ({
+export const connectToKernelAuto = (enable: boolean): EditorActionTypes => ({
   type: KERNEL.CONNECT.AUTO,
   enable,
 });
@@ -328,7 +327,7 @@ export const unlockCellSuccess = (
 /**
  * Failed to unlock a cell
  */
-export const unlockCellFailure = (errorMessage: string) => ({
+export const unlockCellFailure = (errorMessage: string): EditorActionTypes => ({
   type: CELL.UNLOCK.FAILURE,
   error: {
     message: errorMessage,

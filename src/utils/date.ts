@@ -13,7 +13,7 @@ import {
 /**
  * Check if a given date is more than a duration ago
  */
-export const isOlderThan = (date: Date | number | null, duration: Duration) => {
+export const isOlderThan = (date: Date | number | null, duration: Duration): boolean => {
   if (date === null) {
     return true;
   }
@@ -21,7 +21,7 @@ export const isOlderThan = (date: Date | number | null, duration: Duration) => {
   return isAfter(sub(Date.now(), duration), date);
 };
 
-export const timeSince = (date: Date | number) => {
+export const timeSince = (date: Date | number): string => {
   const now = Date.now();
   const minutes = differenceInMinutes(now, date);
 

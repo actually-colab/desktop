@@ -8,7 +8,7 @@ import { isOlderThan } from '../../../utils/date';
 /**
  * Hook to keep track and fetch notebooks
  */
-const useNotebooks = () => {
+const useNotebooks = (): null => {
   const isAuthenticated = useSelector((state: ReduxState) => state.auth.isAuthenticated);
   const isGettingNotebooks = useSelector((state: ReduxState) => state.editor.isGettingNotebooks);
   const getNotebooksErrorMessage = useSelector((state: ReduxState) => state.editor.getNotebooksErrorMessage);
