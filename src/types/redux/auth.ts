@@ -1,7 +1,7 @@
-import { Action } from 'redux';
-import { ThunkAction } from 'redux-thunk';
+import type { Action } from 'redux';
+import type { ThunkAction } from 'redux-thunk';
 
-import { User } from '../user';
+import type { DUser } from '@actually-colab/editor-types';
 
 export const LOAD_SESSION = {
   SUCCESS: 'LOAD_SESSION_SUCCESS',
@@ -39,7 +39,7 @@ type SignInStartAction = {
 
 type SignInSuccessAction = {
   type: typeof SIGN_IN.SUCCESS;
-  user: User;
+  user: DUser;
   sessionToken: string;
 };
 

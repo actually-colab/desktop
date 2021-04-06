@@ -1,5 +1,6 @@
+import type { DUser } from '@actually-colab/editor-types';
+
 import { AuthActionTypes, AuthAsyncActionTypes, LOAD_SESSION, SIGN_IN, SIGN_OUT } from '../../types/redux/auth';
-import { User } from '../../types/user';
 import { SessionTokenStorage } from '../../utils/storage';
 import { _editor } from '.';
 
@@ -12,7 +13,7 @@ const signInStart = (tokenType: 'id' | 'session', token: string): AuthActionType
 /**
  * Successfully signed in
  */
-export const signInSuccess = (user: User, sessionToken: string): AuthActionTypes => {
+export const signInSuccess = (user: DUser, sessionToken: string): AuthActionTypes => {
   SessionTokenStorage.set(sessionToken);
 
   return {

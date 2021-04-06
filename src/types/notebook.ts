@@ -1,11 +1,10 @@
-import { DCell, Notebook } from '@actually-colab/editor-types';
+import { DCell, Notebook, DUser } from '@actually-colab/editor-types';
 
 import { IpynbOutput } from './ipynb';
-import { User } from './user';
 import { RemoveIndex } from './generics';
 
 export type BaseKernelOutput = {
-  uid: User['uid'];
+  uid: DUser['uid'];
   output_id: string;
   cell_id: EditorCell['cell_id'];
   /**
@@ -45,7 +44,7 @@ export type EditorCell = Required<RemoveIndex<DCell>> & EditorCellMeta;
  * A lock that indicates which user owns which cell
  */
 export type Lock = {
-  uid: User['uid'];
+  uid: DUser['uid'];
   cell_id: EditorCell['cell_id'];
 };
 

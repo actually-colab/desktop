@@ -1,10 +1,11 @@
+import type { DUser } from '@actually-colab/editor-types';
+
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import { DisplayData, ExecuteResult, KernelOutputError, Media, Output, StreamText } from '@nteract/outputs';
 
 import { ReduxState } from '../types/redux';
-import { User } from '../types/user';
 import { spacing } from '../constants/theme';
 import { ImmutableEditorCell } from '../immutable';
 import { sortImmutableOutputByMessageIndex } from '../utils/notebook';
@@ -22,7 +23,7 @@ const styles = StyleSheet.create({
 /**
  * A component to render the output of a cell
  */
-const OutputCell: React.FC<{ cell: ImmutableEditorCell; uid?: User['uid'] }> = ({ cell, uid }) => {
+const OutputCell: React.FC<{ cell: ImmutableEditorCell; uid?: DUser['uid'] }> = ({ cell, uid }) => {
   const outputs = useSelector((state: ReduxState) => state.editor.outputs);
 
   const cellOutputs = React.useMemo(

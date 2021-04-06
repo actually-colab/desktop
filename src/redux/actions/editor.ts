@@ -1,8 +1,8 @@
+import type { DCell, Notebook, NotebookAccessLevelType, NotebookContents, DUser } from '@actually-colab/editor-types';
+
 import { format } from 'date-fns';
-import { DCell, Notebook, NotebookAccessLevelType, NotebookContents } from '@actually-colab/editor-types';
 
 import { CELL, EditorActionTypes, EditorAsyncActionTypes, KERNEL, NOTEBOOKS } from '../../types/redux/editor';
-import { User } from '../../types/user';
 import { EditorCell, EditorCellMeta, KernelOutput } from '../../types/notebook';
 import { Kernel, KernelLog } from '../../types/kernel';
 import { ImmutableEditorCell } from '../../immutable';
@@ -275,7 +275,7 @@ const lockCellStart = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
  */
 export const lockCellSuccess = (
   isMe: boolean,
-  uid: User['uid'],
+  uid: DUser['uid'],
   cell_id: EditorCell['cell_id'],
   cell: Partial<EditorCell>
 ): EditorActionTypes => ({
@@ -299,7 +299,7 @@ export const lockCellFailure = (errorMessage: string): EditorActionTypes => ({
 /**
  * Try to lock a given cell
  */
-export const lockCell = (user: User, cell_id: EditorCell['cell_id']): EditorAsyncActionTypes => async (dispatch) => {
+export const lockCell = (user: DUser, cell_id: EditorCell['cell_id']): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(lockCellStart(cell_id));
   dispatch(selectCell(cell_id));
 };
@@ -314,7 +314,7 @@ const unlockCellStart = (cell_id: EditorCell['cell_id']): EditorActionTypes => (
  */
 export const unlockCellSuccess = (
   isMe: boolean,
-  uid: User['uid'],
+  uid: DUser['uid'],
   cell_id: EditorCell['cell_id'],
   cell: Partial<EditorCell>
 ): EditorActionTypes => ({
@@ -338,7 +338,7 @@ export const unlockCellFailure = (errorMessage: string) => ({
 /**
  * Try to unlock the given cell
  */
-export const unlockCell = (user: User, cell_id: EditorCell['cell_id']): EditorAsyncActionTypes => async (dispatch) => {
+export const unlockCell = (user: DUser, cell_id: EditorCell['cell_id']): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(unlockCellStart(cell_id));
 };
 
