@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import {
   Button,
+  ControlLabel,
   Dropdown,
   Form,
   FormControl,
@@ -85,6 +86,10 @@ const styles = StyleSheet.create({
   lastModifiedText: {
     marginLeft: spacing.DEFAULT / 4,
     color: palette.GRAY,
+  },
+  requiredText: {
+    marginLeft: spacing.DEFAULT / 2,
+    color: palette.ERROR,
   },
 });
 
@@ -222,8 +227,11 @@ const ProjectsPanel: React.FC = () => {
             onSubmit={handleNewProjectFormSubmit}
           >
             <FormGroup>
+              <ControlLabel>
+                Project Name <span className={css(styles.requiredText)}>Required</span>
+              </ControlLabel>
               <FormControl name="name" label="Project Name" placeholder="Project Name" />
-              <HelpBlock>Required</HelpBlock>
+              <HelpBlock>This will be the name of your new notebook</HelpBlock>
             </FormGroup>
           </Form>
         </Modal.Body>
