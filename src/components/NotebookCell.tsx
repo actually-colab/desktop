@@ -102,6 +102,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
   const { kernelIsConnected } = useKernelStatus();
 
   const user = useSelector((state: ReduxState) => state.auth.user);
+  const users = useSelector((state: ReduxState) => state.editor.users);
   const lockedCells = useSelector((state: ReduxState) => state.editor.lockedCells);
   const lockingCellId = useSelector((state: ReduxState) => state.editor.lockingCellId);
   const unlockingCellId = useSelector((state: ReduxState) => state.editor.unlockingCellId);
@@ -119,9 +120,10 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
       cell.lock_held_by !== ''
         ? {
             uid: cell.lock_held_by,
+            name: users.find((_user) => _user.uid === cell.lock_held_by)?.name ?? 'Unknown',
           }
         : null,
-    [cell.lock_held_by]
+    [cell.lock_held_by, users]
   );
   const ownsCell = React.useMemo(() => lockOwner?.uid === user?.uid, [lockOwner?.uid, user?.uid]);
   const lockedByOtherUser = React.useMemo(() => !ownsCell && lockOwner !== null, [lockOwner, ownsCell]);
@@ -266,7 +268,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
             ) : lockOwner !== null ? (
               <div className={css(styles.lockOwnerContainer)}>
                 <Icon icon="pencil" />
-                <span className={css(styles.lockOwnerText)}>Bailey Tincher</span>
+                <span className={css(styles.lockOwnerText)}>{lockOwner.name}</span>
               </div>
             ) : (
               <IconTextButton
