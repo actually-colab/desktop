@@ -103,6 +103,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
 
   const user = useSelector((state: ReduxState) => state.auth.user);
   const users = useSelector((state: ReduxState) => state.editor.users);
+  const selectedOutputsUid = useSelector((state: ReduxState) => state.editor.selectedOutputsUid);
   const lockedCells = useSelector((state: ReduxState) => state.editor.lockedCells);
   const lockingCellId = useSelector((state: ReduxState) => state.editor.lockingCellId);
   const unlockingCellId = useSelector((state: ReduxState) => state.editor.unlockingCellId);
@@ -249,7 +250,8 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
               size="xs"
               loading={isRunning}
               disabled={
-                (!kernelIsConnected && cell.language === 'python') || (cell.language === 'markdown' && cell.rendered)
+                ((!kernelIsConnected || selectedOutputsUid !== '') && cell.language === 'python') ||
+                (cell.language === 'markdown' && cell.rendered)
               }
               onClick={onClickPlay}
             />

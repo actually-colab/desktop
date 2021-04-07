@@ -157,7 +157,7 @@ const EditorHeader: React.FC = () => {
             icon="step-forward"
             tooltipText="Run and advance"
             tooltipDirection="bottom"
-            disabled={!kernelIsConnected && selectedCell?.language !== 'markdown'}
+            disabled={(!kernelIsConnected || selectedOutputsUid !== '') && selectedCell?.language === 'python'}
             onClick={onClickPlayNext}
           />
           <RegularIconButton
@@ -165,7 +165,7 @@ const EditorHeader: React.FC = () => {
             icon="stop"
             tooltipText="Interrupt the kernel"
             tooltipDirection="bottom"
-            disabled={!kernelIsConnected}
+            disabled={!kernelIsConnected || selectedOutputsUid !== ''}
             onClick={dispatchStopCodeExecution}
           />
 
@@ -244,10 +244,12 @@ const EditorHeader: React.FC = () => {
             }
             onSelect={handleKernelSelect}
           >
-            <Dropdown.Item eventKey="">{gatewayUri}</Dropdown.Item>
+            <Dropdown.Item eventKey="" disabled={kernelStatus === 'Busy'}>
+              {gatewayUri}
+            </Dropdown.Item>
 
             {users.map((activeUser) => (
-              <Dropdown.Item key={activeUser.uid} eventKey={activeUser.uid}>
+              <Dropdown.Item key={activeUser.uid} eventKey={activeUser.uid} disabled={kernelStatus === 'Busy'}>
                 {activeUser.email}
               </Dropdown.Item>
             ))}
