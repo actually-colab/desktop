@@ -43,6 +43,7 @@ const EditorHeader: React.FC = () => {
   const notebook = useSelector((state: ReduxState) => state.editor.notebook);
   const lockedCells = useSelector((state: ReduxState) => state.editor.lockedCells);
   const cells = useSelector((state: ReduxState) => state.editor.cells);
+  const users = useSelector((state: ReduxState) => state.editor.users);
   const connectToKernelErrorMessage = useSelector((state: ReduxState) => state.editor.connectToKernelErrorMessage);
   const isAddingCell = useSelector((state: ReduxState) => state.editor.isAddingCell);
   const isDeletingCell = useSelector((state: ReduxState) => state.editor.isDeletingCell);
@@ -211,17 +212,11 @@ const EditorHeader: React.FC = () => {
 
         <div className={css(styles.headerNoDrag)}>
           <div className={css(styles.avatarsContainer)}>
-            <div className={css(styles.avatar)}>
-              <UserAvatar
-                placement="bottomEnd"
-                user={{
-                  uid: 'BAILEY', // TODO
-                  name: 'Bailey Tincher',
-                  email: 'bailey@test.com',
-                }}
-                statusColor={palette.SUCCESS}
-              />
-            </div>
+            {users.map((user) => (
+              <div className={css(styles.avatar)} key={user.uid}>
+                <UserAvatar placement="bottomEnd" user={user} statusColor={palette.SUCCESS} />
+              </div>
+            ))}
           </div>
 
           <PopoverDropdown

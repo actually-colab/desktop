@@ -3,7 +3,7 @@ import { StyleSheet, css } from 'aphrodite';
 import { Avatar, Badge, Popover, Whisper, WhisperProps } from 'rsuite';
 import type { DUser } from '@actually-colab/editor-types';
 
-import type { ImmutableNotebookAccessLevel } from '../immutable';
+import type { ImmutableNotebookAccessLevel, ImmutableUser } from '../immutable';
 import { palette } from '../constants/theme';
 
 const styles = StyleSheet.create({
@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
  * A component for rendering an avatar with a status badge
  */
 const UserAvatar: React.FC<{
-  user: DUser | ImmutableNotebookAccessLevel;
+  user: DUser | ImmutableUser | ImmutableNotebookAccessLevel;
   hover?: boolean;
   placement?: WhisperProps['placement'];
   userColor?: string;
