@@ -72,7 +72,10 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
 
         const currentUser = action.user;
 
-        socketClient.on('notebook_opened', (user) => console.log('Notebook opened by', user));
+        socketClient.on('notebook_opened', (user) => store.dispatch(_editor.connectToNotebook(user)));
+        socketClient.on('notebook_closed', (_, triggered_by) =>
+          store.dispatch(_editor.disconnectFromNotebook(triggered_by ?? ''))
+        );
 
         socketClient.on('cell_created', (dcell, triggered_by) => {
           console.log('Cell created', dcell);

@@ -18,6 +18,8 @@ import {
   ImmutableNotebookFactory,
   ImmutableReducedNotebook,
   ImmutableReducedNotebookFactory,
+  ImmutableUser,
+  ImmutableUserFactory,
 } from '../immutable';
 import {
   cellArrayToImmutableMap,
@@ -156,6 +158,10 @@ export interface EditorState {
    */
   outputs: ImmutableMap<EditorCell['cell_id'], ImmutableList<ImmutableKernelOutput>>;
   /**
+   * A list of users who are active
+   */
+  users: ImmutableList<ImmutableUser>;
+  /**
    * A list of logs from various kernel interactions
    */
   logs: ImmutableList<ImmutableKernelLog>;
@@ -198,6 +204,7 @@ const initialState: EditorState = {
   notebook: null,
   cells: ImmutableMap(),
   outputs: ImmutableMap(),
+  users: ImmutableList(),
   logs: ImmutableList(),
 };
 
@@ -450,6 +457,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
           cell_ids: ImmutableList(reducedNotebook.cell_ids),
         }),
         cells: cellArrayToImmutableMap(dcells.map((dcell) => cleanDCell(dcell))),
+        users: state.users.clear(),
       };
     }
     /**
@@ -460,6 +468,23 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ...state,
         isOpeningNotebook: false,
         openingNotebookId: '',
+      };
+
+    /**
+     * A user has opened the notebook
+     */
+    case NOTEBOOKS.ACCESS.CONNECT:
+      return {
+        ...state,
+        users: state.users.filter((user) => user.uid !== action.user.uid).push(new ImmutableUserFactory(action.user)),
+      };
+    /**
+     * A user has closed the notebook
+     */
+    case NOTEBOOKS.ACCESS.DISCONNECT:
+      return {
+        ...state,
+        users: state.users.filter((user) => user.uid !== action.uid),
       };
 
     /**

@@ -62,6 +62,10 @@ export const NOTEBOOKS = {
     SUCCESS: 'NOTEBOOKS_OPEN_SUCCESS',
     FAILURE: 'NOTEBOOKS_OPEN_FAILURE',
   },
+  ACCESS: {
+    CONNECT: 'NOTEBOOKS_ACCESS_CONNECT',
+    DISCONNECT: 'NOTEBOOKS_ACCESS_DISCONNECT',
+  },
   SHARE: {
     START: 'NOTEBOOKS_SHARE_START',
     SUCCESS: 'NOTEBOOKS_SHARE_SUCCESS',
@@ -216,6 +220,16 @@ type NotebooksOpenSuccessAction = {
 type NotebooksOpenFailureAction = {
   type: typeof NOTEBOOKS.OPEN.FAILURE;
 } & ActionError;
+
+type NotebooksAccessConnectAction = {
+  type: typeof NOTEBOOKS.ACCESS.CONNECT;
+  user: DUser;
+};
+
+type NotebooksAccessDisconnectAction = {
+  type: typeof NOTEBOOKS.ACCESS.DISCONNECT;
+  uid: string;
+};
 
 type NotebooksShareStartAction = {
   type: typeof NOTEBOOKS.SHARE.START;
@@ -417,6 +431,8 @@ export type EditorActionTypes =
   | NotebooksOpenStartAction
   | NotebooksOpenSuccessAction
   | NotebooksOpenFailureAction
+  | NotebooksAccessConnectAction
+  | NotebooksAccessDisconnectAction
   | NotebooksShareStartAction
   | NotebooksShareSuccessAction
   | NotebooksShareFailureAction

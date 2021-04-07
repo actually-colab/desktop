@@ -224,6 +224,22 @@ export const openNotebook = (nb_id: Notebook['nb_id']): EditorAsyncActionTypes =
   dispatch(openNotebookStart(nb_id));
 };
 
+/**
+ * A user has connected to a notebook
+ */
+export const connectToNotebook = (user: DUser): EditorActionTypes => ({
+  type: NOTEBOOKS.ACCESS.CONNECT,
+  user,
+});
+
+/**
+ * A user has disconnected from the notebook
+ */
+export const disconnectFromNotebook = (uid: string): EditorActionTypes => ({
+  type: NOTEBOOKS.ACCESS.DISCONNECT,
+  uid,
+});
+
 const shareNotebookStart = (
   nb_id: Notebook['nb_id'],
   email: string,
