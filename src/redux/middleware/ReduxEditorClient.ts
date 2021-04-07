@@ -112,6 +112,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           console.log('Cell edited', dcell);
           store.dispatch(_editor.editCellSuccess(triggered_by === currentUser.uid, dcell.cell_id, cleanDCell(dcell)));
         });
+
+        socketClient.on('output_updated', (output) => console.log(output));
         break;
       }
       /**
@@ -244,6 +246,14 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
             );
           }
         })();
+        break;
+      }
+
+      /**
+       * Selected a new user to view outputs for
+       */
+      case NOTEBOOKS.OUTPUTS.SELECT: {
+        // TODO: fetch all outputs for the user
         break;
       }
 

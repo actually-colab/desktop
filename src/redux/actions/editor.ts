@@ -280,6 +280,14 @@ export const shareNotebook = (
   dispatch(shareNotebookStart(nb_id, email, access_level));
 };
 
+/**
+ * Select a given user to view outputs for
+ */
+export const selectOutputUser = (uid: string): EditorActionTypes => ({
+  type: NOTEBOOKS.OUTPUTS.SELECT,
+  uid,
+});
+
 const lockCellStart = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
   type: CELL.LOCK.START,
   cell_id,

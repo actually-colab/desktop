@@ -71,6 +71,9 @@ export const NOTEBOOKS = {
     SUCCESS: 'NOTEBOOKS_SHARE_SUCCESS',
     FAILURE: 'NOTEBOOKS_SHARE_FAILURE',
   },
+  OUTPUTS: {
+    SELECT: 'NOTEBOOKS_OUTPUTS_SELECT',
+  },
 } as const;
 export const CELL = {
   LOCK: {
@@ -246,6 +249,11 @@ type NotebooksShareSuccessAction = {
 type NotebooksShareFailureAction = {
   type: typeof NOTEBOOKS.SHARE.FAILURE;
 } & ActionError;
+
+type NotebooksOutputsSelectAction = {
+  type: typeof NOTEBOOKS.OUTPUTS.SELECT;
+  uid: string;
+};
 
 type LockCellStartAction = {
   type: typeof CELL.LOCK.START;
@@ -436,6 +444,7 @@ export type EditorActionTypes =
   | NotebooksShareStartAction
   | NotebooksShareSuccessAction
   | NotebooksShareFailureAction
+  | NotebooksOutputsSelectAction
   | LockCellStartAction
   | LockCellSuccessAction
   | LockCellFailureAction

@@ -2,6 +2,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import { Button, Divider, Dropdown, Modal } from 'rsuite';
+import { DUser } from '@actually-colab/editor-types';
 
 import { palette, spacing } from '../../../constants/theme';
 import { ReduxState } from '../../../types/redux';
@@ -44,12 +45,12 @@ const EditorHeader: React.FC = () => {
   const lockedCells = useSelector((state: ReduxState) => state.editor.lockedCells);
   const cells = useSelector((state: ReduxState) => state.editor.cells);
   const users = useSelector((state: ReduxState) => state.editor.users);
+  const selectedOutputsUid = useSelector((state: ReduxState) => state.editor.selectedOutputsUid);
   const connectToKernelErrorMessage = useSelector((state: ReduxState) => state.editor.connectToKernelErrorMessage);
   const isAddingCell = useSelector((state: ReduxState) => state.editor.isAddingCell);
   const isDeletingCell = useSelector((state: ReduxState) => state.editor.isDeletingCell);
   const selectedCellId = useSelector((state: ReduxState) => state.editor.selectedCellId);
 
-  const [outputSelection, setOutputSelection] = React.useState<string>(gatewayUri);
   const [showDeleteCell, setShowDeleteCell] = React.useState<boolean>(false);
 
   const ownedCells = React.useMemo(() => lockedCells.filter((lock) => lock.uid === user?.uid), [
@@ -78,6 +79,10 @@ const EditorHeader: React.FC = () => {
       text: kernelStatus === 'Error' ? `Error: ${connectToKernelErrorMessage}` : kernelStatus,
     }),
     [connectToKernelErrorMessage, kernelStatus]
+  );
+  const visibleSelectedOutputsUid = React.useMemo<DUser['uid']>(
+    () => (selectedOutputsUid === '' ? user?.uid ?? '' : selectedOutputsUid),
+    [selectedOutputsUid, user?.uid]
   );
 
   const dispatch = useDispatch();
@@ -115,6 +120,9 @@ const EditorHeader: React.FC = () => {
     () => lockedCellId !== '' && dispatch(_editor.stopCodeExecution(lockedCellId)),
     [dispatch, lockedCellId]
   );
+  const dispatchSelectOutputUser = React.useCallback((uid: string) => dispatch(_editor.selectOutputUser(uid)), [
+    dispatch,
+  ]);
 
   const handleLanguageSelect = React.useCallback(
     (eventKey: EditorCell['language']) => {
@@ -127,9 +135,12 @@ const EditorHeader: React.FC = () => {
     [dispatchEditCell, lockedCellId]
   );
 
-  const handleKernelSelect = React.useCallback((eventKey: string) => {
-    setOutputSelection(eventKey);
-  }, []);
+  const handleKernelSelect = React.useCallback(
+    (eventKey: string) => {
+      dispatchSelectOutputUser(eventKey);
+    },
+    [dispatchSelectOutputUser]
+  );
 
   React.useEffect(() => {
     if (lockedCellId === '') {
@@ -212,29 +223,34 @@ const EditorHeader: React.FC = () => {
 
         <div className={css(styles.headerNoDrag)}>
           <div className={css(styles.avatarsContainer)}>
-            {users.map((user) => (
-              <div className={css(styles.avatar)} key={user.uid}>
-                <UserAvatar placement="bottomEnd" user={user} statusColor={palette.SUCCESS} />
+            {users.map((activeUser) => (
+              <div className={css(styles.avatar)} key={activeUser.uid}>
+                <UserAvatar placement="bottomEnd" user={activeUser} statusColor={palette.SUCCESS} />
               </div>
             ))}
           </div>
 
           <PopoverDropdown
             placement="bottomEnd"
-            activeKey={outputSelection}
+            activeKey={selectedOutputsUid}
             buttonContent={
               <React.Fragment>
-                {outputSelection === gatewayUri && (
+                {selectedOutputsUid === '' && (
                   <StatusIndicator textPlacement="right" color={kernelStatusColor} tooltipOptions={statusTooltip} />
                 )}
 
-                {outputSelection}
+                {visibleSelectedOutputsUid}
               </React.Fragment>
             }
             onSelect={handleKernelSelect}
           >
-            <Dropdown.Item eventKey={gatewayUri}>{gatewayUri}</Dropdown.Item>
-            <Dropdown.Item eventKey="bailey@test.com">bailey@test.com</Dropdown.Item>
+            <Dropdown.Item eventKey="">{gatewayUri}</Dropdown.Item>
+
+            {users.map((activeUser) => (
+              <Dropdown.Item key={activeUser.uid} eventKey={activeUser.uid}>
+                {activeUser.email}
+              </Dropdown.Item>
+            ))}
           </PopoverDropdown>
         </div>
       </div>

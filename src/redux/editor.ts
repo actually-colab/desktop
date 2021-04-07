@@ -153,10 +153,16 @@ export interface EditorState {
    * A map of `cell_id`'s to cells in the currently open notebook
    */
   cells: ImmutableMap<EditorCell['cell_id'], ImmutableEditorCell>;
+
+  /**
+   * The `uid` to view outputs for
+   */
+  selectedOutputsUid: string;
   /**
    * A map of `cell_id`'s to outputs for each cell
    */
   outputs: ImmutableMap<EditorCell['cell_id'], ImmutableList<ImmutableKernelOutput>>;
+
   /**
    * A list of users who are active
    */
@@ -203,7 +209,10 @@ const initialState: EditorState = {
   notebooks: ImmutableList(),
   notebook: null,
   cells: ImmutableMap(),
+
+  selectedOutputsUid: '',
   outputs: ImmutableMap(),
+
   users: ImmutableList(),
   logs: ImmutableList(),
 };
@@ -495,6 +504,9 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ...state,
         isSharingNotebook: true,
       };
+    /**
+     * Successfully shared a notebook
+     */
     case NOTEBOOKS.SHARE.SUCCESS: {
       return {
         ...state,
@@ -514,10 +526,22 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
           }) ?? null,
       };
     }
+    /**
+     * Failed to share a notebook
+     */
     case NOTEBOOKS.SHARE.FAILURE:
       return {
         ...state,
         isSharingNotebook: false,
+      };
+
+    /**
+     * Selected a given user to view outputs for
+     */
+    case NOTEBOOKS.OUTPUTS.SELECT:
+      return {
+        ...state,
+        selectedOutputsUid: action.uid,
       };
 
     /**
