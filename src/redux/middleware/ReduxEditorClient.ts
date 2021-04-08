@@ -74,7 +74,10 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
 
         socketClient.on('notebook_opened', (user) => {
           console.log('Notebook opened', user);
-          store.dispatch(_editor.connectToNotebook(user));
+
+          if (user.uid !== store.getState().auth.user?.uid) {
+            store.dispatch(_editor.connectToNotebook(user));
+          }
         });
         socketClient.on('notebook_closed', (_, triggered_by) => {
           console.log('Notebook closed', triggered_by);
