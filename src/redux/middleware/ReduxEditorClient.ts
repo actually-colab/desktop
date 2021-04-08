@@ -3,10 +3,10 @@ import { ActuallyColabRESTClient, ActuallyColabSocketClient } from '@actually-co
 
 import { ReduxState } from '../../types/redux';
 import { SIGN_IN, SIGN_OUT } from '../../types/redux/auth';
-import { CELL, NOTEBOOKS } from '../../types/redux/editor';
+import { CELL, KERNEL, NOTEBOOKS } from '../../types/redux/editor';
 import { DEMO_NOTEBOOK_NAME } from '../../constants/demo';
 import { httpToWebSocket } from '../../utils/request';
-import { cleanDCell } from '../../utils/notebook';
+import { cleanDCell, convertMessagesToOutputString } from '../../utils/notebook';
 import { LatestNotebookIdStorage } from '../../utils/storage';
 import { syncSleep } from '../../utils/sleep';
 import { ReduxActions, _auth, _editor, _ui } from '../actions';
@@ -72,10 +72,14 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
 
         const currentUser = action.user;
 
-        socketClient.on('notebook_opened', (user) => store.dispatch(_editor.connectToNotebook(user)));
-        socketClient.on('notebook_closed', (_, triggered_by) =>
-          store.dispatch(_editor.disconnectFromNotebook(triggered_by ?? ''))
-        );
+        socketClient.on('notebook_opened', (user) => {
+          console.log('Notebook opened', user);
+          store.dispatch(_editor.connectToNotebook(user));
+        });
+        socketClient.on('notebook_closed', (_, triggered_by) => {
+          console.log('Notebook closed', triggered_by);
+          store.dispatch(_editor.disconnectFromNotebook(triggered_by ?? ''));
+        });
 
         socketClient.on('cell_created', (dcell, triggered_by) => {
           console.log('Cell created', dcell);
@@ -113,7 +117,12 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           store.dispatch(_editor.editCellSuccess(triggered_by === currentUser.uid, dcell.cell_id, cleanDCell(dcell)));
         });
 
-        socketClient.on('output_updated', (output) => console.log(output));
+        socketClient.on('output_updated', (output) => {
+          console.log('Received outputs', output);
+          if (output.uid !== currentUser.uid) {
+            store.dispatch(_editor.receiveOutputs(output));
+          }
+        });
         break;
       }
       /**
@@ -322,6 +331,44 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
         if (action.changes !== undefined) {
           socketClient?.editCell(notebook.nb_id, action.cell_id, action.changes);
         }
+        break;
+      }
+
+      /**
+       * Execution has started with a valid run index to notify the server
+       */
+      case KERNEL.MESSAGE.UPDATE_RUN_INDEX: {
+        const notebook = store.getState().editor.notebook;
+        if (notebook === null) {
+          console.error('Notebook was null');
+          break;
+        }
+
+        socketClient?.updateOutput(notebook.nb_id, action.cell_id, convertMessagesToOutputString([]));
+        break;
+      }
+
+      /**
+       * Received a message from the kernel to send to the server
+       */
+      case KERNEL.MESSAGE.RECEIVE: {
+        const notebook = store.getState().editor.notebook;
+        if (notebook === null) {
+          console.error('Notebook was null');
+          break;
+        }
+
+        const allMessages = (
+          store
+            .getState()
+            .editor.outputs.get(action.cell_id)
+            ?.get('')
+            ?.filter((message) => message.runIndex === action.messages[0].runIndex)
+            ?.toArray()
+            ?.map((message) => message.toObject()) ?? []
+        ).concat(action.messages);
+
+        socketClient?.updateOutput(notebook.nb_id, action.cell_id, convertMessagesToOutputString(allMessages));
         break;
       }
     }

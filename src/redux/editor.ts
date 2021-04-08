@@ -1,4 +1,5 @@
 import { List as ImmutableList, Map as ImmutableMap } from 'immutable';
+import { DUser } from '@actually-colab/editor-types';
 
 import { CELL, KERNEL, NOTEBOOKS } from '../types/redux/editor';
 import { SIGN_OUT } from '../types/redux/auth';
@@ -24,6 +25,7 @@ import {
 import {
   cellArrayToImmutableMap,
   cleanDCell,
+  convertOutputStringToMessages,
   makeAccessLevelsImmutable,
   reduceImmutableNotebook,
   reduceNotebookContents,
@@ -159,9 +161,11 @@ export interface EditorState {
    */
   selectedOutputsUid: string;
   /**
-   * A map of `cell_id`'s to outputs for each cell
+   * A map of `cell_id`'s to a map of `uid` to a list of outputs for each cell.
+   *
+   * Use an empty string as the key for the current user
    */
-  outputs: ImmutableMap<EditorCell['cell_id'], ImmutableList<ImmutableKernelOutput>>;
+  outputs: ImmutableMap<EditorCell['cell_id'], ImmutableMap<DUser['uid'], ImmutableList<ImmutableKernelOutput>>>;
 
   /**
    * A list of users who are active
@@ -449,6 +453,8 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         openingNotebookId: '',
         lockingCellId: '',
         unlockingCellId: '',
+        selectedCellId: '',
+        selectedOutputsUid: '',
         lockedCells: ImmutableList(
           dcells
             .filter((dcell) => (dcell.lock_held_by ?? '') !== '')
@@ -542,6 +548,24 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         selectedOutputsUid: action.uid,
+      };
+
+    /**
+     * Received an output object from a user
+     */
+    case NOTEBOOKS.OUTPUTS.RECEIVE:
+      return {
+        ...state,
+        outputs: state.outputs.update(action.output.cell_id, ImmutableMap(), (userMap) =>
+          userMap.set(
+            action.output.uid,
+            ImmutableList(
+              convertOutputStringToMessages(action.output.output).map(
+                (message) => new ImmutableKernelOutputFactory(message)
+              )
+            )
+          )
+        ),
       };
 
     /**
@@ -851,7 +875,9 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         runQueue: state.runQueue.filter((cell_id) => cell_id !== action.cell.cell_id),
         isExecutingCode: true,
         runningCellId: action.cell.cell_id,
-        outputs: state.outputs.update(action.cell.cell_id, ImmutableList(), (outputs) => outputs.clear()),
+        outputs: state.outputs.update(action.cell.cell_id, ImmutableMap(), (userMap) =>
+          userMap.update('', ImmutableList(), (outputs) => outputs.clear())
+        ),
       };
     }
     /**
@@ -902,10 +928,12 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
     case KERNEL.MESSAGE.RECEIVE:
       return {
         ...state,
-        outputs: state.outputs.update(action.cell_id, ImmutableList(), (outputs) =>
-          outputs.concat(
-            ImmutableList<ImmutableKernelOutput>(
-              action.messages.map<ImmutableKernelOutput>((message) => new ImmutableKernelOutputFactory(message))
+        outputs: state.outputs.update(action.cell_id, ImmutableMap(), (userMap) =>
+          userMap.update('', ImmutableList(), (outputs) =>
+            outputs.concat(
+              ImmutableList<ImmutableKernelOutput>(
+                action.messages.map<ImmutableKernelOutput>((message) => new ImmutableKernelOutputFactory(message))
+              )
             )
           )
         ),

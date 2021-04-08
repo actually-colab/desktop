@@ -291,7 +291,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
           </div>
         </div>
 
-        <OutputCell cell={cell} uid={user?.uid} />
+        <OutputCell cell={cell} />
       </div>
     </div>
   );

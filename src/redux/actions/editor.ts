@@ -1,4 +1,11 @@
-import type { DCell, Notebook, NotebookAccessLevelType, NotebookContents, DUser } from '@actually-colab/editor-types';
+import type {
+  DCell,
+  Notebook,
+  NotebookAccessLevelType,
+  NotebookContents,
+  DUser,
+  OOutput,
+} from '@actually-colab/editor-types';
 import { format } from 'date-fns';
 
 import { CELL, EditorActionTypes, EditorAsyncActionTypes, KERNEL, NOTEBOOKS } from '../../types/redux/editor';
@@ -286,6 +293,14 @@ export const shareNotebook = (
 export const selectOutputUser = (uid: string): EditorActionTypes => ({
   type: NOTEBOOKS.OUTPUTS.SELECT,
   uid,
+});
+
+/**
+ * Receive an output from the server for a given user
+ */
+export const receiveOutputs = (output: OOutput): EditorActionTypes => ({
+  type: NOTEBOOKS.OUTPUTS.RECEIVE,
+  output,
 });
 
 const lockCellStart = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
