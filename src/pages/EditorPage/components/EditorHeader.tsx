@@ -11,10 +11,11 @@ import { EditorCell } from '../../../types/notebook';
 import useKernelStatus from '../../../kernel/useKernelStatus';
 import { Header, PopoverDropdown, RegularIconButton, StatusIndicator, UserAvatar } from '../../../components';
 import { StatusIndicatorProps } from '../../../components/StatusIndicator';
+import { CollaboratorsPopover } from '../Header';
 
 const styles = StyleSheet.create({
   header: {
-    paddingRight: 4,
+    paddingRight: spacing.DEFAULT / 2,
     display: 'flex',
     flexDirection: 'row',
     flex: 1,
@@ -30,6 +31,9 @@ const styles = StyleSheet.create({
   avatarsContainer: {},
   avatar: {
     marginRight: spacing.DEFAULT / 2,
+  },
+  padLeft: {
+    marginLeft: spacing.DEFAULT / 2,
   },
 });
 
@@ -260,6 +264,10 @@ const EditorHeader: React.FC = () => {
                 </Dropdown.Item>
               ))}
           </PopoverDropdown>
+
+          <div className={css(styles.padLeft)}>
+            <CollaboratorsPopover />
+          </div>
         </div>
       </div>
 
