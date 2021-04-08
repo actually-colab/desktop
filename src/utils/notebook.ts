@@ -238,9 +238,9 @@ export const download = (
 
     if (cell) {
       notebookData.push({
-        cell,
+        cell: uid === '' ? cell : cell.set('runIndex', cell.selectedOutputsRunIndex),
         outputs: cellOutputs
-          ?.filter((output) => uid !== '' || output.runIndex === cell.runIndex)
+          ?.filter((output) => (uid === '' ? output.runIndex === cell.runIndex : output.uid === uid))
           ?.sort(sortImmutableOutputByMessageIndex),
       });
     }
