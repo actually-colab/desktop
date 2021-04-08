@@ -7,7 +7,7 @@ import { DisplayData, ExecuteResult, KernelOutputError, Media, Output, StreamTex
 import { ReduxState } from '../types/redux';
 import { spacing } from '../constants/theme';
 import { ImmutableEditorCell, ImmutableKernelOutput } from '../immutable';
-import { sortImmutableOutputByMessageIndex } from '../utils/notebook';
+import { sortOutputByMessageIndex } from '../utils/notebook';
 
 const styles = StyleSheet.create({
   container: {},
@@ -36,7 +36,7 @@ const OutputCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
             ? output.runIndex === cell.runIndex
             : output.runIndex === cell.selectedOutputsRunIndex
         )
-        ?.sort(sortImmutableOutputByMessageIndex) ?? ImmutableList<ImmutableKernelOutput>(),
+        ?.sort(sortOutputByMessageIndex) ?? ImmutableList<ImmutableKernelOutput>(),
     [cell.cell_id, cell.runIndex, cell.selectedOutputsRunIndex, outputs, selectedOutputsUid]
   );
 
