@@ -90,11 +90,27 @@ const CodeCell: React.FC<{
       if (!isEditable) return;
 
       onChange(cell_id, {
-        cursor_pos: editorRef.current?.editor.session.getDocument().positionToIndex(selection.cursor),
+        cursor_pos: editorRef.current?.editor.getSession().getDocument().positionToIndex(selection.cursor),
       });
     },
     [cell_id, isEditable, onChange]
   );
+
+  /**
+   * Set the cursor position on initial focus.
+   *
+   * This cannot be done in the onFocus event because the cell is not necessarily editable at that point
+   */
+  React.useEffect(() => {
+    if (isEditable && cell.cursor_pos === null && editorRef.current?.editor.isFocused()) {
+      onChange(cell_id, {
+        cursor_pos: editorRef.current?.editor
+          .getSession()
+          .getDocument()
+          .positionToIndex(editorRef.current?.editor.getCursorPosition()),
+      });
+    }
+  }, [cell.cursor_pos, cell_id, isEditable, onChange]);
 
   return (
     <div className={css(styles.container, isEditable ? styles.containerFocused : styles.containerBlurred)}>
