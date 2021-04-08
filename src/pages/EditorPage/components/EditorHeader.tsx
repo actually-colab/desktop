@@ -248,11 +248,13 @@ const EditorHeader: React.FC = () => {
               {gatewayUri}
             </Dropdown.Item>
 
-            {users.map((activeUser) => (
-              <Dropdown.Item key={activeUser.uid} eventKey={activeUser.uid} disabled={kernelStatus === 'Busy'}>
-                {activeUser.email}
-              </Dropdown.Item>
-            ))}
+            {notebook?.users
+              .filter((availableUser) => availableUser.uid !== user?.uid)
+              .map((availableUser) => (
+                <Dropdown.Item key={availableUser.uid} eventKey={availableUser.uid} disabled={kernelStatus === 'Busy'}>
+                  {availableUser.email}
+                </Dropdown.Item>
+              ))}
           </PopoverDropdown>
         </div>
       </div>
