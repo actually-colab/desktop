@@ -1,10 +1,16 @@
-import { DCell, Notebook, NotebookAccessLevel, NotebookContents, DUser } from '@actually-colab/editor-types';
+import { DCell, Notebook, NotebookAccessLevel, NotebookContents, DUser, OOutput } from '@actually-colab/editor-types';
 import { List as ImmutableList, Map as ImmutableMap } from 'immutable';
 import { saveAs } from 'file-saver';
 
 import type { ReduxState } from '../types/redux';
 import { IpynbCell, IpynbNotebook, IpynbOutput } from '../types/ipynb';
-import { EditorCell, KernelOutput, ReducedNotebook } from '../types/notebook';
+import {
+  EditorCell,
+  KernelOutput,
+  ReceivableKernelOutputPayload,
+  ReducedNotebook,
+  SendableKernelOutputPayload,
+} from '../types/notebook';
 import {
   ImmutableEditorCell,
   ImmutableEditorCellFactory,
@@ -94,21 +100,30 @@ export const cellArrayToImmutableMap = (
 /**
  * Convert a decompressed output object into an array of kernel outputs
  */
-export const convertOutputStringToMessages = (output: string): KernelOutput[] => {
-  const outputObject = JSON.parse(output) as {
-    messages: KernelOutput[];
-  };
+export const convertOutputToReceivablePayload = (output: OOutput): ReceivableKernelOutputPayload => {
+  const { metadata, messages } = JSON.parse(output.output) as SendableKernelOutputPayload;
 
-  return outputObject.messages;
+  return {
+    metadata: {
+      ...metadata,
+      uid: output.uid,
+      nb_id: output.nb_id,
+      cell_id: output.cell_id,
+    },
+    messages: messages.map((message) => ({
+      ...message,
+      uid: output.uid,
+      cell_id: output.cell_id,
+      runIndex: metadata.runIndex,
+    })),
+  };
 };
 
 /**
  * Convert an array of kernel outputs to an output object ready for compression
  */
-export const convertMessagesToOutputString = (messages: KernelOutput[]): string => {
-  return JSON.stringify({
-    messages,
-  });
+export const convertSendablePayloadToOutputString = (payload: SendableKernelOutputPayload): string => {
+  return JSON.stringify(payload);
 };
 
 /**

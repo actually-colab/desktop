@@ -281,7 +281,7 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
               if (runIndex !== -1) {
                 // No need to queue
                 store.dispatch(
-                  _editor.receiveKernelMessage(action.cell.cell_id, [
+                  _editor.receiveKernelMessage(action.cell.cell_id, runIndex, [
                     {
                       ...kernelOutput,
                       runIndex,
@@ -297,6 +297,7 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
               store.dispatch(
                 _editor.receiveKernelMessage(
                   action.cell.cell_id,
+                  runIndex,
                   messageQueue.map((oldMessage) => ({ ...oldMessage, runIndex }))
                 )
               );
