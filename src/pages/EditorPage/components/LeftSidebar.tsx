@@ -217,6 +217,7 @@ const LeftSidebar: React.FC = () => {
                       style={{ marginLeft: spacing.DEFAULT }}
                       appearance="subtle"
                       icon={<Icon icon="pencil" />}
+                      disabled
                       onClick={() => setActiveMenuKey('settings')}
                     />
                   </div>
