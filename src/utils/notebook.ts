@@ -27,13 +27,10 @@ import { splitKeepNewlines } from './regex';
 /**
  * A comparator for sorting kernel outputs by their message indices
  */
-export const sortImmutableOutputByMessageIndex = (a: ImmutableKernelOutput, b: ImmutableKernelOutput): number =>
-  a.messageIndex - b.messageIndex;
-
-/**
- * A comparator for sorting immutable kernel outputs by their message indices
- */
-export const sortOutputByMessageIndex = (a: KernelOutput, b: KernelOutput): number => a.messageIndex - b.messageIndex;
+export const sortOutputByMessageIndex = (
+  a: KernelOutput | ImmutableKernelOutput,
+  b: KernelOutput | ImmutableKernelOutput
+): number => a.messageIndex - b.messageIndex;
 
 /**
  * Convert a notebook to a reduced notebook
@@ -238,10 +235,10 @@ export const download = (
 
     if (cell) {
       notebookData.push({
-        cell,
+        cell: uid === '' ? cell : cell.set('runIndex', cell.selectedOutputsRunIndex),
         outputs: cellOutputs
-          ?.filter((output) => uid !== '' || output.runIndex === cell.runIndex)
-          ?.sort(sortImmutableOutputByMessageIndex),
+          ?.filter((output) => (uid === '' ? output.runIndex === cell.runIndex : output.uid === uid))
+          ?.sort(sortOutputByMessageIndex),
       });
     }
   });
