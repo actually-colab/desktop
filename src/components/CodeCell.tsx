@@ -78,17 +78,9 @@ const CodeCell: React.FC<{
     (newValue: string) => {
       if (!isEditable) return;
 
-      const cursor_pos = editorRef.current?.editor.getCursorPosition();
-
-      const changes: Partial<DCell> = {
+      onChange(cell_id, {
         contents: newValue,
-      };
-
-      if (cursor_pos !== undefined) {
-        changes.cursor_pos = editorRef.current?.editor.session.getDocument().positionToIndex(cursor_pos);
-      }
-
-      onChange(cell_id, changes);
+      });
     },
     [cell_id, isEditable, onChange]
   );
@@ -97,17 +89,9 @@ const CodeCell: React.FC<{
     (selection: { cursor: { row: number; column: number } }) => {
       if (!isEditable) return;
 
-      const contents = editorRef.current?.editor.getValue();
-
-      const changes: Partial<DCell> = {
+      onChange(cell_id, {
         cursor_pos: editorRef.current?.editor.session.getDocument().positionToIndex(selection.cursor),
-      };
-
-      if (contents !== undefined) {
-        changes.contents = contents;
-      }
-
-      onChange(cell_id, changes);
+      });
     },
     [cell_id, isEditable, onChange]
   );
