@@ -2,6 +2,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import { Icon } from 'rsuite';
+import { DCell } from '@actually-colab/editor-types';
 
 import { ReduxState } from '../types/redux';
 import { _editor } from '../redux/actions';
@@ -65,7 +66,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   codeContainerLockedByOtherUser: {
-    opacity: 0.5,
+    opacity: 0.7,
   },
   cellToolbar: {
     display: 'flex',
@@ -202,11 +203,9 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
   }, [cell, dispatch]);
 
   const onChange = React.useCallback(
-    (cell_id: string, newValue: string) => {
+    (cell_id: string, changes: Partial<DCell>) => {
       dispatchEditCell(cell_id, {
-        changes: {
-          contents: newValue,
-        },
+        changes,
       });
     },
     [dispatchEditCell]
