@@ -322,7 +322,17 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           break;
         }
 
-        socketClient?.unlockCell(notebook.nb_id, action.cell_id);
+        const cell = store.getState().editor.cells.get(action.cell_id);
+        if (cell === undefined) {
+          console.error('Cell was undefined');
+          break;
+        }
+
+        socketClient?.unlockCell(notebook.nb_id, action.cell_id, {
+          language: cell.language,
+          contents: cell.contents,
+          cursor_pos: cell.cursor_pos,
+        });
         break;
       }
 
