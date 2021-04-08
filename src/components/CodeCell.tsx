@@ -1,7 +1,8 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import AceEditor from 'react-ace';
+import AceEditor, { IMarker } from 'react-ace';
+import { DCell } from '@actually-colab/editor-types';
 
 import { ReduxState } from '../types/redux';
 import { EditorCell } from '../types/notebook';
@@ -30,8 +31,10 @@ const CodeCell: React.FC<{
   cell: ImmutableEditorCell;
   onFocus?(cell_id: EditorCell['cell_id']): void;
   onBlur?(cell_id: EditorCell['cell_id']): void;
-  onChange(cell_id: EditorCell['cell_id'], newValue: string): void;
+  onChange(cell_id: EditorCell['cell_id'], changes: Partial<DCell>): void;
 }> = ({ cell, onFocus, onBlur, onChange }) => {
+  const editorRef = React.useRef<AceEditor | null>(null);
+
   const user = useSelector((state: ReduxState) => state.auth.user);
 
   const isEditable = React.useMemo(() => cell.lock_held_by === user?.uid, [cell.lock_held_by, user?.uid]);
@@ -40,6 +43,28 @@ const CodeCell: React.FC<{
   const language = React.useMemo(() => cell.language, [cell.language]);
   const contents = React.useMemo(() => cell.contents, [cell.contents]);
   const wrapEnabled = React.useMemo(() => language === 'markdown', [language]);
+  const markers = React.useMemo<IMarker[]>(() => {
+    if (isEditable || cell.cursor_pos === null) {
+      return [];
+    }
+
+    const cursor_pos = editorRef.current?.editor.session.getDocument().indexToPosition(cell.cursor_pos, 0);
+
+    if (cursor_pos === undefined) {
+      return [];
+    }
+
+    return [
+      {
+        className: 'user-marker-1',
+        type: 'text',
+        startRow: cursor_pos.row,
+        startCol: cursor_pos.column,
+        endRow: cursor_pos.row,
+        endCol: cursor_pos.column + 1,
+      },
+    ];
+  }, [cell.cursor_pos, isEditable]);
 
   const handleFocus = React.useCallback(() => {
     onFocus?.(cell_id);
@@ -51,14 +76,46 @@ const CodeCell: React.FC<{
 
   const handleChange = React.useCallback(
     (newValue: string) => {
-      onChange(cell_id, newValue);
+      if (!isEditable) return;
+
+      const cursor_pos = editorRef.current?.editor.getCursorPosition();
+
+      const changes: Partial<DCell> = {
+        contents: newValue,
+      };
+
+      if (cursor_pos !== undefined) {
+        changes.cursor_pos = editorRef.current?.editor.session.getDocument().positionToIndex(cursor_pos);
+      }
+
+      onChange(cell_id, changes);
     },
-    [cell_id, onChange]
+    [cell_id, isEditable, onChange]
+  );
+
+  const handleCursorChange = React.useCallback(
+    (selection: { cursor: { row: number; column: number } }) => {
+      if (!isEditable) return;
+
+      const contents = editorRef.current?.editor.getValue();
+
+      const changes: Partial<DCell> = {
+        cursor_pos: editorRef.current?.editor.session.getDocument().positionToIndex(selection.cursor),
+      };
+
+      if (contents !== undefined) {
+        changes.contents = contents;
+      }
+
+      onChange(cell_id, changes);
+    },
+    [cell_id, isEditable, onChange]
   );
 
   return (
     <div className={css(styles.container, isEditable ? styles.containerFocused : styles.containerBlurred)}>
       <AceEditor
+        ref={editorRef}
         style={{ width: '100%' }}
         name={cell_id}
         mode={language}
@@ -70,7 +127,9 @@ const CodeCell: React.FC<{
         onFocus={handleFocus}
         onBlur={handleBlur}
         onChange={handleChange}
+        onCursorChange={handleCursorChange}
         wrapEnabled={wrapEnabled}
+        markers={markers}
       />
     </div>
   );

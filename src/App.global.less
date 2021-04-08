@@ -16,7 +16,7 @@
 @table-alt-background-color: #f0f2ef;
 @markdown-border-color: #ddd;
 @markdown-code-background-color: #fdefef;
-@user-1: #fb9f89;
+@user-1: @primary;
 
 body {
   height: 100vh;
@@ -58,7 +58,7 @@ body {
 
 .user-marker-1 {
   position: absolute;
-  width: 1px !important;
+  width: 2px !important;
   background-color: @user-1;
 }
 
@@ -67,9 +67,9 @@ body {
   position: absolute;
   left: -2px;
   top: -2px;
-  width: 5px;
-  height: 5px;
-  background-color: @base-color;
+  width: 6px;
+  height: 6px;
+  background-color: @user-1;
 }
 
 /**
