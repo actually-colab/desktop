@@ -47,7 +47,16 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
             store.dispatch(_auth.signInSuccess(res.user, res.sessionToken));
           } catch (error) {
             console.error(error);
+            console.error(error.response);
             store.dispatch(_auth.signInFailure(error.message));
+            store.dispatch(
+              _ui.notify({
+                level: 'error',
+                title: 'Failed to sign in',
+                message: error.response?.data ?? error.message,
+                duration: 4000,
+              })
+            );
           }
         })();
         break;
@@ -167,6 +176,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
             }
           } catch (error) {
             console.error(error);
+            console.error(error.response);
             store.dispatch(_editor.getNotebooksFailure(error.message));
             store.dispatch(
               _ui.notify({
@@ -192,6 +202,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
             store.dispatch(_editor.createNotebookSuccess(notebook));
           } catch (error) {
             console.error(error);
+            console.error(error.response);
             store.dispatch(_editor.createNotebookFailure(error.message));
             store.dispatch(
               _ui.notify({
@@ -229,6 +240,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
             }
           } catch (error) {
             console.error(error);
+            console.error(error.response);
             store.dispatch(_editor.openNotebookFailure(error.message));
             store.dispatch(
               _ui.notify({
@@ -254,6 +266,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
             store.dispatch(_editor.shareNotebookSuccess(notebook));
           } catch (error) {
             console.error(error);
+            console.error(error.response);
             store.dispatch(_editor.shareNotebooksFailure(error.message));
             store.dispatch(
               _ui.notify({

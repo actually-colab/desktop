@@ -198,6 +198,7 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
             store.dispatch(_editor.restartKernelSuccess());
           } catch (error) {
             console.error(error);
+            console.error(error.response);
           }
         })();
         break;
@@ -340,6 +341,7 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
             store.dispatch(_editor.interruptKernelSuccess(action.cell_id));
           } catch (error) {
             console.error(error);
+            console.error(error.response);
           }
         })();
         break;
