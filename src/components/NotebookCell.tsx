@@ -103,7 +103,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
   const { kernelIsConnected } = useKernelStatus();
 
   const user = useSelector((state: ReduxState) => state.auth.user);
-  const users = useSelector((state: ReduxState) => state.editor.users);
+  const notebook = useSelector((state: ReduxState) => state.editor.notebook);
   const selectedOutputsUid = useSelector((state: ReduxState) => state.editor.selectedOutputsUid);
   const lockedCells = useSelector((state: ReduxState) => state.editor.lockedCells);
   const lockingCellId = useSelector((state: ReduxState) => state.editor.lockingCellId);
@@ -122,10 +122,10 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
       cell.lock_held_by !== ''
         ? {
             uid: cell.lock_held_by,
-            name: users.find((_user) => _user.uid === cell.lock_held_by)?.name ?? 'Unknown',
+            name: notebook?.users.find((_user) => _user.uid === cell.lock_held_by)?.name ?? 'Unknown',
           }
         : null,
-    [cell.lock_held_by, users]
+    [cell.lock_held_by, notebook?.users]
   );
   const ownsCell = React.useMemo(() => lockOwner?.uid === user?.uid, [lockOwner?.uid, user?.uid]);
   const lockedByOtherUser = React.useMemo(() => !ownsCell && lockOwner !== null, [lockOwner, ownsCell]);
