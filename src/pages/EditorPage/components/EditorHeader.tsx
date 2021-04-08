@@ -80,9 +80,12 @@ const EditorHeader: React.FC = () => {
     }),
     [connectToKernelErrorMessage, kernelStatus]
   );
-  const visibleSelectedOutputsUid = React.useMemo<DUser['uid']>(
-    () => (selectedOutputsUid === '' ? user?.uid ?? '' : selectedOutputsUid),
-    [selectedOutputsUid, user?.uid]
+  const selectedOutputsEmail = React.useMemo<DUser['uid']>(
+    () =>
+      (selectedOutputsUid === ''
+        ? user?.email
+        : notebook?.users?.find((_user) => _user.uid === selectedOutputsUid)?.email) ?? '',
+    [notebook?.users, selectedOutputsUid, user?.email]
   );
 
   const dispatch = useDispatch();
@@ -234,13 +237,14 @@ const EditorHeader: React.FC = () => {
             placement="bottomEnd"
             activeKey={selectedOutputsUid}
             buttonContent={
-              <React.Fragment>
-                {selectedOutputsUid === '' && (
+              selectedOutputsUid === '' ? (
+                <React.Fragment>
                   <StatusIndicator textPlacement="right" color={kernelStatusColor} tooltipOptions={statusTooltip} />
-                )}
-
-                {visibleSelectedOutputsUid}
-              </React.Fragment>
+                  {gatewayUri}
+                </React.Fragment>
+              ) : (
+                selectedOutputsEmail
+              )
             }
             onSelect={handleKernelSelect}
           >
