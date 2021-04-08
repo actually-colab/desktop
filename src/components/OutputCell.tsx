@@ -31,9 +31,13 @@ const OutputCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
       outputs
         .get(cell.cell_id)
         ?.get(selectedOutputsUid)
-        ?.filter((output) => selectedOutputsUid !== '' || output.runIndex === cell.runIndex)
+        ?.filter((output) =>
+          selectedOutputsUid === ''
+            ? output.runIndex === cell.runIndex
+            : output.runIndex === cell.selectedOutputsRunIndex
+        )
         ?.sort(sortImmutableOutputByMessageIndex) ?? ImmutableList<ImmutableKernelOutput>(),
-    [cell.cell_id, cell.runIndex, outputs, selectedOutputsUid]
+    [cell.cell_id, cell.runIndex, cell.selectedOutputsRunIndex, outputs, selectedOutputsUid]
   );
 
   return (

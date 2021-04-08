@@ -553,20 +553,25 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
     /**
      * Received an output object from a user
      */
-    case NOTEBOOKS.OUTPUTS.RECEIVE:
+    case NOTEBOOKS.OUTPUTS.RECEIVE: {
+      const messages = convertOutputStringToMessages(action.output.output);
+
       return {
         ...state,
+        cells:
+          messages.length > 0 && messages[0].uid === state.selectedOutputsUid
+            ? state.cells.update(messages[0].cell_id, (cell) =>
+                cell.set('selectedOutputsRunIndex', messages[0].runIndex)
+              )
+            : state.cells,
         outputs: state.outputs.update(action.output.cell_id, ImmutableMap(), (userMap) =>
           userMap.set(
             action.output.uid,
-            ImmutableList(
-              convertOutputStringToMessages(action.output.output).map(
-                (message) => new ImmutableKernelOutputFactory(message)
-              )
-            )
+            ImmutableList(messages.map((message) => new ImmutableKernelOutputFactory(message)))
           )
         ),
       };
+    }
 
     /**
      * Started locking a given cell

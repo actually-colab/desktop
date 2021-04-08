@@ -138,6 +138,10 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
     runQueue,
   ]);
   const isQueued = React.useMemo(() => queueIndex >= 0, [queueIndex]);
+  const selectedRunIndex = React.useMemo(
+    () => (selectedOutputsUid === '' ? cell.runIndex : cell.selectedOutputsRunIndex),
+    [cell.runIndex, cell.selectedOutputsRunIndex, selectedOutputsUid]
+  );
 
   const dispatch = useDispatch();
   const dispatchUnlockCell = React.useCallback(() => user !== null && dispatch(_editor.unlockCell(user, cell_id)), [
@@ -216,7 +220,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
             <React.Fragment>
               <code>[</code>
               <code className={css(styles.runIndex)}>
-                {isRunning || isQueued ? '*' : cell.runIndex === -1 ? '' : cell.runIndex}
+                {isRunning || isQueued ? '*' : selectedRunIndex === -1 ? '' : selectedRunIndex}
               </code>
               <code>]</code>
             </React.Fragment>
