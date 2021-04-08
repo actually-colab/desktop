@@ -25,7 +25,7 @@ import {
 import {
   cellArrayToImmutableMap,
   cleanDCell,
-  convertOutputStringToMessages,
+  convertOutputToReceivablePayload,
   makeAccessLevelsImmutable,
   reduceImmutableNotebook,
   reduceNotebookContents,
@@ -554,15 +554,13 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
      * Received an output object from a user
      */
     case NOTEBOOKS.OUTPUTS.RECEIVE: {
-      const messages = convertOutputStringToMessages(action.output.output);
+      const { metadata, messages } = convertOutputToReceivablePayload(action.output);
 
       return {
         ...state,
         cells:
-          messages.length > 0 && messages[0].uid === state.selectedOutputsUid
-            ? state.cells.update(messages[0].cell_id, (cell) =>
-                cell.set('selectedOutputsRunIndex', messages[0].runIndex)
-              )
+          metadata.uid === state.selectedOutputsUid
+            ? state.cells.update(metadata.cell_id, (cell) => cell.set('selectedOutputsRunIndex', metadata.runIndex))
             : state.cells,
         outputs: state.outputs.update(action.output.cell_id, ImmutableMap(), (userMap) =>
           userMap.set(

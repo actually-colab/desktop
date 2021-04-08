@@ -583,9 +583,14 @@ export const executeCodeFailure = (
 /**
  * Received a message from the kernel
  */
-export const receiveKernelMessage = (cell_id: EditorCell['cell_id'], messages: KernelOutput[]): EditorActionTypes => ({
+export const receiveKernelMessage = (
+  cell_id: EditorCell['cell_id'],
+  runIndex: number,
+  messages: KernelOutput[]
+): EditorActionTypes => ({
   type: KERNEL.MESSAGE.RECEIVE,
   cell_id,
+  runIndex,
   messages,
 });
 

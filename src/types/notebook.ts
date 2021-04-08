@@ -24,6 +24,34 @@ export type KernelOutput = BaseKernelOutput & {
   output: IpynbOutput;
 };
 
+/**
+ * An output without metadata
+ */
+export type MinimalKernelOutput = Omit<KernelOutput, 'uid' | 'cell_id' | 'runIndex'>;
+
+/**
+ * A payload containing metadata and an array of minimal outputs generated from an OOutput received from a client
+ */
+export type ReceivableKernelOutputPayload = {
+  metadata: {
+    uid: string;
+    nb_id: string;
+    cell_id: string;
+    runIndex: number;
+  };
+  messages: KernelOutput[];
+};
+
+/**
+ * A payload containing metadata and an array of minimal outputs to send to the client
+ */
+export type SendableKernelOutputPayload = {
+  metadata: {
+    runIndex: number;
+  };
+  messages: MinimalKernelOutput[];
+};
+
 export type EditorCellMeta = {
   /**
    * If the cell is markdown, this indicates if the markdown is rendered or editable

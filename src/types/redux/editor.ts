@@ -416,6 +416,7 @@ type InterruptKernelSuccessAction = {
 type KernelMessageReceiveAction = {
   type: typeof KERNEL.MESSAGE.RECEIVE;
   cell_id: EditorCell['cell_id'];
+  runIndex: number;
   messages: KernelOutput[];
 };
 

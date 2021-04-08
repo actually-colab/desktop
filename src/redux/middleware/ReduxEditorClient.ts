@@ -6,7 +6,7 @@ import { SIGN_IN, SIGN_OUT } from '../../types/redux/auth';
 import { CELL, KERNEL, NOTEBOOKS } from '../../types/redux/editor';
 import { DEMO_NOTEBOOK_NAME } from '../../constants/demo';
 import { httpToWebSocket } from '../../utils/request';
-import { cleanDCell, convertMessagesToOutputString } from '../../utils/notebook';
+import { cleanDCell, convertSendablePayloadToOutputString } from '../../utils/notebook';
 import { LatestNotebookIdStorage } from '../../utils/storage';
 import { syncSleep } from '../../utils/sleep';
 import { ReduxActions, _auth, _editor, _ui } from '../actions';
@@ -344,7 +344,17 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           break;
         }
 
-        socketClient?.updateOutput(notebook.nb_id, action.cell_id, convertMessagesToOutputString([]));
+        // Send a blank message to notify the clients of the updated run index
+        socketClient?.updateOutput(
+          notebook.nb_id,
+          action.cell_id,
+          convertSendablePayloadToOutputString({
+            metadata: {
+              runIndex: action.runIndex,
+            },
+            messages: [],
+          })
+        );
         break;
       }
 
@@ -358,6 +368,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           break;
         }
 
+        // Get all the existing messages plus the new ones
         const allMessages = (
           store
             .getState()
@@ -368,7 +379,16 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
             ?.map((message) => message.toObject()) ?? []
         ).concat(action.messages);
 
-        socketClient?.updateOutput(notebook.nb_id, action.cell_id, convertMessagesToOutputString(allMessages));
+        socketClient?.updateOutput(
+          notebook.nb_id,
+          action.cell_id,
+          convertSendablePayloadToOutputString({
+            metadata: {
+              runIndex: action.runIndex,
+            },
+            messages: allMessages,
+          })
+        );
         break;
       }
     }
