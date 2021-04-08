@@ -33,6 +33,10 @@ export type EditorCellMeta = {
    * The latest execution count associated with this cell
    */
   runIndex: number;
+  /**
+   * The latest execution count associated with this cell when another user is being viewed
+   */
+  selectedOutputsRunIndex: number;
 };
 
 /**

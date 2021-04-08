@@ -44,6 +44,7 @@ export const ImmutableEditorCellFactory = ImmutableRecord<Required<EditorCell>>(
   position: -1,
   rendered: true,
   runIndex: -1,
+  selectedOutputsRunIndex: -1,
 });
 
 /**

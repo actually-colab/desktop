@@ -10,9 +10,9 @@ import { download } from '../../../utils/notebook';
  * The Downloads panel for the right sidebar
  */
 const DownloadsPanel: React.FC = () => {
-  const user = useSelector((state: ReduxState) => state.auth.user);
   const notebook = useSelector((state: ReduxState) => state.editor.notebook);
   const cells = useSelector((state: ReduxState) => state.editor.cells);
+  const selectedOutputsUid = useSelector((state: ReduxState) => state.editor.selectedOutputsUid);
   const outputs = useSelector((state: ReduxState) => state.editor.outputs);
 
   const isDownloadSupported = React.useMemo(() => {
@@ -24,7 +24,6 @@ const DownloadsPanel: React.FC = () => {
 
     return isSupported;
   }, []);
-  const uid = React.useMemo(() => user?.uid ?? '', [user?.uid]);
 
   const onClickDownload = React.useCallback(
     (type: 'ipynb' | 'py' | 'md') => {
@@ -32,9 +31,9 @@ const DownloadsPanel: React.FC = () => {
         return;
       }
 
-      download(notebook, uid, cells, outputs, type);
+      download(notebook, cells, outputs, selectedOutputsUid, type);
     },
-    [cells, notebook, outputs, uid]
+    [cells, notebook, outputs, selectedOutputsUid]
   );
 
   return (

@@ -1,4 +1,5 @@
 import { List as ImmutableList, Map as ImmutableMap } from 'immutable';
+import { DUser } from '@actually-colab/editor-types';
 
 import { CELL, KERNEL, NOTEBOOKS } from '../types/redux/editor';
 import { SIGN_OUT } from '../types/redux/auth';
@@ -24,6 +25,7 @@ import {
 import {
   cellArrayToImmutableMap,
   cleanDCell,
+  convertOutputStringToMessages,
   makeAccessLevelsImmutable,
   reduceImmutableNotebook,
   reduceNotebookContents,
@@ -153,10 +155,18 @@ export interface EditorState {
    * A map of `cell_id`'s to cells in the currently open notebook
    */
   cells: ImmutableMap<EditorCell['cell_id'], ImmutableEditorCell>;
+
   /**
-   * A map of `cell_id`'s to outputs for each cell
+   * The `uid` to view outputs for
    */
-  outputs: ImmutableMap<EditorCell['cell_id'], ImmutableList<ImmutableKernelOutput>>;
+  selectedOutputsUid: string;
+  /**
+   * A map of `cell_id`'s to a map of `uid` to a list of outputs for each cell.
+   *
+   * Use an empty string as the key for the current user
+   */
+  outputs: ImmutableMap<EditorCell['cell_id'], ImmutableMap<DUser['uid'], ImmutableList<ImmutableKernelOutput>>>;
+
   /**
    * A list of users who are active
    */
@@ -203,7 +213,10 @@ const initialState: EditorState = {
   notebooks: ImmutableList(),
   notebook: null,
   cells: ImmutableMap(),
+
+  selectedOutputsUid: '',
   outputs: ImmutableMap(),
+
   users: ImmutableList(),
   logs: ImmutableList(),
 };
@@ -440,6 +453,8 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         openingNotebookId: '',
         lockingCellId: '',
         unlockingCellId: '',
+        selectedCellId: '',
+        selectedOutputsUid: '',
         lockedCells: ImmutableList(
           dcells
             .filter((dcell) => (dcell.lock_held_by ?? '') !== '')
@@ -495,6 +510,9 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ...state,
         isSharingNotebook: true,
       };
+    /**
+     * Successfully shared a notebook
+     */
     case NOTEBOOKS.SHARE.SUCCESS: {
       return {
         ...state,
@@ -514,11 +532,46 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
           }) ?? null,
       };
     }
+    /**
+     * Failed to share a notebook
+     */
     case NOTEBOOKS.SHARE.FAILURE:
       return {
         ...state,
         isSharingNotebook: false,
       };
+
+    /**
+     * Selected a given user to view outputs for
+     */
+    case NOTEBOOKS.OUTPUTS.SELECT:
+      return {
+        ...state,
+        selectedOutputsUid: action.uid,
+      };
+
+    /**
+     * Received an output object from a user
+     */
+    case NOTEBOOKS.OUTPUTS.RECEIVE: {
+      const messages = convertOutputStringToMessages(action.output.output);
+
+      return {
+        ...state,
+        cells:
+          messages.length > 0 && messages[0].uid === state.selectedOutputsUid
+            ? state.cells.update(messages[0].cell_id, (cell) =>
+                cell.set('selectedOutputsRunIndex', messages[0].runIndex)
+              )
+            : state.cells,
+        outputs: state.outputs.update(action.output.cell_id, ImmutableMap(), (userMap) =>
+          userMap.set(
+            action.output.uid,
+            ImmutableList(messages.map((message) => new ImmutableKernelOutputFactory(message)))
+          )
+        ),
+      };
+    }
 
     /**
      * Started locking a given cell
@@ -827,7 +880,9 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         runQueue: state.runQueue.filter((cell_id) => cell_id !== action.cell.cell_id),
         isExecutingCode: true,
         runningCellId: action.cell.cell_id,
-        outputs: state.outputs.update(action.cell.cell_id, ImmutableList(), (outputs) => outputs.clear()),
+        outputs: state.outputs.update(action.cell.cell_id, ImmutableMap(), (userMap) =>
+          userMap.update('', ImmutableList(), (outputs) => outputs.clear())
+        ),
       };
     }
     /**
@@ -878,10 +933,12 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
     case KERNEL.MESSAGE.RECEIVE:
       return {
         ...state,
-        outputs: state.outputs.update(action.cell_id, ImmutableList(), (outputs) =>
-          outputs.concat(
-            ImmutableList<ImmutableKernelOutput>(
-              action.messages.map<ImmutableKernelOutput>((message) => new ImmutableKernelOutputFactory(message))
+        outputs: state.outputs.update(action.cell_id, ImmutableMap(), (userMap) =>
+          userMap.update('', ImmutableList(), (outputs) =>
+            outputs.concat(
+              ImmutableList<ImmutableKernelOutput>(
+                action.messages.map<ImmutableKernelOutput>((message) => new ImmutableKernelOutputFactory(message))
+              )
             )
           )
         ),

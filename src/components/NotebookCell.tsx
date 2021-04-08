@@ -103,6 +103,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
 
   const user = useSelector((state: ReduxState) => state.auth.user);
   const users = useSelector((state: ReduxState) => state.editor.users);
+  const selectedOutputsUid = useSelector((state: ReduxState) => state.editor.selectedOutputsUid);
   const lockedCells = useSelector((state: ReduxState) => state.editor.lockedCells);
   const lockingCellId = useSelector((state: ReduxState) => state.editor.lockingCellId);
   const unlockingCellId = useSelector((state: ReduxState) => state.editor.unlockingCellId);
@@ -137,6 +138,10 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
     runQueue,
   ]);
   const isQueued = React.useMemo(() => queueIndex >= 0, [queueIndex]);
+  const selectedRunIndex = React.useMemo(
+    () => (selectedOutputsUid === '' ? cell.runIndex : cell.selectedOutputsRunIndex),
+    [cell.runIndex, cell.selectedOutputsRunIndex, selectedOutputsUid]
+  );
 
   const dispatch = useDispatch();
   const dispatchUnlockCell = React.useCallback(() => user !== null && dispatch(_editor.unlockCell(user, cell_id)), [
@@ -215,7 +220,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
             <React.Fragment>
               <code>[</code>
               <code className={css(styles.runIndex)}>
-                {isRunning || isQueued ? '*' : cell.runIndex === -1 ? '' : cell.runIndex}
+                {isRunning || isQueued ? '*' : selectedRunIndex === -1 ? '' : selectedRunIndex}
               </code>
               <code>]</code>
             </React.Fragment>
@@ -249,7 +254,8 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
               size="xs"
               loading={isRunning}
               disabled={
-                (!kernelIsConnected && cell.language === 'python') || (cell.language === 'markdown' && cell.rendered)
+                ((!kernelIsConnected || selectedOutputsUid !== '') && cell.language === 'python') ||
+                (cell.language === 'markdown' && cell.rendered)
               }
               onClick={onClickPlay}
             />
@@ -289,7 +295,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
           </div>
         </div>
 
-        <OutputCell cell={cell} uid={user?.uid} />
+        <OutputCell cell={cell} />
       </div>
     </div>
   );

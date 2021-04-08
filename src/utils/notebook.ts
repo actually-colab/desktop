@@ -2,6 +2,7 @@ import { DCell, Notebook, NotebookAccessLevel, NotebookContents, DUser } from '@
 import { List as ImmutableList, Map as ImmutableMap } from 'immutable';
 import { saveAs } from 'file-saver';
 
+import type { ReduxState } from '../types/redux';
 import { IpynbCell, IpynbNotebook, IpynbOutput } from '../types/ipynb';
 import { EditorCell, KernelOutput, ReducedNotebook } from '../types/notebook';
 import {
@@ -88,6 +89,26 @@ export const cellArrayToImmutableMap = (
   });
 
   return map;
+};
+
+/**
+ * Convert a decompressed output object into an array of kernel outputs
+ */
+export const convertOutputStringToMessages = (output: string): KernelOutput[] => {
+  const outputObject = JSON.parse(output) as {
+    messages: KernelOutput[];
+  };
+
+  return outputObject.messages;
+};
+
+/**
+ * Convert an array of kernel outputs to an output object ready for compression
+ */
+export const convertMessagesToOutputString = (messages: KernelOutput[]): string => {
+  return JSON.stringify({
+    messages,
+  });
 };
 
 /**
@@ -189,22 +210,22 @@ const convertToMd = (
  */
 export const download = (
   notebook: ImmutableReducedNotebook,
+  cells: ReduxState['editor']['cells'],
+  outputs: ReduxState['editor']['outputs'],
   uid: DUser['uid'],
-  cells: ImmutableMap<EditorCell['cell_id'], ImmutableEditorCell>,
-  outputs: ImmutableMap<EditorCell['cell_id'], ImmutableList<ImmutableKernelOutput>>,
   extension: 'ipynb' | 'py' | 'md' = 'ipynb'
 ): void => {
   const notebookData: { cell: ImmutableEditorCell; outputs?: ImmutableList<ImmutableKernelOutput> }[] = [];
 
   notebook.cell_ids.forEach((cell_id) => {
     const cell = cells.get(cell_id);
-    const cellOutputs = outputs.get(cell_id);
+    const cellOutputs = outputs.get(cell_id)?.get(uid);
 
     if (cell) {
       notebookData.push({
         cell,
         outputs: cellOutputs
-          ?.filter((output) => output.uid === uid && output.runIndex === cell.runIndex)
+          ?.filter((output) => uid !== '' || output.runIndex === cell.runIndex)
           ?.sort(sortImmutableOutputByMessageIndex),
       });
     }
