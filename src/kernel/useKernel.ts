@@ -1,6 +1,5 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Notebook } from '@actually-colab/editor-types';
 
 import { ReduxState } from '../types/redux';
 import { _editor } from '../redux/actions';
@@ -19,7 +18,6 @@ const useKernel = (): null => {
   const cells = useSelector((state: ReduxState) => state.editor.cells);
   const runQueue = useSelector((state: ReduxState) => state.editor.runQueue);
   const isExecutingCode = useSelector((state: ReduxState) => state.editor.isExecutingCode);
-  const notebook = useSelector((state: ReduxState) => state.editor.notebook);
 
   const shouldConnect = React.useMemo(
     () =>
@@ -41,13 +39,8 @@ const useKernel = (): null => {
     dispatch,
   ]);
   const dispatchDisconnectFromKernel = React.useCallback(() => dispatch(_editor.disconnectFromKernel()), [dispatch]);
-  const dispatchRestartKernel = React.useCallback(
-    () => kernel !== null && dispatch(_editor.restartKernel(gatewayUri, kernel)),
-    [dispatch, gatewayUri, kernel]
-  );
 
   const timeout = React.useRef<NodeJS.Timeout | null>(null);
-  const currentNotebookId = React.useRef<Notebook['nb_id']>('');
 
   /**
    * Manage the kernel connection
@@ -81,16 +74,6 @@ const useKernel = (): null => {
       }
     }
   }, [cells, dispatchExecuteCode, isExecutingCode, runQueue]);
-
-  /**
-   * Automatically restart kernel on notebook change
-   */
-  React.useEffect(() => {
-    if (currentNotebookId.current !== '' && notebook !== null && notebook.nb_id !== currentNotebookId.current) {
-      dispatchRestartKernel();
-      currentNotebookId.current = notebook.nb_id;
-    }
-  }, [dispatchRestartKernel, notebook]);
 
   /**
    * Automatically disconnect from the kernel if the gateway URI is edited

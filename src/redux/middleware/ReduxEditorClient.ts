@@ -217,6 +217,13 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
             LatestNotebookIdStorage.set(notebook.nb_id);
 
             store.dispatch(_editor.openNotebookSuccess(notebook));
+
+            // Restart the kernel
+            const kernel = store.getState().editor.kernel;
+
+            if (kernel !== null) {
+              store.dispatch(_editor.restartKernel(kernel.uri, kernel));
+            }
           } catch (error) {
             console.error(error);
             store.dispatch(_editor.openNotebookFailure(error.message));
