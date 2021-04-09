@@ -67,20 +67,59 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
       case SIGN_IN.SUCCESS: {
         socketClient = new ActuallyColabSocketClient(baseSocketURL, action.sessionToken);
 
+        /**
+         * The socket connection was opened
+         */
         socketClient.on('connect', () => {
           console.log('Connected to AC socket');
           window.addEventListener('beforeunload', closeOnUnmount);
         });
 
+        /**
+         * The socket connection was closed
+         */
         socketClient.on('close', (event) => {
           console.log('Disconnected from AC socket', event);
           window.removeEventListener('beforeunload', closeOnUnmount);
         });
 
+        /**
+         * The socket connection encountered an error
+         */
         socketClient.on('error', (error) => console.error(error));
 
         const currentUser = action.user;
 
+        /**
+         * Received notebook contents and connected users for a given notebook
+         */
+        socketClient.on('notebook_contents', (activeNotebook) => {
+          console.log('Notebook contents', activeNotebook);
+
+          const { connected_users, ...notebook } = activeNotebook;
+          const currentUser = store.getState().auth.user;
+
+          // Remember the most recently opened notebook
+          LatestNotebookIdStorage.set(notebook.nb_id);
+
+          store.dispatch(
+            _editor.openNotebookSuccess(
+              notebook,
+              connected_users.filter((uid) => uid !== currentUser?.uid)
+            )
+          );
+
+          // Restart the kernel
+          const kernel = store.getState().editor.kernel;
+
+          if (kernel !== null) {
+            store.dispatch(_editor.restartKernel(kernel.uri, kernel));
+          }
+        });
+
+        /**
+         * A notebook was opened by a given user
+         */
         socketClient.on('notebook_opened', (user) => {
           console.log('Notebook opened', user);
 
@@ -88,11 +127,21 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
             store.dispatch(_editor.connectToNotebook(user));
           }
         });
-        socketClient.on('notebook_closed', (_, triggered_by) => {
-          console.log('Notebook closed', triggered_by);
-          store.dispatch(_editor.disconnectFromNotebook(triggered_by ?? ''));
+
+        /**
+         * A notebook was closed by a given user
+         */
+        socketClient.on('notebook_closed', (nb_id, triggered_by) => {
+          console.log('Notebook closed', nb_id, triggered_by);
+
+          if (nb_id === store.getState().editor.notebook?.nb_id) {
+            store.dispatch(_editor.disconnectFromNotebook(triggered_by ?? ''));
+          }
         });
 
+        /**
+         * A cell was created by a given user
+         */
         socketClient.on('cell_created', (dcell, triggered_by) => {
           console.log('Cell created', dcell);
           store.dispatch(
@@ -100,6 +149,9 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           );
         });
 
+        /**
+         * A cell was locked by a given user
+         */
         socketClient.on('cell_locked', (dcell, triggered_by) => {
           console.log('Cell locked', dcell);
           store.dispatch(
@@ -112,6 +164,9 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           );
         });
 
+        /**
+         * A cell was unlocked by a given user
+         */
         socketClient.on('cell_unlocked', (dcell, triggered_by) => {
           console.log('Cell unlocked', dcell);
           store.dispatch(
@@ -124,11 +179,17 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           );
         });
 
+        /**
+         * A cell was edited by a given user
+         */
         socketClient.on('cell_edited', (dcell, triggered_by) => {
           console.log('Cell edited', dcell);
           store.dispatch(_editor.editCellSuccess(triggered_by === currentUser.uid, dcell.cell_id, cleanDCell(dcell)));
         });
 
+        /**
+         * An output was received from a given user
+         */
         socketClient.on('output_updated', (output) => {
           console.log('Received outputs', output);
           if (output.uid !== currentUser.uid) {
@@ -223,34 +284,6 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
       case NOTEBOOKS.OPEN.START: {
         (async () => {
           socketClient?.openNotebook(action.nb_id);
-
-          try {
-            const notebook = await restClient.getNotebookContents(action.nb_id);
-
-            // Remember the most recently opened notebook
-            LatestNotebookIdStorage.set(notebook.nb_id);
-
-            store.dispatch(_editor.openNotebookSuccess(notebook));
-
-            // Restart the kernel
-            const kernel = store.getState().editor.kernel;
-
-            if (kernel !== null) {
-              store.dispatch(_editor.restartKernel(kernel.uri, kernel));
-            }
-          } catch (error) {
-            console.error(error);
-            console.error(error.response);
-            store.dispatch(_editor.openNotebookFailure(error.message));
-            store.dispatch(
-              _ui.notify({
-                level: 'error',
-                title: 'Error',
-                message: 'Failed to open your notebook! Are you sure the user exists?',
-                duration: 4000,
-              })
-            );
-          }
         })();
         break;
       }

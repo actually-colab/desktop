@@ -26,7 +26,7 @@ export const signInSuccess = (user: DUser, sessionToken: string): AuthActionType
 /**
  * Failed to sign in
  */
-export const signInFailure = (errorMessage: string): AuthActionTypes => {
+export const signInFailure = (errorMessage: string = 'Unknown Error'): AuthActionTypes => {
   return {
     type: SIGN_IN.FAILURE,
     error: {

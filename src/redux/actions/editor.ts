@@ -77,7 +77,7 @@ export const connectToKernelSuccess = (kernel: Kernel): EditorActionTypes => ({
 /**
  * Failed to connect to a kernel
  */
-export const connectToKernelFailure = (errorMessage: string): EditorActionTypes => ({
+export const connectToKernelFailure = (errorMessage: string = 'Unknown Error'): EditorActionTypes => ({
   type: KERNEL.CONNECT.FAILURE,
   error: {
     message: errorMessage,
@@ -157,7 +157,7 @@ export const getNotebooksSuccess = (notebooks: Notebook[]): EditorActionTypes =>
 /**
  * Failed to get the notebooks
  */
-export const getNotebooksFailure = (errorMessage: string): EditorActionTypes => ({
+export const getNotebooksFailure = (errorMessage: string = 'Unknown Error'): EditorActionTypes => ({
   type: NOTEBOOKS.GET.FAILURE,
   error: {
     message: errorMessage,
@@ -187,7 +187,7 @@ export const createNotebookSuccess = (notebook: Notebook): EditorActionTypes => 
 /**
  * Failed to create a notebook
  */
-export const createNotebookFailure = (errorMessage: string): EditorActionTypes => ({
+export const createNotebookFailure = (errorMessage: string = 'Unknown Error'): EditorActionTypes => ({
   type: NOTEBOOKS.CREATE.FAILURE,
   error: {
     message: errorMessage,
@@ -209,15 +209,16 @@ const openNotebookStart = (nb_id: Notebook['nb_id']): EditorActionTypes => ({
 /**
  * Successfully opened a notebook
  */
-export const openNotebookSuccess = (notebook: NotebookContents): EditorActionTypes => ({
+export const openNotebookSuccess = (notebook: NotebookContents, activeUids: string[] = []): EditorActionTypes => ({
   type: NOTEBOOKS.OPEN.SUCCESS,
   notebook,
+  activeUids,
 });
 
 /**
  * Failed to open a notebook
  */
-export const openNotebookFailure = (errorMessage: string): EditorActionTypes => ({
+export const openNotebookFailure = (errorMessage: string = 'Unknown Error'): EditorActionTypes => ({
   type: NOTEBOOKS.OPEN.FAILURE,
   error: {
     message: errorMessage,
@@ -269,7 +270,7 @@ export const shareNotebookSuccess = (notebook: Notebook): EditorActionTypes => (
 /**
  * Failed to share a notebook
  */
-export const shareNotebooksFailure = (errorMessage: string): EditorActionTypes => ({
+export const shareNotebooksFailure = (errorMessage: string = 'Unknown Error'): EditorActionTypes => ({
   type: NOTEBOOKS.SHARE.FAILURE,
   error: {
     message: errorMessage,
@@ -327,7 +328,7 @@ export const lockCellSuccess = (
 /**
  * Failed to lock a cell
  */
-export const lockCellFailure = (errorMessage: string): EditorActionTypes => ({
+export const lockCellFailure = (errorMessage: string = 'Unknown Error'): EditorActionTypes => ({
   type: CELL.LOCK.FAILURE,
   error: {
     message: errorMessage,
@@ -366,7 +367,7 @@ export const unlockCellSuccess = (
 /**
  * Failed to unlock a cell
  */
-export const unlockCellFailure = (errorMessage: string): EditorActionTypes => ({
+export const unlockCellFailure = (errorMessage: string = 'Unknown Error'): EditorActionTypes => ({
   type: CELL.UNLOCK.FAILURE,
   error: {
     message: errorMessage,
@@ -404,7 +405,7 @@ export const addCellSuccess = (
 /**
  * Failed to add a new cell
  */
-export const addCellFailure = (errorMessage: string): EditorActionTypes => ({
+export const addCellFailure = (errorMessage: string = 'Unknown Error'): EditorActionTypes => ({
   type: CELL.ADD.FAILURE,
   error: {
     message: errorMessage,
@@ -435,7 +436,7 @@ export const deleteCellSuccess = (isMe: boolean, cell_id: EditorCell['cell_id'])
 /**
  * Failed to delete a cell
  */
-export const deleteCellFailure = (errorMessage: string): EditorActionTypes => ({
+export const deleteCellFailure = (errorMessage: string = 'Unknown Error'): EditorActionTypes => ({
   type: CELL.DELETE.FAILURE,
   error: {
     message: errorMessage,
@@ -477,7 +478,7 @@ export const editCellSuccess = (
 /**
  * Failed to edit a cell
  */
-export const editCellFailure = (errorMessage: string): EditorActionTypes => {
+export const editCellFailure = (errorMessage: string = 'Unknown Error'): EditorActionTypes => {
   return {
     type: CELL.EDIT.FAILURE,
     error: {
@@ -570,7 +571,7 @@ export const executeCodeSuccess = (cell_id: EditorCell['cell_id'], runIndex: num
 export const executeCodeFailure = (
   cell_id: EditorCell['cell_id'],
   runIndex: number,
-  errorMessage: string
+  errorMessage: string = 'Unknown Error'
 ): EditorActionTypes => ({
   type: KERNEL.EXECUTE.FAILURE,
   cell_id,

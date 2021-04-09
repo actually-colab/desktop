@@ -28,7 +28,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  avatarsContainer: {},
+  avatarsContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   avatar: {
     marginRight: spacing.DEFAULT / 2,
   },
