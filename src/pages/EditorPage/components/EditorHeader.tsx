@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import { Button, Divider, Dropdown, Modal } from 'rsuite';
+import { Button, Divider, Dropdown, Icon, Modal } from 'rsuite';
 import { DUser } from '@actually-colab/editor-types';
 
 import { palette, spacing } from '../../../constants/theme';
@@ -9,8 +9,7 @@ import { ReduxState } from '../../../types/redux';
 import { _editor } from '../../../redux/actions';
 import { EditorCell } from '../../../types/notebook';
 import useKernelStatus from '../../../kernel/useKernelStatus';
-import { Header, PopoverDropdown, RegularIconButton, StatusIndicator, UserAvatar } from '../../../components';
-import { StatusIndicatorProps } from '../../../components/StatusIndicator';
+import { Header, PopoverDropdown, RegularIconButton, UserAvatar } from '../../../components';
 import { CollaboratorsPopover } from '../Header';
 
 const styles = StyleSheet.create({
@@ -39,6 +38,11 @@ const styles = StyleSheet.create({
   padLeft: {
     marginLeft: spacing.DEFAULT / 2,
   },
+  kernelIconContainer: {
+    position: 'relative',
+    marginTop: 3,
+    marginRight: spacing.DEFAULT / 2,
+  },
 });
 
 /**
@@ -48,13 +52,11 @@ const EditorHeader: React.FC = () => {
   const { kernelStatus, kernelStatusColor, kernelIsConnected } = useKernelStatus();
 
   const user = useSelector((state: ReduxState) => state.auth.user);
-  const gatewayUri = useSelector((state: ReduxState) => state.editor.gatewayUri);
   const notebook = useSelector((state: ReduxState) => state.editor.notebook);
   const lockedCells = useSelector((state: ReduxState) => state.editor.lockedCells);
   const cells = useSelector((state: ReduxState) => state.editor.cells);
   const users = useSelector((state: ReduxState) => state.editor.users);
   const selectedOutputsUid = useSelector((state: ReduxState) => state.editor.selectedOutputsUid);
-  const connectToKernelErrorMessage = useSelector((state: ReduxState) => state.editor.connectToKernelErrorMessage);
   const isAddingCell = useSelector((state: ReduxState) => state.editor.isAddingCell);
   const isDeletingCell = useSelector((state: ReduxState) => state.editor.isDeletingCell);
   const selectedCellId = useSelector((state: ReduxState) => state.editor.selectedCellId);
@@ -81,13 +83,6 @@ const EditorHeader: React.FC = () => {
     [cells, notebook?.cell_ids, selectedCellId]
   );
 
-  const statusTooltip = React.useMemo<StatusIndicatorProps['tooltipOptions']>(
-    () => ({
-      placement: 'bottomEnd',
-      text: kernelStatus === 'Error' ? `Error: ${connectToKernelErrorMessage}` : kernelStatus,
-    }),
-    [connectToKernelErrorMessage, kernelStatus]
-  );
   const selectedOutputsEmail = React.useMemo<DUser['uid']>(
     () =>
       (selectedOutputsUid === ''
@@ -245,19 +240,21 @@ const EditorHeader: React.FC = () => {
             placement="bottomEnd"
             activeKey={selectedOutputsUid}
             buttonContent={
-              selectedOutputsUid === '' ? (
-                <React.Fragment>
-                  <StatusIndicator textPlacement="right" color={kernelStatusColor} tooltipOptions={statusTooltip} />
-                  {gatewayUri}
-                </React.Fragment>
-              ) : (
-                selectedOutputsEmail
-              )
+              <React.Fragment>
+                <div className={css(styles.kernelIconContainer)}>
+                  <Icon
+                    icon="related-map"
+                    size="lg"
+                    style={selectedOutputsUid === '' ? { color: kernelStatusColor } : undefined}
+                  />
+                </div>
+                {`Viewing: ${selectedOutputsUid === '' ? user?.email : selectedOutputsEmail}`}
+              </React.Fragment>
             }
             onSelect={handleKernelSelect}
           >
             <Dropdown.Item eventKey="" disabled={kernelStatus === 'Busy'}>
-              {gatewayUri}
+              {`${user?.email} (you)`}
             </Dropdown.Item>
 
             {notebook?.users
