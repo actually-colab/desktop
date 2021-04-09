@@ -13,6 +13,13 @@ import { ImmutableEditorCell } from '../../immutable';
 import { EditorCell, EditorCellMeta, KernelOutput } from '../notebook';
 import { Kernel, KernelLog } from '../kernel';
 
+export const CLIENT = {
+  CONNECT: {
+    START: 'CLIENT_CONNECT_START',
+    SUCCESS: 'CLIENT_CONNECT_SUCCESS',
+    FAILURE: 'CLIENT_CONNECT_FAILURE',
+  },
+} as const;
 export const KERNEL = {
   LOG: {
     APPEND: 'KERNEL_LOG_APPEND',
@@ -125,6 +132,18 @@ type ActionError = {
   error: {
     message: string;
   };
+};
+
+type ConnectToClientStartAction = {
+  type: typeof CLIENT.CONNECT.START;
+};
+
+type ConnectToClientSuccessAction = {
+  type: typeof CLIENT.CONNECT.SUCCESS;
+};
+
+type ConnectToClientFailureAction = {
+  type: typeof CLIENT.CONNECT.FAILURE;
 };
 
 type KernelLogAppendAction = {
@@ -431,6 +450,9 @@ type KernelMessageUpdateRunIndexAction = {
  * An action for manipulating the editor redux store
  */
 export type EditorActionTypes =
+  | ConnectToClientStartAction
+  | ConnectToClientSuccessAction
+  | ConnectToClientFailureAction
   | KernelLogAppendAction
   | KernelLogClearAction
   | SetKernelGatewayAction
