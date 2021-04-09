@@ -103,7 +103,7 @@ const CollaboratorsPanel: React.FC = () => {
 
   const [shareFormValue, setShareFormValue] = React.useState<ShareFormValue>({
     email: '',
-    accessLevel: 'Read Only',
+    accessLevel: 'Full Access',
   });
 
   const sharedUsers = React.useMemo(() => notebook?.users, [notebook?.users]);
@@ -121,10 +121,10 @@ const CollaboratorsPanel: React.FC = () => {
     (_, event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       dispatchShareNotebook();
-      setShareFormValue({
+      setShareFormValue((prevShareFormValue) => ({
+        ...prevShareFormValue,
         email: '',
-        accessLevel: 'Read Only',
-      });
+      }));
     },
     [dispatchShareNotebook]
   );
