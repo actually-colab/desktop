@@ -1,4 +1,4 @@
-import { List as ImmutableList, Map as ImmutableMap } from 'immutable';
+import { List as ImmutableList, Map as ImmutableMap, OrderedSet as ImmutableOrderedSet } from 'immutable';
 import { DUser } from '@actually-colab/editor-types';
 
 import { CELL, KERNEL, NOTEBOOKS } from '../types/redux/editor';
@@ -170,7 +170,7 @@ export interface EditorState {
   /**
    * A list of users who are active
    */
-  users: ImmutableList<ImmutableUser>;
+  users: ImmutableOrderedSet<ImmutableUser>;
   /**
    * A list of logs from various kernel interactions
    */
@@ -217,7 +217,7 @@ const initialState: EditorState = {
   selectedOutputsUid: '',
   outputs: ImmutableMap(),
 
-  users: ImmutableList(),
+  users: ImmutableOrderedSet(),
   logs: ImmutableList(),
 };
 
@@ -446,6 +446,11 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
     case NOTEBOOKS.OPEN.SUCCESS: {
       const dcells = Object.values(action.notebook.cells);
       const reducedNotebook = reduceNotebookContents(action.notebook);
+      const immutableReducedNotebook = new ImmutableReducedNotebookFactory({
+        ...reducedNotebook,
+        users: makeAccessLevelsImmutable(reducedNotebook.users),
+        cell_ids: ImmutableList(reducedNotebook.cell_ids),
+      });
 
       return {
         ...state,
@@ -466,13 +471,23 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
                 })
             )
         ),
-        notebook: new ImmutableReducedNotebookFactory({
-          ...reducedNotebook,
-          users: makeAccessLevelsImmutable(reducedNotebook.users),
-          cell_ids: ImmutableList(reducedNotebook.cell_ids),
-        }),
+        notebook: immutableReducedNotebook,
         cells: cellArrayToImmutableMap(dcells.map((dcell) => cleanDCell(dcell))),
-        users: state.users.clear(),
+        users: state.users.clear().concat(
+          action.activeUids
+            .map<ImmutableUser | undefined>((uid) => {
+              const accessLevel = reducedNotebook.users.find((_user) => _user.uid === uid);
+
+              if (!accessLevel) {
+                return undefined;
+              }
+
+              const { access_level, ...user } = accessLevel;
+
+              return new ImmutableUserFactory(user);
+            })
+            .filter<ImmutableUser>((user): user is ImmutableUser => !!user)
+        ),
       };
     }
     /**
@@ -491,7 +506,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
     case NOTEBOOKS.ACCESS.CONNECT:
       return {
         ...state,
-        users: state.users.filter((user) => user.uid !== action.user.uid).push(new ImmutableUserFactory(action.user)),
+        users: state.users.filter((user) => user.uid !== action.user.uid).add(new ImmutableUserFactory(action.user)),
       };
     /**
      * A user has closed the notebook

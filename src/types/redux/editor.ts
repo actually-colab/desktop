@@ -226,6 +226,7 @@ type NotebooksOpenStartAction = {
 type NotebooksOpenSuccessAction = {
   type: typeof NOTEBOOKS.OPEN.SUCCESS;
   notebook: NotebookContents;
+  activeUids: DUser['uid'][];
 };
 
 type NotebooksOpenFailureAction = {
