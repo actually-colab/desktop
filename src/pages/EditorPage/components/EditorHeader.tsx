@@ -63,6 +63,11 @@ const EditorHeader: React.FC = () => {
 
   const [showDeleteCell, setShowDeleteCell] = React.useState<boolean>(false);
 
+  const accessLevel = React.useMemo(() => notebook?.users.find((_user) => _user.uid === user?.uid), [
+    notebook?.users,
+    user?.uid,
+  ]);
+  const canEdit = React.useMemo(() => accessLevel?.access_level === 'Full Access', [accessLevel?.access_level]);
   const ownedCells = React.useMemo(() => lockedCells.filter((lock) => lock.uid === user?.uid), [
     lockedCells,
     user?.uid,
@@ -183,6 +188,7 @@ const EditorHeader: React.FC = () => {
             tooltipText="Create a new cell"
             tooltipDirection="bottom"
             loading={isAddingCell}
+            disabled={!canEdit}
             onClick={() => dispatchAddCell(-1)}
           />
           <RegularIconButton
@@ -206,7 +212,7 @@ const EditorHeader: React.FC = () => {
           <PopoverDropdown
             placement="bottomEnd"
             activeKey={lockedCell?.language ?? 'python'}
-            buttonProps={{ disabled: lockedCell === null }}
+            buttonProps={{ disabled: !canEdit || lockedCell === null }}
             buttonContent={(lockedCell?.language === 'python' ? 'python3' : lockedCell?.language) ?? 'python3'}
             onSelect={handleLanguageSelect}
           >
@@ -222,7 +228,7 @@ const EditorHeader: React.FC = () => {
             tooltipText="Delete the current cell"
             tooltipDirection="bottom"
             loading={isDeletingCell}
-            disabled={lockedCellId === ''}
+            disabled={!canEdit || lockedCellId === ''}
             onClick={() => setShowDeleteCell(true)}
           />
         </div>
