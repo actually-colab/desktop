@@ -1,8 +1,9 @@
 import { List as ImmutableList, Map as ImmutableMap, OrderedSet as ImmutableOrderedSet } from 'immutable';
 import { DUser } from '@actually-colab/editor-types';
 
-import { CELL, KERNEL, NOTEBOOKS } from '../types/redux/editor';
+import { CELL, CLIENT, KERNEL, NOTEBOOKS } from '../types/redux/editor';
 import { SIGN_OUT } from '../types/redux/auth';
+import { ClientConnectionStatus } from '../types/client';
 import { EditorCell } from '../types/notebook';
 import { Kernel } from '../types/kernel';
 import { DEFAULT_GATEWAY_URI } from '../constants/jupyter';
@@ -36,6 +37,11 @@ import { ReduxActions } from './actions';
  * The editor redux state
  */
 export interface EditorState {
+  /**
+   * The status of the socket client connection
+   */
+  clientConnectionStatus: ClientConnectionStatus;
+
   /**
    * If the application should continuously try to connect to the kernel
    */
@@ -178,6 +184,8 @@ export interface EditorState {
 }
 
 const initialState: EditorState = {
+  clientConnectionStatus: 'Offline',
+
   autoConnectToKernel: process.env.REACT_APP_KERNEL_AUTO_CONNECT !== 'off',
   isEditingGatewayUri: false,
 
@@ -226,9 +234,37 @@ const initialState: EditorState = {
  */
 const reducer = (state = initialState, action: ReduxActions): EditorState => {
   switch (action.type) {
+    /**
+     * From Auth, if sign out occurs reset the state
+     */
     case SIGN_OUT.SUCCESS:
       return {
         ...initialState,
+      };
+
+    /**
+     * Started connecting to the client socket
+     */
+    case CLIENT.CONNECT.START:
+      return {
+        ...state,
+        clientConnectionStatus: 'Connecting',
+      };
+    /**
+     * Successfully connected to the client socket
+     */
+    case CLIENT.CONNECT.SUCCESS:
+      return {
+        ...state,
+        clientConnectionStatus: 'Connected',
+      };
+    /**
+     * Failed to connect to the client socket
+     */
+    case CLIENT.CONNECT.FAILURE:
+      return {
+        ...state,
+        clientConnectionStatus: 'Offline',
       };
 
     /**

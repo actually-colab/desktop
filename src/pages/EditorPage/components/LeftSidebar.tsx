@@ -131,9 +131,20 @@ const CategoryButton: React.FC<{
  */
 const LeftSidebar: React.FC = () => {
   const user = useSelector((state: ReduxState) => state.auth.user);
+  const clientConnectionStatus = useSelector((state: ReduxState) => state.editor.clientConnectionStatus);
 
   const [activeMenuKey, setActiveMenuKey] = React.useState<'' | 'projects' | 'kernel' | 'follow' | 'settings'>(
     'projects'
+  );
+
+  const connectionColor = React.useMemo(
+    () =>
+      clientConnectionStatus === 'Connected'
+        ? palette.SUCCESS
+        : clientConnectionStatus === 'Connecting'
+        ? palette.WARNING
+        : palette.GRAY,
+    [clientConnectionStatus]
   );
 
   const dispatch = useDispatch();
@@ -208,7 +219,7 @@ const LeftSidebar: React.FC = () => {
                 placement="rightEnd"
                 user={user}
                 userColor={palette.CHARCOAL}
-                statusColor={palette.SUCCESS}
+                statusColor={connectionColor}
                 title={
                   <div className={css(styles.profilePopoverTitle)}>
                     <span>{user.name}</span>

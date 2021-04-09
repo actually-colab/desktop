@@ -65,6 +65,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
        * The user has signed in successfully
        */
       case SIGN_IN.SUCCESS: {
+        store.dispatch(_editor.connectToClientStart());
+
         socketClient = new ActuallyColabSocketClient(baseSocketURL, action.sessionToken);
 
         /**
@@ -73,6 +75,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
         socketClient.on('connect', () => {
           console.log('Connected to AC socket');
           window.addEventListener('beforeunload', closeOnUnmount);
+
+          store.dispatch(_editor.connectToClientSuccess());
         });
 
         /**
@@ -81,6 +85,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
         socketClient.on('close', (event) => {
           console.log('Disconnected from AC socket', event);
           window.removeEventListener('beforeunload', closeOnUnmount);
+
+          store.dispatch(_editor.connectToClientFailure());
         });
 
         /**
@@ -282,9 +288,12 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
        * Started opening a given notebook
        */
       case NOTEBOOKS.OPEN.START: {
-        (async () => {
-          socketClient?.openNotebook(action.nb_id);
-        })();
+        if (store.getState().editor.clientConnectionStatus !== 'Connected') {
+          console.error('Tried to use socket before connected');
+          return;
+        }
+
+        socketClient?.openNotebook(action.nb_id);
         break;
       }
 
@@ -329,7 +338,12 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
         const notebook = store.getState().editor.notebook;
         if (notebook === null) {
           console.error('Notebook was null');
-          break;
+          return;
+        }
+
+        if (store.getState().editor.clientConnectionStatus !== 'Connected') {
+          console.error('Tried to use socket before connected');
+          return;
         }
 
         socketClient?.createCell(notebook.nb_id, 'python');
@@ -351,7 +365,12 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
         const notebook = store.getState().editor.notebook;
         if (notebook === null) {
           console.error('Notebook was null');
-          break;
+          return;
+        }
+
+        if (store.getState().editor.clientConnectionStatus !== 'Connected') {
+          console.error('Tried to use socket before connected');
+          return;
         }
 
         socketClient?.lockCell(notebook.nb_id, action.cell_id);
@@ -365,13 +384,18 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
         const notebook = store.getState().editor.notebook;
         if (notebook === null) {
           console.error('Notebook was null');
-          break;
+          return;
         }
 
         const cell = store.getState().editor.cells.get(action.cell_id);
         if (cell === undefined) {
           console.error('Cell was undefined');
-          break;
+          return;
+        }
+
+        if (store.getState().editor.clientConnectionStatus !== 'Connected') {
+          console.error('Tried to use socket before connected');
+          return;
         }
 
         socketClient?.unlockCell(notebook.nb_id, action.cell_id, {
@@ -391,13 +415,18 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
         const notebook = store.getState().editor.notebook;
         if (notebook === null) {
           console.error('Notebook was null');
-          break;
+          return;
         }
 
         const cell = store.getState().editor.cells.get(action.cell_id);
         if (cell === undefined) {
           console.error('Cell was undefined');
-          break;
+          return;
+        }
+
+        if (store.getState().editor.clientConnectionStatus !== 'Connected') {
+          console.error('Tried to use socket before connected');
+          return;
         }
 
         if (action.changes !== undefined) {
@@ -418,7 +447,12 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
         const notebook = store.getState().editor.notebook;
         if (notebook === null) {
           console.error('Notebook was null');
-          break;
+          return;
+        }
+
+        if (store.getState().editor.clientConnectionStatus !== 'Connected') {
+          console.error('Tried to use socket before connected');
+          return;
         }
 
         // Send a blank message to notify the clients of the updated run index
@@ -442,7 +476,12 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
         const notebook = store.getState().editor.notebook;
         if (notebook === null) {
           console.error('Notebook was null');
-          break;
+          return;
+        }
+
+        if (store.getState().editor.clientConnectionStatus !== 'Connected') {
+          console.error('Tried to use socket before connected');
+          return;
         }
 
         // Get all the existing messages plus the new ones

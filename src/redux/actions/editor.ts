@@ -8,10 +8,31 @@ import type {
 } from '@actually-colab/editor-types';
 import { format } from 'date-fns';
 
-import { CELL, EditorActionTypes, EditorAsyncActionTypes, KERNEL, NOTEBOOKS } from '../../types/redux/editor';
+import { CELL, CLIENT, EditorActionTypes, EditorAsyncActionTypes, KERNEL, NOTEBOOKS } from '../../types/redux/editor';
 import { EditorCell, EditorCellMeta, KernelOutput } from '../../types/notebook';
 import { Kernel, KernelLog } from '../../types/kernel';
 import { ImmutableEditorCell } from '../../immutable';
+
+/**
+ * Started connecting to the client socket
+ */
+export const connectToClientStart = (): EditorActionTypes => ({
+  type: CLIENT.CONNECT.START,
+});
+
+/**
+ * Successfully connected to the client socket
+ */
+export const connectToClientSuccess = (): EditorActionTypes => ({
+  type: CLIENT.CONNECT.SUCCESS,
+});
+
+/**
+ * Failed to connect to the client socket
+ */
+export const connectToClientFailure = (): EditorActionTypes => ({
+  type: CLIENT.CONNECT.FAILURE,
+});
 
 /**
  * Add a new log message

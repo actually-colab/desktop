@@ -10,6 +10,7 @@ import { isOlderThan } from '../../../utils/date';
  */
 const useNotebooks = (): null => {
   const isAuthenticated = useSelector((state: ReduxState) => state.auth.isAuthenticated);
+  const clientConnectionStatus = useSelector((state: ReduxState) => state.editor.clientConnectionStatus);
   const isGettingNotebooks = useSelector((state: ReduxState) => state.editor.isGettingNotebooks);
   const getNotebooksErrorMessage = useSelector((state: ReduxState) => state.editor.getNotebooksErrorMessage);
   const getNotebooksTimestamp = useSelector((state: ReduxState) => state.editor.getNotebooksTimestamp);
@@ -22,13 +23,21 @@ const useNotebooks = (): null => {
   React.useEffect(() => {
     if (
       isAuthenticated &&
+      clientConnectionStatus === 'Connected' &&
       !isGettingNotebooks &&
       getNotebooksErrorMessage === '' &&
       isOlderThan(getNotebooksTimestamp, { minutes: 5 })
     ) {
       dispatch(_editor.getNotebooks());
     }
-  }, [dispatch, getNotebooksErrorMessage, getNotebooksTimestamp, isAuthenticated, isGettingNotebooks]);
+  }, [
+    clientConnectionStatus,
+    dispatch,
+    getNotebooksErrorMessage,
+    getNotebooksTimestamp,
+    isAuthenticated,
+    isGettingNotebooks,
+  ]);
 
   return null;
 };
