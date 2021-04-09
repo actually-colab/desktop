@@ -5,12 +5,11 @@ on:
     branches:
       - master
   pull_request:
-    branches:
-      - master
-    types: [opened, reopened, edited, synchronize]
+    types: [opened, reopened, edited, synchronize, ready_for_review]
 
 jobs:
   lint:
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Check out Git repository
