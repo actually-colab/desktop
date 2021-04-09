@@ -80,14 +80,12 @@ export const cleanDCell = (cell: DCell): Required<DCell> => {
 /**
  * Convert an array of cells to a dictionary
  */
-export const cellArrayToImmutableMap = (
-  cells: DCell[] | EditorCell[]
-): ImmutableMap<EditorCell['cell_id'], ImmutableEditorCell> => {
+export const cellArrayToImmutableMap = (cells: DCell[] | EditorCell[]): ReduxState['editor']['cells'] => {
   let map = ImmutableMap<EditorCell['cell_id'], ImmutableEditorCell>();
 
-  map = map.withMutations((map) => {
+  map = map.withMutations((mtx) => {
     cells.forEach((cell) => {
-      map = map.set(cell.cell_id, new ImmutableEditorCellFactory(cell));
+      mtx.set(cell.cell_id, new ImmutableEditorCellFactory(cell));
     });
   });
 
@@ -224,6 +222,7 @@ export const download = (
   notebook: ImmutableReducedNotebook,
   cells: ReduxState['editor']['cells'],
   outputs: ReduxState['editor']['outputs'],
+  outputsMetadata: ReduxState['editor']['outputsMetadata'],
   uid: DUser['uid'],
   extension: 'ipynb' | 'py' | 'md' = 'ipynb'
 ): void => {
@@ -232,12 +231,17 @@ export const download = (
   notebook.cell_ids.forEach((cell_id) => {
     const cell = cells.get(cell_id);
     const cellOutputs = outputs.get(cell_id)?.get(uid);
+    const cellOutputMetadata = outputsMetadata.get(cell_id)?.get(uid);
 
     if (cell) {
       notebookData.push({
-        cell: uid === '' ? cell : cell.set('runIndex', cell.selectedOutputsRunIndex),
+        cell: uid === '' ? cell : cell.set('runIndex', cellOutputMetadata?.runIndex ?? -1),
         outputs: cellOutputs
-          ?.filter((output) => (uid === '' ? output.runIndex === cell.runIndex : output.uid === uid))
+          ?.filter((output) =>
+            uid === ''
+              ? output.runIndex === cell.runIndex
+              : output.uid === uid && output.runIndex === cellOutputMetadata?.runIndex
+          )
           ?.sort(sortOutputByMessageIndex),
       });
     }

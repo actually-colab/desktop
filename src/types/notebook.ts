@@ -25,6 +25,14 @@ export type KernelOutput = BaseKernelOutput & {
 };
 
 /**
+ * Metadata to identify an output with
+ */
+export type OutputMetadata = {
+  runIndex: number;
+  running: boolean;
+};
+
+/**
  * An output without metadata
  */
 export type MinimalKernelOutput = Omit<KernelOutput, 'uid' | 'cell_id' | 'runIndex'>;
@@ -61,10 +69,6 @@ export type EditorCellMeta = {
    * The latest execution count associated with this cell
    */
   runIndex: number;
-  /**
-   * The latest execution count associated with this cell when another user is being viewed
-   */
-  selectedOutputsRunIndex: number;
 };
 
 /**

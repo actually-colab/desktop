@@ -3,7 +3,7 @@ import { List as ImmutableList, Record as ImmutableRecord } from 'immutable';
 
 import { RemoveIndex } from '../types/generics';
 import { ImmutableRecordOf } from '../types/immutable';
-import { EditorCell, KernelOutput, Lock, ReducedNotebook } from '../types/notebook';
+import { EditorCell, KernelOutput, Lock, OutputMetadata, ReducedNotebook } from '../types/notebook';
 
 /**
  * An Immutable Record for a kernel output
@@ -27,6 +27,18 @@ export const ImmutableKernelOutputFactory = ImmutableRecord<Required<KernelOutpu
 });
 
 /**
+ * An Immutable Record for output metadata
+ */
+export type ImmutableOutputMetadata = ImmutableRecordOf<Required<OutputMetadata>>;
+/**
+ * An Immutable Record Factory for output metadata
+ */
+export const ImmutableOutputMetadataFactory = ImmutableRecord<Required<OutputMetadata>>({
+  runIndex: -1,
+  running: false,
+});
+
+/**
  * An Immutable Record for an editor cell
  */
 export type ImmutableEditorCell = ImmutableRecordOf<Required<EditorCell>>;
@@ -44,7 +56,6 @@ export const ImmutableEditorCellFactory = ImmutableRecord<Required<EditorCell>>(
   position: -1,
   rendered: true,
   runIndex: -1,
-  selectedOutputsRunIndex: -1,
 });
 
 /**
