@@ -111,6 +111,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
   const selectedCellId = useSelector((state: ReduxState) => state.editor.selectedCellId);
   const runningCellId = useSelector((state: ReduxState) => state.editor.runningCellId);
   const runQueue = useSelector((state: ReduxState) => state.editor.runQueue);
+  const outputsMetadata = useSelector((state: ReduxState) => state.editor.outputsMetadata);
 
   const cell_id = React.useMemo(() => cell.cell_id, [cell.cell_id]);
   const ownedCells = React.useMemo(() => lockedCells.filter((lock) => lock.uid === user?.uid), [
@@ -139,9 +140,12 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
     runQueue,
   ]);
   const isQueued = React.useMemo(() => queueIndex >= 0, [queueIndex]);
-  const selectedRunIndex = React.useMemo(
-    () => (selectedOutputsUid === '' ? cell.runIndex : cell.selectedOutputsRunIndex),
-    [cell.runIndex, cell.selectedOutputsRunIndex, selectedOutputsUid]
+  const runIndex = React.useMemo(
+    () =>
+      selectedOutputsUid === ''
+        ? cell.runIndex
+        : outputsMetadata.get(cell.cell_id)?.get(selectedOutputsUid)?.runIndex ?? -1,
+    [cell.cell_id, cell.runIndex, outputsMetadata, selectedOutputsUid]
   );
 
   const dispatch = useDispatch();
@@ -219,7 +223,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
             <React.Fragment>
               <code>[</code>
               <code className={css(styles.runIndex)}>
-                {isRunning || isQueued ? '*' : selectedRunIndex === -1 ? '' : selectedRunIndex}
+                {isRunning || isQueued ? '*' : runIndex === -1 ? '' : runIndex}
               </code>
               <code>]</code>
             </React.Fragment>

@@ -14,6 +14,7 @@ const DownloadsPanel: React.FC = () => {
   const cells = useSelector((state: ReduxState) => state.editor.cells);
   const selectedOutputsUid = useSelector((state: ReduxState) => state.editor.selectedOutputsUid);
   const outputs = useSelector((state: ReduxState) => state.editor.outputs);
+  const outputsMetadata = useSelector((state: ReduxState) => state.editor.outputsMetadata);
 
   const isDownloadSupported = React.useMemo(() => {
     let isSupported = false;
@@ -31,9 +32,9 @@ const DownloadsPanel: React.FC = () => {
         return;
       }
 
-      download(notebook, cells, outputs, selectedOutputsUid, type);
+      download(notebook, cells, outputs, outputsMetadata, selectedOutputsUid, type);
     },
-    [cells, notebook, outputs, selectedOutputsUid]
+    [cells, notebook, outputs, outputsMetadata, selectedOutputsUid]
   );
 
   return (

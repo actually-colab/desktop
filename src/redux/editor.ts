@@ -18,6 +18,8 @@ import {
   ImmutableLockFactory,
   ImmutableNotebook,
   ImmutableNotebookFactory,
+  ImmutableOutputMetadata,
+  ImmutableOutputMetadataFactory,
   ImmutableReducedNotebook,
   ImmutableReducedNotebookFactory,
   ImmutableUser,
@@ -172,6 +174,10 @@ export interface EditorState {
    * Use an empty string as the key for the current user
    */
   outputs: ImmutableMap<EditorCell['cell_id'], ImmutableMap<DUser['uid'], ImmutableList<ImmutableKernelOutput>>>;
+  /**
+   * A map of `cell_id`'s to a map of `uid` to the output metadata
+   */
+  outputsMetadata: ImmutableMap<EditorCell['cell_id'], ImmutableMap<DUser['uid'], ImmutableOutputMetadata>>;
 
   /**
    * A list of users who are active
@@ -224,6 +230,7 @@ const initialState: EditorState = {
 
   selectedOutputsUid: '',
   outputs: ImmutableMap(),
+  outputsMetadata: ImmutableMap(),
 
   users: ImmutableOrderedSet(),
   logs: ImmutableList(),
@@ -609,14 +616,19 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
 
       return {
         ...state,
-        cells:
-          metadata.uid === state.selectedOutputsUid
-            ? state.cells.update(metadata.cell_id, (cell) => cell.set('selectedOutputsRunIndex', metadata.runIndex))
-            : state.cells,
         outputs: state.outputs.update(action.output.cell_id, ImmutableMap(), (userMap) =>
           userMap.set(
             action.output.uid,
             ImmutableList(messages.map((message) => new ImmutableKernelOutputFactory(message)))
+          )
+        ),
+        outputsMetadata: state.outputsMetadata.update(action.output.cell_id, ImmutableMap(), (userMap) =>
+          userMap.set(
+            action.output.uid,
+            new ImmutableOutputMetadataFactory({
+              runIndex: metadata.runIndex,
+              running: false,
+            })
           )
         ),
       };

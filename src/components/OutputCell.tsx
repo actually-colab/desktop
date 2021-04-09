@@ -25,19 +25,24 @@ const styles = StyleSheet.create({
 const OutputCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
   const selectedOutputsUid = useSelector((state: ReduxState) => state.editor.selectedOutputsUid);
   const outputs = useSelector((state: ReduxState) => state.editor.outputs);
+  const outputsMetadata = useSelector((state: ReduxState) => state.editor.outputsMetadata);
 
+  const cell_id = React.useMemo(() => cell.cell_id, [cell.cell_id]);
+  const runIndex = React.useMemo(
+    () =>
+      selectedOutputsUid === ''
+        ? cell.runIndex
+        : outputsMetadata.get(cell.cell_id)?.get(selectedOutputsUid)?.runIndex ?? -1,
+    [cell.cell_id, cell.runIndex, outputsMetadata, selectedOutputsUid]
+  );
   const cellOutputs = React.useMemo(
     () =>
       outputs
-        .get(cell.cell_id)
+        .get(cell_id)
         ?.get(selectedOutputsUid)
-        ?.filter((output) =>
-          selectedOutputsUid === ''
-            ? output.runIndex === cell.runIndex
-            : output.runIndex === cell.selectedOutputsRunIndex
-        )
+        ?.filter((output) => output.runIndex === runIndex)
         ?.sort(sortOutputByMessageIndex) ?? ImmutableList<ImmutableKernelOutput>(),
-    [cell.cell_id, cell.runIndex, cell.selectedOutputsRunIndex, outputs, selectedOutputsUid]
+    [cell_id, outputs, runIndex, selectedOutputsUid]
   );
 
   return (
