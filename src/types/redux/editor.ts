@@ -20,6 +20,14 @@ export const CLIENT = {
     FAILURE: 'CLIENT_CONNECT_FAILURE',
   },
 } as const;
+export const CONTACTS = {
+  GET: {
+    SUCCESS: 'CONTACTS_GET_SUCCESS',
+  },
+  SET: {
+    SUCCESS: 'CONTACTS_SET_SUCCESS',
+  },
+} as const;
 export const KERNEL = {
   LOG: {
     APPEND: 'KERNEL_LOG_APPEND',
@@ -144,6 +152,16 @@ type ConnectToClientSuccessAction = {
 
 type ConnectToClientFailureAction = {
   type: typeof CLIENT.CONNECT.FAILURE;
+};
+
+type GetContactsSuccessAction = {
+  type: typeof CONTACTS.GET.SUCCESS;
+  contacts: DUser['email'][];
+};
+
+type SetContactsSuccessAction = {
+  type: typeof CONTACTS.SET.SUCCESS;
+  contacts: DUser['email'][];
 };
 
 type KernelLogAppendAction = {
@@ -453,6 +471,8 @@ export type EditorActionTypes =
   | ConnectToClientStartAction
   | ConnectToClientSuccessAction
   | ConnectToClientFailureAction
+  | GetContactsSuccessAction
+  | SetContactsSuccessAction
   | KernelLogAppendAction
   | KernelLogClearAction
   | SetKernelGatewayAction
