@@ -85,7 +85,19 @@ export interface EditorState {
   /**
    * The timestamp of the last time the notebooks were fetched
    */
-  getNotebooksTimestamp: Date | null;
+  getNotebooksTimestamp: number | null;
+  /**
+   * If the editor is currently fetching the latest workshops
+   */
+  isGettingWorkshops: boolean;
+  /**
+   * Error message if fetching the workshops fails
+   */
+  getWorkshopsErrorMessage: string;
+  /**
+   * The timestamp of the last time the workshops were fetched
+   */
+  getWorkshopsTimestamp: number | null;
   /**
    * If the editor is creating a notebook
    */
@@ -217,6 +229,9 @@ const initialState: EditorState = {
   isGettingNotebooks: false,
   getNotebooksErrorMessage: '',
   getNotebooksTimestamp: null,
+  isGettingWorkshops: false,
+  getWorkshopsErrorMessage: '',
+  getWorkshopsTimestamp: null,
   isCreatingNotebook: false,
   isOpeningNotebook: false,
   openingNotebookId: '',
@@ -455,6 +470,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         isGettingNotebooks: false,
+        getNotebooksTimestamp: Date.now(),
         notebooks: ImmutableList(
           action.notebooks.map(
             (notebook) =>
@@ -464,7 +480,6 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
               })
           )
         ),
-        getNotebooksTimestamp: new Date(),
       };
     /**
      * Failed to get the users notebooks
@@ -474,6 +489,48 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ...state,
         isGettingNotebooks: false,
         getNotebooksErrorMessage: action.error.message,
+      };
+
+    /**
+     * Started fetching the user's workshops
+     */
+    case WORKSHOPS.GET.START:
+      return {
+        ...state,
+        isGettingWorkshops: true,
+        getWorkshopsErrorMessage: '',
+      };
+    /**
+     * Fetched the users workshops successfully
+     */
+    case WORKSHOPS.GET.SUCCESS:
+      return {
+        ...state,
+        isGettingWorkshops: false,
+        getWorkshopsTimestamp: Date.now(),
+        workshops: ImmutableList(
+          action.workshops.map(
+            (workshop) =>
+              new ImmutableWorkshopFactory({
+                ...workshop,
+                instructors: makeWorkshopAccessLevelsImmutable(workshop.instructors),
+                attendees: makeWorkshopAccessLevelsImmutable(workshop.attendees),
+                main_notebook: new ImmutableNotebookFactory({
+                  ...workshop.main_notebook,
+                  users: makeNotebookAccessLevelsImmutable(workshop.main_notebook.users),
+                }),
+              })
+          )
+        ),
+      };
+    /**
+     * Failed to get the users workshops
+     */
+    case WORKSHOPS.GET.FAILURE:
+      return {
+        ...state,
+        isGettingWorkshops: false,
+        getWorkshopsErrorMessage: action.error.message,
       };
 
     /**
@@ -527,9 +584,9 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
             ...action.workshop,
             instructors: makeWorkshopAccessLevelsImmutable(action.workshop.instructors),
             attendees: makeWorkshopAccessLevelsImmutable(action.workshop.attendees),
-            mainNotebook: new ImmutableNotebookFactory({
-              ...action.workshop.mainNotebook,
-              users: makeNotebookAccessLevelsImmutable(action.workshop.mainNotebook.users),
+            main_notebook: new ImmutableNotebookFactory({
+              ...action.workshop.main_notebook,
+              users: makeNotebookAccessLevelsImmutable(action.workshop.main_notebook.users),
             }),
           })
         ),

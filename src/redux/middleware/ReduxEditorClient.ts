@@ -230,26 +230,66 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
             if (store.getState().editor.notebook === null && !store.getState().editor.isOpeningNotebook) {
               const mostRecentNotebookId = LatestNotebookIdStorage.get();
 
-              if (mostRecentNotebookId && notebooks.find((notebook) => notebook.nb_id === mostRecentNotebookId)) {
-                store.dispatch(_editor.openNotebook(mostRecentNotebookId));
-              } else {
+              if (mostRecentNotebookId === null) {
                 // Open demo notebook as fallback
                 const demoNotebookId = notebooks.find((notebook) => notebook.name === DEMO_NOTEBOOK_NAME)?.nb_id;
 
                 if (demoNotebookId) {
                   store.dispatch(_editor.openNotebook(demoNotebookId));
                 }
+              } else if (notebooks.find((notebook) => notebook.nb_id === mostRecentNotebookId)) {
+                store.dispatch(_editor.openNotebook(mostRecentNotebookId));
               }
             }
           } catch (error) {
             console.error(error);
             console.error(error.response);
+
             store.dispatch(_editor.getNotebooksFailure(error.message));
             store.dispatch(
               _ui.notify({
                 level: 'error',
                 title: 'Error',
                 message: 'Failed to get your notebooks!',
+                duration: 3000,
+              })
+            );
+          }
+        })();
+        break;
+      }
+
+      /**
+       * Started fetching the user's workshops
+       */
+      case WORKSHOPS.GET.START: {
+        (async () => {
+          try {
+            const workshops = await restClient.getWorkshopsForUser();
+
+            store.dispatch(_editor.getWorkshopsSuccess(workshops));
+
+            // If no notebook is open, automatically open the most recent
+            if (store.getState().editor.notebook === null && !store.getState().editor.isOpeningNotebook) {
+              const mostRecentNotebookId = LatestNotebookIdStorage.get();
+
+              if (
+                mostRecentNotebookId &&
+                workshops.find((workshop) => workshop.main_notebook.nb_id === mostRecentNotebookId)
+              ) {
+                store.dispatch(_editor.openNotebook(mostRecentNotebookId));
+              }
+            }
+          } catch (error) {
+            console.error(error);
+            console.error(error.response);
+
+            store.dispatch(_editor.getWorkshopsFailure(error.message));
+            store.dispatch(
+              _ui.notify({
+                level: 'error',
+                title: 'Error',
+                message: 'Failed to get your workshops!',
                 duration: 3000,
               })
             );

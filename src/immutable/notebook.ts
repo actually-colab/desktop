@@ -147,10 +147,10 @@ export const ImmutableWorkshopAccessLevelFactory = ImmutableRecord<RemoveIndex<R
 /**
  * The in-between type for converting a workshop to an Immutable
  */
-export type PseudoImmutableWorkshop = Omit<RemoveIndex<Workshop>, 'instructors' | 'attendees' | 'mainNotebook'> & {
+export type PseudoImmutableWorkshop = Omit<RemoveIndex<Workshop>, 'instructors' | 'attendees' | 'main_notebook'> & {
   instructors: ImmutableList<ImmutableWorkshopAccessLevel>;
   attendees: ImmutableList<ImmutableWorkshopAccessLevel>;
-  mainNotebook: ImmutableNotebook;
+  main_notebook: ImmutableNotebook;
 };
 
 /**
@@ -165,11 +165,10 @@ export const ImmutableWorkshopFactory = ImmutableRecord<Required<PseudoImmutable
   name: '',
   description: '',
   time_modified: Date.now(),
-  nb_id: '',
   start_time: Date.now(),
   end_time: Date.now(),
   capacity: -1,
   instructors: ImmutableList(),
   attendees: ImmutableList(),
-  mainNotebook: new ImmutableNotebookFactory(),
+  main_notebook: new ImmutableNotebookFactory(),
 });

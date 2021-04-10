@@ -313,7 +313,7 @@ const ProjectsPanel: React.FC = () => {
         .filter(filterNotebookByName(filterValue))
         .sort(sortNotebookBy(sortType))
         .map((project) => {
-          const active = project.nb_id === notebook?.nb_id;
+          const active = project.main_notebook.nb_id === notebook?.nb_id;
 
           return (
             <ProjectButton
@@ -321,9 +321,9 @@ const ProjectsPanel: React.FC = () => {
               icon={active ? 'file' : 'file-o'}
               name={project.name}
               active={active}
-              time_modified={project.mainNotebook.time_modified}
-              loading={project.nb_id === openingNotebookId}
-              onClick={() => !isOpeningNotebook && !active && dispatchOpenNotebook(project.nb_id)}
+              time_modified={project.main_notebook.time_modified}
+              loading={project.main_notebook.nb_id === openingNotebookId}
+              onClick={() => !isOpeningNotebook && !active && dispatchOpenNotebook(project.main_notebook.nb_id)}
             />
           );
         })}
