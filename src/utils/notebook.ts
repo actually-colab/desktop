@@ -39,6 +39,13 @@ export const sortNotebookBy = (sortType: 'name' | 'modified') => (
 };
 
 /**
+ * A configurable filter to search for a name that includes a fragment of a name anywhere in it
+ */
+export const filterNotebookByName = (nameFragment: string) => (notebook: Notebook | ImmutableNotebook): boolean => {
+  return notebook.name.toLowerCase().includes(nameFragment.toLowerCase());
+};
+
+/**
  * A comparator for sorting kernel outputs by their message indices
  */
 export const sortOutputByMessageIndex = (
