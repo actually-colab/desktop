@@ -144,7 +144,7 @@ export interface EditorState {
   /**
    * A list of locked cells and user ID's
    */
-  lockedCells: ImmutableList<ImmutableLock>;
+  lockedCells: ImmutableMap<EditorCell['cell_id'], ImmutableLock>;
 
   /**
    * The `cell_id` of the currently selected cell
@@ -245,7 +245,7 @@ const initialState: EditorState = {
 
   lockingCellId: '',
   unlockingCellId: '',
-  lockedCells: ImmutableList(),
+  lockedCells: ImmutableMap(),
 
   selectedCellId: '',
   executionCount: 0,
@@ -631,15 +631,17 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         unlockingCellId: '',
         selectedCellId: '',
         selectedOutputsUid: '',
-        lockedCells: ImmutableList(
+        lockedCells: ImmutableMap<EditorCell['cell_id'], ImmutableLock>().withMutations((mtx) =>
           dcells
             .filter((dcell) => (dcell.lock_held_by ?? '') !== '')
-            .map(
-              (dcell) =>
+            .forEach((dcell) =>
+              mtx.set(
+                dcell.cell_id,
                 new ImmutableLockFactory({
                   cell_id: dcell.cell_id,
                   uid: dcell.lock_held_by ?? '',
                 })
+              )
             )
         ),
         notebook: immutableReducedNotebook,
@@ -788,14 +790,13 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         lockingCellId: action.isMe ? '' : state.lockingCellId,
-        lockedCells: state.lockedCells
-          .filter((lock) => lock.cell_id !== action.cell_id)
-          .push(
-            new ImmutableLockFactory({
-              uid: action.uid,
-              cell_id: action.cell_id,
-            })
-          ),
+        lockedCells: state.lockedCells.set(
+          action.cell_id,
+          new ImmutableLockFactory({
+            uid: action.uid,
+            cell_id: action.cell_id,
+          })
+        ),
         cells: state.cells.update(action.cell_id, new ImmutableEditorCellFactory(), (cell) => cell.merge(action.cell)),
       };
     /**
@@ -822,7 +823,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         unlockingCellId: action.isMe ? '' : state.unlockingCellId,
-        lockedCells: state.lockedCells.filter((lock) => lock.cell_id !== action.cell_id || lock.uid !== action.uid),
+        lockedCells: state.lockedCells.remove(action.cell_id),
         cells: state.cells.update(action.cell_id, new ImmutableEditorCellFactory(), (cell) => cell.merge(action.cell)),
       };
     /**
@@ -908,7 +909,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ...state,
         ...selectionChanges,
         isDeletingCell: action.isMe ? false : state.isDeletingCell,
-        lockedCells: state.lockedCells.filter((lock) => lock.cell_id !== action.cell_id),
+        lockedCells: state.lockedCells.remove(action.cell_id),
         cells: state.cells.delete(action.cell_id),
         outputs: state.outputs.remove(action.cell_id),
         runQueue: state.runQueue.filter((cell_id) => cell_id !== action.cell_id),

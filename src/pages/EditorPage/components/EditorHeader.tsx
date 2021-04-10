@@ -11,6 +11,7 @@ import { EditorCell } from '../../../types/notebook';
 import useKernelStatus from '../../../kernel/useKernelStatus';
 import { Header, PopoverDropdown, RegularIconButton, UserAvatar } from '../../../components';
 import { CollaboratorsPopover } from '../Header';
+import { ImmutableLock } from '../../../immutable';
 
 const styles = StyleSheet.create({
   header: {
@@ -73,7 +74,7 @@ const EditorHeader: React.FC = () => {
     user?.uid,
   ]);
   const lockedCell = React.useMemo(
-    () => (ownedCells.size > 0 ? cells.get(ownedCells.get(0)?.cell_id ?? '') ?? null : null),
+    () => (ownedCells.size > 0 ? cells.get(ownedCells.first<ImmutableLock>()?.cell_id ?? '') ?? null : null),
     [cells, ownedCells]
   );
   const lockedCellId = React.useMemo(() => lockedCell?.cell_id ?? '', [lockedCell?.cell_id]);
