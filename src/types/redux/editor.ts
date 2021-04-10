@@ -7,6 +7,7 @@ import {
   NotebookContents,
   DUser,
   OOutput,
+  Workshop,
 } from '@actually-colab/editor-types';
 
 import { ImmutableEditorCell } from '../../immutable';
@@ -96,6 +97,13 @@ export const NOTEBOOKS = {
   OUTPUTS: {
     SELECT: 'NOTEBOOKS_OUTPUTS_SELECT',
     RECEIVE: 'NOTEBOOKS_OUTPUTS_RECEIVE',
+  },
+} as const;
+export const WORKSHOPS = {
+  CREATE: {
+    START: 'WORKSHOPS_CREATE_START',
+    SUCCESS: 'WORKSHOPS_CREATE_SUCCESS',
+    FAILURE: 'WORKSHOPS_CREATE_FAILURE',
   },
 } as const;
 export const CELL = {
@@ -306,6 +314,21 @@ type NotebooksOutputsReceiveAction = {
   output: OOutput;
 };
 
+type CreateWorkshopStartAction = {
+  type: typeof WORKSHOPS.CREATE.START;
+  name: string;
+  description: string;
+};
+
+type CreateWorkshopSuccessAction = {
+  type: typeof WORKSHOPS.CREATE.SUCCESS;
+  workshop: Workshop;
+};
+
+type CreateWorkshopFailureAction = {
+  type: typeof WORKSHOPS.CREATE.FAILURE;
+} & ActionError;
+
 type LockCellStartAction = {
   type: typeof CELL.LOCK.START;
   cell_id: EditorCell['cell_id'];
@@ -503,6 +526,9 @@ export type EditorActionTypes =
   | NotebooksShareFailureAction
   | NotebooksOutputsSelectAction
   | NotebooksOutputsReceiveAction
+  | CreateWorkshopStartAction
+  | CreateWorkshopSuccessAction
+  | CreateWorkshopFailureAction
   | LockCellStartAction
   | LockCellSuccessAction
   | LockCellFailureAction

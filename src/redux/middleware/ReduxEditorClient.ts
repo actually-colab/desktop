@@ -3,7 +3,7 @@ import { ActuallyColabRESTClient, ActuallyColabSocketClient } from '@actually-co
 
 import { ReduxState } from '../../types/redux';
 import { SIGN_IN, SIGN_OUT } from '../../types/redux/auth';
-import { CELL, KERNEL, NOTEBOOKS } from '../../types/redux/editor';
+import { CELL, KERNEL, NOTEBOOKS, WORKSHOPS } from '../../types/redux/editor';
 import { DEMO_NOTEBOOK_NAME } from '../../constants/demo';
 import { httpToWebSocket } from '../../utils/request';
 import { cleanDCell, convertSendablePayloadToOutputString } from '../../utils/notebook';
@@ -266,6 +266,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           try {
             const notebook = await restClient.createNotebook(action.name);
 
+            console.log('Notebook created', notebook);
             store.dispatch(_editor.createNotebookSuccess(notebook));
           } catch (error) {
             console.error(error);
@@ -276,6 +277,33 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
                 level: 'error',
                 title: 'Error',
                 message: 'Failed to create your notebook!',
+                duration: 3000,
+              })
+            );
+          }
+        })();
+        break;
+      }
+
+      /**
+       * Started creating a workshop
+       */
+      case WORKSHOPS.CREATE.START: {
+        (async () => {
+          try {
+            const workshop = await restClient.createWorkshop(action.name, action.description);
+
+            console.log('Workshop created', workshop);
+            store.dispatch(_editor.createWorkshopSuccess(workshop));
+          } catch (error) {
+            console.error(error);
+            console.error(error.response);
+            store.dispatch(_editor.createWorkshopFailure(error.message));
+            store.dispatch(
+              _ui.notify({
+                level: 'error',
+                title: 'Error',
+                message: 'Failed to create your workshop!',
                 duration: 3000,
               })
             );

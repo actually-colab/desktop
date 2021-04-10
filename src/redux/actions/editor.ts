@@ -5,6 +5,7 @@ import type {
   NotebookContents,
   DUser,
   OOutput,
+  Workshop,
 } from '@actually-colab/editor-types';
 import { format } from 'date-fns';
 
@@ -16,6 +17,7 @@ import {
   EditorAsyncActionTypes,
   KERNEL,
   NOTEBOOKS,
+  WORKSHOPS,
 } from '../../types/redux/editor';
 import { EditorCell, EditorCellMeta, KernelOutput } from '../../types/notebook';
 import { Kernel, KernelLog } from '../../types/kernel';
@@ -51,7 +53,7 @@ const getContactsSuccess = (contacts: DUser['email'][]): EditorActionTypes => ({
 /**
  * Get contacts from local storage
  */
-export const getContacts = (): EditorAsyncActionTypes => (dispatch) => {
+export const getContacts = (): EditorAsyncActionTypes => async (dispatch) => {
   const contacts = RecentUsersStorage.get();
 
   dispatch(getContactsSuccess(contacts));
@@ -65,7 +67,7 @@ const setContactsSuccess = (contacts: DUser['email'][]): EditorActionTypes => ({
 /**
  * Set contacts in local storage
  */
-export const setContacts = (contacts: DUser['email'][]): EditorAsyncActionTypes => (dispatch) => {
+export const setContacts = (contacts: DUser['email'][]): EditorAsyncActionTypes => async (dispatch) => {
   RecentUsersStorage.set(contacts);
 
   dispatch(setContactsSuccess(contacts));
@@ -257,6 +259,37 @@ export const createNotebookFailure = (errorMessage: string = 'Unknown Error'): E
  */
 export const createNotebook = (name: string): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(createNotebookStart(name));
+};
+
+const createWorkshopStart = (name: string, description: string): EditorActionTypes => ({
+  type: WORKSHOPS.CREATE.START,
+  name,
+  description,
+});
+
+/**
+ * Successfully created a workshop
+ */
+export const createWorkshopSuccess = (workshop: Workshop): EditorActionTypes => ({
+  type: WORKSHOPS.CREATE.SUCCESS,
+  workshop,
+});
+
+/**
+ * Failed to create a workshop
+ */
+export const createWorkshopFailure = (errorMessage: string): EditorActionTypes => ({
+  type: WORKSHOPS.CREATE.FAILURE,
+  error: {
+    message: errorMessage,
+  },
+});
+
+/**
+ * Create a workshop with the given name and description
+ */
+export const createWorkshop = (name: string, description: string): EditorAsyncActionTypes => async (dispatch) => {
+  dispatch(createWorkshopStart(name, description));
 };
 
 const openNotebookStart = (nb_id: Notebook['nb_id']): EditorActionTypes => ({

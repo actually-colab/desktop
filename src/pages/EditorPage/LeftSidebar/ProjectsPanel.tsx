@@ -31,6 +31,7 @@ import { filterNotebookByName, sortNotebookBy } from '../../../utils/notebook';
 
 type NewProjectFormValue = {
   name: string;
+  description: string;
 };
 
 /**
@@ -38,6 +39,7 @@ type NewProjectFormValue = {
  */
 const newProjectModel = Schema.Model({
   name: Schema.Types.StringType().containsLetter('This field is required').isRequired('This field is required'),
+  description: Schema.Types.StringType(),
 });
 
 const styles = StyleSheet.create({
@@ -147,25 +149,7 @@ const ProjectsPanel: React.FC = () => {
   const openingNotebookId = useSelector((state: ReduxState) => state.editor.openingNotebookId);
   const notebooks = useSelector((state: ReduxState) => state.editor.notebooks);
   const notebook = useSelector((state: ReduxState) => state.editor.notebook);
-  const workshops = React.useMemo(
-    () => [
-      {
-        name: 'Data Science 101',
-        ws_id: 'test-data-science',
-        nb_id: 'test-data-science',
-        time_modified: Date.now(),
-        isAttendee: false,
-      },
-      {
-        name: 'Intro to Naive Bayes',
-        ws_id: 'test-naive-bayes',
-        nb_id: 'test-naive-bayes',
-        time_modified: Date.now(),
-        isAttendee: true,
-      },
-    ],
-    []
-  );
+  const workshops = useSelector((state: ReduxState) => state.editor.workshops);
 
   const [searchText, setSearchText] = React.useState<string>('');
   const [filterValue, setFilterValue] = React.useState<string>('');
@@ -174,6 +158,7 @@ const ProjectsPanel: React.FC = () => {
   const [newProjectType, setNewProjectType] = React.useState<'Notebook' | 'Workshop'>('Notebook');
   const [newProjectFormValue, setNewProjectFormValue] = React.useState<NewProjectFormValue>({
     name: '',
+    description: '',
   });
 
   const dispatch = useDispatch();
@@ -181,6 +166,12 @@ const ProjectsPanel: React.FC = () => {
   const dispatchCreateNotebook = React.useCallback(
     () => newProjectFormRef.current?.check() && dispatch(_editor.createNotebook(newProjectFormValue.name)),
     [dispatch, newProjectFormValue.name]
+  );
+  const dispatchCreateWorkshop = React.useCallback(
+    () =>
+      newProjectFormRef.current?.check() &&
+      dispatch(_editor.createWorkshop(newProjectFormValue.name, newProjectFormValue.description)),
+    [dispatch, newProjectFormValue.description, newProjectFormValue.name]
   );
   const dispatchOpenNotebook = React.useCallback((nb_id: Notebook['nb_id']) => dispatch(_editor.openNotebook(nb_id)), [
     dispatch,
@@ -225,7 +216,10 @@ const ProjectsPanel: React.FC = () => {
           onSelect={(eventKey: string) => {
             setShowCreateProject(true);
             setNewProjectType(eventKey as typeof newProjectType);
-            setNewProjectFormValue({ name: '' });
+            setNewProjectFormValue({
+              name: '',
+              description: '',
+            });
           }}
         >
           <Dropdown.Item eventKey="Notebook" icon={<Icon icon="file" />}>
@@ -327,14 +321,14 @@ const ProjectsPanel: React.FC = () => {
               icon={active ? 'file' : 'file-o'}
               name={project.name}
               active={active}
-              time_modified={project.time_modified}
+              time_modified={project.mainNotebook.time_modified}
               loading={project.nb_id === openingNotebookId}
               onClick={() => !isOpeningNotebook && !active && dispatchOpenNotebook(project.nb_id)}
             />
           );
         })}
 
-      {workshops.length === 0 && (
+      {workshops.size === 0 && (
         <p className={css(styles.descriptionText)}>
           You have no workshops. To run a workshop, create a new project and select workshop. If you are an attendee,
           the workshop will appear here once it is released!
@@ -366,15 +360,38 @@ const ProjectsPanel: React.FC = () => {
                 Project name <span className={css(styles.requiredText)}>Required</span>
               </ControlLabel>
               <FormControl name="name" label="Project Name" placeholder="Project Name" />
-              <HelpBlock>This will be the name of your new {newProjectType}</HelpBlock>
+              <HelpBlock>
+                This will be the name of your new {newProjectType} as it will appear in the project list
+              </HelpBlock>
             </FormGroup>
+
+            {newProjectType === 'Workshop' && (
+              <FormGroup>
+                <ControlLabel>Project description</ControlLabel>
+                <FormControl
+                  name="description"
+                  label="Project Description"
+                  placeholder="Project Description"
+                  componentClass="textarea"
+                  rows={3}
+                />
+                <HelpBlock>
+                  This will be the description of your new workshop, for instance "Learn the fundamentals of data
+                  science with real world examples"
+                </HelpBlock>
+              </FormGroup>
+            )}
           </Form>
         </Modal.Body>
         <Modal.Footer>
           <Button appearance="subtle" disabled={isCreatingNotebook} onClick={() => setShowCreateProject(false)}>
             Cancel
           </Button>
-          <Button appearance="primary" loading={isCreatingNotebook} onClick={dispatchCreateNotebook}>
+          <Button
+            appearance="primary"
+            loading={isCreatingNotebook}
+            onClick={newProjectType === 'Notebook' ? dispatchCreateNotebook : dispatchCreateWorkshop}
+          >
             Create
           </Button>
         </Modal.Footer>
