@@ -24,6 +24,7 @@ import { _editor } from '../../../redux/actions';
 import { timeSince } from '../../../utils/date';
 import { palette, spacing } from '../../../constants/theme';
 import { PopoverDropdown } from '../../../components';
+import { sortNotebookBy } from '../../../utils/notebook';
 
 type NewProjectFormValue = {
   name: string;
@@ -110,6 +111,7 @@ const ProjectsPanel: React.FC = () => {
   const notebooks = useSelector((state: ReduxState) => state.editor.notebooks);
   const notebook = useSelector((state: ReduxState) => state.editor.notebook);
 
+  const [sortType, setSortType] = React.useState<'name' | 'modified'>('modified');
   const [showCreateProject, setShowCreateProject] = React.useState<boolean>(false);
   const [newProjectFormValue, setNewProjectFormValue] = React.useState<NewProjectFormValue>({
     name: '',
@@ -173,14 +175,19 @@ const ProjectsPanel: React.FC = () => {
         <PopoverDropdown
           appearance="subtle"
           placement="rightStart"
-          buttonContent={<span className={css(styles.sortText)}>Sort by name</span>}
-          activeKey="name"
+          buttonContent={
+            <span className={css(styles.sortText)}>
+              {sortType === 'name' ? 'Sort by name' : 'Sort by last modified'}
+            </span>
+          }
+          activeKey={sortType}
           buttonProps={{
             ripple: false,
           }}
+          onSelect={(eventKey: string) => setSortType(eventKey as typeof sortType)}
         >
           <Dropdown.Item eventKey="name">Sort by name</Dropdown.Item>
-          <Dropdown.Item eventKey="edited">Sort by edited</Dropdown.Item>
+          <Dropdown.Item eventKey="modified">Sort by last modified</Dropdown.Item>
         </PopoverDropdown>
 
         <IconButton
@@ -191,7 +198,7 @@ const ProjectsPanel: React.FC = () => {
         />
       </div>
 
-      {notebooks.map((project) => {
+      {notebooks.sort(sortNotebookBy(sortType)).map((project) => {
         const active = project.nb_id === notebook?.nb_id;
         const timeSinceModification = timeSince(project.time_modified);
 
