@@ -8,6 +8,7 @@ import {
   DUser,
   OOutput,
   Workshop,
+  NotebookAccessLevel,
 } from '@actually-colab/editor-types';
 
 import { ImmutableEditorCell } from '../../immutable';
@@ -330,7 +331,7 @@ type NotebooksShareStartAction = {
 
 type NotebooksShareSuccessAction = {
   type: typeof NOTEBOOKS.SHARE.SUCCESS;
-  notebook: Notebook;
+  user: NotebookAccessLevel;
 };
 
 type NotebooksShareFailureAction = {

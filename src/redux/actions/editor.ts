@@ -6,6 +6,7 @@ import type {
   DUser,
   OOutput,
   Workshop,
+  NotebookAccessLevel,
 } from '@actually-colab/editor-types';
 import { format } from 'date-fns';
 
@@ -382,9 +383,9 @@ const shareNotebookStart = (
 /**
  * Successfully shared a notebook
  */
-export const shareNotebookSuccess = (notebook: Notebook): EditorActionTypes => ({
+export const shareNotebookSuccess = (user: NotebookAccessLevel): EditorActionTypes => ({
   type: NOTEBOOKS.SHARE.SUCCESS,
-  notebook,
+  user,
 });
 
 /**

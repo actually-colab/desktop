@@ -146,6 +146,15 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
         });
 
         /**
+         * A notebook was shared with a given user
+         */
+        socketClient.on('notebook_shared', (user) => {
+          console.log('Notebook shared', user);
+
+          store.dispatch(_editor.shareNotebookSuccess(user));
+        });
+
+        /**
          * A cell was created by a given user
          */
         socketClient.on('cell_created', (dcell, triggered_by) => {
@@ -383,25 +392,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
        * Started sharing a given notebook
        */
       case NOTEBOOKS.SHARE.START: {
-        (async () => {
-          try {
-            const notebook = await restClient.shareNotebook(action.email, action.nb_id, action.access_level);
-
-            store.dispatch(_editor.shareNotebookSuccess(notebook));
-          } catch (error) {
-            console.error(error);
-            console.error(error.response);
-            store.dispatch(_editor.shareNotebooksFailure(error.message));
-            store.dispatch(
-              _ui.notify({
-                level: 'error',
-                title: 'Error',
-                message: 'Failed to share notebook!',
-                duration: 3000,
-              })
-            );
-          }
-        })();
+        socketClient?.shareNotebook(action.email, action.nb_id, action.access_level);
         break;
       }
 

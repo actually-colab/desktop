@@ -17,6 +17,7 @@ import {
   ImmutableLock,
   ImmutableLockFactory,
   ImmutableNotebook,
+  ImmutableNotebookAccessLevelFactory,
   ImmutableNotebookFactory,
   ImmutableOutputMetadata,
   ImmutableOutputMetadataFactory,
@@ -699,22 +700,33 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
      * Successfully shared a notebook
      */
     case NOTEBOOKS.SHARE.SUCCESS: {
+      const notebookIndex = state.notebooks.findIndex((notebook) => notebook.nb_id === state.notebook?.nb_id);
+
+      if (notebookIndex === -1) {
+        return {
+          ...state,
+          isSharingNotebook: false,
+        };
+      }
+
       return {
         ...state,
         isSharingNotebook: false,
-        notebooks: state.notebooks
-          .filter((notebook) => notebook.nb_id !== action.notebook.nb_id)
-          .push(
-            new ImmutableNotebookFactory({
-              ...action.notebook,
-              users: makeNotebookAccessLevelsImmutable(action.notebook.users),
-            })
-          ),
+        notebooks: state.notebooks.update(notebookIndex, (notebook) =>
+          notebook.set(
+            'users',
+            notebook.users
+              .filter((user) => user.uid !== action.user.uid)
+              .push(new ImmutableNotebookAccessLevelFactory(action.user))
+          )
+        ),
         notebook:
-          state.notebook?.merge({
-            time_modified: action.notebook.time_modified,
-            users: makeNotebookAccessLevelsImmutable(action.notebook.users),
-          }) ?? null,
+          state.notebook?.set(
+            'users',
+            state.notebook.users
+              .filter((user) => user.uid !== action.user.uid)
+              .push(new ImmutableNotebookAccessLevelFactory(action.user))
+          ) ?? null,
       };
     }
     /**
