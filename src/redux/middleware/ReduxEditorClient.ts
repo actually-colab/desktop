@@ -293,6 +293,20 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           return;
         }
 
+        const notebook = store.getState().editor.notebook;
+
+        // Don't reopen the currently open notebook
+        if (notebook?.nb_id === action.nb_id) {
+          return;
+        }
+
+        // Close the notebook if one is already open
+        if (notebook !== null) {
+          console.log('Closing notebook', notebook.nb_id);
+          socketClient?.closeNotebook(notebook.nb_id);
+        }
+
+        console.log('Opening notebook', action.nb_id);
         socketClient?.openNotebook(action.nb_id);
         break;
       }
