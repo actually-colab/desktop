@@ -2,6 +2,8 @@ name: Bundle Reporter
 
 on:
   pull_request:
+    branches:
+      - master
     types: [opened, reopened, edited, synchronize, ready_for_review]
 
 jobs:
