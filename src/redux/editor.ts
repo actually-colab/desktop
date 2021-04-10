@@ -527,9 +527,9 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
             ...action.workshop,
             instructors: makeWorkshopAccessLevelsImmutable(action.workshop.instructors),
             attendees: makeWorkshopAccessLevelsImmutable(action.workshop.attendees),
-            mainNotebook: new ImmutableNotebookFactory({
-              ...action.workshop.mainNotebook,
-              users: makeNotebookAccessLevelsImmutable(action.workshop.mainNotebook.users),
+            main_notebook: new ImmutableNotebookFactory({
+              ...action.workshop.main_notebook,
+              users: makeNotebookAccessLevelsImmutable(action.workshop.main_notebook.users),
             }),
           })
         ),
