@@ -17,6 +17,7 @@ import {
   Schema,
 } from 'rsuite';
 import { FormInstance } from 'rsuite/lib/Form';
+import debounce from 'lodash.debounce';
 import { Notebook } from '@actually-colab/editor-types';
 
 import { ReduxState } from '../../../types/redux';
@@ -24,7 +25,7 @@ import { _editor } from '../../../redux/actions';
 import { timeSince } from '../../../utils/date';
 import { palette, spacing } from '../../../constants/theme';
 import { PopoverDropdown } from '../../../components';
-import { sortNotebookBy } from '../../../utils/notebook';
+import { filterNotebookByName, sortNotebookBy } from '../../../utils/notebook';
 
 type NewProjectFormValue = {
   name: string;
@@ -111,6 +112,8 @@ const ProjectsPanel: React.FC = () => {
   const notebooks = useSelector((state: ReduxState) => state.editor.notebooks);
   const notebook = useSelector((state: ReduxState) => state.editor.notebook);
 
+  const [searchText, setSearchText] = React.useState<string>('');
+  const [filterValue, setFilterValue] = React.useState<string>('');
   const [sortType, setSortType] = React.useState<'name' | 'modified'>('modified');
   const [showCreateProject, setShowCreateProject] = React.useState<boolean>(false);
   const [newProjectFormValue, setNewProjectFormValue] = React.useState<NewProjectFormValue>({
@@ -126,6 +129,13 @@ const ProjectsPanel: React.FC = () => {
   const dispatchOpenNotebook = React.useCallback((nb_id: Notebook['nb_id']) => dispatch(_editor.openNotebook(nb_id)), [
     dispatch,
   ]);
+
+  /* eslint-disable react-hooks/exhaustive-deps */
+  const debouncedSetFilterValue = React.useCallback(
+    debounce((newValue: string) => setFilterValue(newValue), 1000),
+    []
+  );
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   const handleNewProjectFormSubmit = React.useCallback(
     (_, event: React.FormEvent<HTMLFormElement>) => {
@@ -163,7 +173,15 @@ const ProjectsPanel: React.FC = () => {
 
       <div className={css(styles.searchContainer)}>
         <InputGroup>
-          <Input size="lg" placeholder="Search projects" />
+          <Input
+            size="lg"
+            placeholder="Search projects"
+            value={searchText}
+            onChange={(newValue: string) => {
+              setSearchText(newValue);
+              debouncedSetFilterValue(newValue);
+            }}
+          />
 
           <InputGroup.Addon className={css(styles.searchAddon)}>
             <Icon icon="search" />
@@ -198,27 +216,30 @@ const ProjectsPanel: React.FC = () => {
         />
       </div>
 
-      {notebooks.sort(sortNotebookBy(sortType)).map((project) => {
-        const active = project.nb_id === notebook?.nb_id;
-        const timeSinceModification = timeSince(project.time_modified);
+      {notebooks
+        .filter(filterNotebookByName(filterValue))
+        .sort(sortNotebookBy(sortType))
+        .map((project) => {
+          const active = project.nb_id === notebook?.nb_id;
+          const timeSinceModification = timeSince(project.time_modified);
 
-        return (
-          <div key={project.nb_id} className={css(styles.project)}>
-            <Button
-              block
-              className={css(styles.projectButton, active && styles.projectActive)}
-              loading={project.nb_id === openingNotebookId}
-              onClick={() => !isOpeningNotebook && !active && dispatchOpenNotebook(project.nb_id)}
-            >
-              <div className={css(styles.projectTitleContainer)}>
-                <Icon icon={active ? 'file' : 'file-o'} />
-                <span className={css(styles.projectTitle)}>{project.name}</span>
-              </div>
-              <span className={css(styles.lastModifiedText)}>{timeSinceModification}</span>
-            </Button>
-          </div>
-        );
-      })}
+          return (
+            <div key={project.nb_id} className={css(styles.project)}>
+              <Button
+                block
+                className={css(styles.projectButton, active && styles.projectActive)}
+                loading={project.nb_id === openingNotebookId}
+                onClick={() => !isOpeningNotebook && !active && dispatchOpenNotebook(project.nb_id)}
+              >
+                <div className={css(styles.projectTitleContainer)}>
+                  <Icon icon={active ? 'file' : 'file-o'} />
+                  <span className={css(styles.projectTitle)}>{project.name}</span>
+                </div>
+                <span className={css(styles.lastModifiedText)}>{timeSinceModification}</span>
+              </Button>
+            </div>
+          );
+        })}
 
       <Modal
         size="xs"
