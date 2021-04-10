@@ -1,7 +1,7 @@
 import { List as ImmutableList, Map as ImmutableMap, OrderedSet as ImmutableOrderedSet } from 'immutable';
 import { DUser } from '@actually-colab/editor-types';
 
-import { CELL, CLIENT, CONTACTS, KERNEL, NOTEBOOKS } from '../types/redux/editor';
+import { CELL, CLIENT, CONTACTS, KERNEL, NOTEBOOKS, WORKSHOPS } from '../types/redux/editor';
 import { SIGN_OUT } from '../types/redux/auth';
 import { ClientConnectionStatus } from '../types/client';
 import { EditorCell } from '../types/notebook';
@@ -24,12 +24,15 @@ import {
   ImmutableReducedNotebookFactory,
   ImmutableUser,
   ImmutableUserFactory,
+  ImmutableWorkshop,
+  ImmutableWorkshopFactory,
 } from '../immutable';
 import {
   cellArrayToImmutableMap,
   cleanDCell,
   convertOutputToReceivablePayload,
-  makeAccessLevelsImmutable,
+  makeNotebookAccessLevelsImmutable,
+  makeWorkshopAccessLevelsImmutable,
   reduceImmutableNotebook,
   reduceNotebookContents,
 } from '../utils/notebook';
@@ -161,6 +164,11 @@ export interface EditorState {
    */
   notebooks: ImmutableList<ImmutableNotebook>;
   /**
+   * A list of workshops the user has access to without their contents
+   */
+  workshops: ImmutableList<ImmutableWorkshop>;
+
+  /**
    * The currently open notebook with ordered `cell_id`'s
    */
   notebook: ImmutableReducedNotebook | null;
@@ -232,6 +240,8 @@ const initialState: EditorState = {
   kernel: null,
 
   notebooks: ImmutableList(),
+  workshops: ImmutableList(),
+
   notebook: null,
   cells: ImmutableMap(),
 
@@ -450,7 +460,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
             (notebook) =>
               new ImmutableNotebookFactory({
                 ...notebook,
-                users: makeAccessLevelsImmutable(notebook.users),
+                users: makeNotebookAccessLevelsImmutable(notebook.users),
               })
           )
         ),
@@ -484,7 +494,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         notebooks: state.notebooks.push(
           new ImmutableNotebookFactory({
             ...action.notebook,
-            users: makeAccessLevelsImmutable(action.notebook.users),
+            users: makeNotebookAccessLevelsImmutable(action.notebook.users),
           })
         ),
       };
@@ -492,6 +502,42 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
      * Failed to create a new notebook
      */
     case NOTEBOOKS.CREATE.FAILURE:
+      return {
+        ...state,
+        isCreatingNotebook: false,
+      };
+
+    /**
+     * Started creating a workshop
+     */
+    case WORKSHOPS.CREATE.START:
+      return {
+        ...state,
+        isCreatingNotebook: true,
+      };
+    /**
+     * Created a new workshop successfully
+     */
+    case WORKSHOPS.CREATE.SUCCESS:
+      return {
+        ...state,
+        isCreatingNotebook: false,
+        workshops: state.workshops.push(
+          new ImmutableWorkshopFactory({
+            ...action.workshop,
+            instructors: makeWorkshopAccessLevelsImmutable(action.workshop.instructors),
+            attendees: makeWorkshopAccessLevelsImmutable(action.workshop.attendees),
+            mainNotebook: new ImmutableNotebookFactory({
+              ...action.workshop.mainNotebook,
+              users: makeNotebookAccessLevelsImmutable(action.workshop.mainNotebook.users),
+            }),
+          })
+        ),
+      };
+    /**
+     * Failed to create a new workshop
+     */
+    case WORKSHOPS.CREATE.FAILURE:
       return {
         ...state,
         isCreatingNotebook: false,
@@ -515,7 +561,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       const reducedNotebook = reduceNotebookContents(action.notebook);
       const immutableReducedNotebook = new ImmutableReducedNotebookFactory({
         ...reducedNotebook,
-        users: makeAccessLevelsImmutable(reducedNotebook.users),
+        users: makeNotebookAccessLevelsImmutable(reducedNotebook.users),
         cell_ids: ImmutableList(reducedNotebook.cell_ids),
       });
 
@@ -604,13 +650,13 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
           .push(
             new ImmutableNotebookFactory({
               ...action.notebook,
-              users: makeAccessLevelsImmutable(action.notebook.users),
+              users: makeNotebookAccessLevelsImmutable(action.notebook.users),
             })
           ),
         notebook:
           state.notebook?.merge({
             time_modified: action.notebook.time_modified,
-            users: makeAccessLevelsImmutable(action.notebook.users),
+            users: makeNotebookAccessLevelsImmutable(action.notebook.users),
           }) ?? null,
       };
     }

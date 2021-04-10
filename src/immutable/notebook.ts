@@ -1,4 +1,4 @@
-import { Notebook, NotebookAccessLevel } from '@actually-colab/editor-types';
+import { Notebook, NotebookAccessLevel, Workshop, WorkshopAccessLevel } from '@actually-colab/editor-types';
 import { List as ImmutableList, Record as ImmutableRecord } from 'immutable';
 
 import { RemoveIndex } from '../types/generics';
@@ -127,4 +127,49 @@ export const ImmutableReducedNotebookFactory = ImmutableRecord<Required<PseudoIm
   time_modified: Date.now(),
   users: ImmutableList(),
   cell_ids: ImmutableList(),
+});
+
+/**
+ * An Immutable Record for a workshop access level
+ */
+export type ImmutableWorkshopAccessLevel = ImmutableRecordOf<RemoveIndex<Required<WorkshopAccessLevel>>>;
+/**
+ * An Immutable Record Factory for a workshop access level
+ */
+export const ImmutableWorkshopAccessLevelFactory = ImmutableRecord<RemoveIndex<Required<WorkshopAccessLevel>>>({
+  uid: '',
+  name: '',
+  email: '',
+  image_url: '',
+  access_level: 'Attendee',
+});
+
+/**
+ * The in-between type for converting a workshop to an Immutable
+ */
+export type PseudoImmutableWorkshop = Omit<RemoveIndex<Workshop>, 'instructors' | 'attendees' | 'mainNotebook'> & {
+  instructors: ImmutableList<ImmutableWorkshopAccessLevel>;
+  attendees: ImmutableList<ImmutableWorkshopAccessLevel>;
+  mainNotebook: ImmutableNotebook;
+};
+
+/**
+ * An Immutable Record for a workshop
+ */
+export type ImmutableWorkshop = ImmutableRecordOf<Required<PseudoImmutableWorkshop>>;
+/**
+ * An Immutable Record Factory for a workshop
+ */
+export const ImmutableWorkshopFactory = ImmutableRecord<Required<PseudoImmutableWorkshop>>({
+  ws_id: '',
+  name: '',
+  description: '',
+  time_modified: Date.now(),
+  nb_id: '',
+  start_time: Date.now(),
+  end_time: Date.now(),
+  capacity: -1,
+  instructors: ImmutableList(),
+  attendees: ImmutableList(),
+  mainNotebook: new ImmutableNotebookFactory(),
 });

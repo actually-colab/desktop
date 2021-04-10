@@ -1,4 +1,12 @@
-import { DCell, Notebook, NotebookAccessLevel, NotebookContents, DUser, OOutput } from '@actually-colab/editor-types';
+import {
+  DCell,
+  Notebook,
+  NotebookAccessLevel,
+  NotebookContents,
+  DUser,
+  OOutput,
+  WorkshopAccessLevel,
+} from '@actually-colab/editor-types';
 import { List as ImmutableList, Map as ImmutableMap } from 'immutable';
 import { saveAs } from 'file-saver';
 
@@ -20,6 +28,8 @@ import {
   ImmutableNotebookAccessLevelFactory,
   ImmutableReducedNotebook,
   ImmutableReducedNotebookFactory,
+  ImmutableWorkshopAccessLevel,
+  ImmutableWorkshopAccessLevelFactory,
 } from '../immutable';
 import { filterUndefined } from './filter';
 import { splitKeepNewlines } from './regex';
@@ -90,8 +100,18 @@ export const reduceNotebookContents = (notebook: NotebookContents): ReducedNoteb
 /**
  * Convert an array of access levels to an immutable list of immutable access levels
  */
-export const makeAccessLevelsImmutable = (users: NotebookAccessLevel[]): ImmutableList<ImmutableNotebookAccessLevel> =>
+export const makeNotebookAccessLevelsImmutable = (
+  users: NotebookAccessLevel[]
+): ImmutableList<ImmutableNotebookAccessLevel> =>
   ImmutableList(users.map((user) => new ImmutableNotebookAccessLevelFactory(user)));
+
+/**
+ * Convert an array of access levels to an immutable list of immutable access levels
+ */
+export const makeWorkshopAccessLevelsImmutable = (
+  users: WorkshopAccessLevel[]
+): ImmutableList<ImmutableWorkshopAccessLevel> =>
+  ImmutableList(users.map((user) => new ImmutableWorkshopAccessLevelFactory(user)));
 
 /**
  * Given a DCell, make sure all values exist
