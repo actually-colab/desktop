@@ -1,5 +1,5 @@
 import { List as ImmutableList, Map as ImmutableMap, OrderedSet as ImmutableOrderedSet } from 'immutable';
-import { DUser } from '@actually-colab/editor-types';
+import { DUser, Notebook, Workshop } from '@actually-colab/editor-types';
 
 import { CELL, CLIENT, CONTACTS, KERNEL, NOTEBOOKS, WORKSHOPS } from '../types/redux/editor';
 import { SIGN_OUT } from '../types/redux/auth';
@@ -175,11 +175,11 @@ export interface EditorState {
   /**
    * A list of notebooks the user has access to without their contents
    */
-  notebooks: ImmutableList<ImmutableNotebook>;
+  notebooks: ImmutableMap<Notebook['nb_id'], ImmutableNotebook>;
   /**
    * A list of workshops the user has access to without their contents
    */
-  workshops: ImmutableList<ImmutableWorkshop>;
+  workshops: ImmutableMap<Workshop['ws_id'], ImmutableWorkshop>;
 
   /**
    * The currently open notebook with ordered `cell_id`'s
@@ -255,8 +255,8 @@ const initialState: EditorState = {
   gatewayUri: DEFAULT_GATEWAY_URI,
   kernel: null,
 
-  notebooks: ImmutableList(),
-  workshops: ImmutableList(),
+  notebooks: ImmutableMap(),
+  workshops: ImmutableMap(),
 
   notebook: null,
   cells: ImmutableMap(),
@@ -472,13 +472,15 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ...state,
         isGettingNotebooks: false,
         getNotebooksTimestamp: Date.now(),
-        notebooks: ImmutableList(
-          action.notebooks.map(
-            (notebook) =>
+        notebooks: ImmutableMap<Notebook['nb_id'], ImmutableNotebook>().withMutations((mtx) =>
+          action.notebooks.forEach((notebook) =>
+            mtx.set(
+              notebook.nb_id,
               new ImmutableNotebookFactory({
                 ...notebook,
                 users: makeNotebookAccessLevelsImmutable(notebook.users),
               })
+            )
           )
         ),
       };
@@ -509,9 +511,10 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ...state,
         isGettingWorkshops: false,
         getWorkshopsTimestamp: Date.now(),
-        workshops: ImmutableList(
-          action.workshops.map(
-            (workshop) =>
+        workshops: ImmutableMap<Workshop['ws_id'], ImmutableWorkshop>().withMutations((mtx) =>
+          action.workshops.forEach((workshop) =>
+            mtx.set(
+              workshop.ws_id,
               new ImmutableWorkshopFactory({
                 ...workshop,
                 instructors: makeWorkshopAccessLevelsImmutable(workshop.instructors),
@@ -521,6 +524,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
                   users: makeNotebookAccessLevelsImmutable(workshop.main_notebook.users),
                 }),
               })
+            )
           )
         ),
       };
@@ -549,7 +553,8 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         isCreatingNotebook: false,
-        notebooks: state.notebooks.push(
+        notebooks: state.notebooks.set(
+          action.notebook.nb_id,
           new ImmutableNotebookFactory({
             ...action.notebook,
             users: makeNotebookAccessLevelsImmutable(action.notebook.users),
@@ -580,7 +585,8 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         isCreatingNotebook: false,
-        workshops: state.workshops.push(
+        workshops: state.workshops.set(
+          action.workshop.ws_id,
           new ImmutableWorkshopFactory({
             ...action.workshop,
             instructors: makeWorkshopAccessLevelsImmutable(action.workshop.instructors),
@@ -702,9 +708,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
      * Successfully shared a notebook
      */
     case NOTEBOOKS.SHARE.SUCCESS: {
-      const notebookIndex = state.notebooks.findIndex((notebook) => notebook.nb_id === state.notebook?.nb_id);
-
-      if (notebookIndex === -1) {
+      if (!state.notebook || state.notebooks.has(state.notebook.nb_id)) {
         return {
           ...state,
           isSharingNotebook: false,
@@ -714,7 +718,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         isSharingNotebook: false,
-        notebooks: state.notebooks.update(notebookIndex, (notebook) =>
+        notebooks: state.notebooks.update(state.notebook.nb_id, (notebook) =>
           notebook.set(
             'users',
             notebook.users
@@ -722,13 +726,12 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
               .push(new ImmutableNotebookAccessLevelFactory(action.user))
           )
         ),
-        notebook:
-          state.notebook?.set(
-            'users',
-            state.notebook.users
-              .filter((user) => user.uid !== action.user.uid)
-              .push(new ImmutableNotebookAccessLevelFactory(action.user))
-          ) ?? null,
+        notebook: state.notebook.set(
+          'users',
+          state.notebook.users
+            .filter((user) => user.uid !== action.user.uid)
+            .push(new ImmutableNotebookAccessLevelFactory(action.user))
+        ),
       };
     }
     /**

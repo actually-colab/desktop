@@ -283,6 +283,7 @@ const ProjectsPanel: React.FC = () => {
       {notebooks
         .filter(filterNotebookByName(filterValue))
         .sort(sortNotebookBy(sortType))
+        .valueSeq()
         .map((project) => {
           const active = project.nb_id === notebook?.nb_id;
 
@@ -312,6 +313,7 @@ const ProjectsPanel: React.FC = () => {
       {workshops
         .filter(filterNotebookByName(filterValue))
         .sort(sortNotebookBy(sortType))
+        .valueSeq()
         .map((project) => {
           const active = project.main_notebook.nb_id === notebook?.nb_id;
 
