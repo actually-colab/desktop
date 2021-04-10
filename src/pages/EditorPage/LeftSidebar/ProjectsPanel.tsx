@@ -12,6 +12,7 @@ import {
   HelpBlock,
   Icon,
   IconButton,
+  IconProps,
   Input,
   InputGroup,
   Modal,
@@ -106,6 +107,34 @@ const styles = StyleSheet.create({
   },
 });
 
+const ProjectButton: React.FC<{
+  icon: IconProps['icon'];
+  name: string;
+  time_modified: number;
+  loading: boolean;
+  active: boolean;
+  onClick(): void;
+}> = ({ icon, name, time_modified, loading, active, onClick }) => {
+  const timeSinceModification = timeSince(time_modified);
+
+  return (
+    <div className={css(styles.project)}>
+      <Button
+        block
+        className={css(styles.projectButton, active && styles.projectActive)}
+        loading={loading}
+        onClick={onClick}
+      >
+        <div className={css(styles.projectTitleContainer)}>
+          <Icon icon={icon} />
+          <span className={css(styles.projectTitle)}>{name}</span>
+        </div>
+        <span className={css(styles.lastModifiedText)}>{timeSinceModification}</span>
+      </Button>
+    </div>
+  );
+};
+
 /**
  * The projects panel for the left sidebar of the editor page
  */
@@ -118,13 +147,46 @@ const ProjectsPanel: React.FC = () => {
   const openingNotebookId = useSelector((state: ReduxState) => state.editor.openingNotebookId);
   const notebooks = useSelector((state: ReduxState) => state.editor.notebooks);
   const notebook = useSelector((state: ReduxState) => state.editor.notebook);
-  const workshops = [
-    {
-      name: 'Data Science 101',
-      primary_nb_id: 'test',
-      time_modified: Date.now(),
-    },
-  ];
+  const workshops = React.useMemo(
+    () => [
+      {
+        name: 'Data Science 101',
+        ws_id: 'test-data-science',
+        nb_id: 'test-data-science',
+        time_modified: Date.now(),
+        isAttendee: false,
+        attendeeNotebooks: [
+          {
+            nb_id: 'test-data-science-1',
+          },
+          {
+            nb_id: 'test-data-science-2',
+          },
+          {
+            nb_id: 'test-data-science-3',
+          },
+          {
+            nb_id: 'test-data-science-4',
+          },
+          {
+            nb_id: 'test-data-science-5',
+          },
+          {
+            nb_id: 'test-data-science-6',
+          },
+        ],
+      },
+      {
+        name: 'Intro to Naive Bayes',
+        ws_id: 'test-naive-bayes',
+        nb_id: 'test-naive-bayes',
+        time_modified: Date.now(),
+        isAttendee: true,
+        attendeeNotebooks: [],
+      },
+    ],
+    []
+  );
 
   const [searchText, setSearchText] = React.useState<string>('');
   const [filterValue, setFilterValue] = React.useState<string>('');
@@ -134,6 +196,12 @@ const ProjectsPanel: React.FC = () => {
   const [newProjectFormValue, setNewProjectFormValue] = React.useState<NewProjectFormValue>({
     name: '',
   });
+  const [openWorkshopId, setOpenWorkshopId] = React.useState<Notebook['nb_id']>('');
+
+  const openWorkshop = React.useMemo(() => workshops.find((workshop) => workshop.ws_id === openWorkshopId), [
+    openWorkshopId,
+    workshops,
+  ]);
 
   const dispatch = useDispatch();
   const dispatchGetNotebooks = React.useCallback(() => dispatch(_editor.getNotebooks()), [dispatch]);
@@ -187,8 +255,12 @@ const ProjectsPanel: React.FC = () => {
             setNewProjectFormValue({ name: '' });
           }}
         >
-          <Dropdown.Item eventKey="Notebook">New Notebook</Dropdown.Item>
-          <Dropdown.Item eventKey="Workshop">New Workshop</Dropdown.Item>
+          <Dropdown.Item eventKey="Notebook" icon={<Icon icon="file" />}>
+            New Notebook
+          </Dropdown.Item>
+          <Dropdown.Item eventKey="Workshop" icon={<Icon icon="mortar-board" />}>
+            New Workshop
+          </Dropdown.Item>
         </PopoverDropdown>
       </div>
 
@@ -246,23 +318,17 @@ const ProjectsPanel: React.FC = () => {
         .sort(sortNotebookBy(sortType))
         .map((project) => {
           const active = project.nb_id === notebook?.nb_id;
-          const timeSinceModification = timeSince(project.time_modified);
 
           return (
-            <div key={project.nb_id} className={css(styles.project)}>
-              <Button
-                block
-                className={css(styles.projectButton, active && styles.projectActive)}
-                loading={project.nb_id === openingNotebookId}
-                onClick={() => !isOpeningNotebook && !active && dispatchOpenNotebook(project.nb_id)}
-              >
-                <div className={css(styles.projectTitleContainer)}>
-                  <Icon icon={active ? 'file' : 'file-o'} />
-                  <span className={css(styles.projectTitle)}>{project.name}</span>
-                </div>
-                <span className={css(styles.lastModifiedText)}>{timeSinceModification}</span>
-              </Button>
-            </div>
+            <ProjectButton
+              key={project.nb_id}
+              icon={active ? 'file' : 'file-o'}
+              name={project.name}
+              active={active}
+              time_modified={project.time_modified}
+              loading={project.nb_id === openingNotebookId}
+              onClick={() => !isOpeningNotebook && !active && dispatchOpenNotebook(project.nb_id)}
+            />
           );
         })}
 
@@ -276,36 +342,40 @@ const ProjectsPanel: React.FC = () => {
         <span className={css(styles.dividerText)}>Workshops</span>
       </Divider>
 
-      {workshops
-        .filter(filterNotebookByName(filterValue))
-        .sort(sortNotebookBy(sortType))
-        .map((project) => {
-          const active = project.primary_nb_id === notebook?.nb_id;
-          const timeSinceModification = timeSince(project.time_modified);
+      {!openWorkshop ? (
+        <React.Fragment>
+          {workshops
+            .filter(filterNotebookByName(filterValue))
+            .sort(sortNotebookBy(sortType))
+            .map((project) => {
+              const active = project.nb_id === notebook?.nb_id;
 
-          return (
-            <div key={project.primary_nb_id} className={css(styles.project)}>
-              <Button
-                block
-                className={css(styles.projectButton, active && styles.projectActive)}
-                loading={project.primary_nb_id === openingNotebookId}
-                onClick={() => !isOpeningNotebook && !active && dispatchOpenNotebook(project.primary_nb_id)}
-              >
-                <div className={css(styles.projectTitleContainer)}>
-                  <Icon icon={active ? 'file' : 'file-o'} />
-                  <span className={css(styles.projectTitle)}>{project.name}</span>
-                </div>
-                <span className={css(styles.lastModifiedText)}>{timeSinceModification}</span>
-              </Button>
-            </div>
-          );
-        })}
+              return (
+                <ProjectButton
+                  key={project.ws_id}
+                  icon={project.isAttendee ? (active ? 'file' : 'file-o') : 'folder-o'}
+                  name={project.name}
+                  active={active}
+                  time_modified={project.time_modified}
+                  loading={project.nb_id === openingNotebookId}
+                  onClick={() =>
+                    !isOpeningNotebook &&
+                    !active &&
+                    (project.isAttendee ? dispatchOpenNotebook(project.nb_id) : setOpenWorkshopId(project.ws_id))
+                  }
+                />
+              );
+            })}
 
-      {workshops.length === 0 && (
-        <p className={css(styles.descriptionText)}>
-          You have no workshops. To run a workshop, create a new project and select workshop. If you are an attendee,
-          the workshop will appear here once it is released!
-        </p>
+          {workshops.length === 0 && (
+            <p className={css(styles.descriptionText)}>
+              You have no workshops. To run a workshop, create a new project and select workshop. If you are an
+              attendee, the workshop will appear here once it is released!
+            </p>
+          )}
+        </React.Fragment>
+      ) : (
+        <React.Fragment>{openWorkshop.attendeeNotebooks.map((attendee) => null)}</React.Fragment>
       )}
 
       <Modal
