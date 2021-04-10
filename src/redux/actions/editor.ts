@@ -7,6 +7,7 @@ import type {
   OOutput,
   Workshop,
   NotebookAccessLevel,
+  WorkshopAccessLevelType,
 } from '@actually-colab/editor-types';
 import { format } from 'date-fns';
 
@@ -407,6 +408,48 @@ export const shareNotebook = (
   access_level: NotebookAccessLevelType
 ): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(shareNotebookStart(nb_id, email, access_level));
+};
+
+const shareWorkshopStart = (
+  ws_id: Workshop['ws_id'],
+  emails: string,
+  access_level: WorkshopAccessLevelType
+): EditorActionTypes => ({
+  type: WORKSHOPS.SHARE.START,
+  ws_id,
+  emails,
+  access_level,
+});
+
+/**
+ * Successfully shared a workshop
+ */
+export const shareWorkshopSuccess = (
+  access_levels: Pick<Workshop, 'instructors' | 'attendees'>
+): EditorActionTypes => ({
+  type: WORKSHOPS.SHARE.SUCCESS,
+  access_levels,
+});
+
+/**
+ * Failed to share a workshop
+ */
+export const shareWorkshopFailure = (errorMessage: string): EditorActionTypes => ({
+  type: WORKSHOPS.SHARE.FAILURE,
+  error: {
+    message: errorMessage,
+  },
+});
+
+/**
+ * Share a workshop with given users
+ */
+export const shareWorkshop = (
+  ws_id: Workshop['ws_id'],
+  emails: string,
+  access_level: WorkshopAccessLevelType
+): EditorAsyncActionTypes => async (dispatch) => {
+  dispatch(shareWorkshopStart(ws_id, emails, access_level));
 };
 
 /**

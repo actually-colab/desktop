@@ -69,6 +69,7 @@ const styles = StyleSheet.create({
   },
   descriptionText: {
     color: palette.GRAY,
+    fontSize: 12,
   },
   project: {
     marginLeft: -spacing.DEFAULT / 2,
@@ -187,9 +188,14 @@ const ProjectsPanel: React.FC = () => {
   const handleNewProjectFormSubmit = React.useCallback(
     (_, event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      dispatchCreateNotebook();
+
+      if (newProjectType === 'Notebook') {
+        dispatchCreateNotebook();
+      } else {
+        dispatchCreateWorkshop();
+      }
     },
-    [dispatchCreateNotebook]
+    [dispatchCreateNotebook, dispatchCreateWorkshop, newProjectType]
   );
 
   /**

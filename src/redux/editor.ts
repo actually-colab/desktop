@@ -708,7 +708,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
      * Successfully shared a notebook
      */
     case NOTEBOOKS.SHARE.SUCCESS: {
-      if (!state.notebook || state.notebooks.has(state.notebook.nb_id)) {
+      if (!state.notebook || !state.notebooks.has(state.notebook.nb_id)) {
         return {
           ...state,
           isSharingNotebook: false,
