@@ -116,6 +116,7 @@ const ProjectsPanel: React.FC = () => {
   const [filterValue, setFilterValue] = React.useState<string>('');
   const [sortType, setSortType] = React.useState<'name' | 'modified'>('modified');
   const [showCreateProject, setShowCreateProject] = React.useState<boolean>(false);
+  const [newProjectType, setNewProjectType] = React.useState<'Notebook' | 'Workshop'>('Notebook');
   const [newProjectFormValue, setNewProjectFormValue] = React.useState<NewProjectFormValue>({
     name: '',
   });
@@ -157,18 +158,24 @@ const ProjectsPanel: React.FC = () => {
   return (
     <React.Fragment>
       <div className={css(styles.newProjectContainer)}>
-        <Button
-          appearance="primary"
-          size="lg"
-          block
-          onClick={() => {
+        <PopoverDropdown
+          placement="rightStart"
+          buttonProps={{ appearance: 'primary', size: 'lg', block: true }}
+          buttonContent={
+            <div>
+              <Icon icon="edit" size="lg" />
+              <span className={css(styles.iconButtonText)}>New project</span>
+            </div>
+          }
+          onSelect={(eventKey: string) => {
             setShowCreateProject(true);
+            setNewProjectType(eventKey as typeof newProjectType);
             setNewProjectFormValue({ name: '' });
           }}
         >
-          <Icon icon="edit" size="lg" />
-          <span className={css(styles.iconButtonText)}>New project</span>
-        </Button>
+          <Dropdown.Item eventKey="Notebook">New Notebook</Dropdown.Item>
+          <Dropdown.Item eventKey="Workshop">New Workshop</Dropdown.Item>
+        </PopoverDropdown>
       </div>
 
       <div className={css(styles.searchContainer)}>
@@ -248,7 +255,7 @@ const ProjectsPanel: React.FC = () => {
         onHide={() => !isCreatingNotebook && setShowCreateProject(false)}
       >
         <Modal.Header>
-          <Modal.Title>New Project Details</Modal.Title>
+          <Modal.Title>New {newProjectType} Details</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form
@@ -266,7 +273,7 @@ const ProjectsPanel: React.FC = () => {
                 Project name <span className={css(styles.requiredText)}>Required</span>
               </ControlLabel>
               <FormControl name="name" label="Project Name" placeholder="Project Name" />
-              <HelpBlock>This will be the name of your new notebook</HelpBlock>
+              <HelpBlock>This will be the name of your new {newProjectType}</HelpBlock>
             </FormGroup>
           </Form>
         </Modal.Body>
