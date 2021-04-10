@@ -4,6 +4,7 @@ import { StyleSheet, css } from 'aphrodite';
 import {
   Button,
   ControlLabel,
+  Divider,
   Dropdown,
   Form,
   FormControl,
@@ -11,6 +12,7 @@ import {
   HelpBlock,
   Icon,
   IconButton,
+  IconProps,
   Input,
   InputGroup,
   Modal,
@@ -60,6 +62,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   sortText: {},
+  dividerText: {
+    color: palette.GRAY,
+  },
+  descriptionText: {
+    color: palette.GRAY,
+  },
   project: {
     marginLeft: -spacing.DEFAULT / 2,
     marginRight: -spacing.DEFAULT / 2,
@@ -99,6 +107,34 @@ const styles = StyleSheet.create({
   },
 });
 
+const ProjectButton: React.FC<{
+  icon: IconProps['icon'];
+  name: string;
+  time_modified: number;
+  loading: boolean;
+  active: boolean;
+  onClick(): void;
+}> = ({ icon, name, time_modified, loading, active, onClick }) => {
+  const timeSinceModification = timeSince(time_modified);
+
+  return (
+    <div className={css(styles.project)}>
+      <Button
+        block
+        className={css(styles.projectButton, active && styles.projectActive)}
+        loading={loading}
+        onClick={onClick}
+      >
+        <div className={css(styles.projectTitleContainer)}>
+          <Icon icon={icon} />
+          <span className={css(styles.projectTitle)}>{name}</span>
+        </div>
+        <span className={css(styles.lastModifiedText)}>{timeSinceModification}</span>
+      </Button>
+    </div>
+  );
+};
+
 /**
  * The projects panel for the left sidebar of the editor page
  */
@@ -111,6 +147,25 @@ const ProjectsPanel: React.FC = () => {
   const openingNotebookId = useSelector((state: ReduxState) => state.editor.openingNotebookId);
   const notebooks = useSelector((state: ReduxState) => state.editor.notebooks);
   const notebook = useSelector((state: ReduxState) => state.editor.notebook);
+  const workshops = React.useMemo(
+    () => [
+      {
+        name: 'Data Science 101',
+        ws_id: 'test-data-science',
+        nb_id: 'test-data-science',
+        time_modified: Date.now(),
+        isAttendee: false,
+      },
+      {
+        name: 'Intro to Naive Bayes',
+        ws_id: 'test-naive-bayes',
+        nb_id: 'test-naive-bayes',
+        time_modified: Date.now(),
+        isAttendee: true,
+      },
+    ],
+    []
+  );
 
   const [searchText, setSearchText] = React.useState<string>('');
   const [filterValue, setFilterValue] = React.useState<string>('');
@@ -173,8 +228,12 @@ const ProjectsPanel: React.FC = () => {
             setNewProjectFormValue({ name: '' });
           }}
         >
-          <Dropdown.Item eventKey="Notebook">New Notebook</Dropdown.Item>
-          <Dropdown.Item eventKey="Workshop">New Workshop</Dropdown.Item>
+          <Dropdown.Item eventKey="Notebook" icon={<Icon icon="file" />}>
+            New Notebook
+          </Dropdown.Item>
+          <Dropdown.Item eventKey="Workshop" icon={<Icon icon="mortar-board" />}>
+            New Workshop
+          </Dropdown.Item>
         </PopoverDropdown>
       </div>
 
@@ -223,30 +282,64 @@ const ProjectsPanel: React.FC = () => {
         />
       </div>
 
+      <Divider>
+        <span className={css(styles.dividerText)}>Notebooks</span>
+      </Divider>
+
       {notebooks
         .filter(filterNotebookByName(filterValue))
         .sort(sortNotebookBy(sortType))
         .map((project) => {
           const active = project.nb_id === notebook?.nb_id;
-          const timeSinceModification = timeSince(project.time_modified);
 
           return (
-            <div key={project.nb_id} className={css(styles.project)}>
-              <Button
-                block
-                className={css(styles.projectButton, active && styles.projectActive)}
-                loading={project.nb_id === openingNotebookId}
-                onClick={() => !isOpeningNotebook && !active && dispatchOpenNotebook(project.nb_id)}
-              >
-                <div className={css(styles.projectTitleContainer)}>
-                  <Icon icon={active ? 'file' : 'file-o'} />
-                  <span className={css(styles.projectTitle)}>{project.name}</span>
-                </div>
-                <span className={css(styles.lastModifiedText)}>{timeSinceModification}</span>
-              </Button>
-            </div>
+            <ProjectButton
+              key={project.nb_id}
+              icon={active ? 'file' : 'file-o'}
+              name={project.name}
+              active={active}
+              time_modified={project.time_modified}
+              loading={project.nb_id === openingNotebookId}
+              onClick={() => !isOpeningNotebook && !active && dispatchOpenNotebook(project.nb_id)}
+            />
           );
         })}
+
+      {notebooks.size === 0 && (
+        <p className={css(styles.descriptionText)}>
+          You have no notebooks. Notebooks you created or are shared with you will appear here.
+        </p>
+      )}
+
+      <Divider>
+        <span className={css(styles.dividerText)}>Workshops</span>
+      </Divider>
+
+      {workshops
+        .filter(filterNotebookByName(filterValue))
+        .sort(sortNotebookBy(sortType))
+        .map((project) => {
+          const active = project.nb_id === notebook?.nb_id;
+
+          return (
+            <ProjectButton
+              key={project.ws_id}
+              icon={active ? 'file' : 'file-o'}
+              name={project.name}
+              active={active}
+              time_modified={project.time_modified}
+              loading={project.nb_id === openingNotebookId}
+              onClick={() => !isOpeningNotebook && !active && dispatchOpenNotebook(project.nb_id)}
+            />
+          );
+        })}
+
+      {workshops.length === 0 && (
+        <p className={css(styles.descriptionText)}>
+          You have no workshops. To run a workshop, create a new project and select workshop. If you are an attendee,
+          the workshop will appear here once it is released!
+        </p>
+      )}
 
       <Modal
         size="xs"

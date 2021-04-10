@@ -1,7 +1,7 @@
 import { List as ImmutableList, Map as ImmutableMap, OrderedSet as ImmutableOrderedSet } from 'immutable';
 import { DUser } from '@actually-colab/editor-types';
 
-import { CELL, CLIENT, KERNEL, NOTEBOOKS } from '../types/redux/editor';
+import { CELL, CLIENT, CONTACTS, KERNEL, NOTEBOOKS } from '../types/redux/editor';
 import { SIGN_OUT } from '../types/redux/auth';
 import { ClientConnectionStatus } from '../types/client';
 import { EditorCell } from '../types/notebook';
@@ -43,6 +43,11 @@ export interface EditorState {
    * The status of the socket client connection
    */
   clientConnectionStatus: ClientConnectionStatus;
+
+  /**
+   * The contacts that the user has shared notebooks with
+   */
+  contacts: DUser['email'][];
 
   /**
    * If the application should continuously try to connect to the kernel
@@ -192,6 +197,8 @@ export interface EditorState {
 const initialState: EditorState = {
   clientConnectionStatus: 'Offline',
 
+  contacts: [],
+
   autoConnectToKernel: process.env.REACT_APP_KERNEL_AUTO_CONNECT !== 'off',
   isEditingGatewayUri: false,
 
@@ -272,6 +279,23 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         clientConnectionStatus: 'Offline',
+      };
+
+    /**
+     * Loaded contacts from local storage
+     */
+    case CONTACTS.GET.SUCCESS:
+      return {
+        ...state,
+        contacts: action.contacts,
+      };
+    /**
+     * Saved contacts to local storage
+     */
+    case CONTACTS.SET.SUCCESS:
+      return {
+        ...state,
+        contacts: action.contacts,
       };
 
     /**

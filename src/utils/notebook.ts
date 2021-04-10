@@ -28,8 +28,14 @@ import { splitKeepNewlines } from './regex';
  * A configurable comparator to sort notebook types
  */
 export const sortNotebookBy = (sortType: 'name' | 'modified') => (
-  a: Notebook | ImmutableNotebook,
-  b: Notebook | ImmutableNotebook
+  a: {
+    name: string;
+    time_modified: number;
+  },
+  b: {
+    name: string;
+    time_modified: number;
+  }
 ): number => {
   if (sortType === 'name') {
     return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
@@ -41,7 +47,7 @@ export const sortNotebookBy = (sortType: 'name' | 'modified') => (
 /**
  * A configurable filter to search for a name that includes a fragment of a name anywhere in it
  */
-export const filterNotebookByName = (nameFragment: string) => (notebook: Notebook | ImmutableNotebook): boolean => {
+export const filterNotebookByName = (nameFragment: string) => (notebook: { name: string }): boolean => {
   return notebook.name.toLowerCase().includes(nameFragment.toLowerCase());
 };
 

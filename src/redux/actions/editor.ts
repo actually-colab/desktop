@@ -8,10 +8,19 @@ import type {
 } from '@actually-colab/editor-types';
 import { format } from 'date-fns';
 
-import { CELL, CLIENT, EditorActionTypes, EditorAsyncActionTypes, KERNEL, NOTEBOOKS } from '../../types/redux/editor';
+import {
+  CELL,
+  CLIENT,
+  CONTACTS,
+  EditorActionTypes,
+  EditorAsyncActionTypes,
+  KERNEL,
+  NOTEBOOKS,
+} from '../../types/redux/editor';
 import { EditorCell, EditorCellMeta, KernelOutput } from '../../types/notebook';
 import { Kernel, KernelLog } from '../../types/kernel';
 import { ImmutableEditorCell } from '../../immutable';
+import { RecentUsersStorage } from '../../utils/storage';
 
 /**
  * Started connecting to the client socket
@@ -33,6 +42,34 @@ export const connectToClientSuccess = (): EditorActionTypes => ({
 export const connectToClientFailure = (): EditorActionTypes => ({
   type: CLIENT.CONNECT.FAILURE,
 });
+
+const getContactsSuccess = (contacts: DUser['email'][]): EditorActionTypes => ({
+  type: CONTACTS.GET.SUCCESS,
+  contacts,
+});
+
+/**
+ * Get contacts from local storage
+ */
+export const getContacts = (): EditorAsyncActionTypes => (dispatch) => {
+  const contacts = RecentUsersStorage.get();
+
+  dispatch(getContactsSuccess(contacts));
+};
+
+const setContactsSuccess = (contacts: DUser['email'][]): EditorActionTypes => ({
+  type: CONTACTS.SET.SUCCESS,
+  contacts,
+});
+
+/**
+ * Set contacts in local storage
+ */
+export const setContacts = (contacts: DUser['email'][]): EditorAsyncActionTypes => (dispatch) => {
+  RecentUsersStorage.set(contacts);
+
+  dispatch(setContactsSuccess(contacts));
+};
 
 /**
  * Add a new log message

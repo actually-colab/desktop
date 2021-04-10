@@ -7,7 +7,7 @@ import { ReduxState } from '../../../types/redux';
 import { _auth } from '../../../redux/actions';
 import { palette, spacing, timing } from '../../../constants/theme';
 import { HEADER_HEIGHT, LEFT_SIDEBAR_PANEL_WIDTH, LEFT_SIDEBAR_TRAY_WIDTH } from '../../../constants/dimensions';
-import { openCompanion } from '../../../utils/redirect';
+import { openCompanion, openGithub } from '../../../utils/redirect';
 import { UserAvatar } from '../../../components';
 
 import { KernelPanel, ProjectsPanel } from '../LeftSidebar';
@@ -126,6 +126,14 @@ const CategoryButton: React.FC<{
   );
 };
 
+type MenuOption = '' | 'Projects' | 'Kernel' | 'Contacts' | 'Settings';
+
+const MENU_OPTIONS: { menuKey: MenuOption; icon: IconProps['icon']; disabled?: boolean }[] = [
+  { menuKey: 'Projects', icon: 'edit' },
+  { menuKey: 'Contacts', icon: 'peoples' },
+  { menuKey: 'Kernel', icon: 'related-map' },
+];
+
 /**
  * The left sidebar for the editor page
  */
@@ -133,9 +141,7 @@ const LeftSidebar: React.FC = () => {
   const user = useSelector((state: ReduxState) => state.auth.user);
   const clientConnectionStatus = useSelector((state: ReduxState) => state.editor.clientConnectionStatus);
 
-  const [activeMenuKey, setActiveMenuKey] = React.useState<'' | 'projects' | 'kernel' | 'follow' | 'settings'>(
-    'projects'
-  );
+  const [activeMenuKey, setActiveMenuKey] = React.useState<MenuOption>('Projects');
 
   const connectionColor = React.useMemo(
     () =>
@@ -167,27 +173,16 @@ const LeftSidebar: React.FC = () => {
       <div className={css(styles.panel)}>
         <div className={css(styles.categoryContainer)}>
           <div className={css(styles.mainPanelCategories)}>
-            <CategoryButton
-              icon="edit"
-              tooltipText="Projects"
-              menuKey="projects"
-              activeMenuKey={activeMenuKey}
-              onSelect={handleCategorySelect}
-            />
-            <CategoryButton
-              icon="peoples"
-              tooltipText="Contacts"
-              menuKey="follow"
-              activeMenuKey={activeMenuKey}
-              onSelect={handleCategorySelect}
-            />
-            <CategoryButton
-              icon="related-map"
-              tooltipText="Kernel"
-              menuKey="kernel"
-              activeMenuKey={activeMenuKey}
-              onSelect={handleCategorySelect}
-            />
+            {MENU_OPTIONS.filter((menu) => !menu.disabled).map((menu) => (
+              <CategoryButton
+                key={menu.menuKey}
+                icon={menu.icon}
+                tooltipText={menu.menuKey}
+                menuKey={menu.menuKey}
+                activeMenuKey={activeMenuKey}
+                onSelect={handleCategorySelect}
+              />
+            ))}
 
             <Whisper
               placement="right"
@@ -206,10 +201,16 @@ const LeftSidebar: React.FC = () => {
           </div>
 
           <div className={css(styles.endPanelCategories)}>
+            <IconButton
+              size="lg"
+              appearance="subtle"
+              icon={<Icon icon="github" style={{ color: palette.CHARCOAL, fontSize: 20 }} />}
+              onClick={() => openGithub()}
+            />
             <CategoryButton
               icon="gear"
               tooltipText="Settings"
-              menuKey="settings"
+              menuKey="Settings"
               activeMenuKey={activeMenuKey}
               onSelect={handleCategorySelect}
             />
@@ -229,7 +230,7 @@ const LeftSidebar: React.FC = () => {
                       appearance="subtle"
                       icon={<Icon icon="pencil" />}
                       disabled
-                      onClick={() => setActiveMenuKey('settings')}
+                      onClick={() => setActiveMenuKey('Settings')}
                     />
                   </div>
                 }
@@ -247,8 +248,10 @@ const LeftSidebar: React.FC = () => {
         </div>
 
         <div className={css(styles.bodyContainer)}>
-          {activeMenuKey === 'projects' && <ProjectsPanel />}
-          {activeMenuKey === 'kernel' && <KernelPanel />}
+          {activeMenuKey === 'Projects' && <ProjectsPanel />}
+          {activeMenuKey === 'Contacts' && <p>Coming soon</p>}
+          {activeMenuKey === 'Kernel' && <KernelPanel />}
+          {activeMenuKey === 'Settings' && <p>Coming soon</p>}
         </div>
       </div>
     </div>
