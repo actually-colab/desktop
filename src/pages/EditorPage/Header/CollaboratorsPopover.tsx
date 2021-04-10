@@ -98,6 +98,7 @@ const styles = StyleSheet.create({
 const CollaboratorsPanel: React.FC = () => {
   const shareFormRef = React.useRef<FormInstance>();
 
+  const user = useSelector((state: ReduxState) => state.auth.user);
   const notebook = useSelector((state: ReduxState) => state.editor.notebook);
   const isSharingNotebook = useSelector((state: ReduxState) => state.editor.isSharingNotebook);
 
@@ -106,6 +107,11 @@ const CollaboratorsPanel: React.FC = () => {
     accessLevel: 'Full Access',
   });
 
+  const accessLevel = React.useMemo(() => notebook?.users.find((_user) => _user.uid === user?.uid), [
+    notebook?.users,
+    user?.uid,
+  ]);
+  const canEdit = React.useMemo(() => accessLevel?.access_level === 'Full Access', [accessLevel?.access_level]);
   const sharedUsers = React.useMemo(() => notebook?.users, [notebook?.users]);
 
   const dispatch = useDispatch();
@@ -132,42 +138,48 @@ const CollaboratorsPanel: React.FC = () => {
   return (
     <div className={css(styles.container)}>
       <div className={css(styles.shareForm)}>
-        <Form
-          ref={shareFormRef}
-          autoComplete="off"
-          fluid
-          checkTrigger="none"
-          model={shareFormModel}
-          formValue={shareFormValue}
-          onChange={(formValue) => setShareFormValue(formValue as ShareFormValue)}
-          onSubmit={handleShareFormSubmit}
-        >
-          <FormGroup>
-            <ControlLabel>
-              Collaborator's email <span className={css(styles.required)}>Required</span>
-            </ControlLabel>
-            <FormControl name="email" label="Email" placeholder="Email" />
-          </FormGroup>
+        {canEdit ? (
+          <React.Fragment>
+            <Form
+              ref={shareFormRef}
+              autoComplete="off"
+              fluid
+              checkTrigger="none"
+              model={shareFormModel}
+              formValue={shareFormValue}
+              onChange={(formValue) => setShareFormValue(formValue as ShareFormValue)}
+              onSubmit={handleShareFormSubmit}
+            >
+              <FormGroup>
+                <ControlLabel>
+                  Collaborator's email <span className={css(styles.required)}>Required</span>
+                </ControlLabel>
+                <FormControl name="email" label="Email" placeholder="Email" />
+              </FormGroup>
 
-          <FormGroup>
-            <ControlLabel>Access level</ControlLabel>
-            <FormControl className={css(styles.fullPicker)} name="accessLevel" accepter={RadioGroup}>
-              <Radio value="Read Only">Read only</Radio>
-              <Radio value="Full Access">Full access</Radio>
-            </FormControl>
-          </FormGroup>
-        </Form>
+              <FormGroup>
+                <ControlLabel>Access level</ControlLabel>
+                <FormControl className={css(styles.fullPicker)} name="accessLevel" accepter={RadioGroup}>
+                  <Radio value="Read Only">Read only</Radio>
+                  <Radio value="Full Access">Full access</Radio>
+                </FormControl>
+              </FormGroup>
+            </Form>
 
-        <Button
-          className={css(styles.shareButton)}
-          appearance="primary"
-          block
-          loading={isSharingNotebook}
-          onClick={dispatchShareNotebook}
-        >
-          <Icon icon="share" size="lg" />
-          <span className={css(styles.shareText)}>Share</span>
-        </Button>
+            <Button
+              className={css(styles.shareButton)}
+              appearance="primary"
+              block
+              loading={isSharingNotebook}
+              onClick={dispatchShareNotebook}
+            >
+              <Icon icon="share" size="lg" />
+              <span className={css(styles.shareText)}>Share</span>
+            </Button>
+          </React.Fragment>
+        ) : (
+          <p>Only collaborators with full access can share this notebook!</p>
+        )}
       </div>
 
       <div className={css(styles.userListContainer)}>
@@ -183,7 +195,9 @@ const CollaboratorsPanel: React.FC = () => {
 
                 <FlexboxGrid.Item colspan={18}>
                   <div className={css(styles.userItemLabel)}>
-                    <div className={css(styles.userItemEmail)}>{item.email}</div>
+                    <div className={css(styles.userItemEmail)}>
+                      {item.uid === user?.uid ? `${item.email} (you)` : item.email}
+                    </div>
                     <div className={css(styles.userItemName)}>{item.name}</div>
                   </div>
                 </FlexboxGrid.Item>

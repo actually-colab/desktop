@@ -63,6 +63,11 @@ const EditorHeader: React.FC = () => {
 
   const [showDeleteCell, setShowDeleteCell] = React.useState<boolean>(false);
 
+  const accessLevel = React.useMemo(() => notebook?.users.find((_user) => _user.uid === user?.uid), [
+    notebook?.users,
+    user?.uid,
+  ]);
+  const canEdit = React.useMemo(() => accessLevel?.access_level === 'Full Access', [accessLevel?.access_level]);
   const ownedCells = React.useMemo(() => lockedCells.filter((lock) => lock.uid === user?.uid), [
     lockedCells,
     user?.uid,
@@ -177,54 +182,61 @@ const EditorHeader: React.FC = () => {
 
           <Divider vertical />
 
-          <RegularIconButton
-            size="sm"
-            icon="plus"
-            tooltipText="Create a new cell"
-            tooltipDirection="bottom"
-            loading={isAddingCell}
-            onClick={() => dispatchAddCell(-1)}
-          />
-          <RegularIconButton
-            size="sm"
-            icon="arrow-up2"
-            tooltipText="Move the cell up"
-            tooltipDirection="bottom"
-            loading={false}
-            disabled={true}
-            onClick={() => console.log('TODO')}
-          />
-          <RegularIconButton
-            size="sm"
-            icon="arrow-down2"
-            tooltipText="Move the cell down"
-            tooltipDirection="bottom"
-            loading={false}
-            disabled={true}
-            onClick={() => console.log('TODO')}
-          />
-          <PopoverDropdown
-            placement="bottomEnd"
-            activeKey={lockedCell?.language ?? 'python'}
-            buttonProps={{ disabled: lockedCell === null }}
-            buttonContent={(lockedCell?.language === 'python' ? 'python3' : lockedCell?.language) ?? 'python3'}
-            onSelect={handleLanguageSelect}
-          >
-            <Dropdown.Item eventKey="python">python3</Dropdown.Item>
-            <Dropdown.Item eventKey="markdown">markdown</Dropdown.Item>
-          </PopoverDropdown>
+          {canEdit ? (
+            <React.Fragment>
+              <RegularIconButton
+                size="sm"
+                icon="plus"
+                tooltipText="Create a new cell"
+                tooltipDirection="bottom"
+                loading={isAddingCell}
+                disabled={!canEdit}
+                onClick={() => dispatchAddCell(-1)}
+              />
+              <RegularIconButton
+                size="sm"
+                icon="arrow-up2"
+                tooltipText="Move the cell up"
+                tooltipDirection="bottom"
+                loading={false}
+                disabled={true}
+                onClick={() => console.log('TODO')}
+              />
+              <RegularIconButton
+                size="sm"
+                icon="arrow-down2"
+                tooltipText="Move the cell down"
+                tooltipDirection="bottom"
+                loading={false}
+                disabled={true}
+                onClick={() => console.log('TODO')}
+              />
+              <PopoverDropdown
+                placement="bottomEnd"
+                activeKey={lockedCell?.language ?? 'python'}
+                buttonProps={{ disabled: !canEdit || lockedCell === null }}
+                buttonContent={(lockedCell?.language === 'python' ? 'python3' : lockedCell?.language) ?? 'python3'}
+                onSelect={handleLanguageSelect}
+              >
+                <Dropdown.Item eventKey="python">python3</Dropdown.Item>
+                <Dropdown.Item eventKey="markdown">markdown</Dropdown.Item>
+              </PopoverDropdown>
 
-          <Divider vertical />
+              <Divider vertical />
 
-          <RegularIconButton
-            size="sm"
-            icon="trash2"
-            tooltipText="Delete the current cell"
-            tooltipDirection="bottom"
-            loading={isDeletingCell}
-            disabled={lockedCellId === ''}
-            onClick={() => setShowDeleteCell(true)}
-          />
+              <RegularIconButton
+                size="sm"
+                icon="trash2"
+                tooltipText="Delete the current cell"
+                tooltipDirection="bottom"
+                loading={isDeletingCell}
+                disabled={!canEdit || lockedCellId === ''}
+                onClick={() => setShowDeleteCell(true)}
+              />
+            </React.Fragment>
+          ) : (
+            'Read Only'
+          )}
         </div>
 
         <div className={css(styles.headerNoDrag)}>
