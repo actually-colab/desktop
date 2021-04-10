@@ -91,6 +91,7 @@ export const ImmutableNotebookAccessLevelFactory = ImmutableRecord<RemoveIndex<R
 export type PseudoImmutableNotebook = Omit<RemoveIndex<Notebook>, 'users'> & {
   users: ImmutableList<ImmutableNotebookAccessLevel>;
 };
+
 /**
  * An Immutable Record for a notebook
  */
@@ -100,6 +101,7 @@ export type ImmutableNotebook = ImmutableRecordOf<Required<PseudoImmutableNotebo
  */
 export const ImmutableNotebookFactory = ImmutableRecord<Required<PseudoImmutableNotebook>>({
   nb_id: '',
+  ws_id: '',
   name: '',
   language: 'python',
   time_modified: Date.now(),
@@ -113,6 +115,7 @@ export type PseudoImmutableReducedNotebook = Omit<ReducedNotebook, 'users' | 'ce
   users: ImmutableList<ImmutableNotebookAccessLevel>;
   cell_ids: ImmutableList<EditorCell['cell_id']>;
 };
+
 /**
  * An Immutable Record for a reduced notebook
  */
@@ -122,6 +125,7 @@ export type ImmutableReducedNotebook = ImmutableRecordOf<Required<PseudoImmutabl
  */
 export const ImmutableReducedNotebookFactory = ImmutableRecord<Required<PseudoImmutableReducedNotebook>>({
   nb_id: '',
+  ws_id: '',
   name: '',
   language: 'python',
   time_modified: Date.now(),
