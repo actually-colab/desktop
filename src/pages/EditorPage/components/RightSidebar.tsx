@@ -3,16 +3,13 @@ import { StyleSheet, css } from 'aphrodite';
 import { IconProps } from 'rsuite';
 
 import { palette, spacing } from '../../../constants/theme';
-import { HEADER_HEIGHT, RIGHT_SIDEBAR_PANEL_WIDTH, RIGHT_SIDEBAR_TRAY_WIDTH } from '../../../constants/dimensions';
+import { RIGHT_SIDEBAR_PANEL_WIDTH, RIGHT_SIDEBAR_TRAY_WIDTH } from '../../../constants/dimensions';
 import { ColoredIconButton } from '../../../components';
 import { CommentsPanel, DownloadsPanel, HelpPanel, SettingsPanel, StatsPanel } from '../RightSidebar';
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
-    right: 0,
-    top: HEADER_HEIGHT,
-    bottom: 0,
+    position: 'relative',
     backgroundColor: palette.BASE,
     borderLeftWidth: 1,
     borderLeftStyle: 'solid',
