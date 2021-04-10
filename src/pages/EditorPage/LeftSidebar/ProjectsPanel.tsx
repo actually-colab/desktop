@@ -4,6 +4,7 @@ import { StyleSheet, css } from 'aphrodite';
 import {
   Button,
   ControlLabel,
+  Divider,
   Dropdown,
   Form,
   FormControl,
@@ -60,6 +61,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   sortText: {},
+  dividerText: {
+    color: palette.GRAY,
+  },
+  descriptionText: {
+    color: palette.GRAY,
+  },
   project: {
     marginLeft: -spacing.DEFAULT / 2,
     marginRight: -spacing.DEFAULT / 2,
@@ -223,6 +230,10 @@ const ProjectsPanel: React.FC = () => {
         />
       </div>
 
+      <Divider>
+        <span className={css(styles.dividerText)}>Notebooks</span>
+      </Divider>
+
       {notebooks
         .filter(filterNotebookByName(filterValue))
         .sort(sortNotebookBy(sortType))
@@ -247,6 +258,21 @@ const ProjectsPanel: React.FC = () => {
             </div>
           );
         })}
+
+      {notebooks.size === 0 && (
+        <p className={css(styles.descriptionText)}>
+          You have no notebooks. Notebooks you created or are shared with you will appear here.
+        </p>
+      )}
+
+      <Divider>
+        <span className={css(styles.dividerText)}>Workshops</span>
+      </Divider>
+
+      <p className={css(styles.descriptionText)}>
+        You have no workshops. To run a workshop, create a new project and select workshop. If you are an attendee, the
+        workshop will appear here once it is released!
+      </p>
 
       <Modal
         size="xs"
