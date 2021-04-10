@@ -25,6 +25,20 @@ import { filterUndefined } from './filter';
 import { splitKeepNewlines } from './regex';
 
 /**
+ * A configurable comparator to sort notebook types
+ */
+export const sortNotebookBy = (sortType: 'name' | 'modified') => (
+  a: Notebook | ImmutableNotebook,
+  b: Notebook | ImmutableNotebook
+): number => {
+  if (sortType === 'name') {
+    return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+  }
+
+  return b.time_modified - a.time_modified;
+};
+
+/**
  * A comparator for sorting kernel outputs by their message indices
  */
 export const sortOutputByMessageIndex = (
