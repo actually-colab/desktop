@@ -100,6 +100,11 @@ export const NOTEBOOKS = {
   },
 } as const;
 export const WORKSHOPS = {
+  GET: {
+    START: 'WORKSHOPS_GET_START',
+    SUCCESS: 'WORKSHOPS_GET_SUCCESS',
+    FAILURE: 'WORKSHOPS_GET_FAILURE',
+  },
   CREATE: {
     START: 'WORKSHOPS_CREATE_START',
     SUCCESS: 'WORKSHOPS_CREATE_SUCCESS',
@@ -249,6 +254,19 @@ type NotebooksGetFailureAction = {
   type: typeof NOTEBOOKS.GET.FAILURE;
 } & ActionError;
 
+type GetWorkshopsStartAction = {
+  type: typeof WORKSHOPS.GET.START;
+};
+
+type GetWorkshopsSuccessAction = {
+  type: typeof WORKSHOPS.GET.SUCCESS;
+  workshops: Workshop[];
+};
+
+type GetWorkshopsFailureAction = {
+  type: typeof WORKSHOPS.GET.FAILURE;
+} & ActionError;
+
 type NotebooksCreateStartAction = {
   type: typeof NOTEBOOKS.CREATE.START;
   name: string;
@@ -261,6 +279,21 @@ type NotebooksCreateSuccessAction = {
 
 type NotebooksCreateFailureAction = {
   type: typeof NOTEBOOKS.CREATE.FAILURE;
+} & ActionError;
+
+type CreateWorkshopStartAction = {
+  type: typeof WORKSHOPS.CREATE.START;
+  name: string;
+  description: string;
+};
+
+type CreateWorkshopSuccessAction = {
+  type: typeof WORKSHOPS.CREATE.SUCCESS;
+  workshop: Workshop;
+};
+
+type CreateWorkshopFailureAction = {
+  type: typeof WORKSHOPS.CREATE.FAILURE;
 } & ActionError;
 
 type NotebooksOpenStartAction = {
@@ -313,21 +346,6 @@ type NotebooksOutputsReceiveAction = {
   type: typeof NOTEBOOKS.OUTPUTS.RECEIVE;
   output: OOutput;
 };
-
-type CreateWorkshopStartAction = {
-  type: typeof WORKSHOPS.CREATE.START;
-  name: string;
-  description: string;
-};
-
-type CreateWorkshopSuccessAction = {
-  type: typeof WORKSHOPS.CREATE.SUCCESS;
-  workshop: Workshop;
-};
-
-type CreateWorkshopFailureAction = {
-  type: typeof WORKSHOPS.CREATE.FAILURE;
-} & ActionError;
 
 type LockCellStartAction = {
   type: typeof CELL.LOCK.START;
@@ -513,9 +531,15 @@ export type EditorActionTypes =
   | NotebooksGetStartAction
   | NotebooksGetSuccessAction
   | NotebooksGetFailureAction
+  | GetWorkshopsStartAction
+  | GetWorkshopsSuccessAction
+  | GetWorkshopsFailureAction
   | NotebooksCreateStartAction
   | NotebooksCreateSuccessAction
   | NotebooksCreateFailureAction
+  | CreateWorkshopStartAction
+  | CreateWorkshopSuccessAction
+  | CreateWorkshopFailureAction
   | NotebooksOpenStartAction
   | NotebooksOpenSuccessAction
   | NotebooksOpenFailureAction
@@ -526,9 +550,6 @@ export type EditorActionTypes =
   | NotebooksShareFailureAction
   | NotebooksOutputsSelectAction
   | NotebooksOutputsReceiveAction
-  | CreateWorkshopStartAction
-  | CreateWorkshopSuccessAction
-  | CreateWorkshopFailureAction
   | LockCellStartAction
   | LockCellSuccessAction
   | LockCellFailureAction

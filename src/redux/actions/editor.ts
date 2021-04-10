@@ -231,6 +231,35 @@ export const getNotebooks = (): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(getNotebooksStart());
 };
 
+const getWorkshopsStart = (): EditorActionTypes => ({
+  type: WORKSHOPS.GET.START,
+});
+
+/**
+ * Successfully got the workshops
+ */
+export const getWorkshopsSuccess = (workshops: Workshop[]): EditorActionTypes => ({
+  type: WORKSHOPS.GET.SUCCESS,
+  workshops,
+});
+
+/**
+ * Failed to get the workshops
+ */
+export const getWorkshopsFailure = (errorMessage: string): EditorActionTypes => ({
+  type: WORKSHOPS.GET.FAILURE,
+  error: {
+    message: errorMessage,
+  },
+});
+
+/**
+ * Get a list of workshops for the current user
+ */
+export const getWorkshops = (): EditorAsyncActionTypes => async (dispatch) => {
+  dispatch(getWorkshopsStart());
+};
+
 const createNotebookStart = (name: string): EditorActionTypes => ({
   type: NOTEBOOKS.CREATE.START,
   name,
