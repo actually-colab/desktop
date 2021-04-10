@@ -118,6 +118,13 @@ const ProjectsPanel: React.FC = () => {
   const openingNotebookId = useSelector((state: ReduxState) => state.editor.openingNotebookId);
   const notebooks = useSelector((state: ReduxState) => state.editor.notebooks);
   const notebook = useSelector((state: ReduxState) => state.editor.notebook);
+  const workshops = [
+    {
+      name: 'Data Science 101',
+      primary_nb_id: 'test',
+      time_modified: Date.now(),
+    },
+  ];
 
   const [searchText, setSearchText] = React.useState<string>('');
   const [filterValue, setFilterValue] = React.useState<string>('');
@@ -269,10 +276,37 @@ const ProjectsPanel: React.FC = () => {
         <span className={css(styles.dividerText)}>Workshops</span>
       </Divider>
 
-      <p className={css(styles.descriptionText)}>
-        You have no workshops. To run a workshop, create a new project and select workshop. If you are an attendee, the
-        workshop will appear here once it is released!
-      </p>
+      {workshops
+        .filter(filterNotebookByName(filterValue))
+        .sort(sortNotebookBy(sortType))
+        .map((project) => {
+          const active = project.primary_nb_id === notebook?.nb_id;
+          const timeSinceModification = timeSince(project.time_modified);
+
+          return (
+            <div key={project.primary_nb_id} className={css(styles.project)}>
+              <Button
+                block
+                className={css(styles.projectButton, active && styles.projectActive)}
+                loading={project.primary_nb_id === openingNotebookId}
+                onClick={() => !isOpeningNotebook && !active && dispatchOpenNotebook(project.primary_nb_id)}
+              >
+                <div className={css(styles.projectTitleContainer)}>
+                  <Icon icon={active ? 'file' : 'file-o'} />
+                  <span className={css(styles.projectTitle)}>{project.name}</span>
+                </div>
+                <span className={css(styles.lastModifiedText)}>{timeSinceModification}</span>
+              </Button>
+            </div>
+          );
+        })}
+
+      {workshops.length === 0 && (
+        <p className={css(styles.descriptionText)}>
+          You have no workshops. To run a workshop, create a new project and select workshop. If you are an attendee,
+          the workshop will appear here once it is released!
+        </p>
+      )}
 
       <Modal
         size="xs"
