@@ -4,7 +4,6 @@ import { StyleSheet, css } from 'aphrodite';
 
 import AceImports from '../../utils/AceImports';
 import { palette, spacing } from '../../constants/theme';
-import { HEADER_HEIGHT, RIGHT_SIDEBAR_TRAY_WIDTH } from '../../constants/dimensions';
 import { ReduxState } from '../../types/redux';
 import useKernel from '../../kernel/useKernel';
 import { NotebookCell } from '../../components';
@@ -28,10 +27,10 @@ const styles = StyleSheet.create({
   page: {
     display: 'flex',
     flex: 1,
+    flexDirection: 'row',
     overflow: 'hidden',
   },
   bodyContainer: {
-    marginRight: RIGHT_SIDEBAR_TRAY_WIDTH,
     display: 'flex',
     flex: 1,
     backgroundColor: palette.BASE,
@@ -44,7 +43,6 @@ const styles = StyleSheet.create({
     overflowY: 'auto',
   },
   rightContainer: {
-    marginTop: HEADER_HEIGHT,
     display: 'flex',
   },
 });
