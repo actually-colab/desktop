@@ -1,4 +1,10 @@
-import { Notebook, NotebookAccessLevel, Workshop, WorkshopAccessLevel } from '@actually-colab/editor-types';
+import {
+  Notebook,
+  NotebookAccessLevel,
+  OChatMessage,
+  Workshop,
+  WorkshopAccessLevel,
+} from '@actually-colab/editor-types';
 import { List as ImmutableList, Record as ImmutableRecord } from 'immutable';
 
 import { RemoveIndex } from '../types/generics';
@@ -176,4 +182,18 @@ export const ImmutableWorkshopFactory = ImmutableRecord<Required<PseudoImmutable
   instructors: ImmutableList(),
   attendees: ImmutableList(),
   main_notebook: new ImmutableNotebookFactory(),
+});
+
+/**
+ * An Immutable Record for a chat message
+ */
+export type ImmutableChatMessage = ImmutableRecordOf<RemoveIndex<Required<OChatMessage>>>;
+/**
+ * An Immutable Record Factory for a chat message
+ */
+export const ImmutableChatMessageFactory = ImmutableRecord<RemoveIndex<Required<OChatMessage>>>({
+  uid: '',
+  nb_id: '',
+  message: '',
+  timestamp: -1,
 });

@@ -8,6 +8,8 @@ import { EditorCell } from '../types/notebook';
 import { Kernel } from '../types/kernel';
 import { DEFAULT_GATEWAY_URI } from '../constants/jupyter';
 import {
+  ImmutableChatMessage,
+  ImmutableChatMessageFactory,
   ImmutableEditorCell,
   ImmutableEditorCellFactory,
   ImmutableKernelLog,
@@ -124,6 +126,10 @@ export interface EditorState {
    * If the editor is releasing a workshop
    */
   isReleasingWorkshop: boolean;
+  /**
+   * If the editor is sending a message
+   */
+  isSendingMessage: boolean;
 
   /**
    * If the editor is currently adding a cell
@@ -222,6 +228,11 @@ export interface EditorState {
    * A list of logs from various kernel interactions
    */
   logs: ImmutableList<ImmutableKernelLog>;
+
+  /**
+   * A list of chat messages
+   */
+  messages: ImmutableList<ImmutableChatMessage>;
 }
 
 const initialState: EditorState = {
@@ -248,6 +259,7 @@ const initialState: EditorState = {
   isSharingNotebook: false,
   isUnsharingNotebook: false,
   isReleasingWorkshop: false,
+  isSendingMessage: false,
 
   isAddingCell: false,
   isDeletingCell: false,
@@ -278,6 +290,8 @@ const initialState: EditorState = {
 
   users: ImmutableOrderedSet(),
   logs: ImmutableList(),
+
+  messages: ImmutableList(),
 };
 
 /**
@@ -643,6 +657,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         isOpeningNotebook: false,
+        isSendingMessage: false,
         openingNotebookId: '',
         lockingCellId: '',
         unlockingCellId: '',
@@ -678,6 +693,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
             })
             .filter<ImmutableUser>((user): user is ImmutableUser => !!user)
         ),
+        messages: state.messages.clear(),
       };
     }
     /**
@@ -721,6 +737,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         isSharingNotebook: false,
         isUnsharingNotebook: false,
         isReleasingWorkshop: false,
+        isSendingMessage: false,
         lockingCellId: '',
         unlockingCellId: '',
         selectedCellId: '',
@@ -733,6 +750,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         users: state.users.clear(),
         outputs: state.outputs.clear(),
         outputsMetadata: state.outputsMetadata.clear(),
+        messages: state.messages.clear(),
       };
     }
 
@@ -940,6 +958,32 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ),
       };
     }
+
+    /**
+     * Started sending a message
+     */
+    case NOTEBOOKS.SEND_MESSAGE.START:
+      return {
+        ...state,
+        isSendingMessage: true,
+      };
+    /**
+     * Successfully sent a message
+     */
+    case NOTEBOOKS.SEND_MESSAGE.SUCCESS:
+      return {
+        ...state,
+        isSendingMessage: action.isMe ? false : state.isSendingMessage,
+        messages: state.messages.push(new ImmutableChatMessageFactory(action.message)),
+      };
+    /**
+     * Failed to send a message
+     */
+    case NOTEBOOKS.SEND_MESSAGE.FAILURE:
+      return {
+        ...state,
+        isSendingMessage: false,
+      };
 
     /**
      * Started locking a given cell

@@ -265,6 +265,15 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
             store.dispatch(_editor.receiveOutputs(output));
           }
         });
+
+        /**
+         * A message was received from a user
+         */
+        socketClient.on('chat_message_sent', (message, triggered_by) => {
+          console.log('Received chat message', message, triggered_by);
+
+          store.dispatch(_editor.sendMessageSuccess(triggered_by === currentUser.uid, message));
+        });
         break;
       }
       /**
@@ -507,6 +516,20 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
        */
       case NOTEBOOKS.OUTPUTS.SELECT: {
         // TODO: fetch all outputs for the user
+        break;
+      }
+
+      /**
+       * Sent a chat message to collaborators
+       */
+      case NOTEBOOKS.SEND_MESSAGE.START: {
+        const notebook = store.getState().editor.notebook;
+        if (notebook === null) {
+          console.error('Notebook was null');
+          return;
+        }
+
+        socketClient?.sendChatMessage(notebook.nb_id, action.message);
         break;
       }
 
