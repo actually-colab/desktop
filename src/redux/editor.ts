@@ -1023,6 +1023,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         isAddingCell: action.isMe ? false : state.isAddingCell,
+        notebooks: state.notebooks.update(action.cell.nb_id, (notebook) => notebook.set('time_modified', Date.now())),
         notebook: state.notebook.update('cell_ids', (cell_ids) =>
           cell_ids.splice(action.index === -1 ? notebook.cell_ids.size ?? 0 : action.index, 0, action.cell_id)
         ),
@@ -1079,6 +1080,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         cells: state.cells.delete(action.cell_id),
         outputs: state.outputs.remove(action.cell_id),
         runQueue: state.runQueue.filter((cell_id) => cell_id !== action.cell_id),
+        notebooks: state.notebooks.update(action.nb_id, (notebook) => notebook.set('time_modified', Date.now())),
       };
     }
     /**
@@ -1128,6 +1130,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         return {
           ...state,
           isEditingCell: false,
+          notebooks: state.notebooks.update(action.cell.nb_id, (notebook) => notebook.set('time_modified', Date.now())),
         };
       }
 
@@ -1150,6 +1153,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         cells: changesAreNewer
           ? state.cells.update(action.cell_id, new ImmutableEditorCellFactory(), (value) => value.merge(action.cell))
           : state.cells,
+        notebooks: state.notebooks.update(action.cell.nb_id, (notebook) => notebook.set('time_modified', Date.now())),
       };
     }
     /**

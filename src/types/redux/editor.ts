@@ -432,7 +432,7 @@ type LockCellSuccessAction = {
   isMe: boolean;
   uid: DUser['uid'];
   cell_id: EditorCell['cell_id'];
-  cell: Partial<EditorCell>;
+  cell: Required<DCell>;
 };
 
 type LockCellFailureAction = {
@@ -449,7 +449,7 @@ type UnlockCellSuccessAction = {
   isMe: boolean;
   uid: DUser['uid'];
   cell_id: EditorCell['cell_id'];
-  cell: Partial<EditorCell>;
+  cell: Required<DCell>;
 };
 
 type UnlockCellFailureAction = {
@@ -466,7 +466,7 @@ type AddCellSuccessAction = {
   isMe: boolean;
   cell_id: EditorCell['cell_id'];
   index: number;
-  cell: Partial<EditorCell>;
+  cell: Required<DCell>;
 };
 
 type AddCellFailureAction = {
@@ -481,6 +481,7 @@ type DeleteCellStartAction = {
 type DeleteCellSuccessAction = {
   type: typeof CELL.DELETE.SUCCESS;
   isMe: boolean;
+  nb_id: Notebook['nb_id'];
   cell_id: EditorCell['cell_id'];
 };
 

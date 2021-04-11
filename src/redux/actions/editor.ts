@@ -582,7 +582,7 @@ export const lockCellSuccess = (
   isMe: boolean,
   uid: DUser['uid'],
   cell_id: EditorCell['cell_id'],
-  cell: Partial<EditorCell>
+  cell: Required<DCell>
 ): EditorActionTypes => ({
   type: CELL.LOCK.SUCCESS,
   isMe,
@@ -621,7 +621,7 @@ export const unlockCellSuccess = (
   isMe: boolean,
   uid: DUser['uid'],
   cell_id: EditorCell['cell_id'],
-  cell: Partial<EditorCell>
+  cell: Required<DCell>
 ): EditorActionTypes => ({
   type: CELL.UNLOCK.SUCCESS,
   isMe,
@@ -659,7 +659,7 @@ export const addCellSuccess = (
   isMe: boolean,
   cell_id: EditorCell['cell_id'],
   index: number,
-  cell: Partial<EditorCell>
+  cell: Required<DCell>
 ): EditorActionTypes => ({
   type: CELL.ADD.SUCCESS,
   isMe,
@@ -693,9 +693,14 @@ const deleteCellStart = (cell_id: EditorCell['cell_id']): EditorActionTypes => (
 /**
  * Successfully deleted a cell
  */
-export const deleteCellSuccess = (isMe: boolean, cell_id: EditorCell['cell_id']): EditorActionTypes => ({
+export const deleteCellSuccess = (
+  isMe: boolean,
+  nb_id: Notebook['nb_id'],
+  cell_id: EditorCell['cell_id']
+): EditorActionTypes => ({
   type: CELL.DELETE.SUCCESS,
   isMe,
+  nb_id,
   cell_id,
 });
 
