@@ -197,7 +197,7 @@ const EditorHeader: React.FC = () => {
               <RegularIconButton
                 size="sm"
                 icon="arrow-up2"
-                tooltipText="Move the cell up"
+                tooltipText="Move the cell up (coming soon)"
                 tooltipDirection="bottom"
                 loading={false}
                 disabled={true}
@@ -206,7 +206,7 @@ const EditorHeader: React.FC = () => {
               <RegularIconButton
                 size="sm"
                 icon="arrow-down2"
-                tooltipText="Move the cell down"
+                tooltipText="Move the cell down (coming soon)"
                 tooltipDirection="bottom"
                 loading={false}
                 disabled={true}
