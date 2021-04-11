@@ -279,6 +279,8 @@ const ProjectsPanel: React.FC = () => {
               name: '',
               description: '',
             });
+            setUploadedContent([]);
+            setUploadedFileList([]);
           }}
         >
           <Dropdown.Item eventKey="Notebook" icon={<Icon icon="file" />}>
