@@ -211,7 +211,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
         socketClient.on('cell_deleted', (nb_id, cell_id, triggered_by) => {
           console.log('Cell deleted', nb_id, cell_id, triggered_by);
 
-          store.dispatch(_editor.deleteCellSuccess(triggered_by === currentUser.uid, cell_id));
+          store.dispatch(_editor.deleteCellSuccess(triggered_by === currentUser.uid, nb_id, cell_id));
         });
 
         /**
