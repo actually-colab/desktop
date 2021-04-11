@@ -164,19 +164,20 @@ const ProjectsPanel: React.FC = () => {
     description: '',
   });
   const [uploadedFileList, setUploadedFileList] = React.useState<FileType[]>([]);
-  const [uploadedContent, setUploadedContent] = React.useState<Pick<DCell, 'language' | 'contents'>[] | null>(null);
+  const [uploadedContent, setUploadedContent] = React.useState<Pick<DCell, 'language' | 'contents'>[]>([]);
 
   const dispatch = useDispatch();
   const dispatchGetNotebooks = React.useCallback(() => dispatch(_editor.getNotebooks()), [dispatch]);
   const dispatchCreateNotebook = React.useCallback(
-    () => newProjectFormRef.current?.check() && dispatch(_editor.createNotebook(newProjectFormValue.name)),
-    [dispatch, newProjectFormValue.name]
+    () =>
+      newProjectFormRef.current?.check() && dispatch(_editor.createNotebook(newProjectFormValue.name, uploadedContent)),
+    [dispatch, newProjectFormValue.name, uploadedContent]
   );
   const dispatchCreateWorkshop = React.useCallback(
     () =>
       newProjectFormRef.current?.check() &&
-      dispatch(_editor.createWorkshop(newProjectFormValue.name, newProjectFormValue.description)),
-    [dispatch, newProjectFormValue.description, newProjectFormValue.name]
+      dispatch(_editor.createWorkshop(newProjectFormValue.name, newProjectFormValue.description, uploadedContent)),
+    [dispatch, newProjectFormValue.description, newProjectFormValue.name, uploadedContent]
   );
   const dispatchOpenNotebook = React.useCallback((nb_id: Notebook['nb_id']) => dispatch(_editor.openNotebook(nb_id)), [
     dispatch,
@@ -193,7 +194,7 @@ const ProjectsPanel: React.FC = () => {
     async (files: FileType[]) => {
       if (files.length === 0) {
         // File was removed
-        setUploadedContent(null);
+        setUploadedContent([]);
         setUploadedFileList([]);
         return;
       }
@@ -211,7 +212,7 @@ const ProjectsPanel: React.FC = () => {
           return;
         }
       } catch (error) {
-        setUploadedContent(null);
+        setUploadedContent([]);
       }
 
       // Could not validate file

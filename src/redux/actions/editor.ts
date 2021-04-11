@@ -262,9 +262,10 @@ export const getWorkshops = (): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(getWorkshopsStart());
 };
 
-const createNotebookStart = (name: string): EditorActionTypes => ({
+const createNotebookStart = (name: string, cells: Pick<DCell, 'language' | 'contents'>[] = []): EditorActionTypes => ({
   type: NOTEBOOKS.CREATE.START,
   name,
+  cells,
 });
 
 /**
@@ -288,14 +289,22 @@ export const createNotebookFailure = (errorMessage: string = 'Unknown Error'): E
 /**
  * Create a notebook with the given name
  */
-export const createNotebook = (name: string): EditorAsyncActionTypes => async (dispatch) => {
-  dispatch(createNotebookStart(name));
+export const createNotebook = (
+  name: string,
+  cells: Pick<DCell, 'language' | 'contents'>[] = []
+): EditorAsyncActionTypes => async (dispatch) => {
+  dispatch(createNotebookStart(name, cells));
 };
 
-const createWorkshopStart = (name: string, description: string): EditorActionTypes => ({
+const createWorkshopStart = (
+  name: string,
+  description: string,
+  cells: Pick<DCell, 'language' | 'contents'>[] = []
+): EditorActionTypes => ({
   type: WORKSHOPS.CREATE.START,
   name,
   description,
+  cells,
 });
 
 /**
@@ -319,8 +328,12 @@ export const createWorkshopFailure = (errorMessage: string): EditorActionTypes =
 /**
  * Create a workshop with the given name and description
  */
-export const createWorkshop = (name: string, description: string): EditorAsyncActionTypes => async (dispatch) => {
-  dispatch(createWorkshopStart(name, description));
+export const createWorkshop = (
+  name: string,
+  description: string,
+  cells: Pick<DCell, 'language' | 'contents'>[] = []
+): EditorAsyncActionTypes => async (dispatch) => {
+  dispatch(createWorkshopStart(name, description, cells));
 };
 
 const openNotebookStart = (nb_id: Notebook['nb_id']): EditorActionTypes => ({

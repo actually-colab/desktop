@@ -277,6 +277,7 @@ type GetWorkshopsFailureAction = {
 type NotebooksCreateStartAction = {
   type: typeof NOTEBOOKS.CREATE.START;
   name: string;
+  cells: Pick<DCell, 'language' | 'contents'>[];
 };
 
 type NotebooksCreateSuccessAction = {
@@ -292,6 +293,7 @@ type CreateWorkshopStartAction = {
   type: typeof WORKSHOPS.CREATE.START;
   name: string;
   description: string;
+  cells: Pick<DCell, 'language' | 'contents'>[];
 };
 
 type CreateWorkshopSuccessAction = {
