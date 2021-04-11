@@ -913,7 +913,9 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         isReleasingWorkshop: action.isMe ? false : state.isReleasingWorkshop,
-        workshops: state.workshops.update(action.ws_id, (workshop) => workshop.set('start_time', Date.now())),
+        workshops: state.workshops.has(action.ws_id)
+          ? state.workshops.update(action.ws_id, (workshop) => workshop.set('start_time', Date.now()))
+          : state.workshops,
       };
     /**
      * Failed to release a workshop

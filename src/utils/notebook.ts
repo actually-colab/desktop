@@ -62,6 +62,12 @@ export const sortNotebookBy = (sortType: 'name' | 'modified') => (
 };
 
 /**
+ * A comparator to sort users by name
+ */
+export const sortUsersByName = (a: { name: string }, b: { name: string }): number =>
+  a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+
+/**
  * A configurable filter predicate to search for a name that includes a fragment of a name anywhere in it
  */
 export const filterNotebookByName = (nameFragment: string) => (notebook: { name: string }): boolean => {

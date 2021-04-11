@@ -109,6 +109,7 @@ export type ImmutableNotebook = ImmutableRecordOf<Required<PseudoImmutableNotebo
 export const ImmutableNotebookFactory = ImmutableRecord<Required<PseudoImmutableNotebook>>({
   nb_id: '',
   ws_id: '',
+  ws_main_notebook: false,
   name: '',
   language: 'python',
   time_modified: Date.now(),
@@ -133,6 +134,7 @@ export type ImmutableReducedNotebook = ImmutableRecordOf<Required<PseudoImmutabl
 export const ImmutableReducedNotebookFactory = ImmutableRecord<Required<PseudoImmutableReducedNotebook>>({
   nb_id: '',
   ws_id: '',
+  ws_main_notebook: false,
   name: '',
   language: 'python',
   time_modified: Date.now(),
@@ -148,6 +150,7 @@ export type ImmutableWorkshopAccessLevel = ImmutableRecordOf<RemoveIndex<Require
  * An Immutable Record Factory for a workshop access level
  */
 export const ImmutableWorkshopAccessLevelFactory = ImmutableRecord<RemoveIndex<Required<WorkshopAccessLevel>>>({
+  nb_id: '',
   uid: '',
   name: '',
   email: '',
