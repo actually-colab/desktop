@@ -17,7 +17,6 @@ import {
   ImmutableLock,
   ImmutableLockFactory,
   ImmutableNotebook,
-  ImmutableNotebookAccessLevelFactory,
   ImmutableNotebookFactory,
   ImmutableOutputMetadata,
   ImmutableOutputMetadataFactory,
@@ -724,7 +723,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
             'users',
             notebook.users
               .filter(filterAccessLevelsFromList(action.users))
-              .concat(action.users.map((user) => new ImmutableNotebookAccessLevelFactory(user)))
+              .concat(makeNotebookAccessLevelsImmutable(action.users))
           )
         ),
         notebook:
@@ -733,7 +732,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
                 'users',
                 state.notebook.users
                   .filter(filterAccessLevelsFromList(action.users))
-                  .concat(action.users.map((user) => new ImmutableNotebookAccessLevelFactory(user)))
+                  .concat(makeNotebookAccessLevelsImmutable(action.users))
               )
             : state.notebook,
       };
@@ -770,11 +769,20 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ...state,
         isSharingNotebook: false,
         workshops: state.workshops.update(action.ws_id, (workshop) =>
-          workshop.set(
-            'instructors',
-            workshop.instructors.filter(
-              filterAccessLevelsFromList(action.access_levels.instructors, action.access_levels.attendees)
-            )
+          workshop.withMutations((mtx) =>
+            mtx
+              .set(
+                'instructors',
+                workshop.instructors
+                  .filter(filterAccessLevelsFromList(action.access_levels.instructors, action.access_levels.attendees))
+                  .concat(makeWorkshopAccessLevelsImmutable(action.access_levels.instructors))
+              )
+              .set(
+                'attendees',
+                workshop.attendees
+                  .filter(filterAccessLevelsFromList(action.access_levels.instructors, action.access_levels.attendees))
+                  .concat(makeWorkshopAccessLevelsImmutable(action.access_levels.attendees))
+              )
           )
         ),
       };
