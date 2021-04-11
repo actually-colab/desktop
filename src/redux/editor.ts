@@ -32,6 +32,7 @@ import {
   cellArrayToImmutableMap,
   cleanDCell,
   convertOutputToReceivablePayload,
+  filterAccessLevelsFromList,
   makeNotebookAccessLevelsImmutable,
   makeWorkshopAccessLevelsImmutable,
   reduceImmutableNotebook,
@@ -722,7 +723,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
           notebook.set(
             'users',
             notebook.users
-              .filter((user) => action.users.findIndex((_user) => _user.uid === user.uid) === -1)
+              .filter(filterAccessLevelsFromList(action.users))
               .concat(action.users.map((user) => new ImmutableNotebookAccessLevelFactory(user)))
           )
         ),
@@ -731,7 +732,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
             ? state.notebook.set(
                 'users',
                 state.notebook.users
-                  .filter((user) => action.users.findIndex((_user) => _user.uid === user.uid) === -1)
+                  .filter(filterAccessLevelsFromList(action.users))
                   .concat(action.users.map((user) => new ImmutableNotebookAccessLevelFactory(user)))
               )
             : state.notebook,
@@ -741,6 +742,47 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
      * Failed to share a notebook
      */
     case NOTEBOOKS.SHARE.FAILURE:
+      return {
+        ...state,
+        isSharingNotebook: false,
+      };
+
+    /**
+     * Started sharing a workshop
+     */
+    case WORKSHOPS.SHARE.START:
+      return {
+        ...state,
+        isSharingNotebook: true,
+      };
+    /**
+     * Successfully shared a workshop
+     */
+    case WORKSHOPS.SHARE.SUCCESS: {
+      if (!state.workshops.has(action.ws_id)) {
+        return {
+          ...state,
+          isSharingNotebook: false,
+        };
+      }
+
+      return {
+        ...state,
+        isSharingNotebook: false,
+        workshops: state.workshops.update(action.ws_id, (workshop) =>
+          workshop.set(
+            'instructors',
+            workshop.instructors.filter(
+              filterAccessLevelsFromList(action.access_levels.instructors, action.access_levels.attendees)
+            )
+          )
+        ),
+      };
+    }
+    /**
+     * Failed to share a workshop
+     */
+    case WORKSHOPS.SHARE.FAILURE:
       return {
         ...state,
         isSharingNotebook: false,

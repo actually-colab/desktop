@@ -146,12 +146,26 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
         });
 
         /**
-         * A notebook was shared with a given user
+         * A notebook was shared with given users
          */
         socketClient.on('notebook_shared', (nb_id, users) => {
           console.log('Notebook shared', nb_id, users);
 
           store.dispatch(_editor.shareNotebookSuccess(nb_id, users));
+        });
+
+        /**
+         * A workshop was shared with given attendees and instructors
+         */
+        socketClient.on('workshop_shared', (ws_id, attendees, instructors) => {
+          console.log('Workshop shared', ws_id, attendees, instructors);
+
+          store.dispatch(
+            _editor.shareWorkshopSuccess(ws_id, {
+              attendees,
+              instructors,
+            })
+          );
         });
 
         /**
@@ -395,6 +409,16 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
         const emails = separateEmails(action.emails);
 
         socketClient?.shareNotebook(emails, action.nb_id, action.access_level);
+        break;
+      }
+
+      /**
+       * Started sharing a given workshop
+       */
+      case WORKSHOPS.SHARE.START: {
+        const emails = separateEmails(action.emails);
+
+        socketClient?.shareWorkshop(emails, action.ws_id, action.access_level);
         break;
       }
 

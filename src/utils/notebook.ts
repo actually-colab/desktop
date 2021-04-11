@@ -62,10 +62,25 @@ export const sortNotebookBy = (sortType: 'name' | 'modified') => (
 };
 
 /**
- * A configurable filter to search for a name that includes a fragment of a name anywhere in it
+ * A configurable filter predicate to search for a name that includes a fragment of a name anywhere in it
  */
 export const filterNotebookByName = (nameFragment: string) => (notebook: { name: string }): boolean => {
   return notebook.name.toLowerCase().includes(nameFragment.toLowerCase());
+};
+
+/**
+ * A configurable filter predicate to remove any matching users that occur in provided lists
+ */
+export const filterAccessLevelsFromList = (...updatedLists: (NotebookAccessLevel | WorkshopAccessLevel)[][]) => (
+  user: ImmutableNotebookAccessLevel | ImmutableWorkshopAccessLevel
+): boolean => {
+  for (const updated of updatedLists) {
+    if (updated.findIndex((_user) => _user.uid === user.uid) !== -1) {
+      return false;
+    }
+  }
+
+  return true;
 };
 
 /**

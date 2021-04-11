@@ -426,9 +426,11 @@ const shareWorkshopStart = (
  * Successfully shared a workshop
  */
 export const shareWorkshopSuccess = (
+  ws_id: string,
   access_levels: Pick<Workshop, 'instructors' | 'attendees'>
 ): EditorActionTypes => ({
   type: WORKSHOPS.SHARE.SUCCESS,
+  ws_id,
   access_levels,
 });
 

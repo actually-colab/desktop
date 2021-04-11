@@ -354,6 +354,7 @@ type ShareWorkshopStartAction = {
 
 type ShareWorkshopSuccessAction = {
   type: typeof WORKSHOPS.SHARE.SUCCESS;
+  ws_id: Workshop['ws_id'];
   access_levels: Pick<Workshop, 'instructors' | 'attendees'>;
 };
 
