@@ -8,6 +8,7 @@ import {
   Form,
   FormControl,
   FormGroup,
+  HelpBlock,
   Icon,
   List,
   Popover,
@@ -17,7 +18,7 @@ import {
   Whisper,
 } from 'rsuite';
 import { FormInstance } from 'rsuite/lib/Form';
-import { NotebookAccessLevelType } from '@actually-colab/editor-types';
+import { NotebookAccessLevelType, WorkshopAccessLevelType } from '@actually-colab/editor-types';
 
 import { palette, spacing } from '../../../constants/theme';
 import { RIGHT_SIDEBAR_PANEL_WIDTH } from '../../../constants/dimensions';
@@ -25,18 +26,42 @@ import { ReduxState } from '../../../types/redux';
 import { _editor } from '../../../redux/actions';
 import { UserAvatar } from '../../../components';
 
-type ShareFormValue = {
-  email: string;
+type ShareNotebookFormValue = {
+  emails: string;
   accessLevel: NotebookAccessLevelType;
 };
 
+type ShareWorkshopFormValue = {
+  emails: string;
+  accessLevel: WorkshopAccessLevelType;
+};
+
 /**
- * The rsuite model to check if a collaborator form is valid
+ * Regex for comma separated emails
  */
-const shareFormModel = Schema.Model({
-  email: Schema.Types.StringType().isEmail('Not a valid email').isRequired('This field is required'),
+const EMAILS_REGEX = /^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$/g;
+
+/**
+ * The rsuite model to check if a collaborator form is valid for notebooks
+ */
+const shareNotebookFormModel = Schema.Model({
+  emails: Schema.Types.StringType()
+    .pattern(EMAILS_REGEX, 'Must be a comma separated list of emails')
+    .isRequired('This field is required'),
   accessLevel: Schema.Types.StringType()
     .isOneOf(['Read Only', 'Full Access'], 'Please select a valid option')
+    .isRequired('This field is required'),
+});
+
+/**
+ * The rsuite model to check if a collaborator form is valid for workshops
+ */
+const shareWorkshopFormModel = Schema.Model({
+  emails: Schema.Types.StringType()
+    .pattern(EMAILS_REGEX, 'Must be a comma separated list of emails')
+    .isRequired('This field is required'),
+  accessLevel: Schema.Types.StringType()
+    .isOneOf(['Instructor', 'Attendee'], 'Please select a valid option')
     .isRequired('This field is required'),
 });
 
@@ -74,6 +99,9 @@ const styles = StyleSheet.create({
   userListContainer: {
     marginTop: spacing.DEFAULT,
   },
+  secondaryListTitle: {
+    marginTop: spacing.DEFAULT,
+  },
   userList: {
     marginTop: spacing.DEFAULT / 2,
     maxHeight: 300,
@@ -101,38 +129,74 @@ const CollaboratorsPanel: React.FC = () => {
   const user = useSelector((state: ReduxState) => state.auth.user);
   const notebook = useSelector((state: ReduxState) => state.editor.notebook);
   const isSharingNotebook = useSelector((state: ReduxState) => state.editor.isSharingNotebook);
+  const workshops = useSelector((state: ReduxState) => state.editor.workshops);
 
-  const [shareFormValue, setShareFormValue] = React.useState<ShareFormValue>({
-    email: '',
+  const [shareNotebookFormValue, setShareNotebookFormValue] = React.useState<ShareNotebookFormValue>({
+    emails: '',
     accessLevel: 'Full Access',
   });
+  const [shareWorkshopFormValue, setShareWorkshopFormValue] = React.useState<ShareWorkshopFormValue>({
+    emails: '',
+    accessLevel: 'Instructor',
+  });
 
-  const accessLevel = React.useMemo(() => notebook?.users.find((_user) => _user.uid === user?.uid), [
-    notebook?.users,
-    user?.uid,
-  ]);
-  const canEdit = React.useMemo(() => accessLevel?.access_level === 'Full Access', [accessLevel?.access_level]);
+  const workshop = React.useMemo(() => workshops.get(notebook?.ws_id ?? '') ?? null, [notebook?.ws_id, workshops]);
+  const accessLevel = React.useMemo(
+    () =>
+      workshop
+        ? workshop.instructors.find((_user) => _user.uid === user?.uid)
+        : notebook?.users.find((_user) => _user.uid === user?.uid),
+    [notebook?.users, user?.uid, workshop]
+  );
+  const canEdit = React.useMemo(
+    () => accessLevel?.access_level === 'Full Access' || accessLevel?.access_level === 'Instructor',
+    [accessLevel?.access_level]
+  );
   const sharedUsers = React.useMemo(() => notebook?.users, [notebook?.users]);
+  const sharedInstructors = React.useMemo(() => workshop?.instructors, [workshop?.instructors]);
+  const sharedAttendees = React.useMemo(() => workshop?.attendees, [workshop?.attendees]);
 
   const dispatch = useDispatch();
   const dispatchShareNotebook = React.useCallback(
     () =>
-      shareFormRef.current?.check() &&
       notebook &&
-      dispatch(_editor.shareNotebook(notebook?.nb_id, shareFormValue.email, shareFormValue.accessLevel)),
-    [dispatch, notebook, shareFormValue.accessLevel, shareFormValue.email]
+      dispatch(
+        _editor.shareNotebook(notebook?.nb_id, shareNotebookFormValue.emails, shareNotebookFormValue.accessLevel)
+      ),
+    [dispatch, notebook, shareNotebookFormValue.accessLevel, shareNotebookFormValue.emails]
+  );
+  const dispatchShareWorkshop = React.useCallback(
+    () =>
+      workshop &&
+      dispatch(
+        _editor.shareWorkshop(workshop.ws_id, shareWorkshopFormValue.emails, shareWorkshopFormValue.accessLevel)
+      ),
+    [dispatch, shareWorkshopFormValue.accessLevel, shareWorkshopFormValue.emails, workshop]
   );
 
   const handleShareFormSubmit = React.useCallback(
-    (_, event: React.FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
-      dispatchShareNotebook();
-      setShareFormValue((prevShareFormValue) => ({
-        ...prevShareFormValue,
-        email: '',
-      }));
+    (_?: any, event?: React.FormEvent<HTMLFormElement>) => {
+      event?.preventDefault();
+
+      if (!shareFormRef.current?.check()) {
+        return;
+      }
+
+      if (workshop) {
+        dispatchShareWorkshop();
+        setShareWorkshopFormValue((prevShareFormValue) => ({
+          ...prevShareFormValue,
+          emails: '',
+        }));
+      } else {
+        dispatchShareNotebook();
+        setShareNotebookFormValue((prevShareFormValue) => ({
+          ...prevShareFormValue,
+          emails: '',
+        }));
+      }
     },
-    [dispatchShareNotebook]
+    [dispatchShareNotebook, dispatchShareWorkshop, workshop]
   );
 
   return (
@@ -145,25 +209,40 @@ const CollaboratorsPanel: React.FC = () => {
               autoComplete="off"
               fluid
               checkTrigger="none"
-              model={shareFormModel}
-              formValue={shareFormValue}
-              onChange={(formValue) => setShareFormValue(formValue as ShareFormValue)}
+              model={workshop ? shareWorkshopFormModel : shareNotebookFormModel}
+              formValue={workshop ? shareWorkshopFormValue : shareNotebookFormValue}
+              onChange={(formValue) =>
+                workshop
+                  ? setShareWorkshopFormValue(formValue as ShareWorkshopFormValue)
+                  : setShareNotebookFormValue(formValue as ShareNotebookFormValue)
+              }
               onSubmit={handleShareFormSubmit}
             >
               <FormGroup>
                 <ControlLabel>
-                  Collaborator's email <span className={css(styles.required)}>Required</span>
+                  Collaborator email(s) <span className={css(styles.required)}>Required</span>
                 </ControlLabel>
-                <FormControl name="email" label="Email" placeholder="Email" />
+                <FormControl name="emails" label="Email(s)" placeholder="Email(s)" />
+                <HelpBlock>This can be a comma separated list of emails</HelpBlock>
               </FormGroup>
 
-              <FormGroup>
-                <ControlLabel>Access level</ControlLabel>
-                <FormControl className={css(styles.fullPicker)} name="accessLevel" accepter={RadioGroup}>
-                  <Radio value="Read Only">Read only</Radio>
-                  <Radio value="Full Access">Full access</Radio>
-                </FormControl>
-              </FormGroup>
+              {workshop === null ? (
+                <FormGroup>
+                  <ControlLabel>Access level</ControlLabel>
+                  <FormControl className={css(styles.fullPicker)} name="accessLevel" accepter={RadioGroup}>
+                    <Radio value="Full Access">Full access</Radio>
+                    <Radio value="Read Only">Read only</Radio>
+                  </FormControl>
+                </FormGroup>
+              ) : (
+                <FormGroup>
+                  <ControlLabel>Access level</ControlLabel>
+                  <FormControl className={css(styles.fullPicker)} name="accessLevel" accepter={RadioGroup}>
+                    <Radio value="Instructor">Instructor</Radio>
+                    <Radio value="Attendee">Attendee</Radio>
+                  </FormControl>
+                </FormGroup>
+              )}
             </Form>
 
             <Button
@@ -171,7 +250,7 @@ const CollaboratorsPanel: React.FC = () => {
               appearance="primary"
               block
               loading={isSharingNotebook}
-              onClick={dispatchShareNotebook}
+              onClick={handleShareFormSubmit}
             >
               <Icon icon="share" size="lg" />
               <span className={css(styles.shareText)}>Share</span>
@@ -183,39 +262,97 @@ const CollaboratorsPanel: React.FC = () => {
       </div>
 
       <div className={css(styles.userListContainer)}>
-        <h6>Shared with:</h6>
+        {workshop === null ? (
+          <React.Fragment>
+            <h6>Shared with:</h6>
 
-        <List className={css(styles.userList)}>
-          {sharedUsers?.map((item, index) => (
-            <List.Item className={css(styles.userItem)} key={item.uid} index={index}>
-              <FlexboxGrid align="middle">
-                <FlexboxGrid.Item colspan={4}>
-                  <UserAvatar user={item} hover={false} />
-                </FlexboxGrid.Item>
+            <List className={css(styles.userList)}>
+              {sharedUsers?.map((item, index) => (
+                <List.Item className={css(styles.userItem)} key={item.uid} index={index}>
+                  <FlexboxGrid align="middle">
+                    <FlexboxGrid.Item colspan={4}>
+                      <UserAvatar user={item} hover={false} />
+                    </FlexboxGrid.Item>
 
-                <FlexboxGrid.Item colspan={18}>
-                  <div className={css(styles.userItemLabel)}>
-                    <div className={css(styles.userItemEmail)}>
-                      {item.uid === user?.uid ? `${item.email} (you)` : item.email}
-                    </div>
-                    <div className={css(styles.userItemName)}>{item.name}</div>
-                  </div>
-                </FlexboxGrid.Item>
+                    <FlexboxGrid.Item colspan={18}>
+                      <div className={css(styles.userItemLabel)}>
+                        <div className={css(styles.userItemEmail)}>
+                          {item.uid === user?.uid ? `${item.email} (you)` : item.email}
+                        </div>
+                        <div className={css(styles.userItemName)}>{item.name}</div>
+                      </div>
+                    </FlexboxGrid.Item>
 
-                <FlexboxGrid.Item colspan={2}>
-                  <Icon
-                    className={css(
-                      styles.accessLevelIcon,
-                      item.access_level === 'Read Only' && styles.accessLevelIconDisabled
-                    )}
-                    icon="pencil"
-                    size="lg"
-                  />
-                </FlexboxGrid.Item>
-              </FlexboxGrid>
-            </List.Item>
-          ))}
-        </List>
+                    <FlexboxGrid.Item colspan={2}>
+                      <Icon
+                        className={css(
+                          styles.accessLevelIcon,
+                          item.access_level === 'Read Only' && styles.accessLevelIconDisabled
+                        )}
+                        icon="pencil"
+                        size="lg"
+                      />
+                    </FlexboxGrid.Item>
+                  </FlexboxGrid>
+                </List.Item>
+              ))}
+            </List>
+
+            {!sharedUsers?.size && <p>No collaborators</p>}
+          </React.Fragment>
+        ) : (
+          <React.Fragment>
+            <h6>Instructors:</h6>
+
+            <List className={css(styles.userList)}>
+              {sharedInstructors?.map((item, index) => (
+                <List.Item className={css(styles.userItem)} key={item.uid} index={index}>
+                  <FlexboxGrid align="middle">
+                    <FlexboxGrid.Item colspan={4}>
+                      <UserAvatar user={item} hover={false} />
+                    </FlexboxGrid.Item>
+
+                    <FlexboxGrid.Item colspan={20}>
+                      <div className={css(styles.userItemLabel)}>
+                        <div className={css(styles.userItemEmail)}>
+                          {item.uid === user?.uid ? `${item.email} (you)` : item.email}
+                        </div>
+                        <div className={css(styles.userItemName)}>{item.name}</div>
+                      </div>
+                    </FlexboxGrid.Item>
+                  </FlexboxGrid>
+                </List.Item>
+              ))}
+            </List>
+
+            {!sharedInstructors?.size && <p>No instructors</p>}
+
+            <h6 className={css(styles.secondaryListTitle)}>Attendees:</h6>
+
+            <List className={css(styles.userList)}>
+              {sharedAttendees?.map((item, index) => (
+                <List.Item className={css(styles.userItem)} key={item.uid} index={index}>
+                  <FlexboxGrid align="middle">
+                    <FlexboxGrid.Item colspan={4}>
+                      <UserAvatar user={item} hover={false} />
+                    </FlexboxGrid.Item>
+
+                    <FlexboxGrid.Item colspan={20}>
+                      <div className={css(styles.userItemLabel)}>
+                        <div className={css(styles.userItemEmail)}>
+                          {item.uid === user?.uid ? `${item.email} (you)` : item.email}
+                        </div>
+                        <div className={css(styles.userItemName)}>{item.name}</div>
+                      </div>
+                    </FlexboxGrid.Item>
+                  </FlexboxGrid>
+                </List.Item>
+              ))}
+            </List>
+
+            {!sharedAttendees?.size && <p>No attendees</p>}
+          </React.Fragment>
+        )}
       </div>
     </div>
   );
@@ -225,6 +362,8 @@ const CollaboratorsPanel: React.FC = () => {
  * The full button and popover for the collaborators component
  */
 const CollaboratorsPopover: React.FC = () => {
+  const notebook = useSelector((state: ReduxState) => state.editor.notebook);
+
   return (
     <Whisper
       trigger="click"
@@ -235,7 +374,7 @@ const CollaboratorsPopover: React.FC = () => {
         </Popover>
       }
     >
-      <Button appearance="primary" size="sm">
+      <Button appearance="primary" size="sm" disabled={notebook === null}>
         <Icon icon="share" />
         <span className={css(styles.shareTextSmall)}>Share</span>
       </Button>

@@ -7,6 +7,7 @@ import type {
   OOutput,
   Workshop,
   NotebookAccessLevel,
+  WorkshopAccessLevelType,
 } from '@actually-colab/editor-types';
 import { format } from 'date-fns';
 
@@ -371,21 +372,22 @@ export const disconnectFromNotebook = (uid: string): EditorActionTypes => ({
 
 const shareNotebookStart = (
   nb_id: Notebook['nb_id'],
-  email: string,
+  emails: string,
   access_level: NotebookAccessLevelType
 ): EditorActionTypes => ({
   type: NOTEBOOKS.SHARE.START,
   nb_id,
-  email,
+  emails,
   access_level,
 });
 
 /**
  * Successfully shared a notebook
  */
-export const shareNotebookSuccess = (user: NotebookAccessLevel): EditorActionTypes => ({
+export const shareNotebookSuccess = (nb_id: string, users: NotebookAccessLevel[]): EditorActionTypes => ({
   type: NOTEBOOKS.SHARE.SUCCESS,
-  user,
+  nb_id,
+  users,
 });
 
 /**
@@ -403,10 +405,54 @@ export const shareNotebooksFailure = (errorMessage: string = 'Unknown Error'): E
  */
 export const shareNotebook = (
   nb_id: Notebook['nb_id'],
-  email: string,
+  emails: string,
   access_level: NotebookAccessLevelType
 ): EditorAsyncActionTypes => async (dispatch) => {
-  dispatch(shareNotebookStart(nb_id, email, access_level));
+  dispatch(shareNotebookStart(nb_id, emails, access_level));
+};
+
+const shareWorkshopStart = (
+  ws_id: Workshop['ws_id'],
+  emails: string,
+  access_level: WorkshopAccessLevelType
+): EditorActionTypes => ({
+  type: WORKSHOPS.SHARE.START,
+  ws_id,
+  emails,
+  access_level,
+});
+
+/**
+ * Successfully shared a workshop
+ */
+export const shareWorkshopSuccess = (
+  ws_id: string,
+  access_levels: Pick<Workshop, 'instructors' | 'attendees'>
+): EditorActionTypes => ({
+  type: WORKSHOPS.SHARE.SUCCESS,
+  ws_id,
+  access_levels,
+});
+
+/**
+ * Failed to share a workshop
+ */
+export const shareWorkshopFailure = (errorMessage: string): EditorActionTypes => ({
+  type: WORKSHOPS.SHARE.FAILURE,
+  error: {
+    message: errorMessage,
+  },
+});
+
+/**
+ * Share a workshop with given users
+ */
+export const shareWorkshop = (
+  ws_id: Workshop['ws_id'],
+  emails: string,
+  access_level: WorkshopAccessLevelType
+): EditorAsyncActionTypes => async (dispatch) => {
+  dispatch(shareWorkshopStart(ws_id, emails, access_level));
 };
 
 /**

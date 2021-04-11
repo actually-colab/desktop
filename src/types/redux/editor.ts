@@ -9,6 +9,7 @@ import {
   OOutput,
   Workshop,
   NotebookAccessLevel,
+  WorkshopAccessLevelType,
 } from '@actually-colab/editor-types';
 
 import { ImmutableEditorCell } from '../../immutable';
@@ -110,6 +111,11 @@ export const WORKSHOPS = {
     START: 'WORKSHOPS_CREATE_START',
     SUCCESS: 'WORKSHOPS_CREATE_SUCCESS',
     FAILURE: 'WORKSHOPS_CREATE_FAILURE',
+  },
+  SHARE: {
+    START: 'WORKSHOPS_SHARE_START',
+    SUCCESS: 'WORKSHOPS_SHARE_SUCCESS',
+    FAILURE: 'WORKSHOPS_SHARE_FAILURE',
   },
 } as const;
 export const CELL = {
@@ -325,17 +331,35 @@ type NotebooksAccessDisconnectAction = {
 type NotebooksShareStartAction = {
   type: typeof NOTEBOOKS.SHARE.START;
   nb_id: string;
-  email: string;
+  emails: string;
   access_level: NotebookAccessLevelType;
 };
 
 type NotebooksShareSuccessAction = {
   type: typeof NOTEBOOKS.SHARE.SUCCESS;
-  user: NotebookAccessLevel;
+  nb_id: string;
+  users: NotebookAccessLevel[];
 };
 
 type NotebooksShareFailureAction = {
   type: typeof NOTEBOOKS.SHARE.FAILURE;
+} & ActionError;
+
+type ShareWorkshopStartAction = {
+  type: typeof WORKSHOPS.SHARE.START;
+  ws_id: string;
+  emails: string;
+  access_level: WorkshopAccessLevelType;
+};
+
+type ShareWorkshopSuccessAction = {
+  type: typeof WORKSHOPS.SHARE.SUCCESS;
+  ws_id: Workshop['ws_id'];
+  access_levels: Pick<Workshop, 'instructors' | 'attendees'>;
+};
+
+type ShareWorkshopFailureAction = {
+  type: typeof WORKSHOPS.SHARE.FAILURE;
 } & ActionError;
 
 type NotebooksOutputsSelectAction = {
@@ -549,6 +573,9 @@ export type EditorActionTypes =
   | NotebooksShareStartAction
   | NotebooksShareSuccessAction
   | NotebooksShareFailureAction
+  | ShareWorkshopStartAction
+  | ShareWorkshopSuccessAction
+  | ShareWorkshopFailureAction
   | NotebooksOutputsSelectAction
   | NotebooksOutputsReceiveAction
   | LockCellStartAction

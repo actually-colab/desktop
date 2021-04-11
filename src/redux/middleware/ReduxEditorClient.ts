@@ -6,7 +6,7 @@ import { SIGN_IN, SIGN_OUT } from '../../types/redux/auth';
 import { CELL, KERNEL, NOTEBOOKS, WORKSHOPS } from '../../types/redux/editor';
 import { DEMO_NOTEBOOK_NAME } from '../../constants/demo';
 import { httpToWebSocket } from '../../utils/request';
-import { cleanDCell, convertSendablePayloadToOutputString } from '../../utils/notebook';
+import { cleanDCell, convertSendablePayloadToOutputString, separateEmails } from '../../utils/notebook';
 import { LatestNotebookIdStorage } from '../../utils/storage';
 import { syncSleep } from '../../utils/sleep';
 import { ReduxActions, _auth, _editor, _ui } from '../actions';
@@ -146,12 +146,26 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
         });
 
         /**
-         * A notebook was shared with a given user
+         * A notebook was shared with given users
          */
-        socketClient.on('notebook_shared', (user) => {
-          console.log('Notebook shared', user);
+        socketClient.on('notebook_shared', (nb_id, users) => {
+          console.log('Notebook shared', nb_id, users);
 
-          store.dispatch(_editor.shareNotebookSuccess(user));
+          store.dispatch(_editor.shareNotebookSuccess(nb_id, users));
+        });
+
+        /**
+         * A workshop was shared with given attendees and instructors
+         */
+        socketClient.on('workshop_shared', (ws_id, attendees, instructors) => {
+          console.log('Workshop shared', ws_id, attendees, instructors);
+
+          store.dispatch(
+            _editor.shareWorkshopSuccess(ws_id, {
+              attendees,
+              instructors,
+            })
+          );
         });
 
         /**
@@ -392,7 +406,19 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
        * Started sharing a given notebook
        */
       case NOTEBOOKS.SHARE.START: {
-        socketClient?.shareNotebook(action.email, action.nb_id, action.access_level);
+        const emails = separateEmails(action.emails);
+
+        socketClient?.shareNotebook(emails, action.nb_id, action.access_level);
+        break;
+      }
+
+      /**
+       * Started sharing a given workshop
+       */
+      case WORKSHOPS.SHARE.START: {
+        const emails = separateEmails(action.emails);
+
+        socketClient?.shareWorkshop(emails, action.ws_id, action.access_level);
         break;
       }
 

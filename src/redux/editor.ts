@@ -17,7 +17,6 @@ import {
   ImmutableLock,
   ImmutableLockFactory,
   ImmutableNotebook,
-  ImmutableNotebookAccessLevelFactory,
   ImmutableNotebookFactory,
   ImmutableOutputMetadata,
   ImmutableOutputMetadataFactory,
@@ -32,6 +31,7 @@ import {
   cellArrayToImmutableMap,
   cleanDCell,
   convertOutputToReceivablePayload,
+  filterAccessLevelsFromList,
   makeNotebookAccessLevelsImmutable,
   makeWorkshopAccessLevelsImmutable,
   reduceImmutableNotebook,
@@ -708,7 +708,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
      * Successfully shared a notebook
      */
     case NOTEBOOKS.SHARE.SUCCESS: {
-      if (!state.notebook || state.notebooks.has(state.notebook.nb_id)) {
+      if (!state.notebooks.has(action.nb_id)) {
         return {
           ...state,
           isSharingNotebook: false,
@@ -718,26 +718,79 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         isSharingNotebook: false,
-        notebooks: state.notebooks.update(state.notebook.nb_id, (notebook) =>
+        notebooks: state.notebooks.update(action.nb_id, (notebook) =>
           notebook.set(
             'users',
             notebook.users
-              .filter((user) => user.uid !== action.user.uid)
-              .push(new ImmutableNotebookAccessLevelFactory(action.user))
+              .filter(filterAccessLevelsFromList(action.users))
+              .concat(makeNotebookAccessLevelsImmutable(action.users))
           )
         ),
-        notebook: state.notebook.set(
-          'users',
-          state.notebook.users
-            .filter((user) => user.uid !== action.user.uid)
-            .push(new ImmutableNotebookAccessLevelFactory(action.user))
-        ),
+        notebook:
+          state.notebook?.nb_id === action.nb_id
+            ? state.notebook.set(
+                'users',
+                state.notebook.users
+                  .filter(filterAccessLevelsFromList(action.users))
+                  .concat(makeNotebookAccessLevelsImmutable(action.users))
+              )
+            : state.notebook,
       };
     }
     /**
      * Failed to share a notebook
      */
     case NOTEBOOKS.SHARE.FAILURE:
+      return {
+        ...state,
+        isSharingNotebook: false,
+      };
+
+    /**
+     * Started sharing a workshop
+     */
+    case WORKSHOPS.SHARE.START:
+      return {
+        ...state,
+        isSharingNotebook: true,
+      };
+    /**
+     * Successfully shared a workshop
+     */
+    case WORKSHOPS.SHARE.SUCCESS: {
+      if (!state.workshops.has(action.ws_id)) {
+        return {
+          ...state,
+          isSharingNotebook: false,
+        };
+      }
+
+      return {
+        ...state,
+        isSharingNotebook: false,
+        workshops: state.workshops.update(action.ws_id, (workshop) =>
+          workshop.withMutations((mtx) =>
+            mtx
+              .set(
+                'instructors',
+                workshop.instructors
+                  .filter(filterAccessLevelsFromList(action.access_levels.instructors, action.access_levels.attendees))
+                  .concat(makeWorkshopAccessLevelsImmutable(action.access_levels.instructors))
+              )
+              .set(
+                'attendees',
+                workshop.attendees
+                  .filter(filterAccessLevelsFromList(action.access_levels.instructors, action.access_levels.attendees))
+                  .concat(makeWorkshopAccessLevelsImmutable(action.access_levels.attendees))
+              )
+          )
+        ),
+      };
+    }
+    /**
+     * Failed to share a workshop
+     */
+    case WORKSHOPS.SHARE.FAILURE:
       return {
         ...state,
         isSharingNotebook: false,
