@@ -220,7 +220,7 @@ export const convertTextToCells = (text: string): Pick<DCell, 'language' | 'cont
       .forEach((cell) => {
         cells.push({
           language: cell.cell_type === 'code' ? 'python' : 'markdown',
-          contents: Array.isArray(cell.source) ? cell.source.join('\n') : cell.source,
+          contents: Array.isArray(cell.source) ? cell.source.join('') : cell.source,
         });
       });
 
