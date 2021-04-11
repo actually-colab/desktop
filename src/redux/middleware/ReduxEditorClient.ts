@@ -500,7 +500,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
         socketClient?.unlockCell(notebook.nb_id, action.cell_id, {
           language: cell.language,
           contents: cell.contents,
-          cursor_pos: cell.cursor_pos,
+          cursor_col: cell.cursor_col,
+          cursor_row: cell.cursor_row,
         });
         break;
       }
@@ -532,7 +533,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           socketClient?.editCell(notebook.nb_id, action.cell_id, {
             language: cell.language,
             contents: cell.contents,
-            cursor_pos: cell.cursor_pos,
+            cursor_col: cell.cursor_col,
+            cursor_row: cell.cursor_row,
             ...action.changes,
           });
         }
