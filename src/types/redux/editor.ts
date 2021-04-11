@@ -332,6 +332,7 @@ type NotebooksAccessConnectAction = {
 
 type NotebooksAccessDisconnectAction = {
   type: typeof NOTEBOOKS.ACCESS.DISCONNECT;
+  isMe: boolean;
   uid: string;
 };
 
@@ -380,6 +381,7 @@ type UnshareNotebookStartAction = {
 type UnshareNotebookSuccessAction = {
   type: typeof NOTEBOOKS.UNSHARE.SUCCESS;
   isMe: boolean;
+  includedMe: boolean;
   nb_id: string;
   uids: NotebookAccessLevel['uid'][];
 };

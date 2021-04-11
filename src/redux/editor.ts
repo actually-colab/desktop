@@ -696,11 +696,32 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
     /**
      * A user has closed the notebook
      */
-    case NOTEBOOKS.ACCESS.DISCONNECT:
+    case NOTEBOOKS.ACCESS.DISCONNECT: {
+      if (!action.isMe) {
+        return {
+          ...state,
+          users: state.users.filter((user) => user.uid !== action.uid),
+        };
+      }
+
       return {
         ...state,
-        users: state.users.filter((user) => user.uid !== action.uid),
+        isSharingNotebook: false,
+        isUnsharingNotebook: false,
+        lockingCellId: '',
+        unlockingCellId: '',
+        selectedCellId: '',
+        selectedOutputsUid: '',
+        isAddingCell: false,
+        isDeletingCell: false,
+        isEditingCell: false,
+        notebook: null,
+        cells: state.cells.clear(),
+        users: state.users.clear(),
+        outputs: state.outputs.clear(),
+        outputsMetadata: state.outputsMetadata.clear(),
       };
+    }
 
     /**
      * Started sharing a notebook
@@ -824,12 +845,16 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         isUnsharingNotebook: action.isMe ? false : state.isUnsharingNotebook,
-        notebooks: state.notebooks.update(action.nb_id, (notebook) =>
-          notebook.set('users', notebook.users.filter(filterUidsFromList(action.uids)))
-        ),
+        notebooks: action.includedMe
+          ? state.notebooks.remove(action.nb_id)
+          : state.notebooks.update(action.nb_id, (notebook) =>
+              notebook.set('users', notebook.users.filter(filterUidsFromList(action.uids)))
+            ),
         notebook:
           state.notebook?.nb_id === action.nb_id
-            ? state.notebook.set('users', state.notebook.users.filter(filterUidsFromList(action.uids)))
+            ? action.includedMe
+              ? null
+              : state.notebook.set('users', state.notebook.users.filter(filterUidsFromList(action.uids)))
             : state.notebook,
       };
     }

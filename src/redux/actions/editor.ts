@@ -378,8 +378,9 @@ export const connectToNotebook = (user: DUser): EditorActionTypes => ({
 /**
  * A user has disconnected from the notebook
  */
-export const disconnectFromNotebook = (uid: string): EditorActionTypes => ({
+export const disconnectFromNotebook = (isMe: boolean, uid: string): EditorActionTypes => ({
   type: NOTEBOOKS.ACCESS.DISCONNECT,
+  isMe,
   uid,
 });
 
@@ -486,11 +487,13 @@ const unshareNotebookStart = (nb_id: string, emails: string): EditorActionTypes 
  */
 export const unshareNotebookSuccess = (
   isMe: boolean,
+  includedMe: boolean,
   nb_id: string,
   uids: NotebookAccessLevel['uid'][]
 ): EditorActionTypes => ({
   type: NOTEBOOKS.UNSHARE.SUCCESS,
   isMe,
+  includedMe,
   nb_id,
   uids,
 });
