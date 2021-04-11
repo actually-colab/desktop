@@ -47,8 +47,8 @@ const styles = StyleSheet.create({
 type MenuOption = 'Chat' | 'Comments' | 'Stats' | 'Downloads' | 'Settings' | 'Help' | '';
 
 const MENU_OPTIONS: { menuKey: MenuOption; icon: IconProps['icon']; disabled?: boolean }[] = [
-  { menuKey: 'Chat', icon: 'commenting' },
-  { menuKey: 'Comments', icon: 'comments' },
+  { menuKey: 'Chat', icon: 'comments' },
+  { menuKey: 'Comments', icon: 'envelope' },
   { menuKey: 'Stats', icon: 'area-chart' },
   { menuKey: 'Downloads', icon: 'download2' },
   { menuKey: 'Settings', icon: 'wrench' },
