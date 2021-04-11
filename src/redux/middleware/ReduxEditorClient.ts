@@ -296,6 +296,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           try {
             const notebooks = await restClient.getNotebooksForUser();
 
+            console.log('Received notebooks', notebooks);
             store.dispatch(_editor.getNotebooksSuccess(notebooks));
 
             // If no notebook is open, automatically open the most recent
@@ -339,6 +340,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           try {
             const workshops = await restClient.getWorkshopsForUser();
 
+            console.log('Received workshops', workshops);
             store.dispatch(_editor.getWorkshopsSuccess(workshops));
 
             // If no notebook is open, automatically open the most recent

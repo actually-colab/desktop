@@ -1,6 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
+import { List as ImmutableList, Map as ImmutableMap, Set as ImmutableSet } from 'immutable';
 import {
   Button,
   ControlLabel,
@@ -22,14 +23,15 @@ import {
 import { FormInstance } from 'rsuite/lib/Form';
 import { FileType } from 'rsuite/lib/Uploader';
 import debounce from 'lodash.debounce';
-import { DCell, Notebook } from '@actually-colab/editor-types';
+import { DCell, Notebook, Workshop } from '@actually-colab/editor-types';
 
 import { ReduxState } from '../../../types/redux';
 import { _editor, _ui } from '../../../redux/actions';
 import { timeSince } from '../../../utils/date';
 import { palette, spacing } from '../../../constants/theme';
 import { PopoverDropdown } from '../../../components';
-import { convertTextToCells, filterNotebookByName, sortNotebookBy } from '../../../utils/notebook';
+import { convertTextToCells, filterNotebookByName, sortNotebookBy, sortUsersByName } from '../../../utils/notebook';
+import { ImmutableNotebook } from '../../../immutable';
 
 type NewProjectFormValue = {
   name: string;
@@ -96,6 +98,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     overflow: 'hidden',
   },
+  projectTitleContainerIndented: {
+    paddingLeft: spacing.DEFAULT,
+  },
   projectTitle: {
     marginLeft: spacing.DEFAULT / 2,
     overflow: 'hidden',
@@ -118,13 +123,27 @@ const styles = StyleSheet.create({
 const ProjectButton: React.FC<{
   icon: IconProps['icon'];
   name: string;
-  time_modified: number;
+  time_modified?: number;
   loading: boolean;
   disabled: boolean;
   active: boolean;
+  indented?: boolean;
+  folder?: boolean;
+  folderOpen?: boolean;
   onClick(): void;
-}> = ({ icon, name, time_modified, loading, disabled, active, onClick }) => {
-  const timeSinceModification = timeSince(time_modified);
+}> = ({
+  icon,
+  name,
+  time_modified = -1,
+  loading,
+  disabled,
+  active,
+  indented = false,
+  folder = false,
+  folderOpen = false,
+  onClick,
+}) => {
+  const timeSinceModification = time_modified !== -1 ? timeSince(time_modified) : null;
 
   return (
     <div className={css(styles.project)}>
@@ -135,13 +154,20 @@ const ProjectButton: React.FC<{
         disabled={disabled}
         onClick={onClick}
       >
-        <div className={css(styles.projectTitleContainer)}>
+        <div className={css(styles.projectTitleContainer, indented && styles.projectTitleContainerIndented)}>
           <Icon icon={icon} />
           <span className={css(styles.projectTitle)}>{name}</span>
         </div>
-        <span className={css(styles.lastModifiedText, disabled && styles.lastModifiedTextDisabled)}>
-          {timeSinceModification}
-        </span>
+
+        {folder ? (
+          <Icon icon={folderOpen ? 'arrow-down-line' : 'arrow-left-line'} />
+        ) : (
+          time_modified !== -1 && (
+            <span className={css(styles.lastModifiedText, disabled && styles.lastModifiedTextDisabled)}>
+              {timeSinceModification}
+            </span>
+          )
+        )}
       </Button>
     </div>
   );
@@ -174,6 +200,32 @@ const ProjectsPanel: React.FC = () => {
   });
   const [uploadedFileList, setUploadedFileList] = React.useState<FileType[]>([]);
   const [uploadedContent, setUploadedContent] = React.useState<Pick<DCell, 'language' | 'contents'>[]>([]);
+  const [openWorkshopIds, setOpenWorkshopIds] = React.useState<ImmutableSet<Workshop['ws_id']>>(ImmutableSet());
+
+  const sortedNotebooks = React.useMemo(
+    () =>
+      notebooks
+        .filter((notebook) => !notebook.ws_id)
+        .filter(filterNotebookByName(filterValue))
+        .sort(sortNotebookBy(sortType))
+        .valueSeq(),
+    [filterValue, notebooks, sortType]
+  );
+  const sortedWorkshops = React.useMemo(
+    () => workshops.filter(filterNotebookByName(filterValue)).sort(sortNotebookBy(sortType)).valueSeq(),
+    [filterValue, sortType, workshops]
+  );
+  const wsIdToAttendees = React.useMemo(
+    () =>
+      ImmutableMap<Workshop['ws_id'], ImmutableList<ImmutableNotebook>>().withMutations((mtx) =>
+        notebooks
+          .filter((notebook) => notebook.ws_id && !notebook.ws_main_notebook)
+          .forEach((notebook) => {
+            mtx.update(notebook.ws_id, ImmutableList(), (list) => list.push(notebook));
+          })
+      ),
+    [notebooks]
+  );
 
   const dispatch = useDispatch();
   const dispatchGetNotebooks = React.useCallback(() => dispatch(_editor.getNotebooks()), [dispatch]);
@@ -344,26 +396,23 @@ const ProjectsPanel: React.FC = () => {
         <span className={css(styles.dividerText)}>Notebooks</span>
       </Divider>
 
-      {notebooks
-        .filter(filterNotebookByName(filterValue))
-        .sort(sortNotebookBy(sortType))
-        .valueSeq()
-        .map((project) => {
-          const active = project.nb_id === notebook?.nb_id;
+      {sortedNotebooks.map((project) => {
+        const active = project.nb_id === notebook?.nb_id;
 
-          return (
-            <ProjectButton
-              key={project.nb_id}
-              icon={active ? 'file' : 'file-o'}
-              name={project.name}
-              active={active}
-              time_modified={project.time_modified}
-              loading={project.nb_id === openingNotebookId}
-              disabled={false}
-              onClick={() => !isOpeningNotebook && !active && dispatchOpenNotebook(project.nb_id)}
-            />
-          );
-        })}
+        return (
+          <ProjectButton
+            key={project.nb_id}
+            icon={active ? 'file' : 'file-o'}
+            name={project.name}
+            active={active}
+            indented={false}
+            disabled={false}
+            time_modified={project.time_modified}
+            loading={project.nb_id === openingNotebookId}
+            onClick={() => !isOpeningNotebook && !active && dispatchOpenNotebook(project.nb_id)}
+          />
+        );
+      })}
 
       {notebooks.size === 0 && (
         <p className={css(styles.descriptionText)}>
@@ -375,27 +424,96 @@ const ProjectsPanel: React.FC = () => {
         <span className={css(styles.dividerText)}>Workshops</span>
       </Divider>
 
-      {workshops
-        .filter(filterNotebookByName(filterValue))
-        .sort(sortNotebookBy(sortType))
-        .valueSeq()
-        .map((project) => {
-          const active = project.main_notebook.nb_id === notebook?.nb_id;
-          const isInstructor = project.instructors.findIndex((instructor) => instructor.uid === user?.uid) >= 0;
+      {sortedWorkshops.map((project) => {
+        const isOpen = openWorkshopIds.has(project.ws_id);
+        const isInstructor = project.instructors.findIndex((instructor) => instructor.uid === user?.uid) >= 0;
+        const isMainNotebookActive = project.main_notebook.nb_id === notebook?.nb_id;
+        const subNotebooks = wsIdToAttendees.get(project.ws_id);
 
-          return (
+        const attendeeNotebook = isInstructor
+          ? null
+          : subNotebooks?.find((_notebook) => !!_notebook.users.find((_user) => _user.uid === user?.uid));
+        const isAttendeeNotebookActive = attendeeNotebook?.nb_id === notebook?.nb_id;
+
+        return (
+          <React.Fragment key={project.ws_id}>
             <ProjectButton
-              key={project.ws_id}
-              icon={active ? 'file' : 'file-o'}
+              icon={isOpen ? 'folder-open-o' : 'folder-o'}
               name={project.name}
-              active={active}
-              time_modified={project.main_notebook.time_modified}
+              active={false}
+              indented={false}
+              folder={true}
+              folderOpen={isOpen}
               loading={project.main_notebook.nb_id === openingNotebookId}
-              disabled={!isInstructor && !project.start_time}
-              onClick={() => !isOpeningNotebook && !active && dispatchOpenNotebook(project.main_notebook.nb_id)}
+              disabled={isGettingWorkshops}
+              onClick={() =>
+                setOpenWorkshopIds(isOpen ? openWorkshopIds.remove(project.ws_id) : openWorkshopIds.add(project.ws_id))
+              }
             />
-          );
-        })}
+
+            {isOpen && (
+              <React.Fragment>
+                <ProjectButton
+                  icon={isMainNotebookActive ? 'file' : 'file-o'}
+                  name={project.main_notebook.name}
+                  active={isMainNotebookActive}
+                  indented={true}
+                  time_modified={project.main_notebook.time_modified}
+                  loading={project.main_notebook.nb_id === openingNotebookId}
+                  disabled={!isInstructor && !project.start_time}
+                  onClick={() =>
+                    !isOpeningNotebook && !isMainNotebookActive && dispatchOpenNotebook(project.main_notebook.nb_id)
+                  }
+                />
+
+                {isInstructor
+                  ? project.attendees.sort(sortUsersByName).map((attendee) => {
+                      const subNotebook = subNotebooks?.find(
+                        (_notebook) => !!_notebook.users.find((_user) => _user.uid === attendee.uid)
+                      );
+
+                      if (!subNotebook) {
+                        return <React.Fragment key={attendee.uid} />;
+                      }
+
+                      const active = subNotebook.nb_id === notebook?.nb_id;
+
+                      return (
+                        <ProjectButton
+                          key={attendee.uid}
+                          icon={active ? 'user' : 'user-o'}
+                          name={attendee.name}
+                          active={active}
+                          indented={true}
+                          time_modified={subNotebook.time_modified}
+                          loading={subNotebook.nb_id === openingNotebookId}
+                          disabled={!isInstructor && !project.start_time}
+                          onClick={() => !isOpeningNotebook && !active && dispatchOpenNotebook(subNotebook.nb_id)}
+                        />
+                      );
+                    })
+                  : attendeeNotebook && (
+                      <ProjectButton
+                        key={user?.uid}
+                        icon={isAttendeeNotebookActive ? 'user' : 'user-o'}
+                        name={user?.name ?? 'Unknown'}
+                        active={isAttendeeNotebookActive}
+                        indented={true}
+                        time_modified={attendeeNotebook.time_modified}
+                        loading={attendeeNotebook.nb_id === openingNotebookId}
+                        disabled={!isInstructor && !project.start_time}
+                        onClick={() =>
+                          !isOpeningNotebook &&
+                          !isAttendeeNotebookActive &&
+                          dispatchOpenNotebook(attendeeNotebook.nb_id)
+                        }
+                      />
+                    )}
+              </React.Fragment>
+            )}
+          </React.Fragment>
+        );
+      })}
 
       {workshops.size === 0 && (
         <p className={css(styles.descriptionText)}>
