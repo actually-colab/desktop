@@ -10,6 +10,7 @@ import {
   FormGroup,
   HelpBlock,
   Icon,
+  IconButton,
   List,
   Popover,
   Radio,
@@ -128,8 +129,9 @@ const CollaboratorsPanel: React.FC = () => {
 
   const user = useSelector((state: ReduxState) => state.auth.user);
   const notebook = useSelector((state: ReduxState) => state.editor.notebook);
-  const isSharingNotebook = useSelector((state: ReduxState) => state.editor.isSharingNotebook);
   const workshops = useSelector((state: ReduxState) => state.editor.workshops);
+  const isSharingNotebook = useSelector((state: ReduxState) => state.editor.isSharingNotebook);
+  const isUnsharingNotebook = useSelector((state: ReduxState) => state.editor.isUnsharingNotebook);
 
   const [shareNotebookFormValue, setShareNotebookFormValue] = React.useState<ShareNotebookFormValue>({
     emails: '',
@@ -161,7 +163,7 @@ const CollaboratorsPanel: React.FC = () => {
     () =>
       notebook &&
       dispatch(
-        _editor.shareNotebook(notebook?.nb_id, shareNotebookFormValue.emails, shareNotebookFormValue.accessLevel)
+        _editor.shareNotebook(notebook.nb_id, shareNotebookFormValue.emails, shareNotebookFormValue.accessLevel)
       ),
     [dispatch, notebook, shareNotebookFormValue.accessLevel, shareNotebookFormValue.emails]
   );
@@ -172,6 +174,10 @@ const CollaboratorsPanel: React.FC = () => {
         _editor.shareWorkshop(workshop.ws_id, shareWorkshopFormValue.emails, shareWorkshopFormValue.accessLevel)
       ),
     [dispatch, shareWorkshopFormValue.accessLevel, shareWorkshopFormValue.emails, workshop]
+  );
+  const dispatchUnshareNotebook = React.useCallback(
+    (email: string) => notebook && dispatch(_editor.unshareNotebook(notebook.nb_id, email)),
+    [dispatch, notebook]
   );
 
   const handleShareFormSubmit = React.useCallback(
@@ -274,7 +280,7 @@ const CollaboratorsPanel: React.FC = () => {
                       <UserAvatar user={item} hover={false} />
                     </FlexboxGrid.Item>
 
-                    <FlexboxGrid.Item colspan={18}>
+                    <FlexboxGrid.Item colspan={16}>
                       <div className={css(styles.userItemLabel)}>
                         <div className={css(styles.userItemEmail)}>
                           {item.uid === user?.uid ? `${item.email} (you)` : item.email}
@@ -283,16 +289,25 @@ const CollaboratorsPanel: React.FC = () => {
                       </div>
                     </FlexboxGrid.Item>
 
-                    <FlexboxGrid.Item colspan={2}>
+                    <FlexboxGrid.Item colspan={canEdit ? 2 : 4}>
                       <Icon
-                        className={css(
-                          styles.accessLevelIcon,
-                          item.access_level === 'Read Only' && styles.accessLevelIconDisabled
-                        )}
-                        icon="pencil"
+                        className={css(styles.accessLevelIcon)}
+                        icon={item.access_level === 'Full Access' ? 'pencil' : 'eye'}
                         size="lg"
                       />
                     </FlexboxGrid.Item>
+                    {canEdit && (
+                      <FlexboxGrid.Item colspan={2}>
+                        <IconButton
+                          size="xs"
+                          appearance="subtle"
+                          icon={<Icon icon="close" />}
+                          loading={isUnsharingNotebook}
+                          disabled={item.uid === user?.uid}
+                          onClick={() => dispatchUnshareNotebook(item.email)}
+                        />
+                      </FlexboxGrid.Item>
+                    )}
                   </FlexboxGrid>
                 </List.Item>
               ))}

@@ -96,6 +96,11 @@ export const NOTEBOOKS = {
     SUCCESS: 'NOTEBOOKS_SHARE_SUCCESS',
     FAILURE: 'NOTEBOOKS_SHARE_FAILURE',
   },
+  UNSHARE: {
+    START: 'NOTEBOOKS_UNSHARE_START',
+    SUCCESS: 'NOTEBOOKS_UNSHARE_SUCCESS',
+    FAILURE: 'NOTEBOOKS_UNSHARE_FAILURE',
+  },
   OUTPUTS: {
     SELECT: 'NOTEBOOKS_OUTPUTS_SELECT',
     RECEIVE: 'NOTEBOOKS_OUTPUTS_RECEIVE',
@@ -327,6 +332,7 @@ type NotebooksAccessConnectAction = {
 
 type NotebooksAccessDisconnectAction = {
   type: typeof NOTEBOOKS.ACCESS.DISCONNECT;
+  isMe: boolean;
   uid: string;
 };
 
@@ -339,6 +345,7 @@ type NotebooksShareStartAction = {
 
 type NotebooksShareSuccessAction = {
   type: typeof NOTEBOOKS.SHARE.SUCCESS;
+  isMe: boolean;
   nb_id: string;
   users: NotebookAccessLevel[];
 };
@@ -356,12 +363,31 @@ type ShareWorkshopStartAction = {
 
 type ShareWorkshopSuccessAction = {
   type: typeof WORKSHOPS.SHARE.SUCCESS;
+  isMe: boolean;
   ws_id: Workshop['ws_id'];
   access_levels: Pick<Workshop, 'instructors' | 'attendees'>;
 };
 
 type ShareWorkshopFailureAction = {
   type: typeof WORKSHOPS.SHARE.FAILURE;
+} & ActionError;
+
+type UnshareNotebookStartAction = {
+  type: typeof NOTEBOOKS.UNSHARE.START;
+  nb_id: string;
+  emails: string;
+};
+
+type UnshareNotebookSuccessAction = {
+  type: typeof NOTEBOOKS.UNSHARE.SUCCESS;
+  isMe: boolean;
+  includedMe: boolean;
+  nb_id: string;
+  uids: NotebookAccessLevel['uid'][];
+};
+
+type UnshareNotebookFailureAction = {
+  type: typeof NOTEBOOKS.UNSHARE.FAILURE;
 } & ActionError;
 
 type NotebooksOutputsSelectAction = {
@@ -578,6 +604,9 @@ export type EditorActionTypes =
   | ShareWorkshopStartAction
   | ShareWorkshopSuccessAction
   | ShareWorkshopFailureAction
+  | UnshareNotebookStartAction
+  | UnshareNotebookSuccessAction
+  | UnshareNotebookFailureAction
   | NotebooksOutputsSelectAction
   | NotebooksOutputsReceiveAction
   | LockCellStartAction

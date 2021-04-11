@@ -32,6 +32,7 @@ import {
   cleanDCell,
   convertOutputToReceivablePayload,
   filterAccessLevelsFromList,
+  filterUidsFromList,
   makeNotebookAccessLevelsImmutable,
   makeWorkshopAccessLevelsImmutable,
   reduceImmutableNotebook,
@@ -115,6 +116,10 @@ export interface EditorState {
    * If the editor is sharing a notebook
    */
   isSharingNotebook: boolean;
+  /**
+   * If the editor is unsharing a notebook
+   */
+  isUnsharingNotebook: boolean;
 
   /**
    * If the editor is currently adding a cell
@@ -237,6 +242,7 @@ const initialState: EditorState = {
   isOpeningNotebook: false,
   openingNotebookId: '',
   isSharingNotebook: false,
+  isUnsharingNotebook: false,
 
   isAddingCell: false,
   isDeletingCell: false,
@@ -690,11 +696,32 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
     /**
      * A user has closed the notebook
      */
-    case NOTEBOOKS.ACCESS.DISCONNECT:
+    case NOTEBOOKS.ACCESS.DISCONNECT: {
+      if (!action.isMe) {
+        return {
+          ...state,
+          users: state.users.filter((user) => user.uid !== action.uid),
+        };
+      }
+
       return {
         ...state,
-        users: state.users.filter((user) => user.uid !== action.uid),
+        isSharingNotebook: false,
+        isUnsharingNotebook: false,
+        lockingCellId: '',
+        unlockingCellId: '',
+        selectedCellId: '',
+        selectedOutputsUid: '',
+        isAddingCell: false,
+        isDeletingCell: false,
+        isEditingCell: false,
+        notebook: null,
+        cells: state.cells.clear(),
+        users: state.users.clear(),
+        outputs: state.outputs.clear(),
+        outputsMetadata: state.outputsMetadata.clear(),
       };
+    }
 
     /**
      * Started sharing a notebook
@@ -711,13 +738,13 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       if (!state.notebooks.has(action.nb_id)) {
         return {
           ...state,
-          isSharingNotebook: false,
+          isSharingNotebook: action.isMe ? false : state.isSharingNotebook,
         };
       }
 
       return {
         ...state,
-        isSharingNotebook: false,
+        isSharingNotebook: action.isMe ? false : state.isSharingNotebook,
         notebooks: state.notebooks.update(action.nb_id, (notebook) =>
           notebook.set(
             'users',
@@ -761,13 +788,13 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       if (!state.workshops.has(action.ws_id)) {
         return {
           ...state,
-          isSharingNotebook: false,
+          isSharingNotebook: action.isMe ? false : state.isSharingNotebook,
         };
       }
 
       return {
         ...state,
-        isSharingNotebook: false,
+        isSharingNotebook: action.isMe ? false : state.isSharingNotebook,
         workshops: state.workshops.update(action.ws_id, (workshop) =>
           workshop.withMutations((mtx) =>
             mtx
@@ -794,6 +821,50 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         isSharingNotebook: false,
+      };
+
+    /**
+     * Started unsharing a notebook
+     */
+    case NOTEBOOKS.UNSHARE.START:
+      return {
+        ...state,
+        isUnsharingNotebook: true,
+      };
+    /**
+     * Successfully unshared a notebook
+     */
+    case NOTEBOOKS.UNSHARE.SUCCESS: {
+      if (!state.notebooks.has(action.nb_id)) {
+        return {
+          ...state,
+          isUnsharingNotebook: action.isMe ? false : state.isUnsharingNotebook,
+        };
+      }
+
+      return {
+        ...state,
+        isUnsharingNotebook: action.isMe ? false : state.isUnsharingNotebook,
+        notebooks: action.includedMe
+          ? state.notebooks.remove(action.nb_id)
+          : state.notebooks.update(action.nb_id, (notebook) =>
+              notebook.set('users', notebook.users.filter(filterUidsFromList(action.uids)))
+            ),
+        notebook:
+          state.notebook?.nb_id === action.nb_id
+            ? action.includedMe
+              ? null
+              : state.notebook.set('users', state.notebook.users.filter(filterUidsFromList(action.uids)))
+            : state.notebook,
+      };
+    }
+    /**
+     * Failed to unshare a notebook
+     */
+    case NOTEBOOKS.UNSHARE.FAILURE:
+      return {
+        ...state,
+        isUnsharingNotebook: false,
       };
 
     /**

@@ -142,27 +142,27 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           console.log('Notebook closed', nb_id, triggered_by);
 
           if (nb_id === store.getState().editor.notebook?.nb_id) {
-            store.dispatch(_editor.disconnectFromNotebook(triggered_by ?? ''));
+            store.dispatch(_editor.disconnectFromNotebook(triggered_by === currentUser.uid, triggered_by ?? ''));
           }
         });
 
         /**
          * A notebook was shared with given users
          */
-        socketClient.on('notebook_shared', (nb_id, users) => {
-          console.log('Notebook shared', nb_id, users);
+        socketClient.on('notebook_shared', (nb_id, users, triggered_by) => {
+          console.log('Notebook shared', nb_id, users, triggered_by);
 
-          store.dispatch(_editor.shareNotebookSuccess(nb_id, users));
+          store.dispatch(_editor.shareNotebookSuccess(triggered_by === currentUser.uid, nb_id, users));
         });
 
         /**
          * A workshop was shared with given attendees and instructors
          */
-        socketClient.on('workshop_shared', (ws_id, attendees, instructors) => {
-          console.log('Workshop shared', ws_id, attendees, instructors);
+        socketClient.on('workshop_shared', (ws_id, attendees, instructors, triggered_by) => {
+          console.log('Workshop shared', ws_id, attendees, instructors, triggered_by);
 
           store.dispatch(
-            _editor.shareWorkshopSuccess(ws_id, {
+            _editor.shareWorkshopSuccess(triggered_by === currentUser.uid, ws_id, {
               attendees,
               instructors,
             })
@@ -170,10 +170,26 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
         });
 
         /**
+         * A notebook was unshared with given users
+         */
+        socketClient.on('notebook_unshared', (nb_id, uids, triggered_by) => {
+          console.log('Notebook unshared', nb_id, uids, triggered_by);
+
+          const includedMe = uids.includes(currentUser.uid);
+
+          // Close notebook if unshared
+          if (includedMe && store.getState().editor.notebook?.nb_id === nb_id) {
+            store.dispatch(_editor.disconnectFromNotebook(includedMe, currentUser.uid));
+          }
+
+          store.dispatch(_editor.unshareNotebookSuccess(triggered_by === currentUser.uid, includedMe, nb_id, uids));
+        });
+
+        /**
          * A cell was created by a given user
          */
         socketClient.on('cell_created', (dcell, triggered_by) => {
-          console.log('Cell created', dcell);
+          console.log('Cell created', dcell, triggered_by);
 
           store.dispatch(
             _editor.addCellSuccess(triggered_by === currentUser.uid, dcell.cell_id, -1, cleanDCell(dcell))
@@ -184,7 +200,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          * A cell was deleted by a given user
          */
         socketClient.on('cell_deleted', (nb_id, cell_id, triggered_by) => {
-          console.log('Cell deleted', nb_id, cell_id);
+          console.log('Cell deleted', nb_id, cell_id, triggered_by);
 
           store.dispatch(_editor.deleteCellSuccess(triggered_by === currentUser.uid, cell_id));
         });
@@ -193,7 +209,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          * A cell was locked by a given user
          */
         socketClient.on('cell_locked', (dcell, triggered_by) => {
-          console.log('Cell locked', dcell);
+          console.log('Cell locked', dcell, triggered_by);
 
           store.dispatch(
             _editor.lockCellSuccess(
@@ -209,7 +225,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          * A cell was unlocked by a given user
          */
         socketClient.on('cell_unlocked', (dcell, triggered_by) => {
-          console.log('Cell unlocked', dcell);
+          console.log('Cell unlocked', dcell, triggered_by);
 
           store.dispatch(
             _editor.unlockCellSuccess(
@@ -225,7 +241,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          * A cell was edited by a given user
          */
         socketClient.on('cell_edited', (dcell, triggered_by) => {
-          console.log('Cell edited', dcell);
+          console.log('Cell edited', dcell, triggered_by);
 
           store.dispatch(_editor.editCellSuccess(triggered_by === currentUser.uid, dcell.cell_id, cleanDCell(dcell)));
         });
@@ -233,8 +249,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
         /**
          * An output was received from a given user
          */
-        socketClient.on('output_updated', (output) => {
-          console.log('Received outputs', output);
+        socketClient.on('output_updated', (output, triggered_by) => {
+          console.log('Received outputs', output, triggered_by);
 
           if (output.uid !== currentUser.uid) {
             store.dispatch(_editor.receiveOutputs(output));
@@ -446,6 +462,21 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
         const emails = separateEmails(action.emails);
 
         socketClient?.shareWorkshop(emails, action.ws_id, action.access_level);
+        break;
+      }
+
+      /**
+       * Started unsharing a given notebook
+       */
+      case NOTEBOOKS.UNSHARE.START: {
+        if (store.getState().editor.clientConnectionStatus !== 'Connected') {
+          console.error('Tried to use socket before connected');
+          return;
+        }
+
+        const emails = separateEmails(action.emails);
+
+        socketClient?.unshareNotebook(emails, action.nb_id);
         break;
       }
 

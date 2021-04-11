@@ -378,8 +378,9 @@ export const connectToNotebook = (user: DUser): EditorActionTypes => ({
 /**
  * A user has disconnected from the notebook
  */
-export const disconnectFromNotebook = (uid: string): EditorActionTypes => ({
+export const disconnectFromNotebook = (isMe: boolean, uid: string): EditorActionTypes => ({
   type: NOTEBOOKS.ACCESS.DISCONNECT,
+  isMe,
   uid,
 });
 
@@ -397,8 +398,13 @@ const shareNotebookStart = (
 /**
  * Successfully shared a notebook
  */
-export const shareNotebookSuccess = (nb_id: string, users: NotebookAccessLevel[]): EditorActionTypes => ({
+export const shareNotebookSuccess = (
+  isMe: boolean,
+  nb_id: string,
+  users: NotebookAccessLevel[]
+): EditorActionTypes => ({
   type: NOTEBOOKS.SHARE.SUCCESS,
+  isMe,
   nb_id,
   users,
 });
@@ -439,10 +445,12 @@ const shareWorkshopStart = (
  * Successfully shared a workshop
  */
 export const shareWorkshopSuccess = (
+  isMe: boolean,
   ws_id: string,
   access_levels: Pick<Workshop, 'instructors' | 'attendees'>
 ): EditorActionTypes => ({
   type: WORKSHOPS.SHARE.SUCCESS,
+  isMe,
   ws_id,
   access_levels,
 });
@@ -466,6 +474,45 @@ export const shareWorkshop = (
   access_level: WorkshopAccessLevelType
 ): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(shareWorkshopStart(ws_id, emails, access_level));
+};
+
+const unshareNotebookStart = (nb_id: string, emails: string): EditorActionTypes => ({
+  type: NOTEBOOKS.UNSHARE.START,
+  nb_id,
+  emails,
+});
+
+/**
+ * Successfully unshared a notebook
+ */
+export const unshareNotebookSuccess = (
+  isMe: boolean,
+  includedMe: boolean,
+  nb_id: string,
+  uids: NotebookAccessLevel['uid'][]
+): EditorActionTypes => ({
+  type: NOTEBOOKS.UNSHARE.SUCCESS,
+  isMe,
+  includedMe,
+  nb_id,
+  uids,
+});
+
+/**
+ * Failed to unshare a notebook
+ */
+export const unshareNotebookFailure = (errorMessage: string): EditorActionTypes => ({
+  type: NOTEBOOKS.UNSHARE.FAILURE,
+  error: {
+    message: errorMessage,
+  },
+});
+
+/**
+ * Unshare a notebook with given users
+ */
+export const unshareNotebook = (nb_id: string, emails: string): EditorAsyncActionTypes => async (dispatch) => {
+  dispatch(unshareNotebookStart(nb_id, emails));
 };
 
 /**
