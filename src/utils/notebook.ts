@@ -84,6 +84,21 @@ export const filterAccessLevelsFromList = (...updatedLists: (NotebookAccessLevel
 };
 
 /**
+ * A configurable filter predicate to remove any matching uids that occur in provided lists
+ */
+export const filterUidsFromList = (...updatedLists: string[][]) => (
+  user: ImmutableNotebookAccessLevel | ImmutableWorkshopAccessLevel
+): boolean => {
+  for (const updated of updatedLists) {
+    if (updated.findIndex((uid) => uid === user.uid) !== -1) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+/**
  * A comparator for sorting kernel outputs by their message indices
  */
 export const sortOutputByMessageIndex = (
