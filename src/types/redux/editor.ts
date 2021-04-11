@@ -122,6 +122,11 @@ export const WORKSHOPS = {
     SUCCESS: 'WORKSHOPS_SHARE_SUCCESS',
     FAILURE: 'WORKSHOPS_SHARE_FAILURE',
   },
+  RELEASE: {
+    START: 'WORKSHOPS_RELEASE_START',
+    SUCCESS: 'WORKSHOPS_RELEASE_SUCCESS',
+    FAILURE: 'WORKSHOPS_RELEASE_FAILURE',
+  },
 } as const;
 export const CELL = {
   LOCK: {
@@ -340,7 +345,7 @@ type NotebooksAccessDisconnectAction = {
 
 type NotebooksShareStartAction = {
   type: typeof NOTEBOOKS.SHARE.START;
-  nb_id: string;
+  nb_id: Notebook['nb_id'];
   emails: string;
   access_level: NotebookAccessLevelType;
 };
@@ -390,6 +395,21 @@ type UnshareNotebookSuccessAction = {
 
 type UnshareNotebookFailureAction = {
   type: typeof NOTEBOOKS.UNSHARE.FAILURE;
+} & ActionError;
+
+type ReleaseWorkshopStartAction = {
+  type: typeof WORKSHOPS.RELEASE.START;
+  ws_id: Workshop['ws_id'];
+};
+
+type ReleaseWorkshopSuccessAction = {
+  type: typeof WORKSHOPS.RELEASE.SUCCESS;
+  isMe: boolean;
+  ws_id: Workshop['ws_id'];
+};
+
+type ReleaseWorkshopFailureAction = {
+  type: typeof WORKSHOPS.RELEASE.FAILURE;
 } & ActionError;
 
 type NotebooksOutputsSelectAction = {
@@ -609,6 +629,9 @@ export type EditorActionTypes =
   | UnshareNotebookStartAction
   | UnshareNotebookSuccessAction
   | UnshareNotebookFailureAction
+  | ReleaseWorkshopStartAction
+  | ReleaseWorkshopSuccessAction
+  | ReleaseWorkshopFailureAction
   | NotebooksOutputsSelectAction
   | NotebooksOutputsReceiveAction
   | LockCellStartAction

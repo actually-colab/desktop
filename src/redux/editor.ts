@@ -120,6 +120,10 @@ export interface EditorState {
    * If the editor is unsharing a notebook
    */
   isUnsharingNotebook: boolean;
+  /**
+   * If the editor is releasing a workshop
+   */
+  isReleasingWorkshop: boolean;
 
   /**
    * If the editor is currently adding a cell
@@ -243,6 +247,7 @@ const initialState: EditorState = {
   openingNotebookId: '',
   isSharingNotebook: false,
   isUnsharingNotebook: false,
+  isReleasingWorkshop: false,
 
   isAddingCell: false,
   isDeletingCell: false,
@@ -715,6 +720,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ...state,
         isSharingNotebook: false,
         isUnsharingNotebook: false,
+        isReleasingWorkshop: false,
         lockingCellId: '',
         unlockingCellId: '',
         selectedCellId: '',
@@ -872,6 +878,32 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         isUnsharingNotebook: false,
+      };
+
+    /**
+     * Started to released a workshop
+     */
+    case WORKSHOPS.RELEASE.START:
+      return {
+        ...state,
+        isReleasingWorkshop: true,
+      };
+    /**
+     * Successfully released a workshop
+     */
+    case WORKSHOPS.RELEASE.SUCCESS:
+      return {
+        ...state,
+        isReleasingWorkshop: action.isMe ? false : state.isReleasingWorkshop,
+        workshops: state.workshops.update(action.ws_id, (workshop) => workshop.set('start_time', Date.now())),
+      };
+    /**
+     * Failed to release a workshop
+     */
+    case WORKSHOPS.RELEASE.FAILURE:
+      return {
+        ...state,
+        isReleasingWorkshop: false,
       };
 
     /**

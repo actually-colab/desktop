@@ -106,6 +106,9 @@ const styles = StyleSheet.create({
     marginLeft: spacing.DEFAULT / 4,
     color: palette.GRAY,
   },
+  lastModifiedTextDisabled: {
+    color: palette.LIGHT_GRAY,
+  },
   requiredText: {
     marginLeft: spacing.DEFAULT / 2,
     color: palette.ERROR,
@@ -117,9 +120,10 @@ const ProjectButton: React.FC<{
   name: string;
   time_modified: number;
   loading: boolean;
+  disabled: boolean;
   active: boolean;
   onClick(): void;
-}> = ({ icon, name, time_modified, loading, active, onClick }) => {
+}> = ({ icon, name, time_modified, loading, disabled, active, onClick }) => {
   const timeSinceModification = timeSince(time_modified);
 
   return (
@@ -128,13 +132,16 @@ const ProjectButton: React.FC<{
         block
         className={css(styles.projectButton, active && styles.projectActive)}
         loading={loading}
+        disabled={disabled}
         onClick={onClick}
       >
         <div className={css(styles.projectTitleContainer)}>
           <Icon icon={icon} />
           <span className={css(styles.projectTitle)}>{name}</span>
         </div>
-        <span className={css(styles.lastModifiedText)}>{timeSinceModification}</span>
+        <span className={css(styles.lastModifiedText, disabled && styles.lastModifiedTextDisabled)}>
+          {timeSinceModification}
+        </span>
       </Button>
     </div>
   );
@@ -146,7 +153,9 @@ const ProjectButton: React.FC<{
 const ProjectsPanel: React.FC = () => {
   const newProjectFormRef = React.useRef<FormInstance>();
 
+  const user = useSelector((state: ReduxState) => state.auth.user);
   const isGettingNotebooks = useSelector((state: ReduxState) => state.editor.isGettingNotebooks);
+  const isGettingWorkshops = useSelector((state: ReduxState) => state.editor.isGettingWorkshops);
   const isCreatingNotebook = useSelector((state: ReduxState) => state.editor.isCreatingNotebook);
   const isOpeningNotebook = useSelector((state: ReduxState) => state.editor.isOpeningNotebook);
   const openingNotebookId = useSelector((state: ReduxState) => state.editor.openingNotebookId);
@@ -168,6 +177,7 @@ const ProjectsPanel: React.FC = () => {
 
   const dispatch = useDispatch();
   const dispatchGetNotebooks = React.useCallback(() => dispatch(_editor.getNotebooks()), [dispatch]);
+  const dispatchGetWorkshops = React.useCallback(() => dispatch(_editor.getWorkshops()), [dispatch]);
   const dispatchCreateNotebook = React.useCallback(
     () =>
       newProjectFormRef.current?.check() && dispatch(_editor.createNotebook(newProjectFormValue.name, uploadedContent)),
@@ -320,8 +330,11 @@ const ProjectsPanel: React.FC = () => {
         <IconButton
           icon={<Icon icon="refresh" />}
           appearance="subtle"
-          loading={isGettingNotebooks}
-          onClick={dispatchGetNotebooks}
+          loading={isGettingNotebooks || isGettingWorkshops}
+          onClick={() => {
+            !isGettingNotebooks && dispatchGetNotebooks();
+            !isGettingWorkshops && dispatchGetWorkshops();
+          }}
         />
       </div>
 
@@ -344,6 +357,7 @@ const ProjectsPanel: React.FC = () => {
               active={active}
               time_modified={project.time_modified}
               loading={project.nb_id === openingNotebookId}
+              disabled={false}
               onClick={() => !isOpeningNotebook && !active && dispatchOpenNotebook(project.nb_id)}
             />
           );
@@ -365,6 +379,7 @@ const ProjectsPanel: React.FC = () => {
         .valueSeq()
         .map((project) => {
           const active = project.main_notebook.nb_id === notebook?.nb_id;
+          const isInstructor = project.instructors.findIndex((instructor) => instructor.uid === user?.uid) >= 0;
 
           return (
             <ProjectButton
@@ -374,6 +389,7 @@ const ProjectsPanel: React.FC = () => {
               active={active}
               time_modified={project.main_notebook.time_modified}
               loading={project.main_notebook.nb_id === openingNotebookId}
+              disabled={!isInstructor && !project.start_time}
               onClick={() => !isOpeningNotebook && !active && dispatchOpenNotebook(project.main_notebook.nb_id)}
             />
           );

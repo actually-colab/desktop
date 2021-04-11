@@ -178,7 +178,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
   );
 
   const onFocusEditor = React.useCallback(
-    (cell_id: string) => {
+    (cell_id: EditorCell['cell_id']) => {
       if (!canEdit) return;
 
       if (canLock && user !== null) {
@@ -214,7 +214,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
   }, [cell, dispatch]);
 
   const onChange = React.useCallback(
-    (cell_id: string, changes: Partial<DCell>) => {
+    (cell_id: EditorCell['cell_id'], changes: Partial<DCell>) => {
       dispatchEditCell(cell_id, {
         changes,
       });

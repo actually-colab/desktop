@@ -132,7 +132,7 @@ const EditorHeader: React.FC = () => {
     () => lockedCellId !== '' && dispatch(_editor.stopCodeExecution(lockedCellId)),
     [dispatch, lockedCellId]
   );
-  const dispatchSelectOutputUser = React.useCallback((uid: string) => dispatch(_editor.selectOutputUser(uid)), [
+  const dispatchSelectOutputUser = React.useCallback((uid: DUser['uid']) => dispatch(_editor.selectOutputUser(uid)), [
     dispatch,
   ]);
 

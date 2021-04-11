@@ -42,9 +42,9 @@ export type MinimalKernelOutput = Omit<KernelOutput, 'uid' | 'cell_id' | 'runInd
  */
 export type ReceivableKernelOutputPayload = {
   metadata: {
-    uid: string;
-    nb_id: string;
-    cell_id: string;
+    uid: DUser['uid'];
+    nb_id: Notebook['nb_id'];
+    cell_id: EditorCell['cell_id'];
     runIndex: number;
   };
   messages: KernelOutput[];
