@@ -406,7 +406,7 @@ const shareNotebookStart = (
  */
 export const shareNotebookSuccess = (
   isMe: boolean,
-  nb_id: string,
+  nb_id: Notebook['nb_id'],
   users: NotebookAccessLevel[]
 ): EditorActionTypes => ({
   type: NOTEBOOKS.SHARE.SUCCESS,
@@ -482,7 +482,7 @@ export const shareWorkshop = (
   dispatch(shareWorkshopStart(ws_id, emails, access_level));
 };
 
-const unshareNotebookStart = (nb_id: string, emails: string): EditorActionTypes => ({
+const unshareNotebookStart = (nb_id: Notebook['nb_id'], emails: string): EditorActionTypes => ({
   type: NOTEBOOKS.UNSHARE.START,
   nb_id,
   emails,
@@ -494,7 +494,7 @@ const unshareNotebookStart = (nb_id: string, emails: string): EditorActionTypes 
 export const unshareNotebookSuccess = (
   isMe: boolean,
   includedMe: boolean,
-  nb_id: string,
+  nb_id: Notebook['nb_id'],
   uids: NotebookAccessLevel['uid'][]
 ): EditorActionTypes => ({
   type: NOTEBOOKS.UNSHARE.SUCCESS,
@@ -517,14 +517,47 @@ export const unshareNotebookFailure = (errorMessage: string): EditorActionTypes 
 /**
  * Unshare a notebook with given users
  */
-export const unshareNotebook = (nb_id: string, emails: string): EditorAsyncActionTypes => async (dispatch) => {
+export const unshareNotebook = (nb_id: Notebook['nb_id'], emails: string): EditorAsyncActionTypes => async (
+  dispatch
+) => {
   dispatch(unshareNotebookStart(nb_id, emails));
+};
+
+const releaseWorkshopStart = (ws_id: Workshop['ws_id']): EditorActionTypes => ({
+  type: WORKSHOPS.RELEASE.START,
+  ws_id,
+});
+
+/**
+ * Successfully released a workshop to attendees
+ */
+export const releaseWorkshopSuccess = (isMe: boolean, ws_id: Workshop['ws_id']): EditorActionTypes => ({
+  type: WORKSHOPS.RELEASE.SUCCESS,
+  isMe,
+  ws_id,
+});
+
+/**
+ * Failed to release a workshop to attendees
+ */
+export const releaseWorkshopFailure = (errorMessage: string): EditorActionTypes => ({
+  type: WORKSHOPS.RELEASE.FAILURE,
+  error: {
+    message: errorMessage,
+  },
+});
+
+/**
+ * Release a workshop to attendees
+ */
+export const releaseWorkshop = (ws_id: Workshop['ws_id']): EditorAsyncActionTypes => async (dispatch) => {
+  dispatch(releaseWorkshopStart(ws_id));
 };
 
 /**
  * Select a given user to view outputs for
  */
-export const selectOutputUser = (uid: string): EditorActionTypes => ({
+export const selectOutputUser = (uid: DUser['uid']): EditorActionTypes => ({
   type: NOTEBOOKS.OUTPUTS.SELECT,
   uid,
 });
@@ -749,7 +782,7 @@ export const updateCellCode = (cell_id: EditorCell['cell_id'], code: string): Ed
 /**
  * Select a given cell for running
  */
-export const selectCell = (cell_id: string): EditorActionTypes => ({
+export const selectCell = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
   type: CELL.SELECT.SET,
   cell_id,
 });

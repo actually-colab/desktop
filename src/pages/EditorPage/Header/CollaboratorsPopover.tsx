@@ -132,6 +132,7 @@ const CollaboratorsPanel: React.FC = () => {
   const workshops = useSelector((state: ReduxState) => state.editor.workshops);
   const isSharingNotebook = useSelector((state: ReduxState) => state.editor.isSharingNotebook);
   const isUnsharingNotebook = useSelector((state: ReduxState) => state.editor.isUnsharingNotebook);
+  const isReleasingWorkshop = useSelector((state: ReduxState) => state.editor.isReleasingWorkshop);
 
   const [shareNotebookFormValue, setShareNotebookFormValue] = React.useState<ShareNotebookFormValue>({
     emails: '',
@@ -145,10 +146,10 @@ const CollaboratorsPanel: React.FC = () => {
   const workshop = React.useMemo(() => workshops.get(notebook?.ws_id ?? '') ?? null, [notebook?.ws_id, workshops]);
   const accessLevel = React.useMemo(
     () =>
-      workshop
+      workshop?.instructors !== undefined
         ? workshop.instructors.find((_user) => _user.uid === user?.uid)
         : notebook?.users.find((_user) => _user.uid === user?.uid),
-    [notebook?.users, user?.uid, workshop]
+    [notebook?.users, user?.uid, workshop?.instructors]
   );
   const canEdit = React.useMemo(
     () => accessLevel?.access_level === 'Full Access' || accessLevel?.access_level === 'Instructor',
@@ -161,11 +162,11 @@ const CollaboratorsPanel: React.FC = () => {
   const dispatch = useDispatch();
   const dispatchShareNotebook = React.useCallback(
     () =>
-      notebook &&
+      notebook?.nb_id &&
       dispatch(
         _editor.shareNotebook(notebook.nb_id, shareNotebookFormValue.emails, shareNotebookFormValue.accessLevel)
       ),
-    [dispatch, notebook, shareNotebookFormValue.accessLevel, shareNotebookFormValue.emails]
+    [dispatch, notebook?.nb_id, shareNotebookFormValue.accessLevel, shareNotebookFormValue.emails]
   );
   const dispatchShareWorkshop = React.useCallback(
     () =>
@@ -176,8 +177,12 @@ const CollaboratorsPanel: React.FC = () => {
     [dispatch, shareWorkshopFormValue.accessLevel, shareWorkshopFormValue.emails, workshop]
   );
   const dispatchUnshareNotebook = React.useCallback(
-    (email: string) => notebook && dispatch(_editor.unshareNotebook(notebook.nb_id, email)),
-    [dispatch, notebook]
+    (email: string) => notebook?.nb_id && dispatch(_editor.unshareNotebook(notebook.nb_id, email)),
+    [dispatch, notebook?.nb_id]
+  );
+  const dispatchReleaseWorkshop = React.useCallback(
+    () => workshop?.ws_id && dispatch(_editor.releaseWorkshop(workshop.ws_id)),
+    [dispatch, workshop?.ws_id]
   );
 
   const handleShareFormSubmit = React.useCallback(
@@ -296,6 +301,7 @@ const CollaboratorsPanel: React.FC = () => {
                         size="lg"
                       />
                     </FlexboxGrid.Item>
+
                     {canEdit && (
                       <FlexboxGrid.Item colspan={2}>
                         <IconButton
@@ -367,19 +373,23 @@ const CollaboratorsPanel: React.FC = () => {
 
             {!sharedAttendees?.size && <p>No attendees</p>}
 
-            <Button
-              className={css(styles.shareButton)}
-              appearance="primary"
-              block
-              loading={false}
-              disabled={!sharedAttendees?.size}
-              onClick={() => console.log('TODO')}
-            >
-              <Icon icon="envelope-open-o" size="lg" />
-              <span className={css(styles.shareText)}>Release</span>
-            </Button>
+            {canEdit && (
+              <React.Fragment>
+                <Button
+                  className={css(styles.shareButton)}
+                  appearance="primary"
+                  block
+                  loading={isReleasingWorkshop}
+                  disabled={!sharedAttendees?.size || !!workshop.start_time}
+                  onClick={dispatchReleaseWorkshop}
+                >
+                  <Icon icon="envelope-open-o" size="lg" />
+                  <span className={css(styles.shareText)}>{workshop.start_time ? 'Released' : 'Release'}</span>
+                </Button>
 
-            <p>Releasing the workshop will open it up for attendees</p>
+                <p>Releasing the workshop will open it up for attendees</p>
+              </React.Fragment>
+            )}
           </React.Fragment>
         )}
       </div>

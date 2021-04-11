@@ -186,6 +186,15 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
         });
 
         /**
+         * A workshop was released to attendees
+         */
+        socketClient.on('workshop_started', (ws_id, triggered_by) => {
+          console.log('Workshop started', ws_id, triggered_by);
+
+          store.dispatch(_editor.releaseWorkshopSuccess(triggered_by === currentUser.uid, ws_id));
+        });
+
+        /**
          * A cell was created by a given user
          */
         socketClient.on('cell_created', (dcell, triggered_by) => {
@@ -477,6 +486,19 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
         const emails = separateEmails(action.emails);
 
         socketClient?.unshareNotebook(emails, action.nb_id);
+        break;
+      }
+
+      /**
+       * Started releasing a given workshop
+       */
+      case WORKSHOPS.RELEASE.START: {
+        if (store.getState().editor.clientConnectionStatus !== 'Connected') {
+          console.error('Tried to use socket before connected');
+          return;
+        }
+
+        socketClient?.startWorkshop(action.ws_id);
         break;
       }
 
