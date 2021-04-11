@@ -3,6 +3,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import { Button, Form, FormControl, FormGroup, Icon, Schema } from 'rsuite';
 import { FormInstance } from 'rsuite/lib/Form';
+import { Map as ImmutableMap } from 'immutable';
+import { format } from 'date-fns';
+import { DUser } from '@actually-colab/editor-types';
 
 import { palette, spacing } from '../../../constants/theme';
 import { ReduxState } from '../../../types/redux';
@@ -39,6 +42,9 @@ const styles = StyleSheet.create({
     marginLeft: spacing.DEFAULT * 2,
     marginRight: 0,
     backgroundColor: palette.PRIMARY,
+  },
+  timestamp: {
+    fontSize: 12,
   },
   composeContainer: {
     borderTopStyle: 'solid',
@@ -83,6 +89,13 @@ const ChatPanel: React.FC = () => {
   });
 
   const uid = React.useMemo(() => user?.uid ?? '', [user?.uid]);
+  const userLookup = React.useMemo(
+    () =>
+      ImmutableMap<DUser['uid'], string>().withMutations((mtx) =>
+        notebook?.users?.forEach((user) => mtx.set(user.uid, user.name))
+      ),
+    [notebook?.users]
+  );
 
   const dispatch = useDispatch();
   const dispatchSendMessage = React.useCallback((message: string) => dispatch(_editor.sendMessage(message)), [
@@ -115,6 +128,9 @@ const ChatPanel: React.FC = () => {
               key={`${message.uid}-${message.timestamp}`}
               className={css(styles.messageBubble, message.uid === uid && styles.messageBubbleSelf)}
             >
+              <h6>{userLookup.get(message.uid) ?? 'Unknown'}</h6>
+              <p className={css(styles.timestamp)}>{format(message.timestamp, 'pp')}</p>
+
               <p>{message.message}</p>
             </div>
           ))}
