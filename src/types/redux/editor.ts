@@ -331,13 +331,14 @@ type NotebooksAccessDisconnectAction = {
 type NotebooksShareStartAction = {
   type: typeof NOTEBOOKS.SHARE.START;
   nb_id: string;
-  email: string;
+  emails: string;
   access_level: NotebookAccessLevelType;
 };
 
 type NotebooksShareSuccessAction = {
   type: typeof NOTEBOOKS.SHARE.SUCCESS;
-  user: NotebookAccessLevel;
+  nb_id: string;
+  users: NotebookAccessLevel[];
 };
 
 type NotebooksShareFailureAction = {

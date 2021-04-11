@@ -372,21 +372,22 @@ export const disconnectFromNotebook = (uid: string): EditorActionTypes => ({
 
 const shareNotebookStart = (
   nb_id: Notebook['nb_id'],
-  email: string,
+  emails: string,
   access_level: NotebookAccessLevelType
 ): EditorActionTypes => ({
   type: NOTEBOOKS.SHARE.START,
   nb_id,
-  email,
+  emails,
   access_level,
 });
 
 /**
  * Successfully shared a notebook
  */
-export const shareNotebookSuccess = (user: NotebookAccessLevel): EditorActionTypes => ({
+export const shareNotebookSuccess = (nb_id: string, users: NotebookAccessLevel[]): EditorActionTypes => ({
   type: NOTEBOOKS.SHARE.SUCCESS,
-  user,
+  nb_id,
+  users,
 });
 
 /**
@@ -404,10 +405,10 @@ export const shareNotebooksFailure = (errorMessage: string = 'Unknown Error'): E
  */
 export const shareNotebook = (
   nb_id: Notebook['nb_id'],
-  email: string,
+  emails: string,
   access_level: NotebookAccessLevelType
 ): EditorAsyncActionTypes => async (dispatch) => {
-  dispatch(shareNotebookStart(nb_id, email, access_level));
+  dispatch(shareNotebookStart(nb_id, emails, access_level));
 };
 
 const shareWorkshopStart = (

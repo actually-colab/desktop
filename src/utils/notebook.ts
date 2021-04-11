@@ -35,6 +35,13 @@ import { filterUndefined } from './filter';
 import { splitKeepNewlines } from './regex';
 
 /**
+ * Separate comma separated string of emails into an array of emails
+ */
+export const separateEmails = (emailsString: string): string[] => {
+  return emailsString.split(',').map((piece) => piece.trim());
+};
+
+/**
  * A configurable comparator to sort notebook types
  */
 export const sortNotebookBy = (sortType: 'name' | 'modified') => (

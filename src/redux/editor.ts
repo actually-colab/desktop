@@ -708,7 +708,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
      * Successfully shared a notebook
      */
     case NOTEBOOKS.SHARE.SUCCESS: {
-      if (!state.notebook || !state.notebooks.has(state.notebook.nb_id)) {
+      if (!state.notebooks.has(action.nb_id)) {
         return {
           ...state,
           isSharingNotebook: false,
@@ -718,20 +718,23 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         isSharingNotebook: false,
-        notebooks: state.notebooks.update(state.notebook.nb_id, (notebook) =>
+        notebooks: state.notebooks.update(action.nb_id, (notebook) =>
           notebook.set(
             'users',
             notebook.users
-              .filter((user) => user.uid !== action.user.uid)
-              .push(new ImmutableNotebookAccessLevelFactory(action.user))
+              .filter((user) => action.users.findIndex((_user) => _user.uid === user.uid) === -1)
+              .concat(action.users.map((user) => new ImmutableNotebookAccessLevelFactory(user)))
           )
         ),
-        notebook: state.notebook.set(
-          'users',
-          state.notebook.users
-            .filter((user) => user.uid !== action.user.uid)
-            .push(new ImmutableNotebookAccessLevelFactory(action.user))
-        ),
+        notebook:
+          state.notebook?.nb_id === action.nb_id
+            ? state.notebook.set(
+                'users',
+                state.notebook.users
+                  .filter((user) => action.users.findIndex((_user) => _user.uid === user.uid) === -1)
+                  .concat(action.users.map((user) => new ImmutableNotebookAccessLevelFactory(user)))
+              )
+            : state.notebook,
       };
     }
     /**

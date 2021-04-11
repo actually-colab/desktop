@@ -27,7 +27,7 @@ import { _editor } from '../../../redux/actions';
 import { UserAvatar } from '../../../components';
 
 type ShareNotebookFormValue = {
-  email: string;
+  emails: string;
   accessLevel: NotebookAccessLevelType;
 };
 
@@ -37,10 +37,17 @@ type ShareWorkshopFormValue = {
 };
 
 /**
+ * Regex for comma separated emails
+ */
+const EMAILS_REGEX = /^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$/g;
+
+/**
  * The rsuite model to check if a collaborator form is valid for notebooks
  */
 const shareNotebookFormModel = Schema.Model({
-  email: Schema.Types.StringType().isEmail('Not a valid email').isRequired('This field is required'),
+  emails: Schema.Types.StringType()
+    .pattern(EMAILS_REGEX, 'Must be a comma separated list of emails')
+    .isRequired('This field is required'),
   accessLevel: Schema.Types.StringType()
     .isOneOf(['Read Only', 'Full Access'], 'Please select a valid option')
     .isRequired('This field is required'),
@@ -51,10 +58,7 @@ const shareNotebookFormModel = Schema.Model({
  */
 const shareWorkshopFormModel = Schema.Model({
   emails: Schema.Types.StringType()
-    .pattern(
-      /^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$/g,
-      'Must be a comma separated list of emails'
-    )
+    .pattern(EMAILS_REGEX, 'Must be a comma separated list of emails')
     .isRequired('This field is required'),
   accessLevel: Schema.Types.StringType()
     .isOneOf(['Instructor', 'Attendee'], 'Please select a valid option')
@@ -128,7 +132,7 @@ const CollaboratorsPanel: React.FC = () => {
   const workshops = useSelector((state: ReduxState) => state.editor.workshops);
 
   const [shareNotebookFormValue, setShareNotebookFormValue] = React.useState<ShareNotebookFormValue>({
-    email: '',
+    emails: '',
     accessLevel: 'Full Access',
   });
   const [shareWorkshopFormValue, setShareWorkshopFormValue] = React.useState<ShareWorkshopFormValue>({
@@ -157,9 +161,9 @@ const CollaboratorsPanel: React.FC = () => {
     () =>
       notebook &&
       dispatch(
-        _editor.shareNotebook(notebook?.nb_id, shareNotebookFormValue.email, shareNotebookFormValue.accessLevel)
+        _editor.shareNotebook(notebook?.nb_id, shareNotebookFormValue.emails, shareNotebookFormValue.accessLevel)
       ),
-    [dispatch, notebook, shareNotebookFormValue.accessLevel, shareNotebookFormValue.email]
+    [dispatch, notebook, shareNotebookFormValue.accessLevel, shareNotebookFormValue.emails]
   );
   const dispatchShareWorkshop = React.useCallback(
     () =>
@@ -188,7 +192,7 @@ const CollaboratorsPanel: React.FC = () => {
         dispatchShareNotebook();
         setShareNotebookFormValue((prevShareFormValue) => ({
           ...prevShareFormValue,
-          email: '',
+          emails: '',
         }));
       }
     },
@@ -214,41 +218,30 @@ const CollaboratorsPanel: React.FC = () => {
               }
               onSubmit={handleShareFormSubmit}
             >
+              <FormGroup>
+                <ControlLabel>
+                  Collaborator email(s) <span className={css(styles.required)}>Required</span>
+                </ControlLabel>
+                <FormControl name="emails" label="Email(s)" placeholder="Email(s)" />
+                <HelpBlock>This can be a comma separated list of emails</HelpBlock>
+              </FormGroup>
+
               {workshop === null ? (
-                <React.Fragment>
-                  <FormGroup>
-                    <ControlLabel>
-                      Collaborator email <span className={css(styles.required)}>Required</span>
-                    </ControlLabel>
-                    <FormControl name="email" label="Email" placeholder="Email" />
-                  </FormGroup>
-
-                  <FormGroup>
-                    <ControlLabel>Access level</ControlLabel>
-                    <FormControl className={css(styles.fullPicker)} name="accessLevel" accepter={RadioGroup}>
-                      <Radio value="Full Access">Full access</Radio>
-                      <Radio value="Read Only">Read only</Radio>
-                    </FormControl>
-                  </FormGroup>
-                </React.Fragment>
+                <FormGroup>
+                  <ControlLabel>Access level</ControlLabel>
+                  <FormControl className={css(styles.fullPicker)} name="accessLevel" accepter={RadioGroup}>
+                    <Radio value="Full Access">Full access</Radio>
+                    <Radio value="Read Only">Read only</Radio>
+                  </FormControl>
+                </FormGroup>
               ) : (
-                <React.Fragment>
-                  <FormGroup>
-                    <ControlLabel>
-                      Collaborator email(s) <span className={css(styles.required)}>Required</span>
-                    </ControlLabel>
-                    <FormControl name="emails" label="Emails" placeholder="Email" />
-                    <HelpBlock>This can be a comma separated list of emails</HelpBlock>
-                  </FormGroup>
-
-                  <FormGroup>
-                    <ControlLabel>Access level</ControlLabel>
-                    <FormControl className={css(styles.fullPicker)} name="accessLevel" accepter={RadioGroup}>
-                      <Radio value="Instructor">Instructor</Radio>
-                      <Radio value="Attendee">Attendee</Radio>
-                    </FormControl>
-                  </FormGroup>
-                </React.Fragment>
+                <FormGroup>
+                  <ControlLabel>Access level</ControlLabel>
+                  <FormControl className={css(styles.fullPicker)} name="accessLevel" accepter={RadioGroup}>
+                    <Radio value="Instructor">Instructor</Radio>
+                    <Radio value="Attendee">Attendee</Radio>
+                  </FormControl>
+                </FormGroup>
               )}
             </Form>
 
