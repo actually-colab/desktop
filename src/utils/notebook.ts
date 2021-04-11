@@ -1,4 +1,12 @@
-import { DCell, Notebook, NotebookAccessLevel, NotebookContents, DUser, OOutput } from '@actually-colab/editor-types';
+import {
+  DCell,
+  Notebook,
+  NotebookAccessLevel,
+  NotebookContents,
+  DUser,
+  OOutput,
+  WorkshopAccessLevel,
+} from '@actually-colab/editor-types';
 import { List as ImmutableList, Map as ImmutableMap } from 'immutable';
 import { saveAs } from 'file-saver';
 
@@ -20,9 +28,81 @@ import {
   ImmutableNotebookAccessLevelFactory,
   ImmutableReducedNotebook,
   ImmutableReducedNotebookFactory,
+  ImmutableWorkshopAccessLevel,
+  ImmutableWorkshopAccessLevelFactory,
 } from '../immutable';
 import { filterUndefined } from './filter';
 import { splitKeepNewlines } from './regex';
+
+/**
+ * Separate comma separated string of emails into an array of emails
+ */
+export const separateEmails = (emailsString: string): string[] => {
+  return emailsString.split(',').map((piece) => piece.trim());
+};
+
+/**
+ * A configurable comparator to sort notebook types
+ */
+export const sortNotebookBy = (sortType: 'name' | 'modified') => (
+  a: {
+    name: string;
+    time_modified: number;
+  },
+  b: {
+    name: string;
+    time_modified: number;
+  }
+): number => {
+  if (sortType === 'name') {
+    return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+  }
+
+  return b.time_modified - a.time_modified;
+};
+
+/**
+ * A comparator to sort users by name
+ */
+export const sortUsersByName = (a: { name: string }, b: { name: string }): number =>
+  a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+
+/**
+ * A configurable filter predicate to search for a name that includes a fragment of a name anywhere in it
+ */
+export const filterNotebookByName = (nameFragment: string) => (notebook: { name: string }): boolean => {
+  return notebook.name.toLowerCase().includes(nameFragment.toLowerCase());
+};
+
+/**
+ * A configurable filter predicate to remove any matching users that occur in provided lists
+ */
+export const filterAccessLevelsFromList = (...updatedLists: (NotebookAccessLevel | WorkshopAccessLevel)[][]) => (
+  user: ImmutableNotebookAccessLevel | ImmutableWorkshopAccessLevel
+): boolean => {
+  for (const updated of updatedLists) {
+    if (updated.findIndex((_user) => _user.uid === user.uid) !== -1) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+/**
+ * A configurable filter predicate to remove any matching uids that occur in provided lists
+ */
+export const filterUidsFromList = (...updatedLists: string[][]) => (
+  user: ImmutableNotebookAccessLevel | ImmutableWorkshopAccessLevel
+): boolean => {
+  for (const updated of updatedLists) {
+    if (updated.findIndex((uid) => uid === user.uid) !== -1) {
+      return false;
+    }
+  }
+
+  return true;
+};
 
 /**
  * A comparator for sorting kernel outputs by their message indices
@@ -63,8 +143,18 @@ export const reduceNotebookContents = (notebook: NotebookContents): ReducedNoteb
 /**
  * Convert an array of access levels to an immutable list of immutable access levels
  */
-export const makeAccessLevelsImmutable = (users: NotebookAccessLevel[]): ImmutableList<ImmutableNotebookAccessLevel> =>
+export const makeNotebookAccessLevelsImmutable = (
+  users: NotebookAccessLevel[]
+): ImmutableList<ImmutableNotebookAccessLevel> =>
   ImmutableList(users.map((user) => new ImmutableNotebookAccessLevelFactory(user)));
+
+/**
+ * Convert an array of access levels to an immutable list of immutable access levels
+ */
+export const makeWorkshopAccessLevelsImmutable = (
+  users: WorkshopAccessLevel[]
+): ImmutableList<ImmutableWorkshopAccessLevel> =>
+  ImmutableList(users.map((user) => new ImmutableWorkshopAccessLevelFactory(user)));
 
 /**
  * Given a DCell, make sure all values exist
@@ -72,7 +162,8 @@ export const makeAccessLevelsImmutable = (users: NotebookAccessLevel[]): Immutab
 export const cleanDCell = (cell: DCell): Required<DCell> => {
   return {
     ...cell,
-    cursor_pos: cell.cursor_pos ?? null,
+    cursor_col: cell.cursor_col ?? null,
+    cursor_row: cell.cursor_row ?? null,
     lock_held_by: cell.lock_held_by ?? '',
   };
 };
@@ -119,6 +210,30 @@ export const convertOutputToReceivablePayload = (output: OOutput): ReceivableKer
  */
 export const convertSendablePayloadToOutputString = (payload: SendableKernelOutputPayload): string => {
   return JSON.stringify(payload);
+};
+
+/**
+ * Convert arbitrary text to an array of DCells if possible, otherwise null
+ */
+export const convertTextToCells = (text: string): Pick<DCell, 'language' | 'contents'>[] | null => {
+  try {
+    const ipynb = JSON.parse(text) as IpynbNotebook;
+
+    const cells: Pick<DCell, 'language' | 'contents'>[] = [];
+
+    ipynb.cells
+      .filter((cell) => cell.cell_type === 'code' || cell.cell_type === 'markdown')
+      .forEach((cell) => {
+        cells.push({
+          language: cell.cell_type === 'code' ? 'python' : 'markdown',
+          contents: Array.isArray(cell.source) ? cell.source.join('') : cell.source,
+        });
+      });
+
+    return cells;
+  } catch (error) {
+    return null;
+  }
 };
 
 /**

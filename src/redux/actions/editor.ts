@@ -5,13 +5,27 @@ import type {
   NotebookContents,
   DUser,
   OOutput,
+  Workshop,
+  NotebookAccessLevel,
+  WorkshopAccessLevelType,
+  OChatMessage,
 } from '@actually-colab/editor-types';
 import { format } from 'date-fns';
 
-import { CELL, CLIENT, EditorActionTypes, EditorAsyncActionTypes, KERNEL, NOTEBOOKS } from '../../types/redux/editor';
+import {
+  CELL,
+  CLIENT,
+  CONTACTS,
+  EditorActionTypes,
+  EditorAsyncActionTypes,
+  KERNEL,
+  NOTEBOOKS,
+  WORKSHOPS,
+} from '../../types/redux/editor';
 import { EditorCell, EditorCellMeta, KernelOutput } from '../../types/notebook';
 import { Kernel, KernelLog } from '../../types/kernel';
 import { ImmutableEditorCell } from '../../immutable';
+import { RecentUsersStorage } from '../../utils/storage';
 
 /**
  * Started connecting to the client socket
@@ -33,6 +47,34 @@ export const connectToClientSuccess = (): EditorActionTypes => ({
 export const connectToClientFailure = (): EditorActionTypes => ({
   type: CLIENT.CONNECT.FAILURE,
 });
+
+const getContactsSuccess = (contacts: DUser['email'][]): EditorActionTypes => ({
+  type: CONTACTS.GET.SUCCESS,
+  contacts,
+});
+
+/**
+ * Get contacts from local storage
+ */
+export const getContacts = (): EditorAsyncActionTypes => async (dispatch) => {
+  const contacts = RecentUsersStorage.get();
+
+  dispatch(getContactsSuccess(contacts));
+};
+
+const setContactsSuccess = (contacts: DUser['email'][]): EditorActionTypes => ({
+  type: CONTACTS.SET.SUCCESS,
+  contacts,
+});
+
+/**
+ * Set contacts in local storage
+ */
+export const setContacts = (contacts: DUser['email'][]): EditorAsyncActionTypes => async (dispatch) => {
+  RecentUsersStorage.set(contacts);
+
+  dispatch(setContactsSuccess(contacts));
+};
 
 /**
  * Add a new log message
@@ -192,9 +234,39 @@ export const getNotebooks = (): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(getNotebooksStart());
 };
 
-const createNotebookStart = (name: string): EditorActionTypes => ({
+const getWorkshopsStart = (): EditorActionTypes => ({
+  type: WORKSHOPS.GET.START,
+});
+
+/**
+ * Successfully got the workshops
+ */
+export const getWorkshopsSuccess = (workshops: Workshop[]): EditorActionTypes => ({
+  type: WORKSHOPS.GET.SUCCESS,
+  workshops,
+});
+
+/**
+ * Failed to get the workshops
+ */
+export const getWorkshopsFailure = (errorMessage: string): EditorActionTypes => ({
+  type: WORKSHOPS.GET.FAILURE,
+  error: {
+    message: errorMessage,
+  },
+});
+
+/**
+ * Get a list of workshops for the current user
+ */
+export const getWorkshops = (): EditorAsyncActionTypes => async (dispatch) => {
+  dispatch(getWorkshopsStart());
+};
+
+const createNotebookStart = (name: string, cells: Pick<DCell, 'language' | 'contents'>[] = []): EditorActionTypes => ({
   type: NOTEBOOKS.CREATE.START,
   name,
+  cells,
 });
 
 /**
@@ -218,8 +290,51 @@ export const createNotebookFailure = (errorMessage: string = 'Unknown Error'): E
 /**
  * Create a notebook with the given name
  */
-export const createNotebook = (name: string): EditorAsyncActionTypes => async (dispatch) => {
-  dispatch(createNotebookStart(name));
+export const createNotebook = (
+  name: string,
+  cells: Pick<DCell, 'language' | 'contents'>[] = []
+): EditorAsyncActionTypes => async (dispatch) => {
+  dispatch(createNotebookStart(name, cells));
+};
+
+const createWorkshopStart = (
+  name: string,
+  description: string,
+  cells: Pick<DCell, 'language' | 'contents'>[] = []
+): EditorActionTypes => ({
+  type: WORKSHOPS.CREATE.START,
+  name,
+  description,
+  cells,
+});
+
+/**
+ * Successfully created a workshop
+ */
+export const createWorkshopSuccess = (workshop: Workshop): EditorActionTypes => ({
+  type: WORKSHOPS.CREATE.SUCCESS,
+  workshop,
+});
+
+/**
+ * Failed to create a workshop
+ */
+export const createWorkshopFailure = (errorMessage: string): EditorActionTypes => ({
+  type: WORKSHOPS.CREATE.FAILURE,
+  error: {
+    message: errorMessage,
+  },
+});
+
+/**
+ * Create a workshop with the given name and description
+ */
+export const createWorkshop = (
+  name: string,
+  description: string,
+  cells: Pick<DCell, 'language' | 'contents'>[] = []
+): EditorAsyncActionTypes => async (dispatch) => {
+  dispatch(createWorkshopStart(name, description, cells));
 };
 
 const openNotebookStart = (nb_id: Notebook['nb_id']): EditorActionTypes => ({
@@ -256,36 +371,49 @@ export const openNotebook = (nb_id: Notebook['nb_id']): EditorAsyncActionTypes =
 /**
  * A user has connected to a notebook
  */
-export const connectToNotebook = (user: DUser): EditorActionTypes => ({
+export const connectToNotebook = (nb_id: Notebook['nb_id'], uid: DUser['uid']): EditorActionTypes => ({
   type: NOTEBOOKS.ACCESS.CONNECT,
-  user,
+  nb_id,
+  uid,
 });
 
 /**
  * A user has disconnected from the notebook
  */
-export const disconnectFromNotebook = (uid: string): EditorActionTypes => ({
+export const disconnectFromNotebook = (
+  isMe: boolean,
+  nb_id: Notebook['nb_id'],
+  uid: DUser['uid']
+): EditorActionTypes => ({
   type: NOTEBOOKS.ACCESS.DISCONNECT,
+  isMe,
+  nb_id,
   uid,
 });
 
 const shareNotebookStart = (
   nb_id: Notebook['nb_id'],
-  email: string,
+  emails: string,
   access_level: NotebookAccessLevelType
 ): EditorActionTypes => ({
   type: NOTEBOOKS.SHARE.START,
   nb_id,
-  email,
+  emails,
   access_level,
 });
 
 /**
  * Successfully shared a notebook
  */
-export const shareNotebookSuccess = (notebook: Notebook): EditorActionTypes => ({
+export const shareNotebookSuccess = (
+  isMe: boolean,
+  nb_id: Notebook['nb_id'],
+  users: NotebookAccessLevel[]
+): EditorActionTypes => ({
   type: NOTEBOOKS.SHARE.SUCCESS,
-  notebook,
+  isMe,
+  nb_id,
+  users,
 });
 
 /**
@@ -303,16 +431,134 @@ export const shareNotebooksFailure = (errorMessage: string = 'Unknown Error'): E
  */
 export const shareNotebook = (
   nb_id: Notebook['nb_id'],
-  email: string,
+  emails: string,
   access_level: NotebookAccessLevelType
 ): EditorAsyncActionTypes => async (dispatch) => {
-  dispatch(shareNotebookStart(nb_id, email, access_level));
+  dispatch(shareNotebookStart(nb_id, emails, access_level));
+};
+
+const shareWorkshopStart = (
+  ws_id: Workshop['ws_id'],
+  emails: string,
+  access_level: WorkshopAccessLevelType
+): EditorActionTypes => ({
+  type: WORKSHOPS.SHARE.START,
+  ws_id,
+  emails,
+  access_level,
+});
+
+/**
+ * Successfully shared a workshop
+ */
+export const shareWorkshopSuccess = (
+  isMe: boolean,
+  ws_id: string,
+  access_levels: Pick<Workshop, 'instructors' | 'attendees'>
+): EditorActionTypes => ({
+  type: WORKSHOPS.SHARE.SUCCESS,
+  isMe,
+  ws_id,
+  access_levels,
+});
+
+/**
+ * Failed to share a workshop
+ */
+export const shareWorkshopFailure = (errorMessage: string): EditorActionTypes => ({
+  type: WORKSHOPS.SHARE.FAILURE,
+  error: {
+    message: errorMessage,
+  },
+});
+
+/**
+ * Share a workshop with given users
+ */
+export const shareWorkshop = (
+  ws_id: Workshop['ws_id'],
+  emails: string,
+  access_level: WorkshopAccessLevelType
+): EditorAsyncActionTypes => async (dispatch) => {
+  dispatch(shareWorkshopStart(ws_id, emails, access_level));
+};
+
+const unshareNotebookStart = (nb_id: Notebook['nb_id'], emails: string): EditorActionTypes => ({
+  type: NOTEBOOKS.UNSHARE.START,
+  nb_id,
+  emails,
+});
+
+/**
+ * Successfully unshared a notebook
+ */
+export const unshareNotebookSuccess = (
+  isMe: boolean,
+  includedMe: boolean,
+  nb_id: Notebook['nb_id'],
+  uids: NotebookAccessLevel['uid'][]
+): EditorActionTypes => ({
+  type: NOTEBOOKS.UNSHARE.SUCCESS,
+  isMe,
+  includedMe,
+  nb_id,
+  uids,
+});
+
+/**
+ * Failed to unshare a notebook
+ */
+export const unshareNotebookFailure = (errorMessage: string): EditorActionTypes => ({
+  type: NOTEBOOKS.UNSHARE.FAILURE,
+  error: {
+    message: errorMessage,
+  },
+});
+
+/**
+ * Unshare a notebook with given users
+ */
+export const unshareNotebook = (nb_id: Notebook['nb_id'], emails: string): EditorAsyncActionTypes => async (
+  dispatch
+) => {
+  dispatch(unshareNotebookStart(nb_id, emails));
+};
+
+const releaseWorkshopStart = (ws_id: Workshop['ws_id']): EditorActionTypes => ({
+  type: WORKSHOPS.RELEASE.START,
+  ws_id,
+});
+
+/**
+ * Successfully released a workshop to attendees
+ */
+export const releaseWorkshopSuccess = (isMe: boolean, ws_id: Workshop['ws_id']): EditorActionTypes => ({
+  type: WORKSHOPS.RELEASE.SUCCESS,
+  isMe,
+  ws_id,
+});
+
+/**
+ * Failed to release a workshop to attendees
+ */
+export const releaseWorkshopFailure = (errorMessage: string): EditorActionTypes => ({
+  type: WORKSHOPS.RELEASE.FAILURE,
+  error: {
+    message: errorMessage,
+  },
+});
+
+/**
+ * Release a workshop to attendees
+ */
+export const releaseWorkshop = (ws_id: Workshop['ws_id']): EditorAsyncActionTypes => async (dispatch) => {
+  dispatch(releaseWorkshopStart(ws_id));
 };
 
 /**
  * Select a given user to view outputs for
  */
-export const selectOutputUser = (uid: string): EditorActionTypes => ({
+export const selectOutputUser = (uid: DUser['uid']): EditorActionTypes => ({
   type: NOTEBOOKS.OUTPUTS.SELECT,
   uid,
 });
@@ -324,6 +570,37 @@ export const receiveOutputs = (output: OOutput): EditorActionTypes => ({
   type: NOTEBOOKS.OUTPUTS.RECEIVE,
   output,
 });
+
+const sendMessageStart = (message: string): EditorActionTypes => ({
+  type: NOTEBOOKS.SEND_MESSAGE.START,
+  message,
+});
+
+/**
+ * Successfully sent a message
+ */
+export const sendMessageSuccess = (isMe: boolean, message: OChatMessage): EditorActionTypes => ({
+  type: NOTEBOOKS.SEND_MESSAGE.SUCCESS,
+  isMe,
+  message,
+});
+
+/**
+ * Failed to send a message
+ */
+export const sendMessageFailure = (errorMessage: string): EditorActionTypes => ({
+  type: NOTEBOOKS.SEND_MESSAGE.FAILURE,
+  error: {
+    message: errorMessage,
+  },
+});
+
+/**
+ * Send a message to collaborators
+ */
+export const sendMessage = (message: string): EditorAsyncActionTypes => async (dispatch) => {
+  dispatch(sendMessageStart(message));
+};
 
 const lockCellStart = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
   type: CELL.LOCK.START,
@@ -337,7 +614,7 @@ export const lockCellSuccess = (
   isMe: boolean,
   uid: DUser['uid'],
   cell_id: EditorCell['cell_id'],
-  cell: Partial<EditorCell>
+  cell: Required<DCell>
 ): EditorActionTypes => ({
   type: CELL.LOCK.SUCCESS,
   isMe,
@@ -376,7 +653,7 @@ export const unlockCellSuccess = (
   isMe: boolean,
   uid: DUser['uid'],
   cell_id: EditorCell['cell_id'],
-  cell: Partial<EditorCell>
+  cell: Required<DCell>
 ): EditorActionTypes => ({
   type: CELL.UNLOCK.SUCCESS,
   isMe,
@@ -414,7 +691,7 @@ export const addCellSuccess = (
   isMe: boolean,
   cell_id: EditorCell['cell_id'],
   index: number,
-  cell: Partial<EditorCell>
+  cell: Required<DCell>
 ): EditorActionTypes => ({
   type: CELL.ADD.SUCCESS,
   isMe,
@@ -448,9 +725,14 @@ const deleteCellStart = (cell_id: EditorCell['cell_id']): EditorActionTypes => (
 /**
  * Successfully deleted a cell
  */
-export const deleteCellSuccess = (isMe: boolean, cell_id: EditorCell['cell_id']): EditorActionTypes => ({
+export const deleteCellSuccess = (
+  isMe: boolean,
+  nb_id: Notebook['nb_id'],
+  cell_id: EditorCell['cell_id']
+): EditorActionTypes => ({
   type: CELL.DELETE.SUCCESS,
   isMe,
+  nb_id,
   cell_id,
 });
 
@@ -537,7 +819,7 @@ export const updateCellCode = (cell_id: EditorCell['cell_id'], code: string): Ed
 /**
  * Select a given cell for running
  */
-export const selectCell = (cell_id: string): EditorActionTypes => ({
+export const selectCell = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
   type: CELL.SELECT.SET,
   cell_id,
 });

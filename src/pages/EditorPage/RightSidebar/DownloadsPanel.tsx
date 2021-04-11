@@ -50,7 +50,7 @@ const DownloadsPanel: React.FC = () => {
         title="Download"
         menuStyle={{ border: '1px solid #ddd' }}
         icon={<Icon icon="file-download" size="lg" style={{ marginRight: spacing.DEFAULT / 2 }} />}
-        disabled={!isDownloadSupported}
+        disabled={!isDownloadSupported || notebook === null}
         onSelect={onClickDownload}
       >
         <Dropdown.Item eventKey="ipynb">as Notebook (.ipynb)</Dropdown.Item>

@@ -1,4 +1,10 @@
-import { Notebook, NotebookAccessLevel } from '@actually-colab/editor-types';
+import {
+  Notebook,
+  NotebookAccessLevel,
+  OChatMessage,
+  Workshop,
+  WorkshopAccessLevel,
+} from '@actually-colab/editor-types';
 import { List as ImmutableList, Record as ImmutableRecord } from 'immutable';
 
 import { RemoveIndex } from '../types/generics';
@@ -51,7 +57,8 @@ export const ImmutableEditorCellFactory = ImmutableRecord<Required<EditorCell>>(
   cell_id: '',
   time_modified: -1,
   contents: '',
-  cursor_pos: null,
+  cursor_col: null,
+  cursor_row: null,
   language: 'python',
   position: -1,
   rendered: true,
@@ -91,6 +98,7 @@ export const ImmutableNotebookAccessLevelFactory = ImmutableRecord<RemoveIndex<R
 export type PseudoImmutableNotebook = Omit<RemoveIndex<Notebook>, 'users'> & {
   users: ImmutableList<ImmutableNotebookAccessLevel>;
 };
+
 /**
  * An Immutable Record for a notebook
  */
@@ -100,6 +108,8 @@ export type ImmutableNotebook = ImmutableRecordOf<Required<PseudoImmutableNotebo
  */
 export const ImmutableNotebookFactory = ImmutableRecord<Required<PseudoImmutableNotebook>>({
   nb_id: '',
+  ws_id: '',
+  ws_main_notebook: false,
   name: '',
   language: 'python',
   time_modified: Date.now(),
@@ -113,6 +123,7 @@ export type PseudoImmutableReducedNotebook = Omit<ReducedNotebook, 'users' | 'ce
   users: ImmutableList<ImmutableNotebookAccessLevel>;
   cell_ids: ImmutableList<EditorCell['cell_id']>;
 };
+
 /**
  * An Immutable Record for a reduced notebook
  */
@@ -122,9 +133,70 @@ export type ImmutableReducedNotebook = ImmutableRecordOf<Required<PseudoImmutabl
  */
 export const ImmutableReducedNotebookFactory = ImmutableRecord<Required<PseudoImmutableReducedNotebook>>({
   nb_id: '',
+  ws_id: '',
+  ws_main_notebook: false,
   name: '',
   language: 'python',
   time_modified: Date.now(),
   users: ImmutableList(),
   cell_ids: ImmutableList(),
+});
+
+/**
+ * An Immutable Record for a workshop access level
+ */
+export type ImmutableWorkshopAccessLevel = ImmutableRecordOf<RemoveIndex<Required<WorkshopAccessLevel>>>;
+/**
+ * An Immutable Record Factory for a workshop access level
+ */
+export const ImmutableWorkshopAccessLevelFactory = ImmutableRecord<RemoveIndex<Required<WorkshopAccessLevel>>>({
+  nb_id: '',
+  uid: '',
+  name: '',
+  email: '',
+  image_url: '',
+  access_level: 'Attendee',
+});
+
+/**
+ * The in-between type for converting a workshop to an Immutable
+ */
+export type PseudoImmutableWorkshop = Omit<RemoveIndex<Workshop>, 'instructors' | 'attendees' | 'main_notebook'> & {
+  instructors: ImmutableList<ImmutableWorkshopAccessLevel>;
+  attendees: ImmutableList<ImmutableWorkshopAccessLevel>;
+  main_notebook: ImmutableNotebook;
+};
+
+/**
+ * An Immutable Record for a workshop
+ */
+export type ImmutableWorkshop = ImmutableRecordOf<Required<PseudoImmutableWorkshop>>;
+/**
+ * An Immutable Record Factory for a workshop
+ */
+export const ImmutableWorkshopFactory = ImmutableRecord<Required<PseudoImmutableWorkshop>>({
+  ws_id: '',
+  name: '',
+  description: '',
+  time_modified: Date.now(),
+  start_time: -1,
+  end_time: -1,
+  capacity: -1,
+  instructors: ImmutableList(),
+  attendees: ImmutableList(),
+  main_notebook: new ImmutableNotebookFactory(),
+});
+
+/**
+ * An Immutable Record for a chat message
+ */
+export type ImmutableChatMessage = ImmutableRecordOf<RemoveIndex<Required<OChatMessage>>>;
+/**
+ * An Immutable Record Factory for a chat message
+ */
+export const ImmutableChatMessageFactory = ImmutableRecord<RemoveIndex<Required<OChatMessage>>>({
+  uid: '',
+  nb_id: '',
+  message: '',
+  timestamp: -1,
 });

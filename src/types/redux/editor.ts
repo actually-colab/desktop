@@ -7,6 +7,10 @@ import {
   NotebookContents,
   DUser,
   OOutput,
+  Workshop,
+  NotebookAccessLevel,
+  WorkshopAccessLevelType,
+  OChatMessage,
 } from '@actually-colab/editor-types';
 
 import { ImmutableEditorCell } from '../../immutable';
@@ -18,6 +22,14 @@ export const CLIENT = {
     START: 'CLIENT_CONNECT_START',
     SUCCESS: 'CLIENT_CONNECT_SUCCESS',
     FAILURE: 'CLIENT_CONNECT_FAILURE',
+  },
+} as const;
+export const CONTACTS = {
+  GET: {
+    SUCCESS: 'CONTACTS_GET_SUCCESS',
+  },
+  SET: {
+    SUCCESS: 'CONTACTS_SET_SUCCESS',
   },
 } as const;
 export const KERNEL = {
@@ -85,9 +97,41 @@ export const NOTEBOOKS = {
     SUCCESS: 'NOTEBOOKS_SHARE_SUCCESS',
     FAILURE: 'NOTEBOOKS_SHARE_FAILURE',
   },
+  UNSHARE: {
+    START: 'NOTEBOOKS_UNSHARE_START',
+    SUCCESS: 'NOTEBOOKS_UNSHARE_SUCCESS',
+    FAILURE: 'NOTEBOOKS_UNSHARE_FAILURE',
+  },
   OUTPUTS: {
     SELECT: 'NOTEBOOKS_OUTPUTS_SELECT',
     RECEIVE: 'NOTEBOOKS_OUTPUTS_RECEIVE',
+  },
+  SEND_MESSAGE: {
+    START: 'NOTEBOOKS_SEND_MESSAGE_START',
+    SUCCESS: 'NOTEBOOKS_SEND_MESSAGE_SUCCESS',
+    FAILURE: 'NOTEBOOKS_SEND_MESSAGE_FAILURE',
+  },
+} as const;
+export const WORKSHOPS = {
+  GET: {
+    START: 'WORKSHOPS_GET_START',
+    SUCCESS: 'WORKSHOPS_GET_SUCCESS',
+    FAILURE: 'WORKSHOPS_GET_FAILURE',
+  },
+  CREATE: {
+    START: 'WORKSHOPS_CREATE_START',
+    SUCCESS: 'WORKSHOPS_CREATE_SUCCESS',
+    FAILURE: 'WORKSHOPS_CREATE_FAILURE',
+  },
+  SHARE: {
+    START: 'WORKSHOPS_SHARE_START',
+    SUCCESS: 'WORKSHOPS_SHARE_SUCCESS',
+    FAILURE: 'WORKSHOPS_SHARE_FAILURE',
+  },
+  RELEASE: {
+    START: 'WORKSHOPS_RELEASE_START',
+    SUCCESS: 'WORKSHOPS_RELEASE_SUCCESS',
+    FAILURE: 'WORKSHOPS_RELEASE_FAILURE',
   },
 } as const;
 export const CELL = {
@@ -144,6 +188,16 @@ type ConnectToClientSuccessAction = {
 
 type ConnectToClientFailureAction = {
   type: typeof CLIENT.CONNECT.FAILURE;
+};
+
+type GetContactsSuccessAction = {
+  type: typeof CONTACTS.GET.SUCCESS;
+  contacts: DUser['email'][];
+};
+
+type SetContactsSuccessAction = {
+  type: typeof CONTACTS.SET.SUCCESS;
+  contacts: DUser['email'][];
 };
 
 type KernelLogAppendAction = {
@@ -223,9 +277,23 @@ type NotebooksGetFailureAction = {
   type: typeof NOTEBOOKS.GET.FAILURE;
 } & ActionError;
 
+type GetWorkshopsStartAction = {
+  type: typeof WORKSHOPS.GET.START;
+};
+
+type GetWorkshopsSuccessAction = {
+  type: typeof WORKSHOPS.GET.SUCCESS;
+  workshops: Workshop[];
+};
+
+type GetWorkshopsFailureAction = {
+  type: typeof WORKSHOPS.GET.FAILURE;
+} & ActionError;
+
 type NotebooksCreateStartAction = {
   type: typeof NOTEBOOKS.CREATE.START;
   name: string;
+  cells: Pick<DCell, 'language' | 'contents'>[];
 };
 
 type NotebooksCreateSuccessAction = {
@@ -235,6 +303,22 @@ type NotebooksCreateSuccessAction = {
 
 type NotebooksCreateFailureAction = {
   type: typeof NOTEBOOKS.CREATE.FAILURE;
+} & ActionError;
+
+type CreateWorkshopStartAction = {
+  type: typeof WORKSHOPS.CREATE.START;
+  name: string;
+  description: string;
+  cells: Pick<DCell, 'language' | 'contents'>[];
+};
+
+type CreateWorkshopSuccessAction = {
+  type: typeof WORKSHOPS.CREATE.SUCCESS;
+  workshop: Workshop;
+};
+
+type CreateWorkshopFailureAction = {
+  type: typeof WORKSHOPS.CREATE.FAILURE;
 } & ActionError;
 
 type NotebooksOpenStartAction = {
@@ -254,39 +338,110 @@ type NotebooksOpenFailureAction = {
 
 type NotebooksAccessConnectAction = {
   type: typeof NOTEBOOKS.ACCESS.CONNECT;
-  user: DUser;
+  nb_id: Notebook['nb_id'];
+  uid: DUser['uid'];
 };
 
 type NotebooksAccessDisconnectAction = {
   type: typeof NOTEBOOKS.ACCESS.DISCONNECT;
-  uid: string;
+  isMe: boolean;
+  nb_id: Notebook['nb_id'];
+  uid: DUser['uid'];
 };
 
 type NotebooksShareStartAction = {
   type: typeof NOTEBOOKS.SHARE.START;
-  nb_id: string;
-  email: string;
+  nb_id: Notebook['nb_id'];
+  emails: string;
   access_level: NotebookAccessLevelType;
 };
 
 type NotebooksShareSuccessAction = {
   type: typeof NOTEBOOKS.SHARE.SUCCESS;
-  notebook: Notebook;
+  isMe: boolean;
+  nb_id: Notebook['nb_id'];
+  users: NotebookAccessLevel[];
 };
 
 type NotebooksShareFailureAction = {
   type: typeof NOTEBOOKS.SHARE.FAILURE;
 } & ActionError;
 
+type ShareWorkshopStartAction = {
+  type: typeof WORKSHOPS.SHARE.START;
+  ws_id: Workshop['ws_id'];
+  emails: string;
+  access_level: WorkshopAccessLevelType;
+};
+
+type ShareWorkshopSuccessAction = {
+  type: typeof WORKSHOPS.SHARE.SUCCESS;
+  isMe: boolean;
+  ws_id: Workshop['ws_id'];
+  access_levels: Pick<Workshop, 'instructors' | 'attendees'>;
+};
+
+type ShareWorkshopFailureAction = {
+  type: typeof WORKSHOPS.SHARE.FAILURE;
+} & ActionError;
+
+type UnshareNotebookStartAction = {
+  type: typeof NOTEBOOKS.UNSHARE.START;
+  nb_id: Notebook['nb_id'];
+  emails: string;
+};
+
+type UnshareNotebookSuccessAction = {
+  type: typeof NOTEBOOKS.UNSHARE.SUCCESS;
+  isMe: boolean;
+  includedMe: boolean;
+  nb_id: Notebook['nb_id'];
+  uids: NotebookAccessLevel['uid'][];
+};
+
+type UnshareNotebookFailureAction = {
+  type: typeof NOTEBOOKS.UNSHARE.FAILURE;
+} & ActionError;
+
+type ReleaseWorkshopStartAction = {
+  type: typeof WORKSHOPS.RELEASE.START;
+  ws_id: Workshop['ws_id'];
+};
+
+type ReleaseWorkshopSuccessAction = {
+  type: typeof WORKSHOPS.RELEASE.SUCCESS;
+  isMe: boolean;
+  ws_id: Workshop['ws_id'];
+};
+
+type ReleaseWorkshopFailureAction = {
+  type: typeof WORKSHOPS.RELEASE.FAILURE;
+} & ActionError;
+
 type NotebooksOutputsSelectAction = {
   type: typeof NOTEBOOKS.OUTPUTS.SELECT;
-  uid: string;
+  uid: DUser['uid'];
 };
 
 type NotebooksOutputsReceiveAction = {
   type: typeof NOTEBOOKS.OUTPUTS.RECEIVE;
   output: OOutput;
 };
+
+type NotebooksSendMessageStartAction = {
+  type: typeof NOTEBOOKS.SEND_MESSAGE.START;
+  message: string;
+};
+
+type NotebooksSendMessageSuccessAction = {
+  type: typeof NOTEBOOKS.SEND_MESSAGE.SUCCESS;
+  isMe: boolean;
+  message: OChatMessage;
+};
+
+type NotebooksSendMessageFailureAction = {
+  type: typeof NOTEBOOKS.SEND_MESSAGE.FAILURE;
+} & ActionError;
 
 type LockCellStartAction = {
   type: typeof CELL.LOCK.START;
@@ -298,7 +453,7 @@ type LockCellSuccessAction = {
   isMe: boolean;
   uid: DUser['uid'];
   cell_id: EditorCell['cell_id'];
-  cell: Partial<EditorCell>;
+  cell: Required<DCell>;
 };
 
 type LockCellFailureAction = {
@@ -315,7 +470,7 @@ type UnlockCellSuccessAction = {
   isMe: boolean;
   uid: DUser['uid'];
   cell_id: EditorCell['cell_id'];
-  cell: Partial<EditorCell>;
+  cell: Required<DCell>;
 };
 
 type UnlockCellFailureAction = {
@@ -332,7 +487,7 @@ type AddCellSuccessAction = {
   isMe: boolean;
   cell_id: EditorCell['cell_id'];
   index: number;
-  cell: Partial<EditorCell>;
+  cell: Required<DCell>;
 };
 
 type AddCellFailureAction = {
@@ -347,6 +502,7 @@ type DeleteCellStartAction = {
 type DeleteCellSuccessAction = {
   type: typeof CELL.DELETE.SUCCESS;
   isMe: boolean;
+  nb_id: Notebook['nb_id'];
   cell_id: EditorCell['cell_id'];
 };
 
@@ -453,6 +609,8 @@ export type EditorActionTypes =
   | ConnectToClientStartAction
   | ConnectToClientSuccessAction
   | ConnectToClientFailureAction
+  | GetContactsSuccessAction
+  | SetContactsSuccessAction
   | KernelLogAppendAction
   | KernelLogClearAction
   | SetKernelGatewayAction
@@ -470,9 +628,15 @@ export type EditorActionTypes =
   | NotebooksGetStartAction
   | NotebooksGetSuccessAction
   | NotebooksGetFailureAction
+  | GetWorkshopsStartAction
+  | GetWorkshopsSuccessAction
+  | GetWorkshopsFailureAction
   | NotebooksCreateStartAction
   | NotebooksCreateSuccessAction
   | NotebooksCreateFailureAction
+  | CreateWorkshopStartAction
+  | CreateWorkshopSuccessAction
+  | CreateWorkshopFailureAction
   | NotebooksOpenStartAction
   | NotebooksOpenSuccessAction
   | NotebooksOpenFailureAction
@@ -481,8 +645,20 @@ export type EditorActionTypes =
   | NotebooksShareStartAction
   | NotebooksShareSuccessAction
   | NotebooksShareFailureAction
+  | ShareWorkshopStartAction
+  | ShareWorkshopSuccessAction
+  | ShareWorkshopFailureAction
+  | UnshareNotebookStartAction
+  | UnshareNotebookSuccessAction
+  | UnshareNotebookFailureAction
+  | ReleaseWorkshopStartAction
+  | ReleaseWorkshopSuccessAction
+  | ReleaseWorkshopFailureAction
   | NotebooksOutputsSelectAction
   | NotebooksOutputsReceiveAction
+  | NotebooksSendMessageStartAction
+  | NotebooksSendMessageSuccessAction
+  | NotebooksSendMessageFailureAction
   | LockCellStartAction
   | LockCellSuccessAction
   | LockCellFailureAction

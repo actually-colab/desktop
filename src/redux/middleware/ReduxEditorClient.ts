@@ -3,10 +3,10 @@ import { ActuallyColabRESTClient, ActuallyColabSocketClient } from '@actually-co
 
 import { ReduxState } from '../../types/redux';
 import { SIGN_IN, SIGN_OUT } from '../../types/redux/auth';
-import { CELL, KERNEL, NOTEBOOKS } from '../../types/redux/editor';
+import { CELL, KERNEL, NOTEBOOKS, WORKSHOPS } from '../../types/redux/editor';
 import { DEMO_NOTEBOOK_NAME } from '../../constants/demo';
 import { httpToWebSocket } from '../../utils/request';
-import { cleanDCell, convertSendablePayloadToOutputString } from '../../utils/notebook';
+import { cleanDCell, convertSendablePayloadToOutputString, separateEmails } from '../../utils/notebook';
 import { LatestNotebookIdStorage } from '../../utils/storage';
 import { syncSleep } from '../../utils/sleep';
 import { ReduxActions, _auth, _editor, _ui } from '../actions';
@@ -48,6 +48,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           } catch (error) {
             console.error(error);
             console.error(error.response);
+
             store.dispatch(_auth.signInFailure(error.message));
             store.dispatch(
               _ui.notify({
@@ -74,8 +75,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          */
         socketClient.on('connect', () => {
           console.log('Connected to AC socket');
-          window.addEventListener('beforeunload', closeOnUnmount);
 
+          window.addEventListener('beforeunload', closeOnUnmount);
           store.dispatch(_editor.connectToClientSuccess());
         });
 
@@ -84,8 +85,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          */
         socketClient.on('close', (event) => {
           console.log('Disconnected from AC socket', event);
-          window.removeEventListener('beforeunload', closeOnUnmount);
 
+          window.removeEventListener('beforeunload', closeOnUnmount);
           store.dispatch(_editor.connectToClientFailure());
         });
 
@@ -126,40 +127,99 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
         /**
          * A notebook was opened by a given user
          */
-        socketClient.on('notebook_opened', (user) => {
-          console.log('Notebook opened', user);
+        socketClient.on('notebook_opened', (nb_id, uid, triggered_by) => {
+          console.log('Notebook opened', nb_id, uid, triggered_by);
 
-          if (user.uid !== store.getState().auth.user?.uid) {
-            store.dispatch(_editor.connectToNotebook(user));
+          if (uid !== store.getState().auth.user?.uid) {
+            store.dispatch(_editor.connectToNotebook(nb_id, uid));
           }
         });
 
         /**
          * A notebook was closed by a given user
          */
-        socketClient.on('notebook_closed', (nb_id, triggered_by) => {
+        socketClient.on('notebook_closed', (nb_id, uid, triggered_by) => {
           console.log('Notebook closed', nb_id, triggered_by);
 
           if (nb_id === store.getState().editor.notebook?.nb_id) {
-            store.dispatch(_editor.disconnectFromNotebook(triggered_by ?? ''));
+            store.dispatch(_editor.disconnectFromNotebook(uid === currentUser.uid, nb_id, uid));
           }
+        });
+
+        /**
+         * A notebook was shared with given users
+         */
+        socketClient.on('notebook_shared', (nb_id, users, triggered_by) => {
+          console.log('Notebook shared', nb_id, users, triggered_by);
+
+          store.dispatch(_editor.shareNotebookSuccess(triggered_by === currentUser.uid, nb_id, users));
+        });
+
+        /**
+         * A workshop was shared with given attendees and instructors
+         */
+        socketClient.on('workshop_shared', (ws_id, attendees, instructors, triggered_by) => {
+          console.log('Workshop shared', ws_id, attendees, instructors, triggered_by);
+
+          store.dispatch(
+            _editor.shareWorkshopSuccess(triggered_by === currentUser.uid, ws_id, {
+              attendees,
+              instructors,
+            })
+          );
+        });
+
+        /**
+         * A notebook was unshared with given users
+         */
+        socketClient.on('notebook_unshared', (nb_id, uids, triggered_by) => {
+          console.log('Notebook unshared', nb_id, uids, triggered_by);
+
+          const includedMe = uids.includes(currentUser.uid);
+
+          // Close notebook if unshared
+          if (includedMe && store.getState().editor.notebook?.nb_id === nb_id) {
+            store.dispatch(_editor.disconnectFromNotebook(includedMe, nb_id, currentUser.uid));
+          }
+
+          store.dispatch(_editor.unshareNotebookSuccess(triggered_by === currentUser.uid, includedMe, nb_id, uids));
+        });
+
+        /**
+         * A workshop was released to attendees
+         */
+        socketClient.on('workshop_started', (ws_id, triggered_by) => {
+          console.log('Workshop started', ws_id, triggered_by);
+
+          store.dispatch(_editor.releaseWorkshopSuccess(triggered_by === currentUser.uid, ws_id));
         });
 
         /**
          * A cell was created by a given user
          */
         socketClient.on('cell_created', (dcell, triggered_by) => {
-          console.log('Cell created', dcell);
+          console.log('Cell created', dcell, triggered_by);
+
           store.dispatch(
             _editor.addCellSuccess(triggered_by === currentUser.uid, dcell.cell_id, -1, cleanDCell(dcell))
           );
         });
 
         /**
+         * A cell was deleted by a given user
+         */
+        socketClient.on('cell_deleted', (nb_id, cell_id, triggered_by) => {
+          console.log('Cell deleted', nb_id, cell_id, triggered_by);
+
+          store.dispatch(_editor.deleteCellSuccess(triggered_by === currentUser.uid, nb_id, cell_id));
+        });
+
+        /**
          * A cell was locked by a given user
          */
         socketClient.on('cell_locked', (dcell, triggered_by) => {
-          console.log('Cell locked', dcell);
+          console.log('Cell locked', dcell, triggered_by);
+
           store.dispatch(
             _editor.lockCellSuccess(
               triggered_by === currentUser.uid,
@@ -174,7 +234,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          * A cell was unlocked by a given user
          */
         socketClient.on('cell_unlocked', (dcell, triggered_by) => {
-          console.log('Cell unlocked', dcell);
+          console.log('Cell unlocked', dcell, triggered_by);
+
           store.dispatch(
             _editor.unlockCellSuccess(
               triggered_by === currentUser.uid,
@@ -189,18 +250,29 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          * A cell was edited by a given user
          */
         socketClient.on('cell_edited', (dcell, triggered_by) => {
-          console.log('Cell edited', dcell);
+          console.log('Cell edited', dcell, triggered_by);
+
           store.dispatch(_editor.editCellSuccess(triggered_by === currentUser.uid, dcell.cell_id, cleanDCell(dcell)));
         });
 
         /**
          * An output was received from a given user
          */
-        socketClient.on('output_updated', (output) => {
-          console.log('Received outputs', output);
+        socketClient.on('output_updated', (output, triggered_by) => {
+          console.log('Received outputs', output, triggered_by);
+
           if (output.uid !== currentUser.uid) {
             store.dispatch(_editor.receiveOutputs(output));
           }
+        });
+
+        /**
+         * A message was received from a user
+         */
+        socketClient.on('chat_message_sent', (message, triggered_by) => {
+          console.log('Received chat message', message, triggered_by);
+
+          store.dispatch(_editor.sendMessageSuccess(triggered_by === currentUser.uid, message));
         });
         break;
       }
@@ -224,26 +296,28 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           try {
             const notebooks = await restClient.getNotebooksForUser();
 
+            console.log('Received notebooks', notebooks);
             store.dispatch(_editor.getNotebooksSuccess(notebooks));
 
             // If no notebook is open, automatically open the most recent
             if (store.getState().editor.notebook === null && !store.getState().editor.isOpeningNotebook) {
               const mostRecentNotebookId = LatestNotebookIdStorage.get();
 
-              if (mostRecentNotebookId && notebooks.find((notebook) => notebook.nb_id === mostRecentNotebookId)) {
-                store.dispatch(_editor.openNotebook(mostRecentNotebookId));
-              } else {
+              if (mostRecentNotebookId === null) {
                 // Open demo notebook as fallback
                 const demoNotebookId = notebooks.find((notebook) => notebook.name === DEMO_NOTEBOOK_NAME)?.nb_id;
 
                 if (demoNotebookId) {
                   store.dispatch(_editor.openNotebook(demoNotebookId));
                 }
+              } else if (notebooks.find((notebook) => notebook.nb_id === mostRecentNotebookId)) {
+                store.dispatch(_editor.openNotebook(mostRecentNotebookId));
               }
             }
           } catch (error) {
             console.error(error);
             console.error(error.response);
+
             store.dispatch(_editor.getNotebooksFailure(error.message));
             store.dispatch(
               _ui.notify({
@@ -259,23 +333,93 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
       }
 
       /**
+       * Started fetching the user's workshops
+       */
+      case WORKSHOPS.GET.START: {
+        (async () => {
+          try {
+            const workshops = await restClient.getWorkshopsForUser();
+
+            console.log('Received workshops', workshops);
+            store.dispatch(_editor.getWorkshopsSuccess(workshops));
+
+            // If no notebook is open, automatically open the most recent
+            if (store.getState().editor.notebook === null && !store.getState().editor.isOpeningNotebook) {
+              const mostRecentNotebookId = LatestNotebookIdStorage.get();
+
+              if (
+                mostRecentNotebookId &&
+                workshops.find((workshop) => workshop.main_notebook.nb_id === mostRecentNotebookId)
+              ) {
+                store.dispatch(_editor.openNotebook(mostRecentNotebookId));
+              }
+            }
+          } catch (error) {
+            console.error(error);
+            console.error(error.response);
+
+            store.dispatch(_editor.getWorkshopsFailure(error.message));
+            store.dispatch(
+              _ui.notify({
+                level: 'error',
+                title: 'Error',
+                message: 'Failed to get your workshops!',
+                duration: 3000,
+              })
+            );
+          }
+        })();
+        break;
+      }
+
+      /**
        * Started creating a notebook
        */
       case NOTEBOOKS.CREATE.START: {
         (async () => {
           try {
-            const notebook = await restClient.createNotebook(action.name);
+            const notebook = await restClient.createNotebook(action.name, 'python', action.cells);
 
+            console.log('Notebook created', notebook);
             store.dispatch(_editor.createNotebookSuccess(notebook));
           } catch (error) {
             console.error(error);
             console.error(error.response);
+
             store.dispatch(_editor.createNotebookFailure(error.message));
             store.dispatch(
               _ui.notify({
                 level: 'error',
                 title: 'Error',
                 message: 'Failed to create your notebook!',
+                duration: 3000,
+              })
+            );
+          }
+        })();
+        break;
+      }
+
+      /**
+       * Started creating a workshop
+       */
+      case WORKSHOPS.CREATE.START: {
+        (async () => {
+          try {
+            const workshop = await restClient.createWorkshop(action.name, action.description, action.cells);
+
+            console.log('Workshop created', workshop);
+            store.dispatch(_editor.createWorkshopSuccess(workshop));
+          } catch (error) {
+            console.error(error);
+            console.error(error.response);
+
+            store.dispatch(_editor.createWorkshopFailure(error.message));
+            store.dispatch(
+              _ui.notify({
+                level: 'error',
+                title: 'Error',
+                message: 'Failed to create your workshop!',
                 duration: 3000,
               })
             );
@@ -293,6 +437,20 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           return;
         }
 
+        const notebook = store.getState().editor.notebook;
+
+        // Don't reopen the currently open notebook
+        if (notebook?.nb_id === action.nb_id) {
+          return;
+        }
+
+        // Close the notebook if one is already open
+        if (notebook !== null) {
+          console.log('Closing notebook', notebook.nb_id);
+          socketClient?.closeNotebook(notebook.nb_id);
+        }
+
+        console.log('Opening notebook', action.nb_id);
         socketClient?.openNotebook(action.nb_id);
         break;
       }
@@ -301,25 +459,57 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
        * Started sharing a given notebook
        */
       case NOTEBOOKS.SHARE.START: {
-        (async () => {
-          try {
-            const notebook = await restClient.shareNotebook(action.email, action.nb_id, action.access_level);
+        if (store.getState().editor.clientConnectionStatus !== 'Connected') {
+          console.error('Tried to use socket before connected');
+          return;
+        }
 
-            store.dispatch(_editor.shareNotebookSuccess(notebook));
-          } catch (error) {
-            console.error(error);
-            console.error(error.response);
-            store.dispatch(_editor.shareNotebooksFailure(error.message));
-            store.dispatch(
-              _ui.notify({
-                level: 'error',
-                title: 'Error',
-                message: 'Failed to share notebook!',
-                duration: 3000,
-              })
-            );
-          }
-        })();
+        const emails = separateEmails(action.emails);
+
+        socketClient?.shareNotebook(emails, action.nb_id, action.access_level);
+        break;
+      }
+
+      /**
+       * Started sharing a given workshop
+       */
+      case WORKSHOPS.SHARE.START: {
+        if (store.getState().editor.clientConnectionStatus !== 'Connected') {
+          console.error('Tried to use socket before connected');
+          return;
+        }
+
+        const emails = separateEmails(action.emails);
+
+        socketClient?.shareWorkshop(emails, action.ws_id, action.access_level);
+        break;
+      }
+
+      /**
+       * Started unsharing a given notebook
+       */
+      case NOTEBOOKS.UNSHARE.START: {
+        if (store.getState().editor.clientConnectionStatus !== 'Connected') {
+          console.error('Tried to use socket before connected');
+          return;
+        }
+
+        const emails = separateEmails(action.emails);
+
+        socketClient?.unshareNotebook(emails, action.nb_id);
+        break;
+      }
+
+      /**
+       * Started releasing a given workshop
+       */
+      case WORKSHOPS.RELEASE.START: {
+        if (store.getState().editor.clientConnectionStatus !== 'Connected') {
+          console.error('Tried to use socket before connected');
+          return;
+        }
+
+        socketClient?.startWorkshop(action.ws_id);
         break;
       }
 
@@ -328,6 +518,20 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
        */
       case NOTEBOOKS.OUTPUTS.SELECT: {
         // TODO: fetch all outputs for the user
+        break;
+      }
+
+      /**
+       * Sent a chat message to collaborators
+       */
+      case NOTEBOOKS.SEND_MESSAGE.START: {
+        const notebook = store.getState().editor.notebook;
+        if (notebook === null) {
+          console.error('Notebook was null');
+          return;
+        }
+
+        socketClient?.sendChatMessage(notebook.nb_id, action.message);
         break;
       }
 
@@ -354,7 +558,18 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
        * Started deleting a cell
        */
       case CELL.DELETE.START: {
-        // TODO: delete cell
+        const notebook = store.getState().editor.notebook;
+        if (notebook === null) {
+          console.error('Notebook was null');
+          return;
+        }
+
+        if (store.getState().editor.clientConnectionStatus !== 'Connected') {
+          console.error('Tried to use socket before connected');
+          return;
+        }
+
+        socketClient?.deleteCell(notebook.nb_id, action.cell_id);
         break;
       }
 
@@ -401,7 +616,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
         socketClient?.unlockCell(notebook.nb_id, action.cell_id, {
           language: cell.language,
           contents: cell.contents,
-          cursor_pos: cell.cursor_pos,
+          cursor_col: cell.cursor_col,
+          cursor_row: cell.cursor_row,
         });
         break;
       }
@@ -433,7 +649,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           socketClient?.editCell(notebook.nb_id, action.cell_id, {
             language: cell.language,
             contents: cell.contents,
-            cursor_pos: cell.cursor_pos,
+            cursor_col: cell.cursor_col,
+            cursor_row: cell.cursor_row,
             ...action.changes,
           });
         }

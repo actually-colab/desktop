@@ -8,10 +8,13 @@ import { spacing } from '../constants/theme';
 const styles = StyleSheet.create({
   buttonContentContainer: {
     display: 'inline-block',
+    width: '100%',
   },
   buttonContent: {
+    width: '100%',
     display: 'flex',
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
   dropdownIcon: {

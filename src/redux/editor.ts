@@ -1,13 +1,15 @@
 import { List as ImmutableList, Map as ImmutableMap, OrderedSet as ImmutableOrderedSet } from 'immutable';
-import { DUser } from '@actually-colab/editor-types';
+import { DUser, Notebook, Workshop } from '@actually-colab/editor-types';
 
-import { CELL, CLIENT, KERNEL, NOTEBOOKS } from '../types/redux/editor';
+import { CELL, CLIENT, CONTACTS, KERNEL, NOTEBOOKS, WORKSHOPS } from '../types/redux/editor';
 import { SIGN_OUT } from '../types/redux/auth';
 import { ClientConnectionStatus } from '../types/client';
 import { EditorCell } from '../types/notebook';
 import { Kernel } from '../types/kernel';
 import { DEFAULT_GATEWAY_URI } from '../constants/jupyter';
 import {
+  ImmutableChatMessage,
+  ImmutableChatMessageFactory,
   ImmutableEditorCell,
   ImmutableEditorCellFactory,
   ImmutableKernelLog,
@@ -24,12 +26,17 @@ import {
   ImmutableReducedNotebookFactory,
   ImmutableUser,
   ImmutableUserFactory,
+  ImmutableWorkshop,
+  ImmutableWorkshopFactory,
 } from '../immutable';
 import {
   cellArrayToImmutableMap,
   cleanDCell,
   convertOutputToReceivablePayload,
-  makeAccessLevelsImmutable,
+  filterAccessLevelsFromList,
+  filterUidsFromList,
+  makeNotebookAccessLevelsImmutable,
+  makeWorkshopAccessLevelsImmutable,
   reduceImmutableNotebook,
   reduceNotebookContents,
 } from '../utils/notebook';
@@ -43,6 +50,11 @@ export interface EditorState {
    * The status of the socket client connection
    */
   clientConnectionStatus: ClientConnectionStatus;
+
+  /**
+   * The contacts that the user has shared notebooks with
+   */
+  contacts: DUser['email'][];
 
   /**
    * If the application should continuously try to connect to the kernel
@@ -77,7 +89,19 @@ export interface EditorState {
   /**
    * The timestamp of the last time the notebooks were fetched
    */
-  getNotebooksTimestamp: Date | null;
+  getNotebooksTimestamp: number | null;
+  /**
+   * If the editor is currently fetching the latest workshops
+   */
+  isGettingWorkshops: boolean;
+  /**
+   * Error message if fetching the workshops fails
+   */
+  getWorkshopsErrorMessage: string;
+  /**
+   * The timestamp of the last time the workshops were fetched
+   */
+  getWorkshopsTimestamp: number | null;
   /**
    * If the editor is creating a notebook
    */
@@ -94,6 +118,18 @@ export interface EditorState {
    * If the editor is sharing a notebook
    */
   isSharingNotebook: boolean;
+  /**
+   * If the editor is unsharing a notebook
+   */
+  isUnsharingNotebook: boolean;
+  /**
+   * If the editor is releasing a workshop
+   */
+  isReleasingWorkshop: boolean;
+  /**
+   * If the editor is sending a message
+   */
+  isSendingMessage: boolean;
 
   /**
    * If the editor is currently adding a cell
@@ -123,7 +159,7 @@ export interface EditorState {
   /**
    * A list of locked cells and user ID's
    */
-  lockedCells: ImmutableList<ImmutableLock>;
+  lockedCells: ImmutableMap<EditorCell['cell_id'], ImmutableLock>;
 
   /**
    * The `cell_id` of the currently selected cell
@@ -154,7 +190,12 @@ export interface EditorState {
   /**
    * A list of notebooks the user has access to without their contents
    */
-  notebooks: ImmutableList<ImmutableNotebook>;
+  notebooks: ImmutableMap<Notebook['nb_id'], ImmutableNotebook>;
+  /**
+   * A list of workshops the user has access to without their contents
+   */
+  workshops: ImmutableMap<Workshop['ws_id'], ImmutableWorkshop>;
+
   /**
    * The currently open notebook with ordered `cell_id`'s
    */
@@ -187,10 +228,17 @@ export interface EditorState {
    * A list of logs from various kernel interactions
    */
   logs: ImmutableList<ImmutableKernelLog>;
+
+  /**
+   * A list of chat messages
+   */
+  messages: ImmutableList<ImmutableChatMessage>;
 }
 
 const initialState: EditorState = {
   clientConnectionStatus: 'Offline',
+
+  contacts: [],
 
   autoConnectToKernel: process.env.REACT_APP_KERNEL_AUTO_CONNECT !== 'off',
   isEditingGatewayUri: false,
@@ -202,10 +250,16 @@ const initialState: EditorState = {
   isGettingNotebooks: false,
   getNotebooksErrorMessage: '',
   getNotebooksTimestamp: null,
+  isGettingWorkshops: false,
+  getWorkshopsErrorMessage: '',
+  getWorkshopsTimestamp: null,
   isCreatingNotebook: false,
   isOpeningNotebook: false,
   openingNotebookId: '',
   isSharingNotebook: false,
+  isUnsharingNotebook: false,
+  isReleasingWorkshop: false,
+  isSendingMessage: false,
 
   isAddingCell: false,
   isDeletingCell: false,
@@ -214,7 +268,7 @@ const initialState: EditorState = {
 
   lockingCellId: '',
   unlockingCellId: '',
-  lockedCells: ImmutableList(),
+  lockedCells: ImmutableMap(),
 
   selectedCellId: '',
   executionCount: 0,
@@ -224,7 +278,9 @@ const initialState: EditorState = {
   gatewayUri: DEFAULT_GATEWAY_URI,
   kernel: null,
 
-  notebooks: ImmutableList(),
+  notebooks: ImmutableMap(),
+  workshops: ImmutableMap(),
+
   notebook: null,
   cells: ImmutableMap(),
 
@@ -234,6 +290,8 @@ const initialState: EditorState = {
 
   users: ImmutableOrderedSet(),
   logs: ImmutableList(),
+
+  messages: ImmutableList(),
 };
 
 /**
@@ -272,6 +330,23 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         clientConnectionStatus: 'Offline',
+      };
+
+    /**
+     * Loaded contacts from local storage
+     */
+    case CONTACTS.GET.SUCCESS:
+      return {
+        ...state,
+        contacts: action.contacts,
+      };
+    /**
+     * Saved contacts to local storage
+     */
+    case CONTACTS.SET.SUCCESS:
+      return {
+        ...state,
+        contacts: action.contacts,
       };
 
     /**
@@ -421,16 +496,18 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         isGettingNotebooks: false,
-        notebooks: ImmutableList(
-          action.notebooks.map(
-            (notebook) =>
+        getNotebooksTimestamp: Date.now(),
+        notebooks: ImmutableMap<Notebook['nb_id'], ImmutableNotebook>().withMutations((mtx) =>
+          action.notebooks.forEach((notebook) =>
+            mtx.set(
+              notebook.nb_id,
               new ImmutableNotebookFactory({
                 ...notebook,
-                users: makeAccessLevelsImmutable(notebook.users),
+                users: makeNotebookAccessLevelsImmutable(notebook.users),
               })
+            )
           )
         ),
-        getNotebooksTimestamp: new Date(),
       };
     /**
      * Failed to get the users notebooks
@@ -440,6 +517,50 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ...state,
         isGettingNotebooks: false,
         getNotebooksErrorMessage: action.error.message,
+      };
+
+    /**
+     * Started fetching the user's workshops
+     */
+    case WORKSHOPS.GET.START:
+      return {
+        ...state,
+        isGettingWorkshops: true,
+        getWorkshopsErrorMessage: '',
+      };
+    /**
+     * Fetched the users workshops successfully
+     */
+    case WORKSHOPS.GET.SUCCESS:
+      return {
+        ...state,
+        isGettingWorkshops: false,
+        getWorkshopsTimestamp: Date.now(),
+        workshops: ImmutableMap<Workshop['ws_id'], ImmutableWorkshop>().withMutations((mtx) =>
+          action.workshops.forEach((workshop) =>
+            mtx.set(
+              workshop.ws_id,
+              new ImmutableWorkshopFactory({
+                ...workshop,
+                instructors: makeWorkshopAccessLevelsImmutable(workshop.instructors),
+                attendees: makeWorkshopAccessLevelsImmutable(workshop.attendees),
+                main_notebook: new ImmutableNotebookFactory({
+                  ...workshop.main_notebook,
+                  users: makeNotebookAccessLevelsImmutable(workshop.main_notebook.users),
+                }),
+              })
+            )
+          )
+        ),
+      };
+    /**
+     * Failed to get the users workshops
+     */
+    case WORKSHOPS.GET.FAILURE:
+      return {
+        ...state,
+        isGettingWorkshops: false,
+        getWorkshopsErrorMessage: action.error.message,
       };
 
     /**
@@ -457,10 +578,11 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         isCreatingNotebook: false,
-        notebooks: state.notebooks.push(
+        notebooks: state.notebooks.set(
+          action.notebook.nb_id,
           new ImmutableNotebookFactory({
             ...action.notebook,
-            users: makeAccessLevelsImmutable(action.notebook.users),
+            users: makeNotebookAccessLevelsImmutable(action.notebook.users),
           })
         ),
       };
@@ -468,6 +590,43 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
      * Failed to create a new notebook
      */
     case NOTEBOOKS.CREATE.FAILURE:
+      return {
+        ...state,
+        isCreatingNotebook: false,
+      };
+
+    /**
+     * Started creating a workshop
+     */
+    case WORKSHOPS.CREATE.START:
+      return {
+        ...state,
+        isCreatingNotebook: true,
+      };
+    /**
+     * Created a new workshop successfully
+     */
+    case WORKSHOPS.CREATE.SUCCESS:
+      return {
+        ...state,
+        isCreatingNotebook: false,
+        workshops: state.workshops.set(
+          action.workshop.ws_id,
+          new ImmutableWorkshopFactory({
+            ...action.workshop,
+            instructors: makeWorkshopAccessLevelsImmutable(action.workshop.instructors),
+            attendees: makeWorkshopAccessLevelsImmutable(action.workshop.attendees),
+            main_notebook: new ImmutableNotebookFactory({
+              ...action.workshop.main_notebook,
+              users: makeNotebookAccessLevelsImmutable(action.workshop.main_notebook.users),
+            }),
+          })
+        ),
+      };
+    /**
+     * Failed to create a new workshop
+     */
+    case WORKSHOPS.CREATE.FAILURE:
       return {
         ...state,
         isCreatingNotebook: false,
@@ -491,27 +650,30 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       const reducedNotebook = reduceNotebookContents(action.notebook);
       const immutableReducedNotebook = new ImmutableReducedNotebookFactory({
         ...reducedNotebook,
-        users: makeAccessLevelsImmutable(reducedNotebook.users),
+        users: makeNotebookAccessLevelsImmutable(reducedNotebook.users),
         cell_ids: ImmutableList(reducedNotebook.cell_ids),
       });
 
       return {
         ...state,
         isOpeningNotebook: false,
+        isSendingMessage: false,
         openingNotebookId: '',
         lockingCellId: '',
         unlockingCellId: '',
         selectedCellId: '',
         selectedOutputsUid: '',
-        lockedCells: ImmutableList(
+        lockedCells: ImmutableMap<EditorCell['cell_id'], ImmutableLock>().withMutations((mtx) =>
           dcells
             .filter((dcell) => (dcell.lock_held_by ?? '') !== '')
-            .map(
-              (dcell) =>
+            .forEach((dcell) =>
+              mtx.set(
+                dcell.cell_id,
                 new ImmutableLockFactory({
                   cell_id: dcell.cell_id,
                   uid: dcell.lock_held_by ?? '',
                 })
+              )
             )
         ),
         notebook: immutableReducedNotebook,
@@ -531,6 +693,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
             })
             .filter<ImmutableUser>((user): user is ImmutableUser => !!user)
         ),
+        messages: state.messages.clear(),
       };
     }
     /**
@@ -546,19 +709,50 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
     /**
      * A user has opened the notebook
      */
-    case NOTEBOOKS.ACCESS.CONNECT:
+    case NOTEBOOKS.ACCESS.CONNECT: {
+      const user = state.notebooks.get(action.nb_id)?.users.find((user) => user.uid === action.uid);
+
+      if (!user) {
+        return state;
+      }
+
       return {
         ...state,
-        users: state.users.filter((user) => user.uid !== action.user.uid).add(new ImmutableUserFactory(action.user)),
+        users: state.users.filter((user) => user.uid !== action.uid).add(new ImmutableUserFactory(user)),
       };
+    }
     /**
      * A user has closed the notebook
      */
-    case NOTEBOOKS.ACCESS.DISCONNECT:
+    case NOTEBOOKS.ACCESS.DISCONNECT: {
+      if (!action.isMe) {
+        return {
+          ...state,
+          users: state.users.filter((user) => user.uid !== action.uid),
+        };
+      }
+
       return {
         ...state,
-        users: state.users.filter((user) => user.uid !== action.uid),
+        isSharingNotebook: false,
+        isUnsharingNotebook: false,
+        isReleasingWorkshop: false,
+        isSendingMessage: false,
+        lockingCellId: '',
+        unlockingCellId: '',
+        selectedCellId: '',
+        selectedOutputsUid: '',
+        isAddingCell: false,
+        isDeletingCell: false,
+        isEditingCell: false,
+        notebook: null,
+        cells: state.cells.clear(),
+        users: state.users.clear(),
+        outputs: state.outputs.clear(),
+        outputsMetadata: state.outputsMetadata.clear(),
+        messages: state.messages.clear(),
       };
+    }
 
     /**
      * Started sharing a notebook
@@ -572,22 +766,33 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
      * Successfully shared a notebook
      */
     case NOTEBOOKS.SHARE.SUCCESS: {
+      if (!state.notebooks.has(action.nb_id)) {
+        return {
+          ...state,
+          isSharingNotebook: action.isMe ? false : state.isSharingNotebook,
+        };
+      }
+
       return {
         ...state,
-        isSharingNotebook: false,
-        notebooks: state.notebooks
-          .filter((notebook) => notebook.nb_id !== action.notebook.nb_id)
-          .push(
-            new ImmutableNotebookFactory({
-              ...action.notebook,
-              users: makeAccessLevelsImmutable(action.notebook.users),
-            })
-          ),
+        isSharingNotebook: action.isMe ? false : state.isSharingNotebook,
+        notebooks: state.notebooks.update(action.nb_id, (notebook) =>
+          notebook.set(
+            'users',
+            notebook.users
+              .filter(filterAccessLevelsFromList(action.users))
+              .concat(makeNotebookAccessLevelsImmutable(action.users))
+          )
+        ),
         notebook:
-          state.notebook?.merge({
-            time_modified: action.notebook.time_modified,
-            users: makeAccessLevelsImmutable(action.notebook.users),
-          }) ?? null,
+          state.notebook?.nb_id === action.nb_id
+            ? state.notebook.set(
+                'users',
+                state.notebook.users
+                  .filter(filterAccessLevelsFromList(action.users))
+                  .concat(makeNotebookAccessLevelsImmutable(action.users))
+              )
+            : state.notebook,
       };
     }
     /**
@@ -597,6 +802,128 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         isSharingNotebook: false,
+      };
+
+    /**
+     * Started sharing a workshop
+     */
+    case WORKSHOPS.SHARE.START:
+      return {
+        ...state,
+        isSharingNotebook: true,
+      };
+    /**
+     * Successfully shared a workshop
+     */
+    case WORKSHOPS.SHARE.SUCCESS: {
+      if (!state.workshops.has(action.ws_id)) {
+        return {
+          ...state,
+          isSharingNotebook: action.isMe ? false : state.isSharingNotebook,
+        };
+      }
+
+      return {
+        ...state,
+        isSharingNotebook: action.isMe ? false : state.isSharingNotebook,
+        workshops: state.workshops.update(action.ws_id, (workshop) =>
+          workshop.withMutations((mtx) =>
+            mtx
+              .set(
+                'instructors',
+                workshop.instructors
+                  .filter(filterAccessLevelsFromList(action.access_levels.instructors, action.access_levels.attendees))
+                  .concat(makeWorkshopAccessLevelsImmutable(action.access_levels.instructors))
+              )
+              .set(
+                'attendees',
+                workshop.attendees
+                  .filter(filterAccessLevelsFromList(action.access_levels.instructors, action.access_levels.attendees))
+                  .concat(makeWorkshopAccessLevelsImmutable(action.access_levels.attendees))
+              )
+          )
+        ),
+      };
+    }
+    /**
+     * Failed to share a workshop
+     */
+    case WORKSHOPS.SHARE.FAILURE:
+      return {
+        ...state,
+        isSharingNotebook: false,
+      };
+
+    /**
+     * Started unsharing a notebook
+     */
+    case NOTEBOOKS.UNSHARE.START:
+      return {
+        ...state,
+        isUnsharingNotebook: true,
+      };
+    /**
+     * Successfully unshared a notebook
+     */
+    case NOTEBOOKS.UNSHARE.SUCCESS: {
+      if (!state.notebooks.has(action.nb_id)) {
+        return {
+          ...state,
+          isUnsharingNotebook: action.isMe ? false : state.isUnsharingNotebook,
+        };
+      }
+
+      return {
+        ...state,
+        isUnsharingNotebook: action.isMe ? false : state.isUnsharingNotebook,
+        notebooks: action.includedMe
+          ? state.notebooks.remove(action.nb_id)
+          : state.notebooks.update(action.nb_id, (notebook) =>
+              notebook.set('users', notebook.users.filter(filterUidsFromList(action.uids)))
+            ),
+        notebook:
+          state.notebook?.nb_id === action.nb_id
+            ? action.includedMe
+              ? null
+              : state.notebook.set('users', state.notebook.users.filter(filterUidsFromList(action.uids)))
+            : state.notebook,
+      };
+    }
+    /**
+     * Failed to unshare a notebook
+     */
+    case NOTEBOOKS.UNSHARE.FAILURE:
+      return {
+        ...state,
+        isUnsharingNotebook: false,
+      };
+
+    /**
+     * Started to released a workshop
+     */
+    case WORKSHOPS.RELEASE.START:
+      return {
+        ...state,
+        isReleasingWorkshop: true,
+      };
+    /**
+     * Successfully released a workshop
+     */
+    case WORKSHOPS.RELEASE.SUCCESS:
+      return {
+        ...state,
+        isReleasingWorkshop: action.isMe ? false : state.isReleasingWorkshop,
+        workshops: state.workshops.has(action.ws_id)
+          ? state.workshops.update(action.ws_id, (workshop) => workshop.set('start_time', Date.now()))
+          : state.workshops,
+      };
+    /**
+     * Failed to release a workshop
+     */
+    case WORKSHOPS.RELEASE.FAILURE:
+      return {
+        ...state,
+        isReleasingWorkshop: false,
       };
 
     /**
@@ -635,6 +962,32 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
     }
 
     /**
+     * Started sending a message
+     */
+    case NOTEBOOKS.SEND_MESSAGE.START:
+      return {
+        ...state,
+        isSendingMessage: true,
+      };
+    /**
+     * Successfully sent a message
+     */
+    case NOTEBOOKS.SEND_MESSAGE.SUCCESS:
+      return {
+        ...state,
+        isSendingMessage: action.isMe ? false : state.isSendingMessage,
+        messages: state.messages.push(new ImmutableChatMessageFactory(action.message)),
+      };
+    /**
+     * Failed to send a message
+     */
+    case NOTEBOOKS.SEND_MESSAGE.FAILURE:
+      return {
+        ...state,
+        isSendingMessage: false,
+      };
+
+    /**
      * Started locking a given cell
      */
     case CELL.LOCK.START:
@@ -649,14 +1002,13 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         lockingCellId: action.isMe ? '' : state.lockingCellId,
-        lockedCells: state.lockedCells
-          .filter((lock) => lock.cell_id !== action.cell_id)
-          .push(
-            new ImmutableLockFactory({
-              uid: action.uid,
-              cell_id: action.cell_id,
-            })
-          ),
+        lockedCells: state.lockedCells.set(
+          action.cell_id,
+          new ImmutableLockFactory({
+            uid: action.uid,
+            cell_id: action.cell_id,
+          })
+        ),
         cells: state.cells.update(action.cell_id, new ImmutableEditorCellFactory(), (cell) => cell.merge(action.cell)),
       };
     /**
@@ -683,7 +1035,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         unlockingCellId: action.isMe ? '' : state.unlockingCellId,
-        lockedCells: state.lockedCells.filter((lock) => lock.cell_id !== action.cell_id || lock.uid !== action.uid),
+        lockedCells: state.lockedCells.remove(action.cell_id),
         cells: state.cells.update(action.cell_id, new ImmutableEditorCellFactory(), (cell) => cell.merge(action.cell)),
       };
     /**
@@ -717,6 +1069,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         isAddingCell: action.isMe ? false : state.isAddingCell,
+        notebooks: state.notebooks.update(action.cell.nb_id, (notebook) => notebook.set('time_modified', Date.now())),
         notebook: state.notebook.update('cell_ids', (cell_ids) =>
           cell_ids.splice(action.index === -1 ? notebook.cell_ids.size ?? 0 : action.index, 0, action.cell_id)
         ),
@@ -769,10 +1122,11 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ...state,
         ...selectionChanges,
         isDeletingCell: action.isMe ? false : state.isDeletingCell,
-        lockedCells: state.lockedCells.filter((lock) => lock.cell_id !== action.cell_id),
+        lockedCells: state.lockedCells.remove(action.cell_id),
         cells: state.cells.delete(action.cell_id),
         outputs: state.outputs.remove(action.cell_id),
         runQueue: state.runQueue.filter((cell_id) => cell_id !== action.cell_id),
+        notebooks: state.notebooks.update(action.nb_id, (notebook) => notebook.set('time_modified', Date.now())),
       };
     }
     /**
@@ -822,6 +1176,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         return {
           ...state,
           isEditingCell: false,
+          notebooks: state.notebooks.update(action.cell.nb_id, (notebook) => notebook.set('time_modified', Date.now())),
         };
       }
 
@@ -844,6 +1199,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         cells: changesAreNewer
           ? state.cells.update(action.cell_id, new ImmutableEditorCellFactory(), (value) => value.merge(action.cell))
           : state.cells,
+        notebooks: state.notebooks.update(action.cell.nb_id, (notebook) => notebook.set('time_modified', Date.now())),
       };
     }
     /**

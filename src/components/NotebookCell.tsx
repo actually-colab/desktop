@@ -113,6 +113,11 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
   const runQueue = useSelector((state: ReduxState) => state.editor.runQueue);
   const outputsMetadata = useSelector((state: ReduxState) => state.editor.outputsMetadata);
 
+  const accessLevel = React.useMemo(() => notebook?.users.find((_user) => _user.uid === user?.uid), [
+    notebook?.users,
+    user?.uid,
+  ]);
+  const canEdit = React.useMemo(() => accessLevel?.access_level === 'Full Access', [accessLevel?.access_level]);
   const cell_id = React.useMemo(() => cell.cell_id, [cell.cell_id]);
   const ownedCells = React.useMemo(() => lockedCells.filter((lock) => lock.uid === user?.uid), [
     lockedCells,
@@ -173,7 +178,9 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
   );
 
   const onFocusEditor = React.useCallback(
-    (cell_id: string) => {
+    (cell_id: EditorCell['cell_id']) => {
+      if (!canEdit) return;
+
       if (canLock && user !== null) {
         ownedCells.forEach((ownedCell) => dispatch(_editor.unlockCell(user, ownedCell.cell_id)));
 
@@ -182,10 +189,10 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
 
       dispatch(_editor.selectCell(cell_id));
     },
-    [canLock, dispatch, ownedCells, user]
+    [canEdit, canLock, dispatch, ownedCells, user]
   );
 
-  const onClickLock = React.useCallback(() => onFocusEditor(cell_id), [cell_id, onFocusEditor]);
+  const onClickLock = React.useCallback(() => canEdit && onFocusEditor(cell_id), [canEdit, cell_id, onFocusEditor]);
 
   const onClickPlay = React.useCallback(() => {
     if (cell.language === 'python') {
@@ -207,7 +214,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
   }, [cell, dispatch]);
 
   const onChange = React.useCallback(
-    (cell_id: string, changes: Partial<DCell>) => {
+    (cell_id: EditorCell['cell_id'], changes: Partial<DCell>) => {
       dispatchEditCell(cell_id, {
         changes,
       });
@@ -271,7 +278,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
                 tooltipText="Allow others to edit"
                 tooltipDirection="bottom"
                 color={palette.PRIMARY}
-                disabled={isUnlocking}
+                disabled={!canEdit || isUnlocking}
                 onClick={dispatchUnlockCell}
               />
             ) : lockOwner !== null ? (
@@ -287,7 +294,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
                 tooltipText="Lock for editing"
                 tooltipDirection="bottom"
                 color={palette.GRAY}
-                disabled={!canLock || isLocking}
+                disabled={!canEdit || !canLock || isLocking}
                 onClick={onClickLock}
               />
             )}

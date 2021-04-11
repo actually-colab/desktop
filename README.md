@@ -1,4 +1,4 @@
-<img src=".readme/img/header.png" width="100%">
+<img src=".readme/img/header.png" width="100%" />
 
 <div align="center">
 
@@ -9,6 +9,17 @@
 </div>
 
 # desktop
+
+![Screenshot](.readme/img/screenshot.png)
+
+<details>
+<summary>Architecture Overview</summary>
+
+This is a high level overview of our architecture.
+
+![Architecture](.readme/img/architecture.png)
+
+</details>
 
 ## Motivation
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import { Button, Divider, Dropdown, Modal } from 'rsuite';
+import { Button, Divider, Dropdown, Icon, Modal } from 'rsuite';
 import { DUser } from '@actually-colab/editor-types';
 
 import { palette, spacing } from '../../../constants/theme';
@@ -9,9 +9,9 @@ import { ReduxState } from '../../../types/redux';
 import { _editor } from '../../../redux/actions';
 import { EditorCell } from '../../../types/notebook';
 import useKernelStatus from '../../../kernel/useKernelStatus';
-import { Header, PopoverDropdown, RegularIconButton, StatusIndicator, UserAvatar } from '../../../components';
-import { StatusIndicatorProps } from '../../../components/StatusIndicator';
+import { Header, PopoverDropdown, RegularIconButton, UserAvatar } from '../../../components';
 import { CollaboratorsPopover } from '../Header';
+import { ImmutableLock } from '../../../immutable';
 
 const styles = StyleSheet.create({
   header: {
@@ -39,6 +39,11 @@ const styles = StyleSheet.create({
   padLeft: {
     marginLeft: spacing.DEFAULT / 2,
   },
+  kernelIconContainer: {
+    position: 'relative',
+    marginTop: 3,
+    marginRight: spacing.DEFAULT / 2,
+  },
 });
 
 /**
@@ -48,25 +53,28 @@ const EditorHeader: React.FC = () => {
   const { kernelStatus, kernelStatusColor, kernelIsConnected } = useKernelStatus();
 
   const user = useSelector((state: ReduxState) => state.auth.user);
-  const gatewayUri = useSelector((state: ReduxState) => state.editor.gatewayUri);
   const notebook = useSelector((state: ReduxState) => state.editor.notebook);
   const lockedCells = useSelector((state: ReduxState) => state.editor.lockedCells);
   const cells = useSelector((state: ReduxState) => state.editor.cells);
   const users = useSelector((state: ReduxState) => state.editor.users);
   const selectedOutputsUid = useSelector((state: ReduxState) => state.editor.selectedOutputsUid);
-  const connectToKernelErrorMessage = useSelector((state: ReduxState) => state.editor.connectToKernelErrorMessage);
   const isAddingCell = useSelector((state: ReduxState) => state.editor.isAddingCell);
   const isDeletingCell = useSelector((state: ReduxState) => state.editor.isDeletingCell);
   const selectedCellId = useSelector((state: ReduxState) => state.editor.selectedCellId);
 
   const [showDeleteCell, setShowDeleteCell] = React.useState<boolean>(false);
 
+  const accessLevel = React.useMemo(() => notebook?.users.find((_user) => _user.uid === user?.uid), [
+    notebook?.users,
+    user?.uid,
+  ]);
+  const canEdit = React.useMemo(() => accessLevel?.access_level === 'Full Access', [accessLevel?.access_level]);
   const ownedCells = React.useMemo(() => lockedCells.filter((lock) => lock.uid === user?.uid), [
     lockedCells,
     user?.uid,
   ]);
   const lockedCell = React.useMemo(
-    () => (ownedCells.size > 0 ? cells.get(ownedCells.get(0)?.cell_id ?? '') ?? null : null),
+    () => (ownedCells.size > 0 ? cells.get(ownedCells.first<ImmutableLock>()?.cell_id ?? '') ?? null : null),
     [cells, ownedCells]
   );
   const lockedCellId = React.useMemo(() => lockedCell?.cell_id ?? '', [lockedCell?.cell_id]);
@@ -81,13 +89,6 @@ const EditorHeader: React.FC = () => {
     [cells, notebook?.cell_ids, selectedCellId]
   );
 
-  const statusTooltip = React.useMemo<StatusIndicatorProps['tooltipOptions']>(
-    () => ({
-      placement: 'bottomEnd',
-      text: kernelStatus === 'Error' ? `Error: ${connectToKernelErrorMessage}` : kernelStatus,
-    }),
-    [connectToKernelErrorMessage, kernelStatus]
-  );
   const selectedOutputsEmail = React.useMemo<DUser['uid']>(
     () =>
       (selectedOutputsUid === ''
@@ -131,7 +132,7 @@ const EditorHeader: React.FC = () => {
     () => lockedCellId !== '' && dispatch(_editor.stopCodeExecution(lockedCellId)),
     [dispatch, lockedCellId]
   );
-  const dispatchSelectOutputUser = React.useCallback((uid: string) => dispatch(_editor.selectOutputUser(uid)), [
+  const dispatchSelectOutputUser = React.useCallback((uid: DUser['uid']) => dispatch(_editor.selectOutputUser(uid)), [
     dispatch,
   ]);
 
@@ -182,54 +183,61 @@ const EditorHeader: React.FC = () => {
 
           <Divider vertical />
 
-          <RegularIconButton
-            size="sm"
-            icon="plus"
-            tooltipText="Create a new cell"
-            tooltipDirection="bottom"
-            loading={isAddingCell}
-            onClick={() => dispatchAddCell(-1)}
-          />
-          <RegularIconButton
-            size="sm"
-            icon="arrow-up2"
-            tooltipText="Move the cell up"
-            tooltipDirection="bottom"
-            loading={false}
-            disabled={true}
-            onClick={() => console.log('TODO')}
-          />
-          <RegularIconButton
-            size="sm"
-            icon="arrow-down2"
-            tooltipText="Move the cell down"
-            tooltipDirection="bottom"
-            loading={false}
-            disabled={true}
-            onClick={() => console.log('TODO')}
-          />
-          <PopoverDropdown
-            placement="bottomEnd"
-            activeKey={lockedCell?.language ?? 'python'}
-            buttonProps={{ disabled: lockedCell === null }}
-            buttonContent={(lockedCell?.language === 'python' ? 'python3' : lockedCell?.language) ?? 'python3'}
-            onSelect={handleLanguageSelect}
-          >
-            <Dropdown.Item eventKey="python">python3</Dropdown.Item>
-            <Dropdown.Item eventKey="markdown">markdown</Dropdown.Item>
-          </PopoverDropdown>
+          {canEdit ? (
+            <React.Fragment>
+              <RegularIconButton
+                size="sm"
+                icon="plus"
+                tooltipText="Create a new cell"
+                tooltipDirection="bottom"
+                loading={isAddingCell}
+                disabled={!canEdit}
+                onClick={() => dispatchAddCell(-1)}
+              />
+              <RegularIconButton
+                size="sm"
+                icon="arrow-up2"
+                tooltipText="Move the cell up (coming soon)"
+                tooltipDirection="bottom"
+                loading={false}
+                disabled={true}
+                onClick={() => console.log('TODO')}
+              />
+              <RegularIconButton
+                size="sm"
+                icon="arrow-down2"
+                tooltipText="Move the cell down (coming soon)"
+                tooltipDirection="bottom"
+                loading={false}
+                disabled={true}
+                onClick={() => console.log('TODO')}
+              />
+              <PopoverDropdown
+                placement="bottomEnd"
+                activeKey={lockedCell?.language ?? 'python'}
+                buttonProps={{ disabled: !canEdit || lockedCell === null }}
+                buttonContent={(lockedCell?.language === 'python' ? 'python3' : lockedCell?.language) ?? 'python3'}
+                onSelect={handleLanguageSelect}
+              >
+                <Dropdown.Item eventKey="python">python3</Dropdown.Item>
+                <Dropdown.Item eventKey="markdown">markdown</Dropdown.Item>
+              </PopoverDropdown>
 
-          <Divider vertical />
+              <Divider vertical />
 
-          <RegularIconButton
-            size="sm"
-            icon="trash2"
-            tooltipText="Delete the current cell"
-            tooltipDirection="bottom"
-            loading={isDeletingCell}
-            disabled={lockedCellId === ''}
-            onClick={() => setShowDeleteCell(true)}
-          />
+              <RegularIconButton
+                size="sm"
+                icon="trash2"
+                tooltipText="Delete the current cell"
+                tooltipDirection="bottom"
+                loading={isDeletingCell}
+                disabled={!canEdit || lockedCellId === ''}
+                onClick={() => setShowDeleteCell(true)}
+              />
+            </React.Fragment>
+          ) : (
+            'Read Only'
+          )}
         </div>
 
         <div className={css(styles.headerNoDrag)}>
@@ -245,19 +253,21 @@ const EditorHeader: React.FC = () => {
             placement="bottomEnd"
             activeKey={selectedOutputsUid}
             buttonContent={
-              selectedOutputsUid === '' ? (
-                <React.Fragment>
-                  <StatusIndicator textPlacement="right" color={kernelStatusColor} tooltipOptions={statusTooltip} />
-                  {gatewayUri}
-                </React.Fragment>
-              ) : (
-                selectedOutputsEmail
-              )
+              <React.Fragment>
+                <div className={css(styles.kernelIconContainer)}>
+                  <Icon
+                    icon="related-map"
+                    size="lg"
+                    style={selectedOutputsUid === '' ? { color: kernelStatusColor } : undefined}
+                  />
+                </div>
+                {`Viewing: ${selectedOutputsUid === '' ? user?.email : selectedOutputsEmail}`}
+              </React.Fragment>
             }
             onSelect={handleKernelSelect}
           >
             <Dropdown.Item eventKey="" disabled={kernelStatus === 'Busy'}>
-              {gatewayUri}
+              {`${user?.email} (you)`}
             </Dropdown.Item>
 
             {notebook?.users
