@@ -481,7 +481,7 @@ const ProjectsPanel: React.FC = () => {
                       return (
                         <ProjectButton
                           key={attendee.uid}
-                          icon={active ? 'file' : 'file-o'}
+                          icon={active ? 'user' : 'user-o'}
                           name={attendee.name}
                           active={active}
                           indented={true}
@@ -495,7 +495,7 @@ const ProjectsPanel: React.FC = () => {
                   : attendeeNotebook && (
                       <ProjectButton
                         key={user?.uid}
-                        icon={isAttendeeNotebookActive ? 'file' : 'file-o'}
+                        icon={isAttendeeNotebookActive ? 'user' : 'user-o'}
                         name={user?.name ?? 'Unknown'}
                         active={isAttendeeNotebookActive}
                         indented={true}
