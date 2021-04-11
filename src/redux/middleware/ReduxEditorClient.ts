@@ -127,22 +127,22 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
         /**
          * A notebook was opened by a given user
          */
-        socketClient.on('notebook_opened', (user) => {
-          console.log('Notebook opened', user);
+        socketClient.on('notebook_opened', (nb_id, uid, triggered_by) => {
+          console.log('Notebook opened', nb_id, uid, triggered_by);
 
-          if (user.uid !== store.getState().auth.user?.uid) {
-            store.dispatch(_editor.connectToNotebook(user));
+          if (uid !== store.getState().auth.user?.uid) {
+            store.dispatch(_editor.connectToNotebook(nb_id, uid));
           }
         });
 
         /**
          * A notebook was closed by a given user
          */
-        socketClient.on('notebook_closed', (nb_id, triggered_by) => {
+        socketClient.on('notebook_closed', (nb_id, uid, triggered_by) => {
           console.log('Notebook closed', nb_id, triggered_by);
 
           if (nb_id === store.getState().editor.notebook?.nb_id) {
-            store.dispatch(_editor.disconnectFromNotebook(triggered_by === currentUser.uid, triggered_by ?? ''));
+            store.dispatch(_editor.disconnectFromNotebook(uid === currentUser.uid, nb_id, uid));
           }
         });
 
@@ -179,7 +179,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
 
           // Close notebook if unshared
           if (includedMe && store.getState().editor.notebook?.nb_id === nb_id) {
-            store.dispatch(_editor.disconnectFromNotebook(includedMe, currentUser.uid));
+            store.dispatch(_editor.disconnectFromNotebook(includedMe, nb_id, currentUser.uid));
           }
 
           store.dispatch(_editor.unshareNotebookSuccess(triggered_by === currentUser.uid, includedMe, nb_id, uids));

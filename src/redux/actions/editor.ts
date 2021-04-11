@@ -370,17 +370,23 @@ export const openNotebook = (nb_id: Notebook['nb_id']): EditorAsyncActionTypes =
 /**
  * A user has connected to a notebook
  */
-export const connectToNotebook = (user: DUser): EditorActionTypes => ({
+export const connectToNotebook = (nb_id: Notebook['nb_id'], uid: DUser['uid']): EditorActionTypes => ({
   type: NOTEBOOKS.ACCESS.CONNECT,
-  user,
+  nb_id,
+  uid,
 });
 
 /**
  * A user has disconnected from the notebook
  */
-export const disconnectFromNotebook = (isMe: boolean, uid: string): EditorActionTypes => ({
+export const disconnectFromNotebook = (
+  isMe: boolean,
+  nb_id: Notebook['nb_id'],
+  uid: DUser['uid']
+): EditorActionTypes => ({
   type: NOTEBOOKS.ACCESS.DISCONNECT,
   isMe,
+  nb_id,
   uid,
 });
 

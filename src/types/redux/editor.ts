@@ -327,13 +327,15 @@ type NotebooksOpenFailureAction = {
 
 type NotebooksAccessConnectAction = {
   type: typeof NOTEBOOKS.ACCESS.CONNECT;
-  user: DUser;
+  nb_id: Notebook['nb_id'];
+  uid: DUser['uid'];
 };
 
 type NotebooksAccessDisconnectAction = {
   type: typeof NOTEBOOKS.ACCESS.DISCONNECT;
   isMe: boolean;
-  uid: string;
+  nb_id: Notebook['nb_id'];
+  uid: DUser['uid'];
 };
 
 type NotebooksShareStartAction = {
@@ -346,7 +348,7 @@ type NotebooksShareStartAction = {
 type NotebooksShareSuccessAction = {
   type: typeof NOTEBOOKS.SHARE.SUCCESS;
   isMe: boolean;
-  nb_id: string;
+  nb_id: Notebook['nb_id'];
   users: NotebookAccessLevel[];
 };
 
@@ -356,7 +358,7 @@ type NotebooksShareFailureAction = {
 
 type ShareWorkshopStartAction = {
   type: typeof WORKSHOPS.SHARE.START;
-  ws_id: string;
+  ws_id: Workshop['ws_id'];
   emails: string;
   access_level: WorkshopAccessLevelType;
 };
@@ -374,7 +376,7 @@ type ShareWorkshopFailureAction = {
 
 type UnshareNotebookStartAction = {
   type: typeof NOTEBOOKS.UNSHARE.START;
-  nb_id: string;
+  nb_id: Notebook['nb_id'];
   emails: string;
 };
 
@@ -382,7 +384,7 @@ type UnshareNotebookSuccessAction = {
   type: typeof NOTEBOOKS.UNSHARE.SUCCESS;
   isMe: boolean;
   includedMe: boolean;
-  nb_id: string;
+  nb_id: Notebook['nb_id'];
   uids: NotebookAccessLevel['uid'][];
 };
 
@@ -392,7 +394,7 @@ type UnshareNotebookFailureAction = {
 
 type NotebooksOutputsSelectAction = {
   type: typeof NOTEBOOKS.OUTPUTS.SELECT;
-  uid: string;
+  uid: DUser['uid'];
 };
 
 type NotebooksOutputsReceiveAction = {

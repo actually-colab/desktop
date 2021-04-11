@@ -688,11 +688,18 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
     /**
      * A user has opened the notebook
      */
-    case NOTEBOOKS.ACCESS.CONNECT:
+    case NOTEBOOKS.ACCESS.CONNECT: {
+      const user = state.notebooks.get(action.nb_id)?.users.find((user) => user.uid === action.uid);
+
+      if (!user) {
+        return state;
+      }
+
       return {
         ...state,
-        users: state.users.filter((user) => user.uid !== action.user.uid).add(new ImmutableUserFactory(action.user)),
+        users: state.users.filter((user) => user.uid !== action.uid).add(new ImmutableUserFactory(user)),
       };
+    }
     /**
      * A user has closed the notebook
      */
