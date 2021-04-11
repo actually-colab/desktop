@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.DEFAULT / 2,
   },
   shareText: {
-    marginLeft: spacing.DEFAULT / 4,
+    marginLeft: spacing.DEFAULT / 2,
     fontSize: 16,
   },
   shareTextSmall: {
@@ -366,6 +366,20 @@ const CollaboratorsPanel: React.FC = () => {
             </List>
 
             {!sharedAttendees?.size && <p>No attendees</p>}
+
+            <Button
+              className={css(styles.shareButton)}
+              appearance="primary"
+              block
+              loading={false}
+              disabled={!sharedAttendees?.size}
+              onClick={() => console.log('TODO')}
+            >
+              <Icon icon="envelope-open-o" size="lg" />
+              <span className={css(styles.shareText)}>Release</span>
+            </Button>
+
+            <p>Releasing the workshop will open it up for attendees</p>
           </React.Fragment>
         )}
       </div>
