@@ -8,6 +8,7 @@ import type {
   Workshop,
   NotebookAccessLevel,
   WorkshopAccessLevelType,
+  OChatMessage,
 } from '@actually-colab/editor-types';
 import { format } from 'date-fns';
 
@@ -569,6 +570,37 @@ export const receiveOutputs = (output: OOutput): EditorActionTypes => ({
   type: NOTEBOOKS.OUTPUTS.RECEIVE,
   output,
 });
+
+const sendMessageStart = (message: string): EditorActionTypes => ({
+  type: NOTEBOOKS.SEND_MESSAGE.START,
+  message,
+});
+
+/**
+ * Successfully sent a message
+ */
+export const sendMessageSuccess = (isMe: boolean, message: OChatMessage): EditorActionTypes => ({
+  type: NOTEBOOKS.SEND_MESSAGE.SUCCESS,
+  isMe,
+  message,
+});
+
+/**
+ * Failed to send a message
+ */
+export const sendMessageFailure = (errorMessage: string): EditorActionTypes => ({
+  type: NOTEBOOKS.SEND_MESSAGE.FAILURE,
+  error: {
+    message: errorMessage,
+  },
+});
+
+/**
+ * Send a message to collaborators
+ */
+export const sendMessage = (message: string): EditorAsyncActionTypes => async (dispatch) => {
+  dispatch(sendMessageStart(message));
+};
 
 const lockCellStart = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
   type: CELL.LOCK.START,

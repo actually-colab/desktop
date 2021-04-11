@@ -10,6 +10,7 @@ import {
   Workshop,
   NotebookAccessLevel,
   WorkshopAccessLevelType,
+  OChatMessage,
 } from '@actually-colab/editor-types';
 
 import { ImmutableEditorCell } from '../../immutable';
@@ -104,6 +105,11 @@ export const NOTEBOOKS = {
   OUTPUTS: {
     SELECT: 'NOTEBOOKS_OUTPUTS_SELECT',
     RECEIVE: 'NOTEBOOKS_OUTPUTS_RECEIVE',
+  },
+  SEND_MESSAGE: {
+    START: 'NOTEBOOKS_SEND_MESSAGE_START',
+    SUCCESS: 'NOTEBOOKS_SEND_MESSAGE_SUCCESS',
+    FAILURE: 'NOTEBOOKS_SEND_MESSAGE_FAILURE',
   },
 } as const;
 export const WORKSHOPS = {
@@ -422,6 +428,21 @@ type NotebooksOutputsReceiveAction = {
   output: OOutput;
 };
 
+type NotebooksSendMessageStartAction = {
+  type: typeof NOTEBOOKS.SEND_MESSAGE.START;
+  message: string;
+};
+
+type NotebooksSendMessageSuccessAction = {
+  type: typeof NOTEBOOKS.SEND_MESSAGE.SUCCESS;
+  isMe: boolean;
+  message: OChatMessage;
+};
+
+type NotebooksSendMessageFailureAction = {
+  type: typeof NOTEBOOKS.SEND_MESSAGE.FAILURE;
+} & ActionError;
+
 type LockCellStartAction = {
   type: typeof CELL.LOCK.START;
   cell_id: EditorCell['cell_id'];
@@ -635,6 +656,9 @@ export type EditorActionTypes =
   | ReleaseWorkshopFailureAction
   | NotebooksOutputsSelectAction
   | NotebooksOutputsReceiveAction
+  | NotebooksSendMessageStartAction
+  | NotebooksSendMessageSuccessAction
+  | NotebooksSendMessageFailureAction
   | LockCellStartAction
   | LockCellSuccessAction
   | LockCellFailureAction

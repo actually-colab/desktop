@@ -63,7 +63,10 @@ const styles = StyleSheet.create({
     lineHeight: '12px',
     whiteSpace: 'pre-wrap',
     wordBreak: 'break-word',
+    display: 'flex',
+    flexDirection: 'column-reverse',
   },
+  outputScrollContainer: {},
   bold: {
     fontWeight: 'bold',
     lineHeight: '18px',
@@ -99,8 +102,6 @@ const KeyValue: React.FC<{ attributeKey: string | React.ReactNode; attributeValu
  * The kernel panel of the left sidebar of the editor page
  */
 const KernelPanel: React.FC = () => {
-  const logsAnchorRef = React.useRef<HTMLDivElement | null>(null);
-
   const { kernelStatus, kernelStatusColor } = useKernelStatus();
 
   const autoConnectToKernel = useSelector((state: ReduxState) => state.editor.autoConnectToKernel);
@@ -109,7 +110,6 @@ const KernelPanel: React.FC = () => {
   const logs = useSelector((state: ReduxState) => state.editor.logs);
 
   const [newGatewayUri, setNewGatewayUri] = React.useState<string>('');
-  const [isLogsPinned, setIsLogsPinned] = React.useState<boolean>(true);
 
   const kernelActiveIsh = React.useMemo(() => kernelStatus !== 'Offline' && kernelStatus !== 'Connecting', [
     kernelStatus,
@@ -128,15 +128,6 @@ const KernelPanel: React.FC = () => {
     (editing: boolean) => dispatch(_editor.editKernelGateway(editing)),
     [dispatch]
   );
-
-  /**
-   * Auto scroll logs if pinned
-   */
-  React.useEffect(() => {
-    if (isLogsPinned && logs.size > 0) {
-      setTimeout(() => logsAnchorRef?.current?.scrollIntoView({ behavior: 'smooth' }), 100);
-    }
-  }, [isLogsPinned, logs.size]);
 
   return (
     <div className={css(styles.container)}>
@@ -258,33 +249,28 @@ const KernelPanel: React.FC = () => {
         </div>
       </Whisper>
 
-      <p className={css(styles.keyText)}>
-        Kernel Logs
-        <Button appearance="subtle" size="xs" onClick={() => setIsLogsPinned((prevIsLogsPinned) => !prevIsLogsPinned)}>
-          <Icon icon="thumb-tack" style={isLogsPinned ? { color: palette.PRIMARY } : undefined} />
-        </Button>
-      </p>
+      <p className={css(styles.keyText)}>Kernel Logs</p>
       <pre className={css(styles.output)}>
-        <Timeline className="icon-timeline">
-          {logs.map((log) => (
-            <Timeline.Item
-              dot={
-                log.status === 'Success' ? (
-                  <Icon icon="check" style={{ background: palette.SUCCESS, color: palette.BASE }} />
-                ) : log.status === 'Warning' ? (
-                  <Icon icon="exclamation" style={{ background: palette.WARNING, color: palette.BASE }} />
-                ) : log.status === 'Error' ? (
-                  <Icon icon="close" style={{ background: palette.ERROR, color: palette.BASE }} />
-                ) : undefined
-              }
-            >
-              <p className={css(styles.bold)}>{log.dateString}</p>
-              <p>{log.message}</p>
-            </Timeline.Item>
-          ))}
-        </Timeline>
-
-        <div ref={logsAnchorRef} />
+        <div className={css(styles.outputScrollContainer)}>
+          <Timeline className="icon-timeline">
+            {logs.map((log) => (
+              <Timeline.Item
+                dot={
+                  log.status === 'Success' ? (
+                    <Icon icon="check" style={{ background: palette.SUCCESS, color: palette.BASE }} />
+                  ) : log.status === 'Warning' ? (
+                    <Icon icon="exclamation" style={{ background: palette.WARNING, color: palette.BASE }} />
+                  ) : log.status === 'Error' ? (
+                    <Icon icon="close" style={{ background: palette.ERROR, color: palette.BASE }} />
+                  ) : undefined
+                }
+              >
+                <p className={css(styles.bold)}>{log.dateString}</p>
+                <p>{log.message}</p>
+              </Timeline.Item>
+            ))}
+          </Timeline>
+        </div>
       </pre>
 
       <div className={css(styles.connectionContainer)}>
