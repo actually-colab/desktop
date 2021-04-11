@@ -141,7 +141,8 @@ export const makeWorkshopAccessLevelsImmutable = (
 export const cleanDCell = (cell: DCell): Required<DCell> => {
   return {
     ...cell,
-    cursor_pos: cell.cursor_pos ?? null,
+    cursor_col: cell.cursor_col ?? null,
+    cursor_row: cell.cursor_row ?? null,
     lock_held_by: cell.lock_held_by ?? '',
   };
 };
