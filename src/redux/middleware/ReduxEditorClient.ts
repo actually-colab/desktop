@@ -48,6 +48,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           } catch (error) {
             console.error(error);
             console.error(error.response);
+
             store.dispatch(_auth.signInFailure(error.message));
             store.dispatch(
               _ui.notify({
@@ -74,8 +75,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          */
         socketClient.on('connect', () => {
           console.log('Connected to AC socket');
-          window.addEventListener('beforeunload', closeOnUnmount);
 
+          window.addEventListener('beforeunload', closeOnUnmount);
           store.dispatch(_editor.connectToClientSuccess());
         });
 
@@ -84,8 +85,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          */
         socketClient.on('close', (event) => {
           console.log('Disconnected from AC socket', event);
-          window.removeEventListener('beforeunload', closeOnUnmount);
 
+          window.removeEventListener('beforeunload', closeOnUnmount);
           store.dispatch(_editor.connectToClientFailure());
         });
 
@@ -173,9 +174,19 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          */
         socketClient.on('cell_created', (dcell, triggered_by) => {
           console.log('Cell created', dcell);
+
           store.dispatch(
             _editor.addCellSuccess(triggered_by === currentUser.uid, dcell.cell_id, -1, cleanDCell(dcell))
           );
+        });
+
+        /**
+         * A cell was deleted by a given user
+         */
+        socketClient.on('cell_deleted', (nb_id, cell_id, triggered_by) => {
+          console.log('Cell deleted', nb_id, cell_id);
+
+          store.dispatch(_editor.deleteCellSuccess(triggered_by === currentUser.uid, cell_id));
         });
 
         /**
@@ -183,6 +194,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          */
         socketClient.on('cell_locked', (dcell, triggered_by) => {
           console.log('Cell locked', dcell);
+
           store.dispatch(
             _editor.lockCellSuccess(
               triggered_by === currentUser.uid,
@@ -198,6 +210,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          */
         socketClient.on('cell_unlocked', (dcell, triggered_by) => {
           console.log('Cell unlocked', dcell);
+
           store.dispatch(
             _editor.unlockCellSuccess(
               triggered_by === currentUser.uid,
@@ -213,6 +226,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          */
         socketClient.on('cell_edited', (dcell, triggered_by) => {
           console.log('Cell edited', dcell);
+
           store.dispatch(_editor.editCellSuccess(triggered_by === currentUser.uid, dcell.cell_id, cleanDCell(dcell)));
         });
 
@@ -221,6 +235,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          */
         socketClient.on('output_updated', (output) => {
           console.log('Received outputs', output);
+
           if (output.uid !== currentUser.uid) {
             store.dispatch(_editor.receiveOutputs(output));
           }
@@ -334,6 +349,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           } catch (error) {
             console.error(error);
             console.error(error.response);
+
             store.dispatch(_editor.createNotebookFailure(error.message));
             store.dispatch(
               _ui.notify({
@@ -361,6 +377,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           } catch (error) {
             console.error(error);
             console.error(error.response);
+
             store.dispatch(_editor.createWorkshopFailure(error.message));
             store.dispatch(
               _ui.notify({
@@ -406,6 +423,11 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
        * Started sharing a given notebook
        */
       case NOTEBOOKS.SHARE.START: {
+        if (store.getState().editor.clientConnectionStatus !== 'Connected') {
+          console.error('Tried to use socket before connected');
+          return;
+        }
+
         const emails = separateEmails(action.emails);
 
         socketClient?.shareNotebook(emails, action.nb_id, action.access_level);
@@ -416,6 +438,11 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
        * Started sharing a given workshop
        */
       case WORKSHOPS.SHARE.START: {
+        if (store.getState().editor.clientConnectionStatus !== 'Connected') {
+          console.error('Tried to use socket before connected');
+          return;
+        }
+
         const emails = separateEmails(action.emails);
 
         socketClient?.shareWorkshop(emails, action.ws_id, action.access_level);
@@ -453,7 +480,18 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
        * Started deleting a cell
        */
       case CELL.DELETE.START: {
-        // TODO: delete cell
+        const notebook = store.getState().editor.notebook;
+        if (notebook === null) {
+          console.error('Notebook was null');
+          return;
+        }
+
+        if (store.getState().editor.clientConnectionStatus !== 'Connected') {
+          console.error('Tried to use socket before connected');
+          return;
+        }
+
+        socketClient?.deleteCell(notebook.nb_id, action.cell_id);
         break;
       }
 
