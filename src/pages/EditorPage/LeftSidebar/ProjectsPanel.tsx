@@ -17,17 +17,19 @@ import {
   InputGroup,
   Modal,
   Schema,
+  Uploader,
 } from 'rsuite';
 import { FormInstance } from 'rsuite/lib/Form';
+import { FileType } from 'rsuite/lib/Uploader';
 import debounce from 'lodash.debounce';
-import { Notebook } from '@actually-colab/editor-types';
+import { DCell, Notebook } from '@actually-colab/editor-types';
 
 import { ReduxState } from '../../../types/redux';
-import { _editor } from '../../../redux/actions';
+import { _editor, _ui } from '../../../redux/actions';
 import { timeSince } from '../../../utils/date';
 import { palette, spacing } from '../../../constants/theme';
 import { PopoverDropdown } from '../../../components';
-import { filterNotebookByName, sortNotebookBy } from '../../../utils/notebook';
+import { convertTextToCells, filterNotebookByName, sortNotebookBy } from '../../../utils/notebook';
 
 type NewProjectFormValue = {
   name: string;
@@ -161,18 +163,21 @@ const ProjectsPanel: React.FC = () => {
     name: '',
     description: '',
   });
+  const [uploadedFileList, setUploadedFileList] = React.useState<FileType[]>([]);
+  const [uploadedContent, setUploadedContent] = React.useState<Pick<DCell, 'language' | 'contents'>[]>([]);
 
   const dispatch = useDispatch();
   const dispatchGetNotebooks = React.useCallback(() => dispatch(_editor.getNotebooks()), [dispatch]);
   const dispatchCreateNotebook = React.useCallback(
-    () => newProjectFormRef.current?.check() && dispatch(_editor.createNotebook(newProjectFormValue.name)),
-    [dispatch, newProjectFormValue.name]
+    () =>
+      newProjectFormRef.current?.check() && dispatch(_editor.createNotebook(newProjectFormValue.name, uploadedContent)),
+    [dispatch, newProjectFormValue.name, uploadedContent]
   );
   const dispatchCreateWorkshop = React.useCallback(
     () =>
       newProjectFormRef.current?.check() &&
-      dispatch(_editor.createWorkshop(newProjectFormValue.name, newProjectFormValue.description)),
-    [dispatch, newProjectFormValue.description, newProjectFormValue.name]
+      dispatch(_editor.createWorkshop(newProjectFormValue.name, newProjectFormValue.description, uploadedContent)),
+    [dispatch, newProjectFormValue.description, newProjectFormValue.name, uploadedContent]
   );
   const dispatchOpenNotebook = React.useCallback((nb_id: Notebook['nb_id']) => dispatch(_editor.openNotebook(nb_id)), [
     dispatch,
@@ -184,6 +189,44 @@ const ProjectsPanel: React.FC = () => {
     []
   );
   /* eslint-enable react-hooks/exhaustive-deps */
+
+  const handleUploadFile = React.useCallback(
+    async (files: FileType[]) => {
+      if (files.length === 0) {
+        // File was removed
+        setUploadedContent([]);
+        setUploadedFileList([]);
+        return;
+      }
+
+      try {
+        const content = await files[0].blobFile?.text();
+        console.log('Uploaded file text', { content });
+
+        const cells = convertTextToCells(content ?? '');
+        console.log('Uploaded file cells', cells);
+
+        if (cells !== null) {
+          setUploadedContent(cells);
+          setUploadedFileList(files);
+          return;
+        }
+      } catch (error) {
+        setUploadedContent([]);
+      }
+
+      // Could not validate file
+      dispatch(
+        _ui.notify({
+          level: 'error',
+          title: 'Failed to upload notebook',
+          message: 'Notebook was not the correct format or the upload failed for unknown reasons',
+          duration: 5000,
+        })
+      );
+    },
+    [dispatch]
+  );
 
   const handleNewProjectFormSubmit = React.useCallback(
     (_, event: React.FormEvent<HTMLFormElement>) => {
@@ -390,6 +433,22 @@ const ProjectsPanel: React.FC = () => {
               </FormGroup>
             )}
           </Form>
+
+          <Divider />
+
+          <ControlLabel>Project content</ControlLabel>
+          <Uploader
+            accept=".ipynb,.json,application/json"
+            draggable
+            autoUpload={false}
+            multiple={false}
+            fileList={uploadedFileList}
+            disabled={uploadedFileList.length > 0}
+            onChange={handleUploadFile}
+          >
+            <div style={{ lineHeight: '64px' }}>Click or Drag a notebook to this area to upload</div>
+          </Uploader>
+          <HelpBlock>You can create a blank project or upload an existing notebook to start from</HelpBlock>
         </Modal.Body>
         <Modal.Footer>
           <Button appearance="subtle" disabled={isCreatingNotebook} onClick={() => setShowCreateProject(false)}>

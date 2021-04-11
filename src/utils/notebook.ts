@@ -192,6 +192,30 @@ export const convertSendablePayloadToOutputString = (payload: SendableKernelOutp
 };
 
 /**
+ * Convert arbitrary text to an array of DCells if possible, otherwise null
+ */
+export const convertTextToCells = (text: string): Pick<DCell, 'language' | 'contents'>[] | null => {
+  try {
+    const ipynb = JSON.parse(text) as IpynbNotebook;
+
+    const cells: Pick<DCell, 'language' | 'contents'>[] = [];
+
+    ipynb.cells
+      .filter((cell) => cell.cell_type === 'code' || cell.cell_type === 'markdown')
+      .forEach((cell) => {
+        cells.push({
+          language: cell.cell_type === 'code' ? 'python' : 'markdown',
+          contents: Array.isArray(cell.source) ? cell.source.join('\n') : cell.source,
+        });
+      });
+
+    return cells;
+  } catch (error) {
+    return null;
+  }
+};
+
+/**
  * Given cells and outputs, convert the notebook to a JSON ipynb format
  */
 const convertToIpynb = (

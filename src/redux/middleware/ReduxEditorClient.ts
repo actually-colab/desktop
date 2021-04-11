@@ -342,7 +342,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
       case NOTEBOOKS.CREATE.START: {
         (async () => {
           try {
-            const notebook = await restClient.createNotebook(action.name);
+            const notebook = await restClient.createNotebook(action.name, 'python', action.cells);
 
             console.log('Notebook created', notebook);
             store.dispatch(_editor.createNotebookSuccess(notebook));
@@ -370,7 +370,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
       case WORKSHOPS.CREATE.START: {
         (async () => {
           try {
-            const workshop = await restClient.createWorkshop(action.name, action.description);
+            const workshop = await restClient.createWorkshop(action.name, action.description, action.cells);
 
             console.log('Workshop created', workshop);
             store.dispatch(_editor.createWorkshopSuccess(workshop));
