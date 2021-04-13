@@ -25,6 +25,7 @@ import { palette, spacing } from '../../../constants/theme';
 import { RIGHT_SIDEBAR_PANEL_WIDTH } from '../../../constants/dimensions';
 import { ReduxState } from '../../../types/redux';
 import { _editor } from '../../../redux/actions';
+import { EMAILS_REGEX } from '../../../utils/regex';
 import { UserAvatar } from '../../../components';
 
 type ShareNotebookFormValue = {
@@ -36,11 +37,6 @@ type ShareWorkshopFormValue = {
   emails: string;
   accessLevel: WorkshopAccessLevelType;
 };
-
-/**
- * Regex for comma separated emails
- */
-const EMAILS_REGEX = /^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$/g;
 
 /**
  * The rsuite model to check if a collaborator form is valid for notebooks
