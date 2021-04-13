@@ -6,9 +6,13 @@
 
 ![GitHub](https://img.shields.io/github/license/actually-colab/desktop) [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/actually-colab/desktop.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/actually-colab/desktop/context:javascript) ![GitHub repo size](https://img.shields.io/github/repo-size/actually-colab/desktop) [![Lines of Code](https://tokei.rs/b1/github/actually-colab/desktop)](https://github.com/actually-colab/desktop) ![GitHub issues](https://img.shields.io/github/issues/actually-colab/desktop) ![GitHub closed issues](https://img.shields.io/github/issues-closed/actually-colab/desktop)
 
+[![Patreon](https://img.shields.io/badge/Patreon-F96854?style=flat&logo=patreon&logoColor=white)](https://www.patreon.com/actuallycolab) [![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=flat&logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=ParNlHsbSrY) [![HackIllinois](https://img.shields.io/badge/HackIllinois%201st%20place%20🏆-0A3E54?style=flat&logo=dev.to&logoColor=white)](https://devpost.com/software/actually-colab-real-time-collaborative-jupyter-editor)
+
 </div>
 
 # desktop
+
+![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB) ![Redux](https://img.shields.io/badge/Redux-593D88?style=flat&logo=redux&logoColor=white) ![Yarn](https://img.shields.io/badge/Yarn-2C8EBB?style=flat&logo=yarn&logoColor=white) ![Netlify](https://img.shields.io/badge/Netlify-00C7B7?style=flat&logo=netlify&logoColor=white)
 
 ![Screenshot](.readme/img/screenshot.png)
 
