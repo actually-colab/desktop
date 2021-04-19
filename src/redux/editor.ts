@@ -3,6 +3,7 @@ import { DUser, Notebook, Workshop } from '@actually-colab/editor-types';
 
 import { CELL, CLIENT, CONTACTS, KERNEL, NOTEBOOKS, WORKSHOPS } from '../types/redux/editor';
 import { SIGN_OUT } from '../types/redux/auth';
+import { ImmutableMapOf } from '../types/immutable';
 import { ClientConnectionStatus } from '../types/client';
 import { EditorCell } from '../types/notebook';
 import { Kernel } from '../types/kernel';
@@ -159,7 +160,7 @@ export interface EditorState {
   /**
    * A list of locked cells and user ID's
    */
-  lockedCells: ImmutableMap<EditorCell['cell_id'], ImmutableLock>;
+  lockedCells: ImmutableMapOf<EditorCell['cell_id'], ImmutableLock>;
 
   /**
    * The `cell_id` of the currently selected cell
@@ -190,11 +191,11 @@ export interface EditorState {
   /**
    * A list of notebooks the user has access to without their contents
    */
-  notebooks: ImmutableMap<Notebook['nb_id'], ImmutableNotebook>;
+  notebooks: ImmutableMapOf<Notebook['nb_id'], ImmutableNotebook>;
   /**
    * A list of workshops the user has access to without their contents
    */
-  workshops: ImmutableMap<Workshop['ws_id'], ImmutableWorkshop>;
+  workshops: ImmutableMapOf<Workshop['ws_id'], ImmutableWorkshop>;
 
   /**
    * The currently open notebook with ordered `cell_id`'s
@@ -203,7 +204,7 @@ export interface EditorState {
   /**
    * A map of `cell_id`'s to cells in the currently open notebook
    */
-  cells: ImmutableMap<EditorCell['cell_id'], ImmutableEditorCell>;
+  cells: ImmutableMapOf<EditorCell['cell_id'], ImmutableEditorCell>;
 
   /**
    * The `uid` to view outputs for
@@ -214,11 +215,11 @@ export interface EditorState {
    *
    * Use an empty string as the key for the current user
    */
-  outputs: ImmutableMap<EditorCell['cell_id'], ImmutableMap<DUser['uid'], ImmutableList<ImmutableKernelOutput>>>;
+  outputs: ImmutableMapOf<EditorCell['cell_id'], ImmutableMapOf<DUser['uid'], ImmutableList<ImmutableKernelOutput>>>;
   /**
    * A map of `cell_id`'s to a map of `uid` to the output metadata
    */
-  outputsMetadata: ImmutableMap<EditorCell['cell_id'], ImmutableMap<DUser['uid'], ImmutableOutputMetadata>>;
+  outputsMetadata: ImmutableMapOf<EditorCell['cell_id'], ImmutableMapOf<DUser['uid'], ImmutableOutputMetadata>>;
 
   /**
    * A list of users who are active
@@ -268,7 +269,7 @@ const initialState: EditorState = {
 
   lockingCellId: '',
   unlockingCellId: '',
-  lockedCells: ImmutableMap(),
+  lockedCells: ImmutableMap() as ImmutableMapOf<EditorCell['cell_id'], ImmutableLock>,
 
   selectedCellId: '',
   executionCount: 0,
@@ -278,15 +279,21 @@ const initialState: EditorState = {
   gatewayUri: DEFAULT_GATEWAY_URI,
   kernel: null,
 
-  notebooks: ImmutableMap(),
-  workshops: ImmutableMap(),
+  notebooks: ImmutableMap() as ImmutableMapOf<Notebook['nb_id'], ImmutableNotebook>,
+  workshops: ImmutableMap() as ImmutableMapOf<Workshop['ws_id'], ImmutableWorkshop>,
 
   notebook: null,
-  cells: ImmutableMap(),
+  cells: ImmutableMap() as ImmutableMapOf<EditorCell['cell_id'], ImmutableEditorCell>,
 
   selectedOutputsUid: '',
-  outputs: ImmutableMap(),
-  outputsMetadata: ImmutableMap(),
+  outputs: ImmutableMap() as ImmutableMapOf<
+    EditorCell['cell_id'],
+    ImmutableMapOf<DUser['uid'], ImmutableList<ImmutableKernelOutput>>
+  >,
+  outputsMetadata: ImmutableMap() as ImmutableMapOf<
+    EditorCell['cell_id'],
+    ImmutableMapOf<DUser['uid'], ImmutableOutputMetadata>
+  >,
 
   users: ImmutableOrderedSet(),
   logs: ImmutableList(),
@@ -777,7 +784,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ...state,
         isSharingNotebook: action.isMe ? false : state.isSharingNotebook,
         notebooks: state.notebooks.update(action.nb_id, (notebook) =>
-          notebook.set(
+          notebook?.set(
             'users',
             notebook.users
               .filter(filterAccessLevelsFromList(action.users))
@@ -827,7 +834,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ...state,
         isSharingNotebook: action.isMe ? false : state.isSharingNotebook,
         workshops: state.workshops.update(action.ws_id, (workshop) =>
-          workshop.withMutations((mtx) =>
+          workshop?.withMutations((mtx) =>
             mtx
               .set(
                 'instructors',
@@ -879,7 +886,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         notebooks: action.includedMe
           ? state.notebooks.remove(action.nb_id)
           : state.notebooks.update(action.nb_id, (notebook) =>
-              notebook.set('users', notebook.users.filter(filterUidsFromList(action.uids)))
+              notebook?.set('users', notebook.users.filter(filterUidsFromList(action.uids)))
             ),
         notebook:
           state.notebook?.nb_id === action.nb_id
@@ -914,7 +921,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ...state,
         isReleasingWorkshop: action.isMe ? false : state.isReleasingWorkshop,
         workshops: state.workshops.has(action.ws_id)
-          ? state.workshops.update(action.ws_id, (workshop) => workshop.set('start_time', Date.now()))
+          ? state.workshops.update(action.ws_id, (workshop) => workshop?.set('start_time', Date.now()))
           : state.workshops,
       };
     /**
@@ -943,20 +950,24 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
 
       return {
         ...state,
-        outputs: state.outputs.update(action.output.cell_id, ImmutableMap(), (userMap) =>
-          userMap.set(
-            action.output.uid,
-            ImmutableList(messages.map((message) => new ImmutableKernelOutputFactory(message)))
-          )
+        outputs: state.outputs.update(
+          action.output.cell_id,
+          (userMap = ImmutableMap() as ImmutableMapOf<DUser['uid'], ImmutableList<ImmutableKernelOutput>>) =>
+            userMap.set(
+              action.output.uid,
+              ImmutableList(messages.map((message) => new ImmutableKernelOutputFactory(message)))
+            )
         ),
-        outputsMetadata: state.outputsMetadata.update(action.output.cell_id, ImmutableMap(), (userMap) =>
-          userMap.set(
-            action.output.uid,
-            new ImmutableOutputMetadataFactory({
-              runIndex: metadata.runIndex,
-              running: false,
-            })
-          )
+        outputsMetadata: state.outputsMetadata.update(
+          action.output.cell_id,
+          (userMap = ImmutableMap() as ImmutableMapOf<DUser['uid'], ImmutableOutputMetadata>) =>
+            userMap.set(
+              action.output.uid,
+              new ImmutableOutputMetadataFactory({
+                runIndex: metadata.runIndex,
+                running: false,
+              })
+            )
         ),
       };
     }
@@ -1009,7 +1020,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
             cell_id: action.cell_id,
           })
         ),
-        cells: state.cells.update(action.cell_id, new ImmutableEditorCellFactory(), (cell) => cell.merge(action.cell)),
+        cells: state.cells.update(action.cell_id, (cell = new ImmutableEditorCellFactory()) => cell.merge(action.cell)),
       };
     /**
      * Failed to lock a cell, for instance another user has the lock or there was some error
@@ -1036,7 +1047,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ...state,
         unlockingCellId: action.isMe ? '' : state.unlockingCellId,
         lockedCells: state.lockedCells.remove(action.cell_id),
-        cells: state.cells.update(action.cell_id, new ImmutableEditorCellFactory(), (cell) => cell.merge(action.cell)),
+        cells: state.cells.update(action.cell_id, (cell = new ImmutableEditorCellFactory()) => cell.merge(action.cell)),
       };
     /**
      * Failed to unlock the cell
@@ -1069,7 +1080,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         isAddingCell: action.isMe ? false : state.isAddingCell,
-        notebooks: state.notebooks.update(action.cell.nb_id, (notebook) => notebook.set('time_modified', Date.now())),
+        notebooks: state.notebooks.update(action.cell.nb_id, (notebook) => notebook?.set('time_modified', Date.now())),
         notebook: state.notebook.update('cell_ids', (cell_ids) =>
           cell_ids.splice(action.index === -1 ? notebook.cell_ids.size ?? 0 : action.index, 0, action.cell_id)
         ),
@@ -1126,7 +1137,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         cells: state.cells.delete(action.cell_id),
         outputs: state.outputs.remove(action.cell_id),
         runQueue: state.runQueue.filter((cell_id) => cell_id !== action.cell_id),
-        notebooks: state.notebooks.update(action.nb_id, (notebook) => notebook.set('time_modified', Date.now())),
+        notebooks: state.notebooks.update(action.nb_id, (notebook) => notebook?.set('time_modified', Date.now())),
       };
     }
     /**
@@ -1157,7 +1168,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ...state,
         ...runQueueChanges,
         isEditingCell: true,
-        cells: state.cells.update(action.cell_id, new ImmutableEditorCellFactory(), (value) =>
+        cells: state.cells.update(action.cell_id, (value = new ImmutableEditorCellFactory()) =>
           value.merge({
             ...action.changes,
             ...action.metaChanges,
@@ -1176,7 +1187,9 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         return {
           ...state,
           isEditingCell: false,
-          notebooks: state.notebooks.update(action.cell.nb_id, (notebook) => notebook.set('time_modified', Date.now())),
+          notebooks: state.notebooks.update(action.cell.nb_id, (notebook) =>
+            notebook?.set('time_modified', Date.now())
+          ),
         };
       }
 
@@ -1197,9 +1210,9 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ...state,
         ...runQueueChanges,
         cells: changesAreNewer
-          ? state.cells.update(action.cell_id, new ImmutableEditorCellFactory(), (value) => value.merge(action.cell))
+          ? state.cells.update(action.cell_id, (value = new ImmutableEditorCellFactory()) => value.merge(action.cell))
           : state.cells,
-        notebooks: state.notebooks.update(action.cell.nb_id, (notebook) => notebook.set('time_modified', Date.now())),
+        notebooks: state.notebooks.update(action.cell.nb_id, (notebook) => notebook?.set('time_modified', Date.now())),
       };
     }
     /**
@@ -1216,7 +1229,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
     case CELL.EDIT.UPDATE_CODE:
       return {
         ...state,
-        cells: state.cells.update(action.cell_id, new ImmutableEditorCellFactory(), (value) =>
+        cells: state.cells.update(action.cell_id, (value = new ImmutableEditorCellFactory()) =>
           value.set('contents', action.code)
         ),
       };
@@ -1297,8 +1310,10 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         runQueue: state.runQueue.filter((cell_id) => cell_id !== action.cell.cell_id),
         isExecutingCode: true,
         runningCellId: action.cell.cell_id,
-        outputs: state.outputs.update(action.cell.cell_id, ImmutableMap(), (userMap) =>
-          userMap.update('', ImmutableList(), (outputs) => outputs.clear())
+        outputs: state.outputs.update(
+          action.cell.cell_id,
+          (userMap = ImmutableMap() as ImmutableMapOf<DUser['uid'], ImmutableList<ImmutableKernelOutput>>) =>
+            userMap.update('', (outputs = ImmutableList()) => outputs.clear())
         ),
       };
     }
@@ -1318,7 +1333,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         isExecutingCode: false,
         runningCellId: '',
         executionCount: action.runIndex,
-        cells: state.cells.update(action.cell_id, new ImmutableEditorCellFactory(), (value) =>
+        cells: state.cells.update(action.cell_id, (value = new ImmutableEditorCellFactory()) =>
           value.set('runIndex', action.runIndex > state.executionCount ? action.runIndex : value.runIndex)
         ),
       };
@@ -1338,7 +1353,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         isExecutingCode: false,
         runningCellId: '',
         executionCount: action.runIndex,
-        cells: state.cells.update(action.cell_id, new ImmutableEditorCellFactory(), (value) =>
+        cells: state.cells.update(action.cell_id, (value = new ImmutableEditorCellFactory()) =>
           value.set('runIndex', action.runIndex > state.executionCount ? action.runIndex : value.runIndex)
         ),
         runQueue: state.runQueue.clear(),
@@ -1350,14 +1365,16 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
     case KERNEL.MESSAGE.RECEIVE:
       return {
         ...state,
-        outputs: state.outputs.update(action.cell_id, ImmutableMap(), (userMap) =>
-          userMap.update('', ImmutableList(), (outputs) =>
-            outputs.concat(
-              ImmutableList<ImmutableKernelOutput>(
-                action.messages.map<ImmutableKernelOutput>((message) => new ImmutableKernelOutputFactory(message))
+        outputs: state.outputs.update(
+          action.cell_id,
+          (userMap = ImmutableMap() as ImmutableMapOf<DUser['uid'], ImmutableList<ImmutableKernelOutput>>) =>
+            userMap.update('', (outputs = ImmutableList()) =>
+              outputs.concat(
+                ImmutableList<ImmutableKernelOutput>(
+                  action.messages.map<ImmutableKernelOutput>((message) => new ImmutableKernelOutputFactory(message))
+                )
               )
             )
-          )
         ),
       };
     /**
@@ -1366,7 +1383,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
     case KERNEL.MESSAGE.UPDATE_RUN_INDEX:
       return {
         ...state,
-        cells: state.cells.update(action.cell_id, new ImmutableEditorCellFactory(), (value) =>
+        cells: state.cells.update(action.cell_id, (value = new ImmutableEditorCellFactory()) =>
           value.set('runIndex', action.runIndex > state.executionCount ? action.runIndex : value.runIndex)
         ),
       };
