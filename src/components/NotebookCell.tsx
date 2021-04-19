@@ -100,6 +100,8 @@ const styles = StyleSheet.create({
  * A component to render all the content for a cell in a notebook including an editor, a toolbar, and cell outputs
  */
 const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
+
   const { kernelIsConnected } = useKernelStatus();
 
   const user = useSelector((state: ReduxState) => state.auth.user);
@@ -222,8 +224,23 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
     [dispatchEditCell]
   );
 
+  /**
+   * Auto scroll when cell is selected
+   */
+  React.useEffect(() => {
+    if (isSelected) {
+      containerRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+      });
+    }
+  }, [isSelected]);
+
   return (
-    <div className={css(styles.container, ownsCell && styles.containerLocked, isSelected && styles.containerSelected)}>
+    <div
+      ref={containerRef}
+      className={css(styles.container, ownsCell && styles.containerLocked, isSelected && styles.containerSelected)}
+    >
       <div className={css(styles.controls)}>
         <div className={css(styles.runIndexContainer)}>
           {cell.language !== 'markdown' && (
