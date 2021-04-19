@@ -386,6 +386,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
 
             console.log('Notebook created', notebook);
             store.dispatch(_editor.createNotebookSuccess(notebook));
+            store.dispatch(_editor.openNotebook(notebook.nb_id));
           } catch (error) {
             console.error(error);
             console.error(error.response);
@@ -414,6 +415,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
 
             console.log('Workshop created', workshop);
             store.dispatch(_editor.createWorkshopSuccess(workshop));
+            store.dispatch(_editor.openNotebook(workshop.main_notebook.nb_id));
           } catch (error) {
             console.error(error);
             console.error(error.response);
