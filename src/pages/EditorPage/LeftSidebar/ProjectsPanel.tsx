@@ -312,6 +312,15 @@ const ProjectsPanel: React.FC = () => {
     }
   }, [isCreatingNotebook]);
 
+  /**
+   * Auto expand folder of open workshop
+   */
+  React.useEffect(() => {
+    if (notebook?.ws_id) {
+      setOpenWorkshopIds((prevOpenWorkshopIds) => prevOpenWorkshopIds.add(notebook.ws_id));
+    }
+  }, [notebook?.ws_id]);
+
   return (
     <React.Fragment>
       <div className={css(styles.newProjectContainer)}>
