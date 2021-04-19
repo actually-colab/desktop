@@ -192,6 +192,10 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           console.log('Workshop started', ws_id, triggered_by);
 
           store.dispatch(_editor.releaseWorkshopSuccess(triggered_by === currentUser.uid, ws_id));
+
+          // Fetch new workshops and notebooks
+          store.dispatch(_editor.getWorkshops());
+          store.dispatch(_editor.getNotebooks());
         });
 
         /**
