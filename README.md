@@ -98,6 +98,14 @@ Create a file `.env.production.local`:
 REACT_APP_GOOGLE_CLIENT_ID="<CHANGE_ME>"
 REACT_APP_AC_API_URI="<CHANGE_ME>"
 REACT_APP_AC_WS_URI="<CHANGE_ME>"
+REACT_APP_SENTRY_DSN="<CHANGE_ME>"
+```
+
+Create a file `scripts/sentry.sh`:
+
+```bash
+#!/bin/bash
+export SENTRY_AUTH_TOKEN="<CHANGE_ME>"
 ```
 
 ```bash

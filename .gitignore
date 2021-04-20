@@ -10,6 +10,7 @@
 
 # production
 /build
+scripts/sentry.sh
 
 # misc
 .DS_Store
