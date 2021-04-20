@@ -30,7 +30,7 @@
     "upgrade:client": "yarn build:client && yarn upgrade @actually-colab/editor-client @actually-colab/editor-types",
     "install:client": "yarn build:client && yarn remove @actually-colab/editor-client && yarn add file:../editor/client && yarn add -D file:../editor/types",
     "postinstall": "husky install && yarn yarn-deduplicate yarn.lock",
-    "predeploy": "yarn build",
+    "predeploy": "(export REACT_APP_SENTRY_RELEASE=$(git rev-parse --short HEAD); yarn build && source ./scripts/sentry.sh && node scripts/sentry.js)",
     "deploy": "netlify deploy --prod",
     "test": "react-scripts test",
     "format": "prettier --config .prettierrc.js --write \"**/*.{ts,js,tsx,css,html,md}\"",
@@ -67,6 +67,7 @@
   },
   "devDependencies": {
     "@actually-colab/editor-types": "file:../editor/types",
+    "@sentry/cli": "^1.64.0",
     "@types/file-saver": "^2.0.1",
     "@types/lodash.debounce": "^4.0.6",
     "@types/node": "^12.0.0",

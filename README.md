@@ -101,6 +101,13 @@ REACT_APP_AC_WS_URI="<CHANGE_ME>"
 REACT_APP_SENTRY_DSN="<CHANGE_ME>"
 ```
 
+Create a file `scripts/sentry.sh`:
+
+```bash
+#!/bin/bash
+export SENTRY_AUTH_TOKEN="<CHANGE_ME>"
+```
+
 ```bash
 yarn deploy
 ```
