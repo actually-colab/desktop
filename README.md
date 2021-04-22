@@ -111,3 +111,7 @@ export SENTRY_AUTH_TOKEN="<CHANGE_ME>"
 ```bash
 yarn deploy
 ```
+
+## License
+
+`@actually-colab/desktop` is [GPLv2 licensed](./LICENSE)
