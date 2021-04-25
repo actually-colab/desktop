@@ -6,7 +6,12 @@ import { SIGN_IN, SIGN_OUT } from '../../types/redux/auth';
 import { CELL, KERNEL, NOTEBOOKS, WORKSHOPS } from '../../types/redux/editor';
 import { DEMO_NOTEBOOK_NAME } from '../../constants/demo';
 import { httpToWebSocket } from '../../utils/request';
-import { cleanDCell, convertSendablePayloadToOutputString, separateEmails } from '../../utils/notebook';
+import {
+  cleanDCell,
+  convertSendablePayloadToOutputString,
+  separateEmails,
+  sortOutputByMessageIndex,
+} from '../../utils/notebook';
 import { LatestNotebookIdStorage } from '../../utils/storage';
 import { syncSleep } from '../../utils/sleep';
 import { ReduxActions, _auth, _editor, _ui } from '../actions';
@@ -715,7 +720,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
             ?.get('')
             ?.get(action.runIndex.toString())
             ?.toArray()
-            ?.map((message) => message.toObject()) ?? []
+            .map((message) => message.toObject())
+            .sort(sortOutputByMessageIndex) ?? []
         ).concat(action.messages);
 
         socketClient?.updateOutput(

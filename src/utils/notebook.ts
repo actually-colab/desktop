@@ -354,7 +354,7 @@ export const download = (
     if (cell) {
       notebookData.push({
         cell: uid === '' ? cell : cell.set('runIndex', cellOutputMetadata?.runIndex ?? -1),
-        outputs: cellOutputs?.filter((output) => output.uid === uid)?.sort(sortOutputByMessageIndex),
+        outputs: cellOutputs,
       });
     }
   });
