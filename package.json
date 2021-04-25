@@ -7,8 +7,9 @@
     "url": "git+https://github.com/actually-colab/desktop.git"
   },
   "author": {
-    "name": "Jeff Taylor-Chang & Bailey Tincher",
-    "url": "https://github.com/actually-colab"
+    "name": "Jeff Taylor-Chang",
+    "email": "jeff@actuallycolab.org",
+    "url": "https://github.com/jtaylorchang"
   },
   "contributors": [
     {
