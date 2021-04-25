@@ -345,19 +345,16 @@ export const download = (
 
   notebook.cell_ids.forEach((cell_id) => {
     const cell = cells.get(cell_id);
-    const cellOutputs = outputs.get(cell_id)?.get(uid);
     const cellOutputMetadata = outputsMetadata.get(cell_id)?.get(uid);
+    const cellOutputs = outputs
+      .get(cell_id)
+      ?.get(uid)
+      ?.get((uid === '' ? cell?.runIndex : cellOutputMetadata?.runIndex)?.toString() ?? '');
 
     if (cell) {
       notebookData.push({
         cell: uid === '' ? cell : cell.set('runIndex', cellOutputMetadata?.runIndex ?? -1),
-        outputs: cellOutputs
-          ?.filter((output) =>
-            uid === ''
-              ? output.runIndex === cell.runIndex
-              : output.uid === uid && output.runIndex === cellOutputMetadata?.runIndex
-          )
-          ?.sort(sortOutputByMessageIndex),
+        outputs: cellOutputs,
       });
     }
   });

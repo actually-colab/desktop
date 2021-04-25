@@ -1,4 +1,4 @@
-import { List as ImmutableList, Map as ImmutableMap, OrderedSet as ImmutableOrderedSet } from 'immutable';
+import { List as ImmutableList, Map as ImmutableMap } from 'immutable';
 import { DUser, Notebook, Workshop } from '@actually-colab/editor-types';
 
 import { CELL, CLIENT, CONTACTS, KERNEL, NOTEBOOKS, WORKSHOPS } from '../types/redux/editor';
@@ -40,6 +40,7 @@ import {
   makeWorkshopAccessLevelsImmutable,
   reduceImmutableNotebook,
   reduceNotebookContents,
+  sortOutputByMessageIndex,
 } from '../utils/notebook';
 import { ReduxActions } from './actions';
 
@@ -211,11 +212,14 @@ export interface EditorState {
    */
   selectedOutputsUid: string;
   /**
-   * A map of `cell_id`'s to a map of `uid` to a list of outputs for each cell.
+   * A map of `cell_id`'s to a map of `uid` to a map of runIndex (as a string) to a list of outputs for each cell.
    *
    * Use an empty string as the key for the current user
    */
-  outputs: ImmutableMapOf<EditorCell['cell_id'], ImmutableMapOf<DUser['uid'], ImmutableList<ImmutableKernelOutput>>>;
+  outputs: ImmutableMapOf<
+    EditorCell['cell_id'],
+    ImmutableMapOf<DUser['uid'], ImmutableMapOf<string, ImmutableList<ImmutableKernelOutput>>>
+  >;
   /**
    * A map of `cell_id`'s to a map of `uid` to the output metadata
    */
@@ -224,7 +228,7 @@ export interface EditorState {
   /**
    * A list of users who are active
    */
-  users: ImmutableOrderedSet<ImmutableUser>;
+  users: ImmutableList<ImmutableUser>;
   /**
    * A list of logs from various kernel interactions
    */
@@ -288,14 +292,14 @@ const initialState: EditorState = {
   selectedOutputsUid: '',
   outputs: ImmutableMap() as ImmutableMapOf<
     EditorCell['cell_id'],
-    ImmutableMapOf<DUser['uid'], ImmutableList<ImmutableKernelOutput>>
+    ImmutableMapOf<DUser['uid'], ImmutableMapOf<string, ImmutableList<ImmutableKernelOutput>>>
   >,
   outputsMetadata: ImmutableMap() as ImmutableMapOf<
     EditorCell['cell_id'],
     ImmutableMapOf<DUser['uid'], ImmutableOutputMetadata>
   >,
 
-  users: ImmutableOrderedSet(),
+  users: ImmutableList(),
   logs: ImmutableList(),
 
   messages: ImmutableList(),
@@ -723,9 +727,11 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         return state;
       }
 
+      const userIndex = state.users.findIndex((user) => user.uid === action.uid);
+
       return {
         ...state,
-        users: state.users.filter((user) => user.uid !== action.uid).add(new ImmutableUserFactory(user)),
+        users: (userIndex !== -1 ? state.users.remove(userIndex) : state.users).push(new ImmutableUserFactory(user)),
       };
     }
     /**
@@ -733,9 +739,11 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
      */
     case NOTEBOOKS.ACCESS.DISCONNECT: {
       if (!action.isMe) {
+        const userIndex = state.users.findIndex((user) => user.uid === action.uid);
+
         return {
           ...state,
-          users: state.users.filter((user) => user.uid !== action.uid),
+          users: userIndex !== -1 ? state.users.remove(userIndex) : state.users,
         };
       }
 
@@ -952,10 +960,19 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ...state,
         outputs: state.outputs.update(
           action.output.cell_id,
-          (userMap = ImmutableMap() as ImmutableMapOf<DUser['uid'], ImmutableList<ImmutableKernelOutput>>) =>
-            userMap.set(
+          (
+            userMap = ImmutableMap() as ImmutableMapOf<
+              DUser['uid'],
+              ImmutableMapOf<string, ImmutableList<ImmutableKernelOutput>>
+            >
+          ) =>
+            userMap.update(
               action.output.uid,
-              ImmutableList(messages.map((message) => new ImmutableKernelOutputFactory(message)))
+              (runIndexMap = ImmutableMap() as ImmutableMapOf<string, ImmutableList<ImmutableKernelOutput>>) =>
+                runIndexMap.set(
+                  metadata.runIndex.toString(),
+                  ImmutableList(messages.map((message) => new ImmutableKernelOutputFactory(message)))
+                )
             )
         ),
         outputsMetadata: state.outputsMetadata.update(
@@ -1129,6 +1146,8 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         }
       }
 
+      const runQueueIndex = state.runQueue.findIndex((cell_id: string) => cell_id === action.cell_id);
+
       return {
         ...state,
         ...selectionChanges,
@@ -1136,7 +1155,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         lockedCells: state.lockedCells.remove(action.cell_id),
         cells: state.cells.delete(action.cell_id),
         outputs: state.outputs.remove(action.cell_id),
-        runQueue: state.runQueue.filter((cell_id) => cell_id !== action.cell_id),
+        runQueue: runQueueIndex !== -1 ? state.runQueue.remove(runQueueIndex) : state.runQueue,
         notebooks: state.notebooks.update(action.nb_id, (notebook) => notebook?.set('time_modified', Date.now())),
       };
     }
@@ -1159,8 +1178,10 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
 
       // If a cell in the runQueue is no longer python, it should not be executed
       if (action.changes?.language === 'markdown') {
-        if (state.runQueue.includes(action.cell_id)) {
-          runQueueChanges.runQueue = state.runQueue.filter((cell_id) => cell_id !== action.cell_id);
+        const runQueueIndex = state.runQueue.findIndex((cell_id) => cell_id === action.cell_id);
+
+        if (runQueueIndex !== -1) {
+          runQueueChanges.runQueue = state.runQueue.remove(runQueueIndex);
         }
       }
 
@@ -1201,8 +1222,10 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
 
       // If a cell in the runQueue is no longer python, it should not be executed
       if (changesAreNewer && action.cell.language === 'markdown') {
-        if (state.runQueue.includes(action.cell_id)) {
-          runQueueChanges.runQueue = state.runQueue.filter((cell_id) => cell_id !== action.cell_id);
+        const runQueueIndex = state.runQueue.findIndex((cell_id) => cell_id === action.cell_id);
+
+        if (runQueueIndex !== -1) {
+          runQueueChanges.runQueue = state.runQueue.remove(runQueueIndex);
         }
       }
 
@@ -1284,9 +1307,11 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         return state;
       }
 
+      const runQueueIndex = state.runQueue.findIndex((cell_id: string) => cell_id === action.cell_id);
+
       return {
         ...state,
-        runQueue: state.runQueue.filter((cell_id) => cell_id !== action.cell_id).push(action.cell_id),
+        runQueue: (runQueueIndex !== -1 ? state.runQueue.remove(runQueueIndex) : state.runQueue).push(action.cell_id),
       };
     }
     /**
@@ -1298,6 +1323,8 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         return state;
       }
 
+      const runQueueIndex = state.runQueue.findIndex((cell_id: string) => cell_id === action.cell.cell_id);
+
       return {
         ...state,
         kernel:
@@ -1307,14 +1334,9 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
                 status: 'Busy',
               }
             : null,
-        runQueue: state.runQueue.filter((cell_id) => cell_id !== action.cell.cell_id),
+        runQueue: runQueueIndex !== -1 ? state.runQueue.remove(runQueueIndex) : state.runQueue,
         isExecutingCode: true,
         runningCellId: action.cell.cell_id,
-        outputs: state.outputs.update(
-          action.cell.cell_id,
-          (userMap = ImmutableMap() as ImmutableMapOf<DUser['uid'], ImmutableList<ImmutableKernelOutput>>) =>
-            userMap.update('', (outputs = ImmutableList()) => outputs.clear())
-        ),
       };
     }
     /**
@@ -1367,13 +1389,26 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ...state,
         outputs: state.outputs.update(
           action.cell_id,
-          (userMap = ImmutableMap() as ImmutableMapOf<DUser['uid'], ImmutableList<ImmutableKernelOutput>>) =>
-            userMap.update('', (outputs = ImmutableList()) =>
-              outputs.concat(
-                ImmutableList<ImmutableKernelOutput>(
-                  action.messages.map<ImmutableKernelOutput>((message) => new ImmutableKernelOutputFactory(message))
+          (
+            userMap = ImmutableMap() as ImmutableMapOf<
+              DUser['uid'],
+              ImmutableMapOf<string, ImmutableList<ImmutableKernelOutput>>
+            >
+          ) =>
+            userMap.update(
+              '',
+              (runIndexMap = ImmutableMap() as ImmutableMapOf<string, ImmutableList<ImmutableKernelOutput>>) =>
+                runIndexMap.update(action.runIndex.toString(), (outputs = ImmutableList()) =>
+                  outputs
+                    .concat(
+                      ImmutableList<ImmutableKernelOutput>(
+                        action.messages.map<ImmutableKernelOutput>(
+                          (message) => new ImmutableKernelOutputFactory(message)
+                        )
+                      )
+                    )
+                    .sort(sortOutputByMessageIndex)
                 )
-              )
             )
         ),
       };
