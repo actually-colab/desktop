@@ -211,11 +211,14 @@ export interface EditorState {
    */
   selectedOutputsUid: string;
   /**
-   * A map of `cell_id`'s to a map of `uid` to a list of outputs for each cell.
+   * A map of `cell_id`'s to a map of `uid` to a map of runIndex (as a string) to a list of outputs for each cell.
    *
    * Use an empty string as the key for the current user
    */
-  outputs: ImmutableMapOf<EditorCell['cell_id'], ImmutableMapOf<DUser['uid'], ImmutableList<ImmutableKernelOutput>>>;
+  outputs: ImmutableMapOf<
+    EditorCell['cell_id'],
+    ImmutableMapOf<DUser['uid'], ImmutableMapOf<string, ImmutableList<ImmutableKernelOutput>>>
+  >;
   /**
    * A map of `cell_id`'s to a map of `uid` to the output metadata
    */
@@ -288,7 +291,7 @@ const initialState: EditorState = {
   selectedOutputsUid: '',
   outputs: ImmutableMap() as ImmutableMapOf<
     EditorCell['cell_id'],
-    ImmutableMapOf<DUser['uid'], ImmutableList<ImmutableKernelOutput>>
+    ImmutableMapOf<DUser['uid'], ImmutableMapOf<string, ImmutableList<ImmutableKernelOutput>>>
   >,
   outputsMetadata: ImmutableMap() as ImmutableMapOf<
     EditorCell['cell_id'],
@@ -952,10 +955,19 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ...state,
         outputs: state.outputs.update(
           action.output.cell_id,
-          (userMap = ImmutableMap() as ImmutableMapOf<DUser['uid'], ImmutableList<ImmutableKernelOutput>>) =>
-            userMap.set(
+          (
+            userMap = ImmutableMap() as ImmutableMapOf<
+              DUser['uid'],
+              ImmutableMapOf<string, ImmutableList<ImmutableKernelOutput>>
+            >
+          ) =>
+            userMap.update(
               action.output.uid,
-              ImmutableList(messages.map((message) => new ImmutableKernelOutputFactory(message)))
+              (runIndexMap = ImmutableMap() as ImmutableMapOf<string, ImmutableList<ImmutableKernelOutput>>) =>
+                runIndexMap.set(
+                  metadata.runIndex.toString(),
+                  ImmutableList(messages.map((message) => new ImmutableKernelOutputFactory(message)))
+                )
             )
         ),
         outputsMetadata: state.outputsMetadata.update(
@@ -1312,8 +1324,17 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         runningCellId: action.cell.cell_id,
         outputs: state.outputs.update(
           action.cell.cell_id,
-          (userMap = ImmutableMap() as ImmutableMapOf<DUser['uid'], ImmutableList<ImmutableKernelOutput>>) =>
-            userMap.update('', (outputs = ImmutableList()) => outputs.clear())
+          (
+            userMap = ImmutableMap() as ImmutableMapOf<
+              DUser['uid'],
+              ImmutableMapOf<string, ImmutableList<ImmutableKernelOutput>>
+            >
+          ) =>
+            userMap.update(
+              '',
+              (runIndexMap = ImmutableMap() as ImmutableMapOf<string, ImmutableList<ImmutableKernelOutput>>) =>
+                runIndexMap.update(action.cell.runIndex.toString(), (outputs = ImmutableList()) => outputs.clear())
+            )
         ),
       };
     }
@@ -1367,13 +1388,22 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ...state,
         outputs: state.outputs.update(
           action.cell_id,
-          (userMap = ImmutableMap() as ImmutableMapOf<DUser['uid'], ImmutableList<ImmutableKernelOutput>>) =>
-            userMap.update('', (outputs = ImmutableList()) =>
-              outputs.concat(
-                ImmutableList<ImmutableKernelOutput>(
-                  action.messages.map<ImmutableKernelOutput>((message) => new ImmutableKernelOutputFactory(message))
+          (
+            userMap = ImmutableMap() as ImmutableMapOf<
+              DUser['uid'],
+              ImmutableMapOf<string, ImmutableList<ImmutableKernelOutput>>
+            >
+          ) =>
+            userMap.update(
+              '',
+              (runIndexMap = ImmutableMap() as ImmutableMapOf<string, ImmutableList<ImmutableKernelOutput>>) =>
+                runIndexMap.update(action.runIndex.toString(), (outputs = ImmutableList()) =>
+                  outputs.concat(
+                    ImmutableList<ImmutableKernelOutput>(
+                      action.messages.map<ImmutableKernelOutput>((message) => new ImmutableKernelOutputFactory(message))
+                    )
+                  )
                 )
-              )
             )
         ),
       };

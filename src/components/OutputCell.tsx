@@ -37,11 +37,8 @@ const OutputCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
   );
   const cellOutputs = React.useMemo(
     () =>
-      outputs
-        .get(cell_id)
-        ?.get(selectedOutputsUid)
-        ?.filter((output) => output.runIndex === runIndex)
-        ?.sort(sortOutputByMessageIndex) ?? ImmutableList<ImmutableKernelOutput>(),
+      outputs.get(cell_id)?.get(selectedOutputsUid)?.get(runIndex.toString())?.sort(sortOutputByMessageIndex) ??
+      ImmutableList<ImmutableKernelOutput>(),
     [cell_id, outputs, runIndex, selectedOutputsUid]
   );
 

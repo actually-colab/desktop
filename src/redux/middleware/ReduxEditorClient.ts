@@ -713,7 +713,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
             .getState()
             .editor.outputs.get(action.cell_id)
             ?.get('')
-            ?.filter((message) => message.runIndex === action.messages[0].runIndex)
+            ?.get(action.runIndex.toString())
             ?.toArray()
             ?.map((message) => message.toObject()) ?? []
         ).concat(action.messages);
