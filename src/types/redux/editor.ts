@@ -214,7 +214,7 @@ type SetKernelGatewayAction = {
   uri: string;
 };
 
-type SetKernelGatewayEditAction = {
+type EditKernelGatewayAction = {
   type: typeof KERNEL.GATEWAY.EDIT;
   editing: boolean;
 };
@@ -614,7 +614,7 @@ export type EditorActionTypes =
   | KernelLogAppendAction
   | KernelLogClearAction
   | SetKernelGatewayAction
-  | SetKernelGatewayEditAction
+  | EditKernelGatewayAction
   | ConnectToKernelAutoAction
   | ConnectToKernelStartAction
   | ConnectToKernelSuccessAction

@@ -1,3 +1,5 @@
+import { DEFAULT_GATEWAY_URI } from '../constants/jupyter';
+
 /**
  * Make a storage object with CRUD functions
  */
@@ -36,10 +38,30 @@ export const buildWrappedLocalStorage = <T>(
 class LocalStorageSet {
   key: string;
   items: string[] = [];
+  defaultValues: string[] = [];
 
-  constructor(key: string) {
+  constructor(key: string, defaultValues: string[] = []) {
     this.key = key;
+    this.defaultValues = defaultValues;
     this.get();
+  }
+
+  /**
+   * Get an array of values in storage without reloading from local storage
+   */
+  values() {
+    return this.items.slice();
+  }
+
+  /**
+   * Get the last item in the array
+   */
+  last() {
+    if (this.items.length > 0) {
+      return this.items[this.items.length - 1];
+    }
+
+    return null;
   }
 
   /**
@@ -49,12 +71,12 @@ class LocalStorageSet {
     const data = localStorage.getItem(this.key);
 
     if (data) {
-      this.items = JSON.parse(data)?.items ?? [];
+      this.items = JSON.parse(data)?.items ?? this.defaultValues;
     } else {
-      this.items = [];
+      this.items = this.defaultValues;
     }
 
-    return this.items;
+    return this.items.slice();
   }
 
   /**
@@ -69,20 +91,29 @@ class LocalStorageSet {
         items: this.items,
       })
     );
+
+    return this.items.slice();
   }
 
   /**
    * Add an item in storage
    */
   add(value: string) {
-    this.set(this.items.filter((item) => item !== value).concat([value]));
+    return this.set(this.items.filter((item) => item !== value).concat([value]));
   }
 
   /**
    * Remove an item from storage
    */
   remove(value: string) {
-    this.set(this.items.filter((item) => item !== value));
+    return this.set(this.items.filter((item) => item !== value));
+  }
+
+  /**
+   * Reset to the initial value
+   */
+  reset() {
+    return this.set(this.defaultValues);
   }
 
   /**
@@ -107,3 +138,10 @@ export const LatestNotebookIdStorage = buildLocalStorage('editor.notebook.latest
  * Store the recent contacts
  */
 export const RecentUsersStorage = new LocalStorageSet('editor.contacts.recent');
+
+/**
+ * Store the recent kernel gateway URIs
+ */
+export const RecentKernelGatewaysStorage = new LocalStorageSet('editor.kernel.gatewayUris.recent', [
+  DEFAULT_GATEWAY_URI,
+]);

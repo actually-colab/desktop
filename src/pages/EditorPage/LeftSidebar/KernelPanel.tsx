@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import { Button, Icon, IconButton, Input, Modal, Popover, Timeline, Toggle, Whisper } from 'rsuite';
+import { Button, Icon, InputPicker, Popover, Timeline, Toggle, Whisper } from 'rsuite';
 
 import { ReduxState } from '../../../types/redux';
 import { _editor } from '../../../redux/actions';
@@ -10,6 +10,7 @@ import { DEFAULT_GATEWAY_URI } from '../../../constants/jupyter';
 import useKernelStatus from '../../../kernel/useKernelStatus';
 import { BorderContainer, StatusIndicator } from '../../../components';
 import { openCompanionDownloadsPage } from '../../../utils/redirect';
+import { RecentKernelGatewaysStorage } from '../../../utils/storage';
 
 const styles = StyleSheet.create({
   container: {
@@ -28,11 +29,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   keyValue: {
+    width: '100%',
     display: 'flex',
     flexDirection: 'column',
     marginBottom: spacing.DEFAULT / 2,
   },
   keyText: {
+    width: '100%',
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
@@ -41,12 +44,16 @@ const styles = StyleSheet.create({
     fontSize: 10,
   },
   valueText: {
+    width: '100%',
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
   },
   popoverContainer: {
     maxWidth: 400,
+  },
+  inputPicker: {
+    width: '100%',
   },
   output: {
     flex: 1,
@@ -110,10 +117,22 @@ const KernelPanel: React.FC = () => {
   const logs = useSelector((state: ReduxState) => state.editor.logs);
 
   const [newGatewayUri, setNewGatewayUri] = React.useState<string>('');
+  const [recentGatewayUris, setRecentGatewayUris] = React.useState<string[]>(RecentKernelGatewaysStorage.values());
 
   const kernelActiveIsh = React.useMemo(() => kernelStatus !== 'Offline' && kernelStatus !== 'Connecting', [
     kernelStatus,
   ]);
+  const gatewayOptions = React.useMemo(
+    () =>
+      recentGatewayUris
+        .slice()
+        .reverse()
+        .map((item) => ({
+          value: item,
+          label: item,
+        })),
+    [recentGatewayUris]
+  );
 
   const dispatch = useDispatch();
   const dispatchConnectToKernelAuto = React.useCallback(
@@ -128,6 +147,31 @@ const KernelPanel: React.FC = () => {
     (editing: boolean) => dispatch(_editor.editKernelGateway(editing)),
     [dispatch]
   );
+
+  const onOpenGateway = React.useCallback(() => dispatchEditKernelGateway(true), [dispatchEditKernelGateway]);
+  const onCloseGateway = React.useCallback(() => dispatchEditKernelGateway(false), [dispatchEditKernelGateway]);
+  const onSelectGateway = React.useCallback(
+    (value: string) => {
+      if (value) {
+        dispatchSetKernelGateway(value);
+        setRecentGatewayUris(RecentKernelGatewaysStorage.add(value));
+      }
+
+      dispatchEditKernelGateway(false);
+    },
+    [dispatchEditKernelGateway, dispatchSetKernelGateway]
+  );
+  const onResetGateway = React.useCallback(() => {
+    setRecentGatewayUris(RecentKernelGatewaysStorage.reset());
+    setNewGatewayUri(DEFAULT_GATEWAY_URI);
+    dispatchSetKernelGateway(DEFAULT_GATEWAY_URI);
+  }, [dispatchSetKernelGateway]);
+
+  React.useEffect(() => {
+    if (!isEditingGatewayUri) {
+      setNewGatewayUri(gatewayUri);
+    }
+  }, [gatewayUri, isEditingGatewayUri]);
 
   return (
     <div className={css(styles.container)}>
@@ -153,57 +197,51 @@ const KernelPanel: React.FC = () => {
         </p>
       </div>
 
-      <Whisper
-        placement="rightStart"
-        trigger="hover"
-        delayShow={timing.SHOW_DELAY}
-        delayHide={timing.HIDE_DELAY}
-        speaker={
-          <Popover title="Setting the Gateway URI">
-            <div className={css(styles.popoverContainer)}>
-              <div className="markdown-container">
-                <p className={css(styles.description)}>
-                  The Gateway URI is usually the IP of the machine running the Kernel Gateway. This could be a machine
-                  using our Kernel Companion or one running it via the terminal. You can even point to an IP of a
-                  machine that isn't your own as long as it is accessible.
-                </p>
-                <p className={css(styles.description)}>
-                  If you want to change the Gateway URI, you must first disconnect from a kernel if you have one
-                </p>
-              </div>
-            </div>
-          </Popover>
-        }
-      >
-        <div>
-          <KeyValue
-            attributeKey="Gateway URI"
-            attributeValue={
-              <React.Fragment>
-                {gatewayUri}
-                <IconButton
-                  style={{ marginLeft: spacing.DEFAULT / 8 }}
-                  appearance="subtle"
-                  size="xs"
-                  icon={
-                    <Icon
-                      icon="pencil"
-                      style={{
-                        color: kernelActiveIsh ? palette.GRAY : palette.PRIMARY,
-                      }}
-                    />
-                  }
-                  disabled={kernelActiveIsh}
-                  onClick={() => {
-                    setNewGatewayUri(gatewayUri);
-                    dispatchEditKernelGateway(true);
-                  }}
-                />
-              </React.Fragment>
+      <KeyValue
+        attributeKey="Gateway URI"
+        attributeValue={
+          <Whisper
+            placement="rightStart"
+            trigger="hover"
+            delayShow={timing.SHOW_DELAY}
+            delayHide={timing.HIDE_DELAY}
+            speaker={
+              <Popover title="Setting the Gateway URI">
+                <div className={css(styles.popoverContainer)}>
+                  <div className="markdown-container">
+                    <p className={css(styles.description)}>
+                      The Gateway URI is usually the IP of the machine running the Kernel Gateway. This could be a
+                      machine using our Kernel Companion or one running it via the terminal. You can even point to an IP
+                      of a machine that isn't your own as long as it is accessible.
+                    </p>
+                    <p className={css(styles.description)}>
+                      If you want to change the Gateway URI, you must first disconnect from a kernel if you have one
+                    </p>
+                  </div>
+                </div>
+              </Popover>
             }
-          />
-        </div>
-      </Whisper>
+          >
+            <InputPicker
+              className={css(styles.inputPicker)}
+              creatable
+              cleanable={false}
+              disabled={kernelActiveIsh}
+              value={newGatewayUri}
+              data={gatewayOptions}
+              onOpen={onOpenGateway}
+              onClose={onCloseGateway}
+              onChange={(value: string) => setNewGatewayUri(value)}
+              onSelect={onSelectGateway}
+              renderExtraFooter={() => (
+                <Button appearance="subtle" block onClick={onResetGateway}>
+                  Reset options
+                </Button>
+              )}
+            />
+          </Whisper>
+        }
+      />
 
       <Whisper
         placement="rightStart"
@@ -288,39 +326,6 @@ const KernelPanel: React.FC = () => {
           Disconnect
         </Button>
       </div>
-
-      <Modal size="xs" show={isEditingGatewayUri} onHide={() => dispatchEditKernelGateway(false)}>
-        <Modal.Header>
-          <Modal.Title>Change Gateway URI</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Input
-            value={newGatewayUri}
-            onChange={(value: string) => setNewGatewayUri(value)}
-            placeholder={DEFAULT_GATEWAY_URI}
-          />
-
-          <Button appearance="subtle" onClick={() => setNewGatewayUri(DEFAULT_GATEWAY_URI)}>
-            <Icon icon="refresh" style={{ marginRight: spacing.DEFAULT / 2 }} />
-            Reset
-          </Button>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button appearance="subtle" onClick={() => dispatchEditKernelGateway(false)}>
-            Cancel
-          </Button>
-          <Button
-            appearance="primary"
-            disabled={kernelActiveIsh || newGatewayUri === gatewayUri}
-            onClick={() => {
-              dispatchSetKernelGateway(newGatewayUri);
-              dispatchEditKernelGateway(false);
-            }}
-          >
-            Save
-          </Button>
-        </Modal.Footer>
-      </Modal>
     </div>
   );
 };
