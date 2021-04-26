@@ -152,7 +152,7 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
        */
       case KERNEL.DISCONNECT.START: {
         if (kernel === null) {
-          console.error('Not connected to a kernel');
+          console.log('Not connected to a kernel');
           return; // Cancel the action
         }
 
@@ -163,7 +163,7 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
             kernel.dispose();
           }
 
-          // Kernel needs to be shutdown on close
+          // Kernel does not need to be shutdown on close
           window.removeEventListener('beforeunload', shutdownOnUnmount);
 
           store.dispatch(
