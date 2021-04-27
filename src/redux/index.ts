@@ -4,9 +4,9 @@ import ReduxThunk from 'redux-thunk';
 
 import ReduxEditorClient from './middleware/ReduxEditorClient';
 import ReduxKernel from './middleware/ReduxKernel';
-import auth from './auth';
-import editor from './editor';
-import ui from './ui';
+import auth from './auth.reducer';
+import editor from './editor.reducer';
+import ui from './ui.reducer';
 
 /**
  * The combined redux store

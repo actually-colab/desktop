@@ -1,6 +1,6 @@
-import { AuthState } from '../../redux/auth';
-import { EditorState } from '../../redux/editor';
-import { UIState } from '../../redux/ui';
+import { AuthState } from '../../redux/auth.reducer';
+import { EditorState } from '../../redux/editor.reducer';
+import { UIState } from '../../redux/ui.reducer';
 
 /**
  * The type of the combined reducer
