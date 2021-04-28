@@ -6,7 +6,7 @@
 
 ![GitHub](https://img.shields.io/github/license/actually-colab/desktop) [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/actually-colab/desktop.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/actually-colab/desktop/context:javascript) ![GitHub repo size](https://img.shields.io/github/repo-size/actually-colab/desktop) [![Lines of Code](https://tokei.rs/b1/github/actually-colab/desktop)](https://github.com/actually-colab/desktop) ![GitHub issues](https://img.shields.io/github/issues/actually-colab/desktop) ![GitHub closed issues](https://img.shields.io/github/issues-closed/actually-colab/desktop)
 
-[![Patreon](https://img.shields.io/badge/Patreon-F96854?style=flat&logo=patreon&logoColor=white)](https://www.patreon.com/actuallycolab) [![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=flat&logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=ParNlHsbSrY) [![HackIllinois](https://img.shields.io/badge/HackIllinois%201st%20place%20🏆-0A3E54?style=flat&logo=dev.to&logoColor=white)](https://devpost.com/software/actually-colab-real-time-collaborative-jupyter-editor)
+[![Open Collective](https://opencollective.com/actuallycolab/tiers/badge.svg)](https://opencollective.com/actuallycolab) [![Patreon](https://img.shields.io/badge/Patreon-F96854?style=flat&logo=patreon&logoColor=white)](https://www.patreon.com/actuallycolab) [![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=flat&logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=ParNlHsbSrY) [![HackIllinois](https://img.shields.io/badge/HackIllinois%201st%20place%20🏆-0A3E54?style=flat&logo=dev.to&logoColor=white)](https://devpost.com/software/actually-colab-real-time-collaborative-jupyter-editor)
 
 </div>
 
@@ -111,6 +111,23 @@ export SENTRY_AUTH_TOKEN="<CHANGE_ME>"
 ```bash
 yarn deploy
 ```
+
+## Backers
+
+Support us with monthly donations to help us continue development and keep the service free for all!
+
+<object type="image/svg+xml" data="https://opencollective.com/actuallycolab/tiers/backer.svg?avatarHeight=36&width=600" style="max-width: 100%;"></object>
+
+## Sponsors
+
+Become a sponsor and we'll add your logo to our README and link to you on our website!
+
+<object type="image/svg+xml" data="https://opencollective.com/actuallycolab/tiers/sponsor.svg?avatarHeight=36&width=600" style="max-width: 100%;"></object>
+
+## Maintainers
+
+- [Jeff Taylor-Chang](https://github.com/jtaylorchang)
+- [Bailey Tincher](https://github.com/baileytincher)
 
 ## License
 
