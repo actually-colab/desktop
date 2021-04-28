@@ -108,6 +108,10 @@ export SENTRY_AUTH_TOKEN="<CHANGE_ME>"
 yarn deploy
 ```
 
+## Docs
+
+See [docs and guides here](https://docs.actuallycolab.org)
+
 ## Backers
 
 Support us with monthly donations to help us continue development and keep the service free for all!
