@@ -1,14 +1,11 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 
 import AceImports from '../../utils/AceImports';
-import { palette, spacing } from '../../constants/theme';
-import { ReduxState } from '../../types/redux';
+import { palette } from '../../constants/theme';
 import useKernel from '../../kernel/useKernel';
-import { NotebookCell } from '../../components';
 
-import { EditorHeader, LeftSidebar, RightSidebar } from './components';
+import { EditorBody, EditorHeader, LeftSidebar, RightSidebar } from './components';
 import useNotebooks from './hooks/useNotebooks';
 
 const styles = StyleSheet.create({
@@ -37,11 +34,6 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     overflow: 'hidden',
   },
-  body: {
-    flex: 1,
-    padding: spacing.DEFAULT,
-    overflowY: 'auto',
-  },
   rightContainer: {
     display: 'flex',
   },
@@ -56,8 +48,6 @@ const EditorPage: React.FC = () => {
   // Include the notebooks
   useNotebooks();
 
-  const notebook = useSelector((state: ReduxState) => state.editor.notebook);
-
   return (
     <div className={css(styles.container)}>
       <LeftSidebar />
@@ -67,11 +57,7 @@ const EditorPage: React.FC = () => {
 
         <div className={css(styles.page)}>
           <div className={css(styles.bodyContainer)}>
-            <div className={css(styles.body)}>
-              {notebook?.cell_ids.map((cell_id) => (
-                <NotebookCell key={cell_id} cell_id={cell_id} />
-              ))}
-            </div>
+            <EditorBody />
           </div>
 
           <div className={css(styles.rightContainer)}>

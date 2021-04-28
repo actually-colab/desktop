@@ -259,7 +259,7 @@ const CollaboratorsPanel: React.FC = () => {
               loading={isSharingNotebook}
               onClick={handleShareFormSubmit}
             >
-              <Icon icon="share" size="lg" />
+              <Icon icon="share-square-o" size="lg" />
               <span className={css(styles.shareText)}>Share</span>
             </Button>
           </React.Fragment>
@@ -410,7 +410,7 @@ const CollaboratorsPopover: React.FC = () => {
       }
     >
       <Button appearance="primary" size="sm" disabled={notebook === null}>
-        <Icon icon="share" />
+        <Icon icon="share-square-o" />
         <span className={css(styles.shareTextSmall)}>Share</span>
       </Button>
     </Whisper>

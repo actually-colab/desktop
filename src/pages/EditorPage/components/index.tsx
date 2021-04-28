@@ -1,5 +1,6 @@
+import EditorBody from './EditorBody';
 import EditorHeader from './EditorHeader';
 import LeftSidebar from './LeftSidebar';
 import RightSidebar from './RightSidebar';
 
-export { EditorHeader, LeftSidebar, RightSidebar };
+export { EditorBody, EditorHeader, LeftSidebar, RightSidebar };
