@@ -23,22 +23,20 @@ const styles = StyleSheet.create({
  */
 const OutputCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
   const selectedOutputsUid = useSelector((state: ReduxState) => state.editor.selectedOutputsUid);
-  const outputs = useSelector((state: ReduxState) => state.editor.outputs);
-  const outputsMetadata = useSelector((state: ReduxState) => state.editor.outputsMetadata);
+  const outputs = useSelector((state: ReduxState) => state.editor.outputs.get(cell.cell_id)?.get(selectedOutputsUid));
+  const outputsMetadata = useSelector((state: ReduxState) =>
+    state.editor.outputsMetadata.get(cell.cell_id)?.get(selectedOutputsUid)
+  );
 
-  const cell_id = React.useMemo(() => cell.cell_id, [cell.cell_id]);
-  const runIndex = React.useMemo(
-    () =>
-      selectedOutputsUid === ''
-        ? cell.runIndex
-        : outputsMetadata.get(cell.cell_id)?.get(selectedOutputsUid)?.runIndex ?? -1,
-    [cell.cell_id, cell.runIndex, outputsMetadata, selectedOutputsUid]
-  );
-  const cellOutputs = React.useMemo(
-    () =>
-      outputs.get(cell_id)?.get(selectedOutputsUid)?.get(runIndex.toString()) ?? ImmutableList<ImmutableKernelOutput>(),
-    [cell_id, outputs, runIndex, selectedOutputsUid]
-  );
+  const runIndex = React.useMemo(() => (selectedOutputsUid === '' ? cell.runIndex : outputsMetadata?.runIndex ?? -1), [
+    cell.runIndex,
+    outputsMetadata,
+    selectedOutputsUid,
+  ]);
+  const cellOutputs = React.useMemo(() => outputs?.get(runIndex.toString()) ?? ImmutableList<ImmutableKernelOutput>(), [
+    outputs,
+    runIndex,
+  ]);
 
   return (
     <div className={css(styles.container)}>
