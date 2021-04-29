@@ -18,11 +18,11 @@ const styles = StyleSheet.create({
  * The body of the editor page
  */
 const EditorBody: React.FC = () => {
-  const notebook = useSelector((state: ReduxState) => state.editor.notebook);
+  const cell_ids = useSelector((state: ReduxState) => state.editor.notebook?.cell_ids);
 
   return (
     <div className={css(styles.body)}>
-      {notebook?.cell_ids.map((cell_id) => (
+      {cell_ids?.map((cell_id) => (
         <NotebookCell key={cell_id} cell_id={cell_id} />
       ))}
     </div>

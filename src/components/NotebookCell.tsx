@@ -343,11 +343,9 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
  * Verify cell exists before creating cell
  */
 const NotebookCellWrapper: React.FC<{ cell_id: EditorCell['cell_id'] }> = ({ cell_id }) => {
-  const cells = useSelector((state: ReduxState) => state.editor.cells);
+  const cell = useSelector((state: ReduxState) => state.editor.cells.get(cell_id));
 
-  const cell = React.useMemo(() => cells.get(cell_id) ?? null, [cell_id, cells]);
-
-  if (cell !== null) {
+  if (cell !== undefined) {
     return <NotebookCell cell={cell} />;
   } else {
     return <React.Fragment />;
