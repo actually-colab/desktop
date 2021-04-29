@@ -39,6 +39,8 @@ const styles = StyleSheet.create({
   },
   containerSelected: {
     borderLeftColor: palette.TANGERINE,
+  },
+  containerAnchored: {
     'overflow-anchor': 'auto',
   },
   controls: {
@@ -139,6 +141,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
     [cell.lock_held_by, notebook?.users]
   );
   const ownsCell = React.useMemo(() => lockOwner?.uid === user?.uid, [lockOwner?.uid, user?.uid]);
+  const ownsNoCells = React.useMemo(() => ownedCells.size === 0, [ownedCells.size]);
   const lockedByOtherUser = React.useMemo(() => !ownsCell && lockOwner !== null, [lockOwner, ownsCell]);
   const canLock = React.useMemo(() => lockOwner === null, [lockOwner]);
   const isLocking = React.useMemo(() => lockingCellId === cell_id, [cell_id, lockingCellId]);
@@ -242,7 +245,12 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
   return (
     <div
       ref={containerRef}
-      className={css(styles.container, ownsCell && styles.containerLocked, isSelected && styles.containerSelected)}
+      className={css(
+        styles.container,
+        ownsCell && styles.containerLocked,
+        isSelected && styles.containerSelected,
+        ownsNoCells && styles.containerAnchored
+      )}
     >
       <div className={css(styles.controls)}>
         <div className={css(styles.runIndexContainer)}>
@@ -265,7 +273,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
               styles.codeContainer,
               lockedByOtherUser
                 ? styles.codeContainerLockedByOtherUser
-                : !ownsCell && (!canLock || ownedCells.size > 0)
+                : !ownsCell && (!canLock || !ownsNoCells)
                 ? styles.codeContainerLockInUse
                 : undefined
             )}
