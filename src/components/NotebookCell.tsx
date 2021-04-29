@@ -35,6 +35,7 @@ const styles = StyleSheet.create({
   containerLocked: {
     borderLeftColor: palette.LIGHT_LAVENDER,
     backgroundColor: palette.BASE_FADED,
+    'overflow-anchor': 'auto',
   },
   containerSelected: {
     borderLeftColor: palette.TANGERINE,
