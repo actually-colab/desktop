@@ -1213,6 +1213,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         return {
           ...state,
           isEditingCell: false,
+          selectedCellId: action.cell_id,
           notebooks: state.notebooks.update(action.cell.nb_id, (notebook) =>
             notebook?.set('time_modified', Date.now())
           ),
