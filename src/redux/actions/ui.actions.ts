@@ -1,4 +1,4 @@
-import { v4 as uuid } from 'uuid';
+import { nanoid } from 'nanoid';
 import { addMilliseconds } from 'date-fns';
 
 import { NOTIFICATION, UIActionTypes, UIAsyncActionTypes } from '../../types/redux/ui';
@@ -31,7 +31,7 @@ const hideNotification = (id: UINotification['id']): UIActionTypes => {
 export const notify = (notification: UINotificationCore): UIAsyncActionTypes => async (dispatch) => {
   const fullNotification: UINotification = {
     ...notification,
-    id: uuid(),
+    id: nanoid(),
     expiration: addMilliseconds(new Date(), notification.duration),
   };
 
