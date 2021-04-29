@@ -40,16 +40,24 @@ const styles = StyleSheet.create({
 });
 
 /**
- * The editor page
+ * Attach high level helpers that shouldn't trigger re-renders
  */
-const EditorPage: React.FC = () => {
+const Helpers: React.FC = () => {
   // Include the kernel manager once
   useKernel();
   // Include the notebooks
   useNotebooks();
 
+  return null;
+};
+
+/**
+ * The editor page
+ */
+const EditorPage: React.FC = () => {
   return (
     <div className={css(styles.container)}>
+      <Helpers />
       <LeftSidebar />
 
       <div className={css(styles.pageContainer)}>
