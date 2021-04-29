@@ -293,6 +293,7 @@ const KernelPanel: React.FC = () => {
           <Timeline className="icon-timeline">
             {logs.map((log) => (
               <Timeline.Item
+                key={log.id}
                 dot={
                   log.status === 'Success' ? (
                     <Icon icon="check" style={{ background: palette.SUCCESS, color: palette.BASE }} />
