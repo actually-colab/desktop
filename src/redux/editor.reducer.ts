@@ -1106,11 +1106,13 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ...state,
         isAddingCell: action.isMe ? false : state.isAddingCell,
         notebooks: state.notebooks.update(action.cell.nb_id, (notebook) => notebook?.set('time_modified', Date.now())),
-        notebook: state.notebook
-          .update('cell_ids', (cell_ids) =>
-            cell_ids.splice(action.index === -1 ? notebook.cell_ids.size ?? 0 : action.index, 0, action.cell_id)
-          )
-          .set('time_modified', Date.now()),
+        notebook: state.notebook.withMutations((mtx) =>
+          mtx
+            .update('cell_ids', (cell_ids) =>
+              cell_ids.splice(action.index === -1 ? notebook.cell_ids.size ?? 0 : action.index, 0, action.cell_id)
+            )
+            .set('time_modified', Date.now())
+        ),
         cells: state.cells.set(action.cell_id, new ImmutableEditorCellFactory(action.cell)),
       };
     }
@@ -1163,11 +1165,19 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ...selectionChanges,
         isDeletingCell: action.isMe ? false : state.isDeletingCell,
         lockedCells: state.lockedCells.remove(action.cell_id),
-        cells: state.cells.delete(action.cell_id),
+        cells: state.cells.remove(action.cell_id),
         outputs: state.outputs.remove(action.cell_id),
         runQueue: runQueueIndex !== -1 ? state.runQueue.remove(runQueueIndex) : state.runQueue,
         notebooks: state.notebooks.update(action.nb_id, (notebook) => notebook?.set('time_modified', Date.now())),
-        notebook: state.notebook.set('time_modified', Date.now()),
+        notebook: state.notebook.withMutations((mtx) => {
+          const cellIndex = mtx.cell_ids.findIndex((cell_id) => cell_id === action.cell_id);
+
+          if (cellIndex >= 0) {
+            mtx.update('cell_ids', (cell_ids) => cell_ids.remove(cellIndex));
+          }
+
+          mtx.set('time_modified', Date.now());
+        }),
       };
     }
     /**
