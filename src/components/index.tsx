@@ -1,4 +1,5 @@
 import BorderContainer from './BorderContainer';
+import CellToolbar from './CellToolbar';
 import CodeCell from './CodeCell';
 import ColoredIconButton from './ColoredIconButton';
 import GoogleSignInButton from './GoogleSignInButton';
@@ -15,6 +16,7 @@ import UserAvatar from './UserAvatar';
 
 export {
   BorderContainer,
+  CellToolbar,
   CodeCell,
   ColoredIconButton,
   GoogleSignInButton,

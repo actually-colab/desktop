@@ -58,10 +58,11 @@ export const KERNEL = {
     SUCCESS: 'KERNEL_RESTART_SUCCESS',
   },
   EXECUTE: {
-    QUEUE: 'KERNEL_EXECUTE_CODE_QUEUE',
-    START: 'KERNEL_EXECUTE_CODE_START',
-    SUCCESS: 'KERNEL_EXECUTE_CODE_SUCCESS',
-    FAILURE: 'KERNEL_EXECUTE_CODE_FAILURE',
+    QUEUE: 'KERNEL_EXECUTE_QUEUE',
+    UNQUEUE: 'KERNEL_EXECUTE_UNQUEUE',
+    START: 'KERNEL_EXECUTE_START',
+    SUCCESS: 'KERNEL_EXECUTE_SUCCESS',
+    FAILURE: 'KERNEL_EXECUTE_FAILURE',
   },
   INTERRUPT: {
     START: 'KERNEL_INTERRUPT_START',
@@ -562,6 +563,11 @@ type ExecuteCodeQueueAction = {
   cell_id: EditorCell['cell_id'];
 };
 
+type ExecuteCodeUnqueueAction = {
+  type: typeof KERNEL.EXECUTE.UNQUEUE;
+  cell_id: EditorCell['cell_id'];
+};
+
 type ExecuteCodeStartAction = {
   type: typeof KERNEL.EXECUTE.START;
   cell: ImmutableEditorCell;
@@ -681,6 +687,7 @@ export type EditorActionTypes =
   | SelectCellSetAction
   | SelectCellNextAction
   | ExecuteCodeQueueAction
+  | ExecuteCodeUnqueueAction
   | ExecuteCodeStartAction
   | ExecuteCodeSuccessAction
   | ExecuteCodeFailureAction

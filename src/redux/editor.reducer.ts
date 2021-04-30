@@ -1323,6 +1323,17 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       };
     }
     /**
+     * Remove a cell from the execution queue
+     */
+    case KERNEL.EXECUTE.UNQUEUE: {
+      const runQueueIndex = state.runQueue.findIndex((cell_id: string) => cell_id === action.cell_id);
+
+      return {
+        ...state,
+        runQueue: runQueueIndex !== -1 ? state.runQueue.remove(runQueueIndex) : state.runQueue,
+      };
+    }
+    /**
      * Started executing a given cell against the kernel
      */
     case KERNEL.EXECUTE.START: {

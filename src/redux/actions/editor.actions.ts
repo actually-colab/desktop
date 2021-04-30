@@ -839,20 +839,24 @@ const executeCodeQueue = (cell_id: EditorCell['cell_id']): EditorActionTypes => 
 /**
  * Add a cell to the execution queue
  */
-export const addCellToQueue = (cell: ImmutableEditorCell): EditorAsyncActionTypes => async (dispatch) => {
-  if (cell.language !== 'python' || cell.contents.trim() === '') {
-    return;
-  }
-
+export const addCellToQueue = (cell_id: EditorCell['cell_id']): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(
     appendKernelLog({
       status: 'Info',
-      message: `Queued cell ${cell.cell_id}`,
+      message: `Queued cell ${cell_id}`,
     })
   );
 
-  dispatch(executeCodeQueue(cell.cell_id));
+  dispatch(executeCodeQueue(cell_id));
 };
+
+/**
+ * Remove a cell from the execution queue
+ */
+export const removeCellFromQueue = (cell_id: EditorCell['cell_id']): EditorActionTypes => ({
+  type: KERNEL.EXECUTE.UNQUEUE,
+  cell_id,
+});
 
 const executeCodeStart = (cell: ImmutableEditorCell): EditorActionTypes => ({
   type: KERNEL.EXECUTE.START,
@@ -912,6 +916,7 @@ export const updateRunIndex = (cell_id: EditorCell['cell_id'], runIndex: number)
  */
 export const executeCode = (cell: ImmutableEditorCell): EditorAsyncActionTypes => async (dispatch) => {
   if (cell.language !== 'python' || cell.contents.trim() === '') {
+    dispatch(removeCellFromQueue(cell.cell_id));
     return;
   }
 

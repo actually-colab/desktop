@@ -1,5 +1,5 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import { List as ImmutableList, Map as ImmutableMap, Set as ImmutableSet } from 'immutable';
 import {
@@ -186,7 +186,18 @@ const ProjectsPanel: React.FC = () => {
   const isOpeningNotebook = useSelector((state: ReduxState) => state.editor.isOpeningNotebook);
   const openingNotebookId = useSelector((state: ReduxState) => state.editor.openingNotebookId);
   const notebooks = useSelector((state: ReduxState) => state.editor.notebooks);
-  const notebook = useSelector((state: ReduxState) => state.editor.notebook);
+  const notebookIds = useSelector((state: ReduxState) => {
+    const notebook = state.editor.notebook;
+
+    if (!notebook) {
+      return notebook;
+    }
+
+    return {
+      nb_id: notebook.nb_id,
+      ws_id: notebook.ws_id,
+    };
+  }, shallowEqual);
   const workshops = useSelector((state: ReduxState) => state.editor.workshops);
 
   const [searchText, setSearchText] = React.useState<string>('');
@@ -316,10 +327,10 @@ const ProjectsPanel: React.FC = () => {
    * Auto expand folder of open workshop
    */
   React.useEffect(() => {
-    if (notebook?.ws_id) {
-      setOpenWorkshopIds((prevOpenWorkshopIds) => prevOpenWorkshopIds.add(notebook.ws_id));
+    if (notebookIds?.ws_id) {
+      setOpenWorkshopIds((prevOpenWorkshopIds) => prevOpenWorkshopIds.add(notebookIds.ws_id));
     }
-  }, [notebook?.ws_id]);
+  }, [notebookIds?.ws_id]);
 
   return (
     <React.Fragment>
@@ -406,7 +417,7 @@ const ProjectsPanel: React.FC = () => {
       </Divider>
 
       {sortedNotebooks.map((project) => {
-        const active = project.nb_id === notebook?.nb_id;
+        const active = project.nb_id === notebookIds?.nb_id;
 
         return (
           <ProjectButton
@@ -436,13 +447,13 @@ const ProjectsPanel: React.FC = () => {
       {sortedWorkshops.map((project) => {
         const isOpen = openWorkshopIds.has(project.ws_id);
         const isInstructor = project.instructors.findIndex((instructor) => instructor.uid === user?.uid) >= 0;
-        const isMainNotebookActive = project.main_notebook.nb_id === notebook?.nb_id;
+        const isMainNotebookActive = project.main_notebook.nb_id === notebookIds?.nb_id;
         const subNotebooks = wsIdToAttendees.get(project.ws_id);
 
         const attendeeNotebook = isInstructor
           ? null
           : subNotebooks?.find((_notebook) => !!_notebook.users.find((_user) => _user.uid === user?.uid));
-        const isAttendeeNotebookActive = attendeeNotebook?.nb_id === notebook?.nb_id;
+        const isAttendeeNotebookActive = attendeeNotebook?.nb_id === notebookIds?.nb_id;
 
         return (
           <React.Fragment key={project.ws_id}>
@@ -485,7 +496,7 @@ const ProjectsPanel: React.FC = () => {
                         return <React.Fragment key={attendee.uid} />;
                       }
 
-                      const active = subNotebook.nb_id === notebook?.nb_id;
+                      const active = subNotebook.nb_id === notebookIds?.nb_id;
 
                       return (
                         <ProjectButton
