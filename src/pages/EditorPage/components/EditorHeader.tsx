@@ -11,7 +11,6 @@ import { EditorCell } from '../../../types/notebook';
 import useKernelStatus from '../../../kernel/useKernelStatus';
 import { Header, PopoverDropdown, RegularIconButton, UserAvatar } from '../../../components';
 import { CollaboratorsPopover } from '../Header';
-import { ImmutableLock } from '../../../immutable';
 
 const styles = StyleSheet.create({
   header: {
@@ -56,9 +55,7 @@ const EditorHeader: React.FC = () => {
   const notebookUsers = useSelector((state: ReduxState) => state.editor.notebook?.users);
   const cell_ids = useSelector((state: ReduxState) => state.editor.notebook?.cell_ids);
   const lockedCellId = useSelector(
-    (state: ReduxState) =>
-      state.editor.lockedCells.filter((lock) => lock.uid === user?.uid).first<ImmutableLock | null>(null)?.cell_id ??
-      '',
+    (state: ReduxState) => state.editor.lockedCells.find((lock) => lock.uid === user?.uid)?.cell_id ?? '',
     shallowEqual
   );
   const users = useSelector((state: ReduxState) => state.editor.users);

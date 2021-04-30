@@ -174,7 +174,7 @@ const CodeCell: React.FC<{
           ref={editorRef}
           style={{ width: '100%' }}
           name={cell_id}
-          mode={language}
+          mode={language ?? 'python'}
           theme="xcode"
           setOptions={aceOptions}
           minLines={1}
