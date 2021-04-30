@@ -1,5 +1,5 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import { Button, Divider, Dropdown, Icon, Modal } from 'rsuite';
 import { DUser } from '@actually-colab/editor-types';
@@ -53,48 +53,52 @@ const EditorHeader: React.FC = () => {
   const { kernelStatus, kernelStatusColor, kernelIsConnected } = useKernelStatus();
 
   const user = useSelector((state: ReduxState) => state.auth.user);
-  const notebook = useSelector((state: ReduxState) => state.editor.notebook);
-  const lockedCells = useSelector((state: ReduxState) => state.editor.lockedCells);
-  const cells = useSelector((state: ReduxState) => state.editor.cells);
+  const notebookUsers = useSelector((state: ReduxState) => state.editor.notebook?.users);
+  const cell_ids = useSelector((state: ReduxState) => state.editor.notebook?.cell_ids);
+  const lockedCellId = useSelector(
+    (state: ReduxState) =>
+      state.editor.lockedCells.filter((lock) => lock.uid === user?.uid).first<ImmutableLock | null>(null)?.cell_id ??
+      '',
+    shallowEqual
+  );
   const users = useSelector((state: ReduxState) => state.editor.users);
   const selectedOutputsUid = useSelector((state: ReduxState) => state.editor.selectedOutputsUid);
   const isAddingCell = useSelector((state: ReduxState) => state.editor.isAddingCell);
   const isDeletingCell = useSelector((state: ReduxState) => state.editor.isDeletingCell);
   const selectedCellId = useSelector((state: ReduxState) => state.editor.selectedCellId);
+  const lockedCellLanguage = useSelector(
+    (state: ReduxState) => state.editor.cells.get(lockedCellId)?.language,
+    shallowEqual
+  );
+  const selectedCellProperties = useSelector((state: ReduxState) => {
+    const cell =
+      state.editor.cells.get(selectedCellId) ??
+      (cell_ids ? (cell_ids.size > 0 ? state.editor.cells.get(cell_ids.get(0) ?? '') ?? null : null) : null);
+
+    if (!cell) {
+      return cell;
+    }
+
+    return {
+      language: cell?.language,
+      rendered: cell?.rendered,
+    };
+  }, shallowEqual);
 
   const [showDeleteCell, setShowDeleteCell] = React.useState<boolean>(false);
 
-  const accessLevel = React.useMemo(() => notebook?.users.find((_user) => _user.uid === user?.uid), [
-    notebook?.users,
+  const accessLevel = React.useMemo(() => notebookUsers?.find((_user) => _user.uid === user?.uid), [
+    notebookUsers,
     user?.uid,
   ]);
   const canEdit = React.useMemo(() => accessLevel?.access_level === 'Full Access', [accessLevel?.access_level]);
-  const ownedCells = React.useMemo(() => lockedCells.filter((lock) => lock.uid === user?.uid), [
-    lockedCells,
-    user?.uid,
-  ]);
-  const lockedCell = React.useMemo(
-    () => (ownedCells.size > 0 ? cells.get(ownedCells.first<ImmutableLock>()?.cell_id ?? '') ?? null : null),
-    [cells, ownedCells]
-  );
-  const lockedCellId = React.useMemo(() => lockedCell?.cell_id ?? '', [lockedCell?.cell_id]);
-  const selectedCell = React.useMemo(
-    () =>
-      cells.get(selectedCellId) ??
-      (notebook?.cell_ids
-        ? notebook.cell_ids.size > 0
-          ? cells.get(notebook.cell_ids.get(0) ?? '') ?? null
-          : null
-        : null),
-    [cells, notebook?.cell_ids, selectedCellId]
-  );
 
   const selectedOutputsEmail = React.useMemo<DUser['uid']>(
     () =>
       (selectedOutputsUid === ''
         ? user?.email
-        : notebook?.users?.find((_user) => _user.uid === selectedOutputsUid)?.email) ?? '',
-    [notebook?.users, selectedOutputsUid, user?.email]
+        : notebookUsers?.find((_user) => _user.uid === selectedOutputsUid)?.email) ?? '',
+    [notebookUsers, selectedOutputsUid, user?.email]
   );
 
   const dispatch = useDispatch();
@@ -108,16 +112,16 @@ const EditorHeader: React.FC = () => {
     [dispatch]
   );
   const onClickPlayNext = React.useCallback(() => {
-    if (selectedCell === null) {
+    if (!selectedCellProperties) {
       return;
     }
 
-    if (selectedCell.language === 'python') {
-      dispatch(_editor.addCellToQueue(selectedCell));
+    if (selectedCellProperties.language === 'python') {
+      dispatch(_editor.addCellToQueue(selectedCellId));
     } else {
-      if (!selectedCell.rendered) {
+      if (!selectedCellProperties.rendered) {
         dispatch(
-          _editor.editCell(selectedCell.cell_id, {
+          _editor.editCell(selectedCellId, {
             metaChanges: {
               rendered: true,
             },
@@ -127,7 +131,7 @@ const EditorHeader: React.FC = () => {
     }
 
     dispatch(_editor.selectNextCell());
-  }, [dispatch, selectedCell]);
+  }, [dispatch, selectedCellId, selectedCellProperties]);
   const dispatchStopCodeExecution = React.useCallback(
     () => lockedCellId !== '' && dispatch(_editor.stopCodeExecution(lockedCellId)),
     [dispatch, lockedCellId]
@@ -169,7 +173,9 @@ const EditorHeader: React.FC = () => {
             icon="step-forward"
             tooltipText="Run and advance"
             tooltipDirection="bottom"
-            disabled={(!kernelIsConnected || selectedOutputsUid !== '') && selectedCell?.language === 'python'}
+            disabled={
+              (!kernelIsConnected || selectedOutputsUid !== '') && selectedCellProperties?.language === 'python'
+            }
             onClick={onClickPlayNext}
           />
           <RegularIconButton
@@ -214,9 +220,9 @@ const EditorHeader: React.FC = () => {
               />
               <PopoverDropdown
                 placement="bottomEnd"
-                activeKey={lockedCell?.language ?? 'python'}
-                buttonProps={{ disabled: !canEdit || lockedCell === null }}
-                buttonContent={(lockedCell?.language === 'python' ? 'python3' : lockedCell?.language) ?? 'python3'}
+                activeKey={lockedCellLanguage ?? 'python'}
+                buttonProps={{ disabled: !canEdit || !lockedCellLanguage }}
+                buttonContent={(lockedCellLanguage === 'python' ? 'python3' : lockedCellLanguage) ?? 'python3'}
                 onSelect={handleLanguageSelect}
               >
                 <Dropdown.Item eventKey="python">python3</Dropdown.Item>
@@ -270,8 +276,8 @@ const EditorHeader: React.FC = () => {
               {`${user?.email} (you)`}
             </Dropdown.Item>
 
-            {notebook?.users
-              .filter((availableUser) => availableUser.uid !== user?.uid)
+            {notebookUsers
+              ?.filter((availableUser) => availableUser.uid !== user?.uid)
               .map((availableUser) => (
                 <Dropdown.Item key={availableUser.uid} eventKey={availableUser.uid} disabled={kernelStatus === 'Busy'}>
                   {availableUser.email}

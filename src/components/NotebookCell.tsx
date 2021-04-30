@@ -193,7 +193,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
 
   const onClickPlay = React.useCallback(() => {
     if (cell.language === 'python') {
-      dispatch(_editor.addCellToQueue(cell));
+      dispatch(_editor.addCellToQueue(cell.cell_id));
     } else {
       if (!cell.rendered) {
         dispatch(
