@@ -1037,6 +1037,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         lockingCellId: action.isMe ? '' : state.lockingCellId,
+        selectedCellId: action.isMe ? action.cell_id : state.selectedCellId,
         lockedCells: state.lockedCells.set(
           action.cell_id,
           new ImmutableLockFactory({

@@ -636,7 +636,7 @@ export const lockCellFailure = (errorMessage: string = 'Unknown Error'): EditorA
 /**
  * Try to lock a given cell
  */
-export const lockCell = (user: DUser, cell_id: EditorCell['cell_id']): EditorAsyncActionTypes => async (dispatch) => {
+export const lockCell = (cell_id: EditorCell['cell_id']): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(lockCellStart(cell_id));
   dispatch(selectCell(cell_id));
 };
@@ -675,7 +675,7 @@ export const unlockCellFailure = (errorMessage: string = 'Unknown Error'): Edito
 /**
  * Try to unlock the given cell
  */
-export const unlockCell = (user: DUser, cell_id: EditorCell['cell_id']): EditorAsyncActionTypes => async (dispatch) => {
+export const unlockCell = (cell_id: EditorCell['cell_id']): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(unlockCellStart(cell_id));
 };
 

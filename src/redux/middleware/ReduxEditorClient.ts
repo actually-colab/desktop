@@ -599,6 +599,16 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           return;
         }
 
+        const user = store.getState().auth.user;
+        const lockedCells = store.getState().editor.lockedCells;
+
+        // Unlock any owned cells
+        lockedCells.forEach((lock) => {
+          if (lock.uid === user?.uid) {
+            store.dispatch(_editor.unlockCell(lock.cell_id));
+          }
+        });
+
         socketClient?.lockCell(notebook.nb_id, action.cell_id);
         break;
       }

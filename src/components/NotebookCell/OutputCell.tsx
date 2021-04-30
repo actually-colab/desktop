@@ -1,12 +1,13 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { shallowEqual, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import { List as ImmutableList } from 'immutable';
 import { DisplayData, ExecuteResult, KernelOutputError, Media, Output, StreamText } from '@nteract/outputs';
 
-import { ReduxState } from '../types/redux';
-import { spacing } from '../constants/theme';
-import { ImmutableEditorCell, ImmutableKernelOutput } from '../immutable';
+import { ReduxState } from '../../types/redux';
+import { EditorCell } from '../../types/notebook';
+import { spacing } from '../../constants/theme';
+import { ImmutableKernelOutput } from '../../immutable';
 
 const styles = StyleSheet.create({
   container: {},
@@ -21,22 +22,20 @@ const styles = StyleSheet.create({
 /**
  * A component to render the output of a cell
  */
-const OutputCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
+const OutputCell: React.FC<{ cell_id: EditorCell['cell_id'] }> = ({ cell_id }) => {
   const selectedOutputsUid = useSelector((state: ReduxState) => state.editor.selectedOutputsUid);
-  const outputs = useSelector((state: ReduxState) => state.editor.outputs.get(cell.cell_id)?.get(selectedOutputsUid));
-  const outputsMetadata = useSelector((state: ReduxState) =>
-    state.editor.outputsMetadata.get(cell.cell_id)?.get(selectedOutputsUid)
+  const runIndex = useSelector(
+    (state: ReduxState) =>
+      (state.editor.selectedOutputsUid === ''
+        ? state.editor.cells.get(cell_id)?.runIndex
+        : state.editor.outputsMetadata.get(cell_id)?.get(state.editor.selectedOutputsUid)?.runIndex) ?? -1,
+    shallowEqual
   );
-
-  const runIndex = React.useMemo(() => (selectedOutputsUid === '' ? cell.runIndex : outputsMetadata?.runIndex ?? -1), [
-    cell.runIndex,
-    outputsMetadata,
-    selectedOutputsUid,
-  ]);
-  const cellOutputs = React.useMemo(() => outputs?.get(runIndex.toString()) ?? ImmutableList<ImmutableKernelOutput>(), [
-    outputs,
-    runIndex,
-  ]);
+  const cellOutputs = useSelector(
+    (state: ReduxState) =>
+      state.editor.outputs.get(cell_id)?.get(selectedOutputsUid)?.get(runIndex.toString()) ??
+      ImmutableList<ImmutableKernelOutput>()
+  );
 
   return (
     <div className={css(styles.container)}>
