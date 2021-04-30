@@ -1,16 +1,26 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import AceEditor, { IMarker } from 'react-ace';
 import { DCell } from '@actually-colab/editor-types';
 
 import { ReduxState } from '../../types/redux';
 import { EditorCell } from '../../types/notebook';
-import { ImmutableEditorCell } from '../../immutable';
+import { _editor } from '../../redux/actions';
 import { editorOptionsActive, editorOptionsInactive } from '../../constants/editorOptions';
 import { palette } from '../../constants/theme';
 
 const styles = StyleSheet.create({
+  codeContainer: {
+    pointerEvents: 'auto',
+    opacity: 1,
+  },
+  codeContainerLockInUse: {
+    opacity: 0.5,
+  },
+  codeContainerLockedByOtherUser: {
+    opacity: 0.7,
+  },
   container: {
     width: '100%',
     borderStyle: 'solid',
@@ -28,23 +38,37 @@ const styles = StyleSheet.create({
  * A component to render a code cell with the Ace Editor
  */
 const CodeCell: React.FC<{
-  cell: ImmutableEditorCell;
-  onFocus?(cell_id: EditorCell['cell_id']): void;
-  onBlur?(cell_id: EditorCell['cell_id']): void;
-  onChange(cell_id: EditorCell['cell_id'], changes: Partial<DCell>): void;
-}> = ({ cell, onFocus, onBlur, onChange }) => {
+  cell_id: EditorCell['cell_id'];
+  ownsLock: boolean;
+  ownsNoCells: boolean;
+}> = ({ cell_id, ownsLock, ownsNoCells }) => {
   const editorRef = React.useRef<AceEditor | null>(null);
 
-  const user = useSelector((state: ReduxState) => state.auth.user);
+  const uid = useSelector((state: ReduxState) => state.auth.user?.uid);
+  const canEdit = useSelector(
+    (state: ReduxState) =>
+      state.editor.notebook?.users.find((_user) => _user.uid === uid)?.access_level === 'Full Access',
+    shallowEqual
+  );
+  const lock_held_by = useSelector((state: ReduxState) => state.editor.cells.get(cell_id)?.lock_held_by);
+  const language = useSelector((state: ReduxState) => state.editor.cells.get(cell_id)?.language);
+  const rendered = useSelector((state: ReduxState) => state.editor.cells.get(cell_id)?.rendered);
+  const contents = useSelector((state: ReduxState) => state.editor.cells.get(cell_id)?.contents);
+  const cursor = useSelector((state: ReduxState) => {
+    const cell = state.editor.cells.get(cell_id);
 
-  const isEditable = React.useMemo(() => cell.lock_held_by === user?.uid, [cell.lock_held_by, user?.uid]);
-  const aceOptions = React.useMemo(() => (isEditable ? editorOptionsActive : editorOptionsInactive), [isEditable]);
-  const cell_id = React.useMemo(() => cell.cell_id, [cell.cell_id]);
-  const language = React.useMemo(() => cell.language, [cell.language]);
-  const contents = React.useMemo(() => cell.contents, [cell.contents]);
+    return {
+      row: cell?.cursor_row ?? null,
+      col: cell?.cursor_col ?? null,
+    };
+  }, shallowEqual);
+
+  const lockedByOtherUser = React.useMemo(() => !!lock_held_by && lock_held_by !== uid, [lock_held_by, uid]);
+  const canLock = React.useMemo(() => !lock_held_by, [lock_held_by]);
+  const aceOptions = React.useMemo(() => (ownsLock ? editorOptionsActive : editorOptionsInactive), [ownsLock]);
   const wrapEnabled = React.useMemo(() => language === 'markdown', [language]);
   const markers = React.useMemo<IMarker[]>(() => {
-    if (isEditable || cell.cursor_col === null || cell.cursor_row === null) {
+    if (ownsLock || cursor.row === null || cursor.col === null) {
       return [];
     }
 
@@ -52,43 +76,59 @@ const CodeCell: React.FC<{
       {
         className: 'user-marker-1',
         type: 'text',
-        startRow: cell.cursor_row,
-        startCol: cell.cursor_col,
-        endRow: cell.cursor_row,
-        endCol: cell.cursor_col + 1,
+        startRow: cursor.row,
+        startCol: cursor.col,
+        endRow: cursor.row,
+        endCol: cursor.col + 1,
       },
     ];
-  }, [cell.cursor_col, cell.cursor_row, isEditable]);
+  }, [cursor.col, cursor.row, ownsLock]);
+  const cursorShouldUpdate = React.useMemo(() => cursor.row === null || cursor.col === null, [cursor.col, cursor.row]);
 
-  const handleFocus = React.useCallback(() => {
-    onFocus?.(cell_id);
-  }, [cell_id, onFocus]);
+  const dispatch = useDispatch();
 
-  const handleBlur = React.useCallback(() => {
-    onBlur?.(cell_id);
-  }, [cell_id, onBlur]);
+  const onFocusEditor = React.useCallback(() => {
+    if (!canEdit) return;
+
+    if (canLock) {
+      dispatch(_editor.lockCell(cell_id));
+    }
+
+    dispatch(_editor.selectCell(cell_id));
+  }, [canEdit, canLock, cell_id, dispatch]);
+
+  const onChange = React.useCallback(
+    (changes: Partial<DCell>) => {
+      dispatch(
+        _editor.editCell(cell_id, {
+          changes,
+        })
+      );
+    },
+    [cell_id, dispatch]
+  );
 
   const handleChange = React.useCallback(
     (newValue: string) => {
-      if (!isEditable) return;
+      if (!ownsLock) return;
 
-      onChange(cell_id, {
+      onChange({
         contents: newValue,
       });
     },
-    [cell_id, isEditable, onChange]
+    [onChange, ownsLock]
   );
 
   const handleCursorChange = React.useCallback(
     (selection: { cursor: { row: number; column: number } }) => {
-      if (!isEditable) return;
+      if (!ownsLock) return;
 
-      onChange(cell_id, {
+      onChange({
         cursor_col: selection.cursor.column,
         cursor_row: selection.cursor.row,
       });
     },
-    [cell_id, isEditable, onChange]
+    [onChange, ownsLock]
   );
 
   /**
@@ -97,35 +137,50 @@ const CodeCell: React.FC<{
    * This cannot be done in the onFocus event because the cell is not necessarily editable at that point
    */
   React.useEffect(() => {
-    if (isEditable && (cell.cursor_col === null || cell.cursor_row === null) && editorRef.current?.editor.isFocused()) {
+    if (ownsLock && cursorShouldUpdate && editorRef.current?.editor.isFocused()) {
       const cursor_pos = editorRef.current?.editor.getCursorPosition();
 
-      onChange(cell_id, {
+      onChange({
         cursor_col: cursor_pos.column,
         cursor_row: cursor_pos.row,
       });
     }
-  }, [cell.cursor_col, cell.cursor_row, cell_id, isEditable, onChange]);
+  }, [cursorShouldUpdate, onChange, ownsLock]);
+
+  // Do not render if markdown is rendered
+  if (language === 'markdown' && rendered) {
+    return null;
+  }
 
   return (
-    <div className={css(styles.container, isEditable ? styles.containerFocused : styles.containerBlurred)}>
-      <AceEditor
-        ref={editorRef}
-        style={{ width: '100%' }}
-        name={cell_id}
-        mode={language}
-        theme="xcode"
-        setOptions={aceOptions}
-        minLines={1}
-        maxLines={Infinity}
-        value={contents}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        onChange={handleChange}
-        onCursorChange={handleCursorChange}
-        wrapEnabled={wrapEnabled}
-        markers={markers}
-      />
+    <div
+      className={css(
+        styles.codeContainer,
+        lockedByOtherUser
+          ? styles.codeContainerLockedByOtherUser
+          : !ownsLock && (!canLock || !ownsNoCells)
+          ? styles.codeContainerLockInUse
+          : undefined
+      )}
+    >
+      <div className={css(styles.container, ownsLock ? styles.containerFocused : styles.containerBlurred)}>
+        <AceEditor
+          ref={editorRef}
+          style={{ width: '100%' }}
+          name={cell_id}
+          mode={language}
+          theme="xcode"
+          setOptions={aceOptions}
+          minLines={1}
+          maxLines={Infinity}
+          value={contents}
+          onFocus={onFocusEditor}
+          onChange={handleChange}
+          onCursorChange={handleCursorChange}
+          wrapEnabled={wrapEnabled}
+          markers={markers}
+        />
+      </div>
     </div>
   );
 };
