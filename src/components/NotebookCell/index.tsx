@@ -43,9 +43,9 @@ const styles = StyleSheet.create({
 });
 
 /**
- * A component to render all the content for a cell in a notebook including an editor, a toolbar, and cell outputs
+ * The styled container for the cell
  */
-const NotebookCell: React.FC<{ cell_id: EditorCell['cell_id'] }> = ({ cell_id }) => {
+const CellContainer: React.FC<{ cell_id: EditorCell['cell_id'] }> = ({ cell_id, children }) => {
   const containerRef = React.useRef<HTMLDivElement | null>(null);
 
   const uid = useSelector((state: ReduxState) => state.auth.user?.uid);
@@ -81,15 +81,28 @@ const NotebookCell: React.FC<{ cell_id: EditorCell['cell_id'] }> = ({ cell_id })
         ownsNoCells && styles.containerAnchored
       )}
     >
-      <RunIndicator cell_id={cell_id} />
-
-      <div className={css(styles.content)}>
-        <CodeCell cell_id={cell_id} ownsLock={ownsLock} ownsNoCells={ownsNoCells} />
-        <MarkdownCell cell_id={cell_id} />
-        <CellToolbar cell_id={cell_id} />
-        <OutputCell cell_id={cell_id} />
-      </div>
+      {children}
     </div>
+  );
+};
+
+/**
+ * A component to render all the content for a cell in a notebook including an editor, a toolbar, and cell outputs
+ */
+const NotebookCell: React.FC<{ cell_id: EditorCell['cell_id'] }> = ({ cell_id }) => {
+  return (
+    <CellContainer cell_id={cell_id}>
+      <React.Fragment>
+        <RunIndicator cell_id={cell_id} />
+
+        <div className={css(styles.content)}>
+          <CodeCell cell_id={cell_id} />
+          <MarkdownCell cell_id={cell_id} />
+          <CellToolbar cell_id={cell_id} />
+          <OutputCell cell_id={cell_id} />
+        </div>
+      </React.Fragment>
+    </CellContainer>
   );
 };
 

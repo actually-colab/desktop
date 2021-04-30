@@ -39,9 +39,7 @@ const styles = StyleSheet.create({
  */
 const CodeCell: React.FC<{
   cell_id: EditorCell['cell_id'];
-  ownsLock: boolean;
-  ownsNoCells: boolean;
-}> = ({ cell_id, ownsLock, ownsNoCells }) => {
+}> = ({ cell_id }) => {
   const editorRef = React.useRef<AceEditor | null>(null);
 
   const uid = useSelector((state: ReduxState) => state.auth.user?.uid);
@@ -51,6 +49,14 @@ const CodeCell: React.FC<{
     shallowEqual
   );
   const lock_held_by = useSelector((state: ReduxState) => state.editor.cells.get(cell_id)?.lock_held_by);
+  const ownsLock = useSelector(
+    (state: ReduxState) => state.editor.cells.get(cell_id)?.lock_held_by === uid,
+    shallowEqual
+  );
+  const ownsNoCells = useSelector(
+    (state: ReduxState) => !state.editor.lockedCells.find((lock) => lock.uid === uid),
+    shallowEqual
+  );
   const language = useSelector((state: ReduxState) => state.editor.cells.get(cell_id)?.language);
   const rendered = useSelector((state: ReduxState) => state.editor.cells.get(cell_id)?.rendered);
   const contents = useSelector((state: ReduxState) => state.editor.cells.get(cell_id)?.contents);
