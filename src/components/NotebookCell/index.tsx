@@ -270,7 +270,7 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
             <CodeCell cell={cell} onFocus={onFocusEditor} onChange={onChange} />
           </div>
         ) : (
-          <MarkdownCell cell={cell} onDoubleClick={dispatchEditMarkdownCell} />
+          <MarkdownCell cell_id={cell_id} onDoubleClick={dispatchEditMarkdownCell} />
         )}
 
         <CellToolbar
