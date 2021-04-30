@@ -80,7 +80,7 @@ const ChatPanel: React.FC = () => {
   const messageFormRef = React.useRef<FormInstance>();
 
   const user = useSelector((state: ReduxState) => state.auth.user);
-  const notebook = useSelector((state: ReduxState) => state.editor.notebook);
+  const notebookUsers = useSelector((state: ReduxState) => state.editor.notebook?.users);
   const isSendingMessage = useSelector((state: ReduxState) => state.editor.isSendingMessage);
   const messages = useSelector((state: ReduxState) => state.editor.messages);
 
@@ -92,9 +92,9 @@ const ChatPanel: React.FC = () => {
   const userLookup = React.useMemo(
     () =>
       ImmutableMap<DUser['uid'], string>().withMutations((mtx) =>
-        notebook?.users?.forEach((user) => mtx.set(user.uid, user.name))
+        notebookUsers?.forEach((user) => mtx.set(user.uid, user.name))
       ),
-    [notebook?.users]
+    [notebookUsers]
   );
 
   const dispatch = useDispatch();
@@ -158,7 +158,7 @@ const ChatPanel: React.FC = () => {
           appearance="primary"
           block
           loading={isSendingMessage}
-          disabled={notebook === null}
+          disabled={!notebookUsers}
           onClick={handleMessageFormSubmit}
         >
           <Icon icon="send-o" />
