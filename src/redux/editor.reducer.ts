@@ -428,7 +428,10 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
       return {
         ...state,
         isConnectingToKernel: false,
+        executionCount: 0,
+        runningCellId: '',
         kernel: action.kernel,
+        runQueue: state.runQueue.clear(),
       };
     /**
      * Failed to connect to the kernel
@@ -488,7 +491,9 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         executionCount: 0,
         runningCellId: '',
         runQueue: state.runQueue.clear(),
-        cells: state.cells.map((cell) => cell.set('runIndex', -1)),
+        cells: state.cells.withMutations((mtx) => {
+          mtx.forEach((cell) => mtx.set(cell.cell_id, cell.set('runIndex', -1)));
+        }),
         outputs: state.outputs.clear(),
       };
 
@@ -1439,6 +1444,20 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
         ...state,
         cells: state.cells.update(action.cell_id, (value = new ImmutableEditorCellFactory()) =>
           value.set('runIndex', action.runIndex > state.executionCount ? action.runIndex : value.runIndex)
+        ),
+        outputs: state.outputs.update(
+          action.cell_id,
+          (
+            userMap = ImmutableMap() as ImmutableMapOf<
+              DUser['uid'],
+              ImmutableMapOf<string, ImmutableList<ImmutableKernelOutput>>
+            >
+          ) =>
+            userMap.update(
+              '',
+              (runIndexMap = ImmutableMap() as ImmutableMapOf<string, ImmutableList<ImmutableKernelOutput>>) =>
+                runIndexMap.update(action.runIndex.toString(), (outputs = ImmutableList()) => outputs.clear())
+            )
         ),
       };
     default:
