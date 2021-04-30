@@ -104,7 +104,19 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
   const containerRef = React.useRef<HTMLDivElement | null>(null);
 
   const user = useSelector((state: ReduxState) => state.auth.user);
-  const users = useSelector((state: ReduxState) => state.editor.notebook?.users);
+  const lockOwner = useSelector(
+    (state: ReduxState) =>
+      cell.lock_held_by !== ''
+        ? {
+            uid: cell.lock_held_by,
+            name: state.editor.notebook?.users.find((_user) => _user.uid === cell.lock_held_by)?.name ?? 'Unknown',
+          }
+        : null,
+    shallowEqual
+  );
+  const accessLevel = useSelector((state: ReduxState) =>
+    state.editor.notebook?.users.find((_user) => _user.uid === user?.uid)
+  );
   const selectedOutputsUid = useSelector((state: ReduxState) => state.editor.selectedOutputsUid);
   const ownedCellIds = useSelector(
     (state: ReduxState) =>
@@ -126,19 +138,8 @@ const NotebookCell: React.FC<{ cell: ImmutableEditorCell }> = ({ cell }) => {
     state.editor.outputsMetadata.get(cell.cell_id)?.get(selectedOutputsUid)
   );
 
-  const accessLevel = React.useMemo(() => users?.find((_user) => _user.uid === user?.uid), [user?.uid, users]);
   const canEdit = React.useMemo(() => accessLevel?.access_level === 'Full Access', [accessLevel?.access_level]);
   const cell_id = React.useMemo(() => cell.cell_id, [cell.cell_id]);
-  const lockOwner = React.useMemo(
-    () =>
-      cell.lock_held_by !== ''
-        ? {
-            uid: cell.lock_held_by,
-            name: users?.find((_user) => _user.uid === cell.lock_held_by)?.name ?? 'Unknown',
-          }
-        : null,
-    [cell.lock_held_by, users]
-  );
   const ownsCell = React.useMemo(() => lockOwner?.uid === user?.uid, [lockOwner?.uid, user?.uid]);
   const ownsNoCells = React.useMemo(() => ownedCellIds.length === 0, [ownedCellIds]);
   const lockedByOtherUser = React.useMemo(() => !ownsCell && lockOwner !== null, [lockOwner, ownsCell]);
