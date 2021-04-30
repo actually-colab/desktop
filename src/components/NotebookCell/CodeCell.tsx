@@ -4,11 +4,11 @@ import { StyleSheet, css } from 'aphrodite';
 import AceEditor, { IMarker } from 'react-ace';
 import { DCell } from '@actually-colab/editor-types';
 
-import { ReduxState } from '../types/redux';
-import { EditorCell } from '../types/notebook';
-import { ImmutableEditorCell } from '../immutable';
-import { editorOptionsActive, editorOptionsInactive } from '../constants/editorOptions';
-import { palette } from '../constants/theme';
+import { ReduxState } from '../../types/redux';
+import { EditorCell } from '../../types/notebook';
+import { ImmutableEditorCell } from '../../immutable';
+import { editorOptionsActive, editorOptionsInactive } from '../../constants/editorOptions';
+import { palette } from '../../constants/theme';
 
 const styles = StyleSheet.create({
   container: {

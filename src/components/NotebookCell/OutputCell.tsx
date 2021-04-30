@@ -4,9 +4,9 @@ import { StyleSheet, css } from 'aphrodite';
 import { List as ImmutableList } from 'immutable';
 import { DisplayData, ExecuteResult, KernelOutputError, Media, Output, StreamText } from '@nteract/outputs';
 
-import { ReduxState } from '../types/redux';
-import { spacing } from '../constants/theme';
-import { ImmutableEditorCell, ImmutableKernelOutput } from '../immutable';
+import { ReduxState } from '../../types/redux';
+import { spacing } from '../../constants/theme';
+import { ImmutableEditorCell, ImmutableKernelOutput } from '../../immutable';
 
 const styles = StyleSheet.create({
   container: {},

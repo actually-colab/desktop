@@ -3,14 +3,13 @@ import { shallowEqual, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import { Icon } from 'rsuite';
 
-import { ReduxState } from '../types/redux';
-import { ImmutableEditorCell } from '../immutable';
-import { palette } from '../constants/theme';
-import useKernelStatus from '../kernel/useKernelStatus';
-
-import ColoredIconButton from './ColoredIconButton';
-import IconTextButton from './IconTextButton';
-import Timer from './Timer';
+import { ReduxState } from '../../types/redux';
+import { ImmutableEditorCell } from '../../immutable';
+import { palette } from '../../constants/theme';
+import useKernelStatus from '../../kernel/useKernelStatus';
+import ColoredIconButton from '../ColoredIconButton';
+import IconTextButton from '../IconTextButton';
+import Timer from '../Timer';
 
 const styles = StyleSheet.create({
   cellToolbar: {

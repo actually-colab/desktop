@@ -3,12 +3,11 @@ import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import { DCell } from '@actually-colab/editor-types';
 
-import { ReduxState } from '../types/redux';
-import { _editor } from '../redux/actions';
-import { EditorCell } from '../types/notebook';
-import { ImmutableEditorCell } from '../immutable';
-import { palette, spacing } from '../constants/theme';
-
+import { ReduxState } from '../../types/redux';
+import { _editor } from '../../redux/actions';
+import { EditorCell } from '../../types/notebook';
+import { ImmutableEditorCell } from '../../immutable';
+import { palette, spacing } from '../../constants/theme';
 import CodeCell from './CodeCell';
 import MarkdownCell from './MarkdownCell';
 import CellToolbar from './CellToolbar';
