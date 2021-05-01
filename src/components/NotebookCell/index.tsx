@@ -22,7 +22,6 @@ const styles = StyleSheet.create({
     borderLeftStyle: 'solid',
     borderLeftWidth: 3,
     borderLeftColor: palette.BASE,
-    opacity: 1,
     'overflow-anchor': 'none',
   },
   containerLocked: {

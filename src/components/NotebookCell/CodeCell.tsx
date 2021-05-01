@@ -49,6 +49,13 @@ const CodeCell: React.FC<{
     shallowEqual
   );
   const lock_held_by = useSelector((state: ReduxState) => state.editor.cells.get(cell_id)?.lock_held_by);
+  const lockOwner = useSelector((state: ReduxState) => {
+    const cell = state.editor.cells.get(cell_id);
+
+    return cell?.lock_held_by
+      ? state.editor.notebook?.users.find((_user) => _user.uid === cell.lock_held_by)?.name ?? ''
+      : '';
+  }, shallowEqual);
   const ownsLock = useSelector(
     (state: ReduxState) => state.editor.cells.get(cell_id)?.lock_held_by === uid,
     shallowEqual
@@ -80,7 +87,7 @@ const CodeCell: React.FC<{
 
     return [
       {
-        className: 'user-marker-1',
+        className: 'user-marker',
         type: 'text',
         startRow: cursor.row,
         startCol: cursor.col,
@@ -89,6 +96,7 @@ const CodeCell: React.FC<{
       },
     ];
   }, [cursor.col, cursor.row, ownsLock]);
+  const markerStyle = React.useMemo<any>(() => ({ '--user-marker-label': `"${lockOwner}"` }), [lockOwner]);
   const cursorShouldUpdate = React.useMemo(() => cursor.row === null || cursor.col === null, [cursor.col, cursor.row]);
 
   const dispatch = useDispatch();
@@ -169,7 +177,10 @@ const CodeCell: React.FC<{
           : undefined
       )}
     >
-      <div className={css(styles.container, ownsLock ? styles.containerFocused : styles.containerBlurred)}>
+      <div
+        className={css(styles.container, ownsLock ? styles.containerFocused : styles.containerBlurred)}
+        style={markerStyle}
+      >
         <AceEditor
           ref={editorRef}
           style={{ width: '100%' }}
