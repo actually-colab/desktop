@@ -98,7 +98,18 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
         /**
          * The socket connection encountered an error
          */
-        socketClient.on('error', (error) => console.error(error));
+        socketClient.on('error', (error) => {
+          console.error(error);
+
+          store.dispatch(
+            _ui.notify({
+              level: 'error',
+              title: 'Error',
+              message: error.message,
+              duration: 5000,
+            })
+          );
+        });
 
         const currentUser = action.user;
 
