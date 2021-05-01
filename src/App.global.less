@@ -17,7 +17,6 @@
 @table-alt-background-color: #f0f2ef;
 @markdown-border-color: #ddd;
 @markdown-code-background-color: #fdefef;
-@user-1: @primary;
 
 body {
   height: 100vh;
@@ -66,20 +65,41 @@ body {
   }
 }
 
-.user-marker-1 {
-  position: absolute;
-  width: 2px !important;
-  background-color: @user-1;
+.ace_marker-layer {
+  z-index: 2;
 }
 
-.user-marker-1::before {
+.user-marker {
+  position: absolute;
+  width: 2px !important;
+  background-color: var(--user-marker-color, @primary);
+}
+
+.user-marker::before {
+  content: var(--user-marker-label, '');
+  color: white;
+  position: absolute;
+  left: 0;
+  top: -90%;
+  padding-left: 2px;
+  padding-right: 2px;
+  background-color: var(--user-marker-color, @primary);
+}
+
+.user-marker-blank {
+  position: absolute;
+  width: 2px !important;
+  background-color: var(--user-marker-color, @primary);
+}
+
+.user-marker-blank::before {
   content: '';
   position: absolute;
   left: -2px;
   top: -2px;
   width: 6px;
   height: 6px;
-  background-color: @user-1;
+  background-color: var(--user-marker-color, @primary);
 }
 
 /**
