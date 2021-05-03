@@ -651,6 +651,17 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           cursor_col: cell.cursor_col,
           cursor_row: cell.cursor_row,
         });
+
+        // Auto render on unlock if applicable
+        if (cell.language === 'markdown' && !cell.rendered) {
+          store.dispatch(
+            _editor.editCell(action.cell_id, {
+              metaChanges: {
+                rendered: true,
+              },
+            })
+          );
+        }
         break;
       }
 
