@@ -42,6 +42,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
        * The user has started signing in
        */
       case SIGN_IN.START: {
+        next(action);
+
         (async () => {
           try {
             const res = await (action.tokenType === 'id'
@@ -294,6 +296,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
 
           store.dispatch(_editor.sendMessageSuccess(triggered_by === currentUser.uid, message));
         });
+
+        next(action);
         break;
       }
       /**
@@ -305,6 +309,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
 
         // Clear most recent notebook
         LatestNotebookIdStorage.remove();
+
+        next(action);
         break;
       }
 
@@ -312,6 +318,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
        * Started fetching the user's notebooks
        */
       case NOTEBOOKS.GET.START: {
+        next(action);
+
         (async () => {
           try {
             const notebooks = await restClient.getNotebooksForUser();
@@ -356,6 +364,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
        * Started fetching the user's workshops
        */
       case WORKSHOPS.GET.START: {
+        next(action);
+
         (async () => {
           try {
             const workshops = await restClient.getWorkshopsForUser();
@@ -396,6 +406,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
        * Started creating a notebook
        */
       case NOTEBOOKS.CREATE.START: {
+        next(action);
+
         (async () => {
           try {
             const notebook = await restClient.createNotebook(action.name, 'python', action.cells);
@@ -425,6 +437,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
        * Started creating a workshop
        */
       case WORKSHOPS.CREATE.START: {
+        next(action);
+
         (async () => {
           try {
             const workshop = await restClient.createWorkshop(action.name, action.description, action.cells);
@@ -466,6 +480,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           return;
         }
 
+        next(action);
+
         // Close the notebook if one is already open
         if (notebook !== null) {
           console.log('Closing notebook', notebook.nb_id);
@@ -486,6 +502,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           return;
         }
 
+        next(action);
+
         const emails = separateEmails(action.emails);
 
         socketClient?.shareNotebook(emails, action.nb_id, action.access_level);
@@ -500,6 +518,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           console.error('Tried to use socket before connected');
           return;
         }
+
+        next(action);
 
         const emails = separateEmails(action.emails);
 
@@ -516,6 +536,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           return;
         }
 
+        next(action);
+
         const emails = separateEmails(action.emails);
 
         socketClient?.unshareNotebook(emails, action.nb_id);
@@ -531,6 +553,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           return;
         }
 
+        next(action);
+
         socketClient?.startWorkshop(action.ws_id);
         break;
       }
@@ -540,6 +564,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
        */
       case NOTEBOOKS.OUTPUTS.SELECT: {
         // TODO: fetch all outputs for the user
+        next(action);
         break;
       }
 
@@ -552,6 +577,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           console.error('Notebook was null');
           return;
         }
+
+        next(action);
 
         socketClient?.sendChatMessage(notebook.nb_id, action.message);
         break;
@@ -572,6 +599,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           return;
         }
 
+        next(action);
+
         socketClient?.createCell(notebook.nb_id, 'python');
         break;
       }
@@ -590,6 +619,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           console.error('Tried to use socket before connected');
           return;
         }
+
+        next(action);
 
         socketClient?.deleteCell(notebook.nb_id, action.cell_id);
         break;
@@ -620,6 +651,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           }
         });
 
+        next(action);
+
         socketClient?.lockCell(notebook.nb_id, action.cell_id);
         break;
       }
@@ -644,6 +677,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           console.error('Tried to use socket before connected');
           return;
         }
+
+        next(action);
 
         socketClient?.unlockCell(notebook.nb_id, action.cell_id, {
           language: cell.language,
@@ -688,6 +723,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           return;
         }
 
+        next(action);
+
         if (action.changes !== undefined) {
           socketClient?.editCell(notebook.nb_id, action.cell_id, {
             language: cell.language,
@@ -714,6 +751,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           console.error('Tried to use socket before connected');
           return;
         }
+
+        next(action);
 
         // Send a blank message to notify the clients of the updated run index
         socketClient?.updateOutput(
@@ -744,8 +783,10 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           return;
         }
 
+        next(action);
+
         // Get all the existing messages plus the new ones
-        const allMessages = (
+        const allMessages =
           store
             .getState()
             .editor.outputs.get(action.cell_id)
@@ -753,8 +794,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
             ?.get(action.runIndex.toString())
             ?.toArray()
             .map((message) => message.toObject())
-            .sort(sortOutputByMessageIndex) ?? []
-        ).concat(action.messages);
+            .sort(sortOutputByMessageIndex) ?? [];
 
         socketClient?.updateOutput(
           notebook.nb_id,
@@ -768,9 +808,11 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
         );
         break;
       }
-    }
 
-    return next(action);
+      default: {
+        return next(action);
+      }
+    }
   };
 };
 

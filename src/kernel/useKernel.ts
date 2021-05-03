@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { ReduxState } from '../types/redux';
 import { _editor } from '../redux/actions';
-import { ImmutableEditorCell } from '../immutable';
 
 /**
  * Hook to connect to a kernel
@@ -15,9 +14,6 @@ const useKernel = (): null => {
   const isConnectingToKernel = useSelector((state: ReduxState) => state.editor.isConnectingToKernel);
   const gatewayUri = useSelector((state: ReduxState) => state.editor.gatewayUri);
   const kernel = useSelector((state: ReduxState) => state.editor.kernel);
-  const cells = useSelector((state: ReduxState) => state.editor.cells);
-  const runQueue = useSelector((state: ReduxState) => state.editor.runQueue);
-  const isExecutingCode = useSelector((state: ReduxState) => state.editor.isExecutingCode);
 
   const shouldConnect = React.useMemo(
     () =>
@@ -35,9 +31,6 @@ const useKernel = (): null => {
     (uri: string, displayError?: boolean) => dispatch(_editor.connectToKernel(uri, displayError)),
     [dispatch]
   );
-  const dispatchExecuteCode = React.useCallback((cell: ImmutableEditorCell) => dispatch(_editor.executeCode(cell)), [
-    dispatch,
-  ]);
   const dispatchDisconnectFromKernel = React.useCallback(() => dispatch(_editor.disconnectFromKernel()), [dispatch]);
 
   const timeout = React.useRef<NodeJS.Timeout | null>(null);
@@ -61,19 +54,6 @@ const useKernel = (): null => {
       }
     }
   }, [autoConnectToKernel, dispatchConnectToKernel, gatewayUri, isEditingGatewayUri, shouldConnect]);
-
-  /**
-   * Automatically execute code from the queue
-   */
-  React.useEffect(() => {
-    if (!isExecutingCode && runQueue.size > 0) {
-      const cell = cells.get(runQueue.get(0) ?? '');
-
-      if (cell) {
-        dispatchExecuteCode(cell);
-      }
-    }
-  }, [cells, dispatchExecuteCode, isExecutingCode, runQueue]);
 
   /**
    * Automatically disconnect from the kernel if the gateway URI is edited

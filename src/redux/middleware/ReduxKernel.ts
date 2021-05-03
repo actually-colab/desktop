@@ -37,6 +37,8 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
           return; // Cancel the action
         }
 
+        next(action);
+
         (async () => {
           const res = await KernelApi.connectToKernel(action.uri);
 
@@ -156,6 +158,8 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
           return; // Cancel the action
         }
 
+        next(action);
+
         (async () => {
           try {
             await kernel.shutdown();
@@ -204,6 +208,29 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
         break;
       }
       /**
+       * A cell is added to the queue
+       */
+      case KERNEL.EXECUTE.QUEUE: {
+        next(action);
+
+        // Don't execute if already executing a cell
+        if (store.getState().editor.isExecutingCode) {
+          break;
+        }
+
+        const runQueue = store.getState().editor.runQueue;
+
+        // Run the next cell in the queue
+        if (runQueue.size > 0) {
+          const cell = store.getState().editor.cells.get(runQueue.get(0) ?? '');
+
+          if (cell) {
+            store.dispatch(_editor.executeCode(cell));
+          }
+        }
+        break;
+      }
+      /**
        * Started executing code on the kernel
        */
       case KERNEL.EXECUTE.START: {
@@ -211,6 +238,13 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
           console.error('Not connected to a kernel');
           return; // Cancel the action
         }
+
+        if (store.getState().editor.isExecutingCode) {
+          console.error('Already executing code');
+          return; // Cancel the action
+        }
+
+        next(action);
 
         (async () => {
           const future = kernel.execute({
@@ -325,6 +359,24 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
         break;
       }
       /**
+       * Finished executing code successfully
+       */
+      case KERNEL.EXECUTE.SUCCESS: {
+        next(action);
+
+        const runQueue = store.getState().editor.runQueue;
+
+        // Run the next cell in the queue
+        if (runQueue.size > 0) {
+          const cell = store.getState().editor.cells.get(runQueue.get(0) ?? '');
+
+          if (cell) {
+            store.dispatch(_editor.executeCode(cell));
+          }
+        }
+        break;
+      }
+      /**
        * Started interrupting the kernel execution
        */
       case KERNEL.INTERRUPT.START: {
@@ -332,6 +384,13 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
           console.error('Not connected to a kernel');
           return; // Cancel the action
         }
+
+        if (!store.getState().editor.isExecutingCode) {
+          console.log('No cell to interrupt');
+          return; // Cancel the action
+        }
+
+        next(action);
 
         (async () => {
           try {
@@ -346,9 +405,11 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
         })();
         break;
       }
-    }
 
-    return next(action);
+      default: {
+        return next(action);
+      }
+    }
   };
 };
 
