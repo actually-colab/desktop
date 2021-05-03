@@ -41,6 +41,7 @@ const CodeCell: React.FC<{
   cell_id: EditorCell['cell_id'];
 }> = ({ cell_id }) => {
   const editorRef = React.useRef<AceEditor | null>(null);
+  const cursorTimer = React.useRef<NodeJS.Timeout | null>(null);
 
   const uid = useSelector((state: ReduxState) => state.auth.user?.uid);
   const canEdit = useSelector(
@@ -75,6 +76,8 @@ const CodeCell: React.FC<{
       col: cell?.cursor_col ?? null,
     };
   }, shallowEqual);
+
+  const [showCursorLabel, setShowCursorLabel] = React.useState<boolean>(false);
 
   const lockedByOtherUser = React.useMemo(() => !!lock_held_by && lock_held_by !== uid, [lock_held_by, uid]);
   const canLock = React.useMemo(() => !lock_held_by, [lock_held_by]);
@@ -161,6 +164,33 @@ const CodeCell: React.FC<{
     }
   }, [cursorShouldUpdate, onChange, ownsLock]);
 
+  /**
+   * Hide cursor label after a short period of inactivity
+   */
+  React.useEffect(() => {
+    if (!ownsLock && cursor.row !== null && cursor.col !== null) {
+      if (cursorTimer.current !== null) {
+        // Will replace the timeout
+        clearTimeout(cursorTimer.current);
+      } else {
+        // Start showing the label
+        setShowCursorLabel(true);
+      }
+
+      // Hide the cursor after 2 seconds if no change
+      cursorTimer.current = setTimeout(() => {
+        setShowCursorLabel(false);
+        cursorTimer.current = null;
+      }, 2000);
+    } else {
+      if (cursorTimer.current !== null) {
+        // Remove the timeout
+        clearTimeout(cursorTimer.current);
+        cursorTimer.current = null;
+      }
+    }
+  }, [cursor.col, cursor.row, ownsLock]);
+
   // Do not render if markdown is rendered
   if (language === 'markdown' && rendered) {
     return null;
@@ -179,7 +209,7 @@ const CodeCell: React.FC<{
     >
       <div
         className={css(styles.container, ownsLock ? styles.containerFocused : styles.containerBlurred)}
-        style={markerStyle}
+        style={showCursorLabel ? markerStyle : undefined}
       >
         <AceEditor
           ref={editorRef}

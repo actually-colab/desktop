@@ -60,7 +60,7 @@ const Timer: React.FC<{ active: boolean; alwaysRender?: boolean; nonce: string |
 
       // Clear the interval
       if (intervalRef.current !== null) {
-        clearTimeout(intervalRef.current);
+        clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
     }
