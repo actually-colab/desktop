@@ -29,7 +29,7 @@
     "build": "react-scripts build",
     "build:client": "cd ../editor/client && git pull && yarn install && yarn build",
     "upgrade:client:dev": "yarn build:client && yarn upgrade @actually-colab/editor-client @actually-colab/editor-types",
-    "upgrade:client:prod": "yarn upgrade @actually-colab/editor-client @actually-colab/editor-types",
+    "upgrade:client:prod": "yarn upgrade @actually-colab/editor-client@latest @actually-colab/editor-types@latest",
     "install:client:dev": "yarn build:client && yarn remove @actually-colab/editor-client @actually-colab/editor-types && yarn add file:../editor/client && yarn add -D file:../editor/types",
     "install:client:prod": "yarn remove @actually-colab/editor-client @actually-colab/editor-types && yarn add @actually-colab/editor-client && yarn add -D @actually-colab/editor-types",
     "postinstall": "husky install && yarn yarn-deduplicate yarn.lock",
@@ -43,7 +43,7 @@
     "analyze": "yarn build && source-map-explorer build/static/js/*.js"
   },
   "dependencies": {
-    "@actually-colab/editor-client": "^0.3.0",
+    "@actually-colab/editor-client": "^0.3.1",
     "@nteract/markdown": "^4.6.1",
     "@nteract/outputs": "^3.0.11",
     "@sentry/react": "^6.3.0",
@@ -69,7 +69,7 @@
     "web-vitals": "^1.0.1"
   },
   "devDependencies": {
-    "@actually-colab/editor-types": "^0.3.0",
+    "@actually-colab/editor-types": "^0.3.1",
     "@sentry/cli": "^1.64.0",
     "@types/file-saver": "^2.0.1",
     "@types/lodash.debounce": "^4.0.6",

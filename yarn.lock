@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@actually-colab/editor-client@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@actually-colab/editor-client/-/editor-client-0.3.0.tgz#7f58f9f5f8365af1b700191cb395d00fa0363e7e"
-  integrity sha512-if2YLoR89L3kuZHCklbB/+QYvZn37caL0KqNFHhD3lNZQrAEB5kC6Jmppxo2vvQ+FC9rpY1bQJ07+bc8NbVLew==
+"@actually-colab/editor-client@^0.3.1":
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/@actually-colab/editor-client/-/editor-client-0.3.1.tgz#5f1de64b8cdb4b3b47335bf1678ed8d978d45b60"
+  integrity sha512-DUSwQKCeY5vrXCIrt8OVFWJMWShoBng8cwh0SF2XrElhK1rrRN5k4FBGC6Ty6TvjjYOSZOSHuKZc4MCzuQc3Jw==
   dependencies:
     axios "^0.21.1"
     axios-retry "^3.1.9"
@@ -15,10 +15,10 @@
     lzutf8 "^0.6.0"
     websocket "^1.0.33"
 
-"@actually-colab/editor-types@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@actually-colab/editor-types/-/editor-types-0.3.0.tgz#04c1478e2d813219f925c3bba62d969cf7d500a4"
-  integrity sha512-lwJrkNn2p0hKZFps08u+a4jNIkySutN46m5bMtzqOLYRFzI3sJ9uC7/G0M9D0atGGWN+vmpSuu1mu6+zylbxjg==
+"@actually-colab/editor-types@^0.3.1":
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/@actually-colab/editor-types/-/editor-types-0.3.1.tgz#122f064813a1d6988fe7b30d76f81ed9284163f2"
+  integrity sha512-HFYe0hS447HvDcV3E11SpFajjE/zIPc1ONCU7mTfzYZ7+3nZkvNsLiAPeWcsouogmVUfLY5SpcVVEljY05eZBg==
 
 "@babel/code-frame@7.10.4":
   version "7.10.4"
