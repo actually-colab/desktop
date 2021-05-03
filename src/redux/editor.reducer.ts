@@ -1378,7 +1378,6 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
      * Successfully executed a cell against the kernel
      */
     case KERNEL.EXECUTE.SUCCESS:
-      console.log('SUCCESS');
       return {
         ...state,
         kernel:

@@ -405,6 +405,7 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
         })();
         break;
       }
+
       default: {
         return next(action);
       }
