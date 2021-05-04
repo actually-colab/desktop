@@ -195,7 +195,7 @@ const CodeCell: React.FC<{
       cursorTimer.current = setTimeout(() => {
         setShowCursorLabel(false);
         cursorTimer.current = null;
-      }, 2000);
+      }, 3000);
     } else {
       if (cursorTimer.current !== null) {
         // Remove the timeout
