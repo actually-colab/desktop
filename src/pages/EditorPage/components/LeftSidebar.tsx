@@ -219,7 +219,7 @@ const LeftSidebar: React.FC = () => {
               <UserAvatar
                 placement="rightEnd"
                 user={user}
-                userColor={palette.CHARCOAL}
+                defaultColor={palette.CHARCOAL}
                 statusColor={connectionColor}
                 title={
                   <div className={css(styles.profilePopoverTitle)}>

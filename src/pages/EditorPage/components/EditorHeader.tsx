@@ -4,7 +4,7 @@ import { StyleSheet, css } from 'aphrodite';
 import { Button, Divider, Dropdown, Icon, Modal } from 'rsuite';
 import { DUser } from '@actually-colab/editor-types';
 
-import { palette, spacing } from '../../../constants/theme';
+import { spacing } from '../../../constants/theme';
 import { ReduxState } from '../../../types/redux';
 import { _editor } from '../../../redux/actions';
 import { EditorCell } from '../../../types/notebook';
@@ -247,7 +247,7 @@ const EditorHeader: React.FC = () => {
           <div className={css(styles.avatarsContainer)}>
             {users.map((activeUser) => (
               <div className={css(styles.avatar)} key={activeUser.uid}>
-                <UserAvatar placement="bottomEnd" user={activeUser} statusColor={palette.SUCCESS} />
+                <UserAvatar placement="bottomEnd" user={activeUser} />
               </div>
             ))}
           </div>
