@@ -7,6 +7,7 @@ import { DCell } from '@actually-colab/editor-types';
 import { ReduxState } from '../../types/redux';
 import { EditorCell } from '../../types/notebook';
 import { _editor } from '../../redux/actions';
+import { randomColor } from '../../utils/color';
 import { editorOptionsActive, editorOptionsInactive } from '../../constants/editorOptions';
 import { palette } from '../../constants/theme';
 
@@ -79,6 +80,13 @@ const CodeCell: React.FC<{
 
   const [showCursorLabel, setShowCursorLabel] = React.useState<boolean>(false);
 
+  const userColor = React.useMemo(
+    () =>
+      randomColor({
+        seed: lock_held_by ?? undefined,
+      }),
+    [lock_held_by]
+  );
   const lockedByOtherUser = React.useMemo(() => !!lock_held_by && lock_held_by !== uid, [lock_held_by, uid]);
   const canLock = React.useMemo(() => !lock_held_by, [lock_held_by]);
   const aceOptions = React.useMemo(() => (ownsLock ? editorOptionsActive : editorOptionsInactive), [ownsLock]);
@@ -90,7 +98,7 @@ const CodeCell: React.FC<{
 
     return [
       {
-        className: 'user-marker',
+        className: showCursorLabel ? 'user-marker' : 'user-marker-blank',
         type: 'text',
         startRow: cursor.row,
         startCol: cursor.col,
@@ -98,8 +106,14 @@ const CodeCell: React.FC<{
         endCol: cursor.col + 1,
       },
     ];
-  }, [cursor.col, cursor.row, ownsLock]);
-  const markerStyle = React.useMemo<any>(() => ({ '--user-marker-label': `"${lockOwner}"` }), [lockOwner]);
+  }, [cursor.col, cursor.row, ownsLock, showCursorLabel]);
+  const markerStyle = React.useMemo<any>(
+    () => ({
+      '--user-marker-label': showCursorLabel ? `"${lockOwner}"` : '""',
+      '--user-marker-color': userColor,
+    }),
+    [lockOwner, showCursorLabel, userColor]
+  );
   const cursorShouldUpdate = React.useMemo(() => cursor.row === null || cursor.col === null, [cursor.col, cursor.row]);
 
   const dispatch = useDispatch();
@@ -209,7 +223,7 @@ const CodeCell: React.FC<{
     >
       <div
         className={css(styles.container, ownsLock ? styles.containerFocused : styles.containerBlurred)}
-        style={showCursorLabel ? markerStyle : undefined}
+        style={markerStyle}
       >
         <AceEditor
           ref={editorRef}
