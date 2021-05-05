@@ -4,7 +4,7 @@ import { Avatar, Badge, Popover, Whisper, WhisperProps } from 'rsuite';
 import type { DUser } from '@actually-colab/editor-types';
 
 import type { ImmutableNotebookAccessLevel, ImmutableUser, ImmutableWorkshopAccessLevel } from '../immutable';
-import { palette } from '../constants/theme';
+import { randomColor } from '../utils/color';
 
 const styles = StyleSheet.create({
   container: {
@@ -21,10 +21,10 @@ const UserAvatar: React.FC<{
   user: DUser | ImmutableUser | ImmutableNotebookAccessLevel | ImmutableWorkshopAccessLevel;
   hover?: boolean;
   placement?: WhisperProps['placement'];
-  userColor?: string;
   statusColor?: string;
+  defaultColor?: string;
   title?: React.ReactNode;
-}> = ({ user, hover = true, placement, userColor = palette.CHARCOAL, statusColor, title, children }) => {
+}> = ({ user, hover = true, placement, statusColor, title, defaultColor, children }) => {
   const userInitials = React.useMemo(() => {
     const piecesOfName = (user.name ?? 'Unknown').split(' ');
 
@@ -35,12 +35,35 @@ const UserAvatar: React.FC<{
     return `${piecesOfName[0][0]}${piecesOfName[1][0]}`.toUpperCase();
   }, [user.name]);
 
+  const userColor = React.useMemo(
+    () =>
+      randomColor({
+        seed: user.uid,
+      }),
+    [user.uid]
+  );
+
   const CoreAvatar = (
     <div className={css(styles.container)}>
       {user.image_url ? (
-        <Avatar size="sm" circle src={user.image_url} alt={userInitials} />
+        <Avatar
+          style={
+            defaultColor === undefined
+              ? {
+                  borderRadius: '50%',
+                  borderStyle: 'solid',
+                  borderWidth: 2,
+                  borderColor: userColor,
+                }
+              : undefined
+          }
+          size="sm"
+          circle
+          src={user.image_url}
+          alt={userInitials}
+        />
       ) : (
-        <Avatar style={{ background: userColor }} size="sm" circle>
+        <Avatar style={{ background: defaultColor ?? userColor }} size="sm" circle>
           {userInitials}
         </Avatar>
       )}
