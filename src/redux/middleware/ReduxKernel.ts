@@ -50,8 +50,9 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
         settings = ServerConnection.makeSettings({
           baseUrl: action.uri,
           wsUrl: httpToWebSocket(action.uri),
-          appUrl: 'http://localhost:4000',
-          token: 'dev',
+          appUrl: process.env.REACT_APP_BASE_URL,
+          token: process.env.NODE_ENV === 'development' ? 'dev' : 'prod',
+          appendToken: true,
         });
 
         kernelManager = new KernelManager({

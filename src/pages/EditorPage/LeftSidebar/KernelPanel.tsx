@@ -187,7 +187,7 @@ const KernelPanel: React.FC = () => {
           Our Kernel Companion manages the kernel process and allows you to run code locally. If we don't support your
           OS,{' '}
           <a
-            href="https://github.com/actually-colab/desktop-launcher#the-kernel-gateway"
+            href="https://github.com/actually-colab/desktop-launcher#starting-the-kernel-manually"
             target="_blank"
             rel="noreferrer"
           >
@@ -198,7 +198,7 @@ const KernelPanel: React.FC = () => {
       </div>
 
       <KeyValue
-        attributeKey="Gateway URI"
+        attributeKey="Kernel URI"
         attributeValue={
           <Whisper
             placement="rightStart"
@@ -210,12 +210,12 @@ const KernelPanel: React.FC = () => {
                 <div className={css(styles.popoverContainer)}>
                   <div className="markdown-container">
                     <p className={css(styles.description)}>
-                      The Gateway URI is usually the IP of the machine running the Kernel Gateway. This could be a
+                      The Gateway URI is usually the IP of the machine running the Jupyter Kernel. This could be a
                       machine using our Kernel Companion or one running it via the terminal. You can even point to an IP
-                      of a machine that isn't your own as long as it is accessible.
+                      of a machine that isn't your own as long as it is accessible from your network.
                     </p>
                     <p className={css(styles.description)}>
-                      If you want to change the Gateway URI, you must first disconnect from a kernel if you have one
+                      If you want to change the Kernel URI, you must first disconnect from a kernel if you have one.
                     </p>
                   </div>
                 </div>
