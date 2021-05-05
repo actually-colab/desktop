@@ -23,8 +23,10 @@
   ],
   "scripts": {
     "start": "concurrently --kill-others \"less-watch-compiler --config less-watcher.config.json\" \"react-scripts start\"",
-    "start:kernel:dev": "jupyter kernelgateway --KernelGatewayApp.allow_origin=\"http://localhost:4000\" --KernelGatewayApp.allow_headers=\"content-type\" --KernelGatewayApp.allow_methods=\"*\"",
-    "start:kernel:prod": "jupyter kernelgateway --KernelGatewayApp.allow_origin=\"https://app.actuallycolab.org\" --KernelGatewayApp.allow_headers=\"content-type\" --KernelGatewayApp.allow_methods=\"*\"",
+    "start:kernel:dev": "jupyter notebook --NotebookApp.open_browser=\"False\" --NotebookApp.allow_origin=\"http://localhost:4000\"",
+    "start:kernel:prod": "jupyter notebook --NotebookApp.open_browser=\"False\" --NotebookApp.allow_origin=\"https://app.actuallycolab.org\"",
+    "list:kernel": "jupyter notebook list",
+    "stop:kernel": "jupyter notebook stop",
     "prebuild": "less-watch-compiler --config less-watcher.config.prod.json",
     "build": "react-scripts build",
     "build:client": "cd ../editor/client && git pull && yarn install && yarn build",
@@ -44,6 +46,7 @@
   },
   "dependencies": {
     "@actually-colab/editor-client": "^0.3.1",
+    "@jupyterlab/services": "^6.0.7",
     "@nteract/markdown": "^4.6.1",
     "@nteract/outputs": "^3.0.11",
     "@sentry/react": "^6.3.0",
@@ -52,7 +55,6 @@
     "date-fns": "^2.17.0",
     "file-saver": "^2.0.5",
     "immutable": "^4.0.0-rc.12",
-    "jupyter-js-services": "^0.21.1",
     "lodash.debounce": "^4.0.8",
     "nanoid": "^3.1.22",
     "randomcolor": "^0.6.2",
