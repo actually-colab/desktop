@@ -2,7 +2,7 @@
 set -euxo pipefail
 
 clean_up() {
-  jupyter notebook stop
+  yarn stop:kernel:all
 }
 
 # Cleanup on exit
