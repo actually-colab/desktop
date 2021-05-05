@@ -1,6 +1,7 @@
 import type { DUser } from '@actually-colab/editor-types';
 
 import { AuthActionTypes, AuthAsyncActionTypes, LOAD_SESSION, SIGN_IN, SIGN_OUT } from '../../types/redux/auth';
+import { LOG_LEVEL } from '../../constants/logging';
 import { SessionTokenStorage } from '../../utils/storage';
 import { _editor } from '.';
 
@@ -59,7 +60,9 @@ const loadSessionFailure = (): AuthActionTypes => ({
 export const loadSession = (): AuthAsyncActionTypes => async (dispatch) => {
   const sessionToken = SessionTokenStorage.get();
 
-  console.log('Local storage session', { sessionToken });
+  if (LOG_LEVEL === 'verbose') {
+    console.log('Local storage session', { sessionToken });
+  }
 
   if (sessionToken) {
     dispatch(loadSessionSuccess(sessionToken));

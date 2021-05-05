@@ -6,6 +6,7 @@ import { KERNEL } from '../../types/redux/editor';
 import { KernelApi } from '../../api';
 import { BaseKernelOutput, KernelOutput } from '../../types/notebook';
 import { IpynbOutput } from '../../types/ipynb';
+import { LOG_LEVEL } from '../../constants/logging';
 import { syncSleep } from '../../utils/sleep';
 import { ReduxActions, _editor, _ui } from '../actions';
 
@@ -154,7 +155,7 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
        */
       case KERNEL.DISCONNECT.START: {
         if (kernel === null) {
-          console.log('Not connected to a kernel');
+          console.error('Not connected to a kernel');
           return; // Cancel the action
         }
 
@@ -305,7 +306,9 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
                 threwError = true;
               }
 
-              console.log({ message, kernelOutput });
+              if (LOG_LEVEL === 'verbose') {
+                console.log({ message, kernelOutput });
+              }
             } catch (error) {
               console.error(error);
             }

@@ -72,7 +72,7 @@ const AuthPage: React.FC = () => {
   );
 
   const onGoogleSignInFailure = React.useCallback((error: Error) => {
-    console.log(error);
+    console.error(error);
   }, []);
 
   return (
