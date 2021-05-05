@@ -82,9 +82,11 @@ const CodeCell: React.FC<{
 
   const userColor = React.useMemo(
     () =>
-      randomColor({
-        seed: lock_held_by ?? undefined,
-      }),
+      lock_held_by
+        ? randomColor({
+            seed: lock_held_by ?? undefined,
+          })
+        : '',
     [lock_held_by]
   );
   const lockedByOtherUser = React.useMemo(() => !!lock_held_by && lock_held_by !== uid, [lock_held_by, uid]);
@@ -107,10 +109,11 @@ const CodeCell: React.FC<{
       },
     ];
   }, [cursor.col, cursor.row, ownsLock, showCursorLabel]);
-  const markerStyle = React.useMemo<any>(
+  const markerStyle = React.useMemo<React.CSSProperties>(
     () => ({
       '--user-marker-label': showCursorLabel ? `"${lockOwner}"` : '""',
       '--user-marker-color': userColor,
+      borderColor: userColor,
     }),
     [lockOwner, showCursorLabel, userColor]
   );
@@ -222,7 +225,10 @@ const CodeCell: React.FC<{
       )}
     >
       <div
-        className={css(styles.container, ownsLock ? styles.containerFocused : styles.containerBlurred)}
+        className={css(
+          styles.container,
+          ownsLock ? styles.containerFocused : userColor === '' && styles.containerBlurred
+        )}
         style={markerStyle}
       >
         <AceEditor
