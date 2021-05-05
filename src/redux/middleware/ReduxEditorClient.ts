@@ -5,6 +5,7 @@ import { ReduxState } from '../../types/redux';
 import { SIGN_IN, SIGN_OUT } from '../../types/redux/auth';
 import { CELL, KERNEL, NOTEBOOKS, WORKSHOPS } from '../../types/redux/editor';
 import { DEMO_NOTEBOOK_NAME } from '../../constants/demo';
+import { LOG_LEVEL } from '../../constants/logging';
 import { httpToWebSocket } from '../../utils/request';
 import {
   cleanDCell,
@@ -50,7 +51,10 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
               ? restClient.loginWithGoogleIdToken(action.token)
               : restClient.refreshSessionToken(action.token));
 
-            console.log('Signed in', res);
+            if (LOG_LEVEL === 'verbose') {
+              console.log('Signed in', res);
+            }
+
             store.dispatch(_auth.signInSuccess(res.user, res.sessionToken));
           } catch (error) {
             console.error(error);
@@ -119,7 +123,9 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          * Received notebook contents and connected users for a given notebook
          */
         socketClient.on('notebook_contents', (activeNotebook) => {
-          console.log('Notebook contents', activeNotebook);
+          if (LOG_LEVEL === 'verbose') {
+            console.log('Notebook contents', activeNotebook);
+          }
 
           const { connected_users, ...notebook } = activeNotebook;
           const currentUser = store.getState().auth.user;
@@ -146,7 +152,9 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          * A notebook was opened by a given user
          */
         socketClient.on('notebook_opened', (nb_id, uid, triggered_by) => {
-          console.log('Notebook opened', nb_id, uid, triggered_by);
+          if (LOG_LEVEL === 'verbose') {
+            console.log('Notebook opened', nb_id, uid, triggered_by);
+          }
 
           if (uid !== store.getState().auth.user?.uid) {
             store.dispatch(_editor.connectToNotebook(nb_id, uid));
@@ -157,7 +165,9 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          * A notebook was closed by a given user
          */
         socketClient.on('notebook_closed', (nb_id, uid, triggered_by) => {
-          console.log('Notebook closed', nb_id, triggered_by);
+          if (LOG_LEVEL === 'verbose') {
+            console.log('Notebook closed', nb_id, triggered_by);
+          }
 
           if (nb_id === store.getState().editor.notebook?.nb_id) {
             store.dispatch(_editor.disconnectFromNotebook(uid === currentUser.uid, nb_id, uid));
@@ -168,7 +178,9 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          * A notebook was shared with given users
          */
         socketClient.on('notebook_shared', (nb_id, users, triggered_by) => {
-          console.log('Notebook shared', nb_id, users, triggered_by);
+          if (LOG_LEVEL === 'verbose') {
+            console.log('Notebook shared', nb_id, users, triggered_by);
+          }
 
           store.dispatch(_editor.shareNotebookSuccess(triggered_by === currentUser.uid, nb_id, users));
         });
@@ -177,7 +189,9 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          * A workshop was shared with given attendees and instructors
          */
         socketClient.on('workshop_shared', (ws_id, attendees, instructors, triggered_by) => {
-          console.log('Workshop shared', ws_id, attendees, instructors, triggered_by);
+          if (LOG_LEVEL === 'verbose') {
+            console.log('Workshop shared', ws_id, attendees, instructors, triggered_by);
+          }
 
           store.dispatch(
             _editor.shareWorkshopSuccess(triggered_by === currentUser.uid, ws_id, {
@@ -191,7 +205,9 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          * A notebook was unshared with given users
          */
         socketClient.on('notebook_unshared', (nb_id, uids, triggered_by) => {
-          console.log('Notebook unshared', nb_id, uids, triggered_by);
+          if (LOG_LEVEL === 'verbose') {
+            console.log('Notebook unshared', nb_id, uids, triggered_by);
+          }
 
           const includedMe = uids.includes(currentUser.uid);
 
@@ -207,7 +223,9 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          * A workshop was released to attendees
          */
         socketClient.on('workshop_started', (ws_id, triggered_by) => {
-          console.log('Workshop started', ws_id, triggered_by);
+          if (LOG_LEVEL === 'verbose') {
+            console.log('Workshop started', ws_id, triggered_by);
+          }
 
           store.dispatch(_editor.releaseWorkshopSuccess(triggered_by === currentUser.uid, ws_id));
 
@@ -220,7 +238,9 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          * A cell was created by a given user
          */
         socketClient.on('cell_created', (dcell, triggered_by) => {
-          console.log('Cell created', dcell, triggered_by);
+          if (LOG_LEVEL === 'verbose') {
+            console.log('Cell created', dcell, triggered_by);
+          }
 
           store.dispatch(
             _editor.addCellSuccess(triggered_by === currentUser.uid, dcell.cell_id, -1, cleanDCell(dcell))
@@ -231,7 +251,9 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          * A cell was deleted by a given user
          */
         socketClient.on('cell_deleted', (nb_id, cell_id, triggered_by) => {
-          console.log('Cell deleted', nb_id, cell_id, triggered_by);
+          if (LOG_LEVEL === 'verbose') {
+            console.log('Cell deleted', nb_id, cell_id, triggered_by);
+          }
 
           store.dispatch(_editor.deleteCellSuccess(triggered_by === currentUser.uid, nb_id, cell_id));
         });
@@ -240,7 +262,9 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          * A cell was locked by a given user
          */
         socketClient.on('cell_locked', (dcell, triggered_by) => {
-          console.log('Cell locked', dcell, triggered_by);
+          if (LOG_LEVEL === 'verbose') {
+            console.log('Cell locked', dcell, triggered_by);
+          }
 
           store.dispatch(
             _editor.lockCellSuccess(
@@ -256,7 +280,9 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          * A cell was unlocked by a given user
          */
         socketClient.on('cell_unlocked', (dcell, triggered_by) => {
-          console.log('Cell unlocked', dcell, triggered_by);
+          if (LOG_LEVEL === 'verbose') {
+            console.log('Cell unlocked', dcell, triggered_by);
+          }
 
           store.dispatch(
             _editor.unlockCellSuccess(
@@ -272,7 +298,9 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          * A cell was edited by a given user
          */
         socketClient.on('cell_edited', (dcell, triggered_by) => {
-          console.log('Cell edited', dcell, triggered_by);
+          if (LOG_LEVEL === 'verbose') {
+            console.log('Cell edited', dcell, triggered_by);
+          }
 
           store.dispatch(_editor.editCellSuccess(triggered_by === currentUser.uid, dcell.cell_id, cleanDCell(dcell)));
         });
@@ -281,7 +309,9 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          * An output was received from a given user
          */
         socketClient.on('output_updated', (output, triggered_by) => {
-          console.log('Received outputs', output, triggered_by);
+          if (LOG_LEVEL === 'verbose') {
+            console.log('Received outputs', output, triggered_by);
+          }
 
           if (output.uid !== currentUser.uid) {
             store.dispatch(_editor.receiveOutputs(output));
@@ -292,7 +322,9 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
          * A message was received from a user
          */
         socketClient.on('chat_message_sent', (message, triggered_by) => {
-          console.log('Received chat message', message, triggered_by);
+          if (LOG_LEVEL === 'verbose') {
+            console.log('Received chat message', message, triggered_by);
+          }
 
           store.dispatch(_editor.sendMessageSuccess(triggered_by === currentUser.uid, message));
         });
@@ -324,7 +356,10 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           try {
             const notebooks = await restClient.getNotebooksForUser();
 
-            console.log('Received notebooks', notebooks);
+            if (LOG_LEVEL === 'verbose') {
+              console.log('Received notebooks', notebooks);
+            }
+
             store.dispatch(_editor.getNotebooksSuccess(notebooks));
 
             // If no notebook is open, automatically open the most recent
@@ -370,7 +405,10 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           try {
             const workshops = await restClient.getWorkshopsForUser();
 
-            console.log('Received workshops', workshops);
+            if (LOG_LEVEL === 'verbose') {
+              console.log('Received workshops', workshops);
+            }
+
             store.dispatch(_editor.getWorkshopsSuccess(workshops));
 
             // If no notebook is open, automatically open the most recent
@@ -412,7 +450,10 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           try {
             const notebook = await restClient.createNotebook(action.name, 'python', action.cells);
 
-            console.log('Notebook created', notebook);
+            if (LOG_LEVEL === 'verbose') {
+              console.log('Notebook created', notebook);
+            }
+
             store.dispatch(_editor.createNotebookSuccess(notebook));
             store.dispatch(_editor.openNotebook(notebook.nb_id));
           } catch (error) {
@@ -443,7 +484,10 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           try {
             const workshop = await restClient.createWorkshop(action.name, action.description, action.cells);
 
-            console.log('Workshop created', workshop);
+            if (LOG_LEVEL === 'verbose') {
+              console.log('Workshop created', workshop);
+            }
+
             store.dispatch(_editor.createWorkshopSuccess(workshop));
             store.dispatch(_editor.openNotebook(workshop.main_notebook.nb_id));
           } catch (error) {
@@ -484,11 +528,17 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
 
         // Close the notebook if one is already open
         if (notebook !== null) {
-          console.log('Closing notebook', notebook.nb_id);
+          if (LOG_LEVEL === 'verbose') {
+            console.log('Closing notebook', notebook.nb_id);
+          }
+
           socketClient?.closeNotebook(notebook.nb_id);
         }
 
-        console.log('Opening notebook', action.nb_id);
+        if (LOG_LEVEL === 'verbose') {
+          console.log('Opening notebook', action.nb_id);
+        }
+
         socketClient?.openNotebook(action.nb_id);
         break;
       }

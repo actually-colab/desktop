@@ -29,6 +29,7 @@ import { ReduxState } from '../../../types/redux';
 import { _editor, _ui } from '../../../redux/actions';
 import { timeSince } from '../../../utils/date';
 import { palette, spacing } from '../../../constants/theme';
+import { LOG_LEVEL } from '../../../constants/logging';
 import { PopoverDropdown } from '../../../components';
 import { convertTextToCells, filterNotebookByName, sortNotebookBy, sortUsersByName } from '../../../utils/notebook';
 import { ImmutableNotebook } from '../../../immutable';
@@ -274,10 +275,16 @@ const ProjectsPanel: React.FC = () => {
 
       try {
         const content = await files[0].blobFile?.text();
-        console.log('Uploaded file text', { content });
+
+        if (LOG_LEVEL === 'verbose') {
+          console.log('Uploaded file text', { content });
+        }
 
         const cells = convertTextToCells(content ?? '');
-        console.log('Uploaded file cells', cells);
+
+        if (LOG_LEVEL === 'verbose') {
+          console.log('Uploaded file cells', cells);
+        }
 
         if (cells !== null) {
           setUploadedContent(cells);
