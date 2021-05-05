@@ -1,7 +1,7 @@
-import { IKernel, Kernel as JupyterKernel } from 'jupyter-js-services';
+import { KernelManager, KernelSpecAPI, ServerConnection } from '@jupyterlab/services';
+import { IKernelConnection } from '@jupyterlab/services/lib/kernel/kernel';
 
 import { GATEWAY_BASE_URI } from '../constants/jupyter';
-import { httpToWebSocket } from '../utils/request';
 
 const GATEWAY_STEM = `${GATEWAY_BASE_URI}:`;
 
@@ -22,11 +22,12 @@ export const extractGatewayUri = (message: string): string => {
  * Connect to the kernel with the given URI
  */
 export const connectToKernel = async (
-  uri: string
+  settings: ServerConnection.ISettings,
+  kernelManager: KernelManager
 ): Promise<
   | {
       success: true;
-      kernel: IKernel;
+      kernel: IKernelConnection;
     }
   | {
       success: false;
@@ -35,12 +36,10 @@ export const connectToKernel = async (
       };
     }
 > => {
-  let kernelSpecs: JupyterKernel.ISpecModels | undefined;
+  let kernelSpecs: KernelSpecAPI.ISpecModels | undefined;
 
   try {
-    kernelSpecs = await JupyterKernel.getSpecs({
-      baseUrl: uri,
-    });
+    kernelSpecs = await KernelSpecAPI.getSpecs(settings);
   } catch (error) {
     console.log('Error fetching kernel specs');
     console.error(error);
@@ -48,7 +47,7 @@ export const connectToKernel = async (
     return {
       success: false,
       error: {
-        message: error?.xhr?.statusText?.message ?? error.message ?? `Could not connect to gateway ${uri}`,
+        message: error?.xhr?.statusText?.message ?? error.message ?? `Could not connect to gateway ${settings.baseUrl}`,
       },
     };
   }
@@ -56,9 +55,7 @@ export const connectToKernel = async (
   console.log('Available kernelspecs', kernelSpecs);
 
   try {
-    const kernel = await JupyterKernel.startNew({
-      baseUrl: uri,
-      wsUrl: httpToWebSocket(uri),
+    const kernel = await kernelManager.startNew({
       name: 'python3',
     });
 
@@ -79,21 +76,3 @@ export const connectToKernel = async (
     };
   }
 };
-
-/**
- * Interrupt the given kernel
- */
-export const interrupt = (gatewayUri: string, kernel_id: string): Promise<Response> =>
-  fetch(`${gatewayUri}/api/kernels/${kernel_id}/interrupt`, { method: 'POST' });
-
-/**
- * Restart the given kernel
- */
-export const restart = (gatewayUri: string, kernel_id: string): Promise<Response> =>
-  fetch(`${gatewayUri}/api/kernels/${kernel_id}/restart`, { method: 'POST' });
-
-/**
- * Kill the given kernel
- */
-export const kill = (gatewayUri: string, kernel_id: string): Promise<Response> =>
-  fetch(`${gatewayUri}/api/kernels/${kernel_id}`, { method: 'DELETE' });
