@@ -29,7 +29,9 @@ The tools available for real time collaboration between individuals or small tea
 
 ### The Kernel
 
-This process is started by the kernel hidden renderer process and communicates with the main process via IPC.
+This process is started by the kernel hidden renderer process and communicates with the main process via IPC. Normally this is taken care of for you if you are using the desktop companion, but you may prefer to launch it manually if you run into issues or we don't support your platform.
+
+#### Starting the Kernel Manually
 
 ```bash
 jupyter notebook --NotebookApp.open_browser="False" --NotebookApp.allow_origin="*" --NotebookApp.token="CHOOSE A TOKEN VALUE"
@@ -41,6 +43,22 @@ jupyter notebook --NotebookApp.open_browser="False" --NotebookApp.allow_origin="
 > - Production: `https://app.actuallycolab.org`
 >
 > Similarly, you should choose a secure value for the token to make sure malicious clients can't connect to execute code
+
+#### Stopping the Kernel
+
+Run the following command to stop the kernel process:
+
+```bash
+jupyter notebook stop
+```
+
+If the kernel is running on a port other than the default `8888`, you can add the port to the end of the command.
+
+To get a list of running ports you can run the following:
+
+```bash
+jupyter notebook list
+```
 
 ### The Editor Client
 
