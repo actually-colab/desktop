@@ -224,7 +224,7 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
 
         (async () => {
           try {
-            await KernelApi.restart(kernelUri, kernel.id);
+            await kernel.restart();
 
             console.log('Kernel was restarted');
             store.dispatch(_editor.restartKernelSuccess());
@@ -431,7 +431,7 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
 
         (async () => {
           try {
-            await KernelApi.interrupt(kernelUri, kernel.id);
+            await kernel.interrupt();
 
             console.log('Kernel was interrupted');
             store.dispatch(_editor.interruptKernelSuccess(action.cell_id));

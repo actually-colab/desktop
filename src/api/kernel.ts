@@ -76,21 +76,3 @@ export const connectToKernel = async (
     };
   }
 };
-
-/**
- * Interrupt the given kernel
- */
-export const interrupt = (gatewayUri: string, kernel_id: string): Promise<Response> =>
-  fetch(`${gatewayUri}/api/kernels/${kernel_id}/interrupt`, { method: 'POST' });
-
-/**
- * Restart the given kernel
- */
-export const restart = (gatewayUri: string, kernel_id: string): Promise<Response> =>
-  fetch(`${gatewayUri}/api/kernels/${kernel_id}/restart`, { method: 'POST' });
-
-/**
- * Kill the given kernel
- */
-export const kill = (gatewayUri: string, kernel_id: string): Promise<Response> =>
-  fetch(`${gatewayUri}/api/kernels/${kernel_id}`, { method: 'DELETE' });
