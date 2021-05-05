@@ -27,18 +27,20 @@ The tools available for real time collaboration between individuals or small tea
 
 ## Repository Setup
 
-### The Kernel Gateway
+### The Kernel
 
 This process is started by the kernel hidden renderer process and communicates with the main process via IPC.
 
 ```bash
-jupyter kernelgateway --KernelGatewayApp.allow_origin="*" --KernelGatewayApp.allow_headers="content-type" --KernelGatewayApp.allow_methods="*"
+jupyter notebook --NotebookApp.open_browser="False" --NotebookApp.allow_origin="*" --NotebookApp.token="CHOOSE A TOKEN VALUE"
 ```
 
 > Setting the CORS Access-Control-Allow-Origin to `*` is generally a bad practice for security reasons. This will allow any website or malicious agent to execute code against your machine if they know what to look for. Instead, use the following origins depending on if you are in development or production:
 >
 > - Development: `http://localhost:4000`
 > - Production: `https://app.actuallycolab.org`
+>
+> Similarly, you should choose a secure value for the token to make sure malicious clients can't connect to execute code
 
 ### The Editor Client
 
