@@ -1,5 +1,6 @@
 import { Middleware } from 'redux';
-import { IKernel } from 'jupyter-js-services';
+import { KernelManager, ServerConnection } from '@jupyterlab/services';
+import { IKernelConnection } from '@jupyterlab/services/lib/kernel/kernel';
 
 import { ReduxState } from '../../types/redux';
 import { KERNEL } from '../../types/redux/editor';
@@ -8,13 +9,16 @@ import { BaseKernelOutput, KernelOutput } from '../../types/notebook';
 import { IpynbOutput } from '../../types/ipynb';
 import { LOG_LEVEL } from '../../constants/logging';
 import { syncSleep } from '../../utils/sleep';
+import { httpToWebSocket } from '../../utils/request';
 import { ReduxActions, _editor, _ui } from '../actions';
 
 /**
  * A redux middleware to manage the Jupyter Kernel
  */
 const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => {
-  let kernel: IKernel | null = null;
+  let settings: ServerConnection.ISettings | null = null;
+  let kernelManager: KernelManager | null = null;
+  let kernel: IKernelConnection | null = null;
   let kernelUri: string = '';
 
   /**
@@ -22,8 +26,10 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
    */
   const shutdownOnUnmount = () => {
     try {
-      kernel?.shutdown();
-      syncSleep(400);
+      if (kernel) {
+        kernel.shutdown();
+        syncSleep(400);
+      }
     } catch (error) {}
   };
 
@@ -40,8 +46,20 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
 
         next(action);
 
+        // Build the connection settings
+        settings = ServerConnection.makeSettings({
+          baseUrl: action.uri,
+          wsUrl: httpToWebSocket(action.uri),
+          appUrl: 'http://localhost:4000',
+          token: 'dev',
+        });
+
+        kernelManager = new KernelManager({
+          serverSettings: settings,
+        });
+
         (async () => {
-          const res = await KernelApi.connectToKernel(action.uri);
+          const res = await KernelApi.connectToKernel(settings, kernelManager);
 
           if (res.success) {
             kernel = res.kernel;
@@ -63,7 +81,7 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
 
             // Listen to the kernel status
             res.kernel.statusChanged.connect((newKernel) => {
-              if (newKernel.status === 'reconnecting') {
+              if (newKernel.status === 'unknown') {
                 disconnected = true;
 
                 store.dispatch(
@@ -84,6 +102,11 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
 
                 store.dispatch(_editor.connectToKernelReconnecting());
               } else if (newKernel.status === 'dead') {
+                if (kernelUri === '') {
+                  // Purposefully killed kernel can be ignored
+                  return;
+                }
+
                 store.dispatch(
                   _ui.notify({
                     level: 'error',
@@ -103,7 +126,7 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
                 kernelUri = '';
 
                 store.dispatch(_editor.disconnectFromKernelSuccess());
-              } else {
+              } else if (newKernel.status === 'idle' || newKernel.status === 'busy') {
                 if (disconnected) {
                   disconnected = false;
 
@@ -162,6 +185,10 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
         next(action);
 
         (async () => {
+          const kernelId = kernel.id;
+          // Change the uri before shutting down to avoid the connection is dead notification
+          kernelUri = '';
+
           try {
             await kernel.shutdown();
           } catch (error) {
@@ -174,7 +201,7 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
           store.dispatch(
             _editor.appendKernelLog({
               status: 'Success',
-              message: `Kernel ${kernel.id} disconnected`,
+              message: `Kernel ${kernelId} disconnected`,
             })
           );
 
@@ -248,9 +275,12 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
         next(action);
 
         (async () => {
-          const future = kernel.execute({
-            code: action.cell.contents,
-          });
+          const future = kernel.requestExecute(
+            {
+              code: action.cell.contents,
+            },
+            true
+          );
 
           const startTimestamp = Date.now();
 
@@ -263,8 +293,12 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
             let kernelOutput: KernelOutput | null = null;
 
             try {
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
               if (message.content.execution_count !== undefined && runIndex === -1) {
                 // execution metadata
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
                 runIndex = message.content.execution_count as number;
 
                 // Update the current run
@@ -342,22 +376,22 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
             }
           };
 
-          future.onDone = () => {
-            store.dispatch(
-              _editor.appendKernelLog({
-                status: threwError ? 'Error' : 'Success',
-                message: `Finished run #${runIndex} on cell ${action.cell.cell_id} in ${
-                  (Date.now() - startTimestamp) / 1000
-                }s`,
-              })
-            );
+          await future.done;
 
-            if (threwError) {
-              store.dispatch(_editor.executeCodeFailure(action.cell.cell_id, runIndex, 'Code threw an error'));
-            } else {
-              store.dispatch(_editor.executeCodeSuccess(action.cell.cell_id, runIndex));
-            }
-          };
+          store.dispatch(
+            _editor.appendKernelLog({
+              status: threwError ? 'Error' : 'Success',
+              message: `Finished run #${runIndex} on cell ${action.cell.cell_id} in ${
+                (Date.now() - startTimestamp) / 1000
+              }s`,
+            })
+          );
+
+          if (threwError) {
+            store.dispatch(_editor.executeCodeFailure(action.cell.cell_id, runIndex, 'Code threw an error'));
+          } else {
+            store.dispatch(_editor.executeCodeSuccess(action.cell.cell_id, runIndex));
+          }
         })();
         break;
       }
