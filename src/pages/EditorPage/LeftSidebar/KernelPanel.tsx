@@ -285,8 +285,9 @@ const KernelPanel: React.FC = () => {
                 <div className={css(styles.popoverContainer)}>
                   <div className="markdown-container">
                     <p className={css(styles.description)}>
-                      The Kernel Token can be found displayed by the Kernel Companion. Copy the token from the companion
-                      into this field to securely access the Jupyter Kernel.
+                      The Kernel Token helps ensure that would-be intruders can't execute code on your machine. The
+                      randomly generated token can be found displayed by the Kernel Companion. Copy the token from the
+                      companion into this field to securely access the Jupyter Kernel.
                     </p>
                     <p className={css(styles.description)}>
                       If you aren't using the Kernel Companion, type the token that your manually started kernel process
