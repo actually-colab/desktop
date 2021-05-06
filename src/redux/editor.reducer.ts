@@ -64,9 +64,9 @@ export interface EditorState {
    */
   autoConnectToKernel: boolean;
   /**
-   * If the user is currently editing the gateway URI. Should disable connecting to the kernel when this is happening
+   * If the user is currently editing the gateway uri or token. Should disable connecting to the kernel when this is happening
    */
-  isEditingGatewayUri: boolean;
+  isEditingGateway: boolean;
 
   /**
    * If the editor is currently connecting to a kernel
@@ -186,6 +186,10 @@ export interface EditorState {
    */
   gatewayUri: string;
   /**
+   * The token for the kernel gateway
+   */
+  gatewayToken: string;
+  /**
    * The basic information of the connected kernel or null if there is none
    */
   kernel: Kernel | null;
@@ -247,7 +251,7 @@ const initialState: EditorState = {
   contacts: [],
 
   autoConnectToKernel: process.env.REACT_APP_KERNEL_AUTO_CONNECT !== 'off',
-  isEditingGatewayUri: false,
+  isEditingGateway: false,
 
   isConnectingToKernel: false,
   isReconnectingToKernel: false,
@@ -282,6 +286,7 @@ const initialState: EditorState = {
   runQueue: ImmutableList(),
 
   gatewayUri: RecentKernelGatewaysStorage.last() ?? DEFAULT_GATEWAY_URI,
+  gatewayToken: '',
   kernel: null,
 
   notebooks: ImmutableMap() as ImmutableMapOf<Notebook['nb_id'], ImmutableNotebook>,
@@ -389,7 +394,8 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
     case KERNEL.GATEWAY.SET:
       return {
         ...state,
-        gatewayUri: action.uri,
+        gatewayUri: action.uri ?? state.gatewayUri,
+        gatewayToken: action.token ?? state.gatewayToken,
       };
     /**
      * Start editing the kernel gateway
@@ -397,7 +403,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
     case KERNEL.GATEWAY.EDIT:
       return {
         ...state,
-        isEditingGatewayUri: action.editing,
+        isEditingGateway: action.editing,
       };
 
     /**

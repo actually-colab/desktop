@@ -102,9 +102,10 @@ export const clearKernelLogs = (): EditorActionTypes => ({
 /**
  * Set the kernel gateway uri
  */
-export const setKernelGateway = (uri: string): EditorActionTypes => ({
+export const setKernelGateway = ({ uri, token }: { uri?: string; token?: string }): EditorActionTypes => ({
   type: KERNEL.GATEWAY.SET,
   uri,
+  token,
 });
 
 /**
@@ -123,9 +124,10 @@ export const connectToKernelAuto = (enable: boolean): EditorActionTypes => ({
   enable,
 });
 
-const connectToKernelStart = (uri: string, displayError: boolean): EditorActionTypes => ({
+const connectToKernelStart = (uri: string, token: string, displayError: boolean): EditorActionTypes => ({
   type: KERNEL.CONNECT.START,
   uri,
+  token,
   displayError,
 });
 
@@ -174,10 +176,12 @@ export const disconnectFromKernelSuccess = (): EditorActionTypes => ({
 });
 
 /**
- * Attempt to connect to the jupyter kernel gateway. In the future this can also hook into the hidden renderer
+ * Attempt to connect to the jupyter kernel gateway
  */
-export const connectToKernel = (uri: string, displayError = false): EditorAsyncActionTypes => async (dispatch) => {
-  dispatch(connectToKernelStart(uri, displayError));
+export const connectToKernel = (uri: string, token: string, displayError = false): EditorAsyncActionTypes => async (
+  dispatch
+) => {
+  dispatch(connectToKernelStart(uri, token, displayError));
 };
 
 const restartKernelStart = (): EditorActionTypes => ({

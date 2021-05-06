@@ -112,7 +112,7 @@ const KernelPanel: React.FC = () => {
   const { kernelStatus, kernelStatusColor } = useKernelStatus();
 
   const autoConnectToKernel = useSelector((state: ReduxState) => state.editor.autoConnectToKernel);
-  const isEditingGatewayUri = useSelector((state: ReduxState) => state.editor.isEditingGatewayUri);
+  const isEditingGateway = useSelector((state: ReduxState) => state.editor.isEditingGateway);
   const gatewayUri = useSelector((state: ReduxState) => state.editor.gatewayUri);
   const logs = useSelector((state: ReduxState) => state.editor.logs);
 
@@ -140,9 +140,13 @@ const KernelPanel: React.FC = () => {
     [dispatch]
   );
   const dispatchDisconnectFromKernel = React.useCallback(() => dispatch(_editor.disconnectFromKernel()), [dispatch]);
-  const dispatchSetKernelGateway = React.useCallback((uri: string) => dispatch(_editor.setKernelGateway(uri)), [
+  const dispatchSetKernelGatewayUri = React.useCallback((uri: string) => dispatch(_editor.setKernelGateway({ uri })), [
     dispatch,
   ]);
+  const dispatchSetKernelGatewayToken = React.useCallback(
+    (token: string) => dispatch(_editor.setKernelGateway({ token })),
+    [dispatch]
+  );
   const dispatchEditKernelGateway = React.useCallback(
     (editing: boolean) => dispatch(_editor.editKernelGateway(editing)),
     [dispatch]
@@ -153,25 +157,25 @@ const KernelPanel: React.FC = () => {
   const onSelectGateway = React.useCallback(
     (value: string) => {
       if (value) {
-        dispatchSetKernelGateway(value);
+        dispatchSetKernelGatewayUri(value);
         setRecentGatewayUris(RecentKernelGatewaysStorage.add(value));
       }
 
       dispatchEditKernelGateway(false);
     },
-    [dispatchEditKernelGateway, dispatchSetKernelGateway]
+    [dispatchEditKernelGateway, dispatchSetKernelGatewayUri]
   );
   const onResetGateway = React.useCallback(() => {
     setRecentGatewayUris(RecentKernelGatewaysStorage.reset());
     setNewGatewayUri(DEFAULT_GATEWAY_URI);
-    dispatchSetKernelGateway(DEFAULT_GATEWAY_URI);
-  }, [dispatchSetKernelGateway]);
+    dispatchSetKernelGatewayUri(DEFAULT_GATEWAY_URI);
+  }, [dispatchSetKernelGatewayUri]);
 
   React.useEffect(() => {
-    if (!isEditingGatewayUri) {
+    if (!isEditingGateway) {
       setNewGatewayUri(gatewayUri);
     }
-  }, [gatewayUri, isEditingGatewayUri]);
+  }, [gatewayUri, isEditingGateway]);
 
   return (
     <div className={css(styles.container)}>

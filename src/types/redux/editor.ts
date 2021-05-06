@@ -212,7 +212,8 @@ type KernelLogClearAction = {
 
 type SetKernelGatewayAction = {
   type: typeof KERNEL.GATEWAY.SET;
-  uri: string;
+  uri?: string;
+  token?: string;
 };
 
 type EditKernelGatewayAction = {
@@ -228,6 +229,7 @@ type ConnectToKernelAutoAction = {
 type ConnectToKernelStartAction = {
   type: typeof KERNEL.CONNECT.START;
   uri: string;
+  token: string;
   displayError: boolean;
 };
 
