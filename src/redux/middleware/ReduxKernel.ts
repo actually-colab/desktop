@@ -179,7 +179,7 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
        */
       case KERNEL.DISCONNECT.START: {
         if (kernel === null) {
-          console.error('Not connected to a kernel');
+          console.log('Not connected to a kernel');
           return; // Cancel the action
         }
 

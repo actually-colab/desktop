@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import { Button, Icon, InputPicker, Popover, Timeline, Toggle, Whisper } from 'rsuite';
+import { Button, Icon, Input, InputPicker, Popover, Timeline, Toggle, Whisper } from 'rsuite';
 
 import { ReduxState } from '../../../types/redux';
 import { _editor } from '../../../redux/actions';
@@ -114,10 +114,13 @@ const KernelPanel: React.FC = () => {
   const autoConnectToKernel = useSelector((state: ReduxState) => state.editor.autoConnectToKernel);
   const isEditingGateway = useSelector((state: ReduxState) => state.editor.isEditingGateway);
   const gatewayUri = useSelector((state: ReduxState) => state.editor.gatewayUri);
+  const gatewayToken = useSelector((state: ReduxState) => state.editor.gatewayToken);
   const logs = useSelector((state: ReduxState) => state.editor.logs);
 
   const [newGatewayUri, setNewGatewayUri] = React.useState<string>('');
   const [recentGatewayUris, setRecentGatewayUris] = React.useState<string[]>(RecentKernelGatewaysStorage.values());
+  const [newGatewayToken, setNewGatewayToken] = React.useState<string>('');
+  const [showGatewayToken, setShowGatewayToken] = React.useState<boolean>(false);
 
   const kernelActiveIsh = React.useMemo(() => kernelStatus !== 'Offline' && kernelStatus !== 'Connecting', [
     kernelStatus,
@@ -133,6 +136,7 @@ const KernelPanel: React.FC = () => {
         })),
     [recentGatewayUris]
   );
+  const gatewayTokenPlaceholder = React.useMemo(() => gatewayToken.replace(/./g, '•'), [gatewayToken]);
 
   const dispatch = useDispatch();
   const dispatchConnectToKernelAuto = React.useCallback(
@@ -170,12 +174,33 @@ const KernelPanel: React.FC = () => {
     setNewGatewayUri(DEFAULT_GATEWAY_URI);
     dispatchSetKernelGatewayUri(DEFAULT_GATEWAY_URI);
   }, [dispatchSetKernelGatewayUri]);
+  const onFocusToken = React.useCallback(() => {
+    setShowGatewayToken(true);
+    dispatchEditKernelGateway(true);
+  }, [dispatchEditKernelGateway]);
+  const onBlurToken = React.useCallback(() => {
+    dispatchSetKernelGatewayToken(newGatewayToken);
+    dispatchEditKernelGateway(false);
+    setShowGatewayToken(false);
+  }, [dispatchEditKernelGateway, dispatchSetKernelGatewayToken, newGatewayToken]);
 
+  /**
+   * Update gateway uri state
+   */
   React.useEffect(() => {
     if (!isEditingGateway) {
       setNewGatewayUri(gatewayUri);
     }
   }, [gatewayUri, isEditingGateway]);
+
+  /**
+   * Update gateway token state
+   */
+  React.useEffect(() => {
+    if (!isEditingGateway) {
+      setNewGatewayToken(gatewayToken);
+    }
+  }, [gatewayToken, isEditingGateway]);
 
   return (
     <div className={css(styles.container)}>
@@ -210,11 +235,11 @@ const KernelPanel: React.FC = () => {
             delayShow={timing.SHOW_DELAY}
             delayHide={timing.HIDE_DELAY}
             speaker={
-              <Popover title="Setting the Gateway URI">
+              <Popover title="Setting the Kernel URI">
                 <div className={css(styles.popoverContainer)}>
                   <div className="markdown-container">
                     <p className={css(styles.description)}>
-                      The Gateway URI is usually the IP of the machine running the Jupyter Kernel. This could be a
+                      The Kernel URI is usually the IP of the machine running the Jupyter Kernel. This could be a
                       machine using our Kernel Companion or one running it via the terminal. You can even point to an IP
                       of a machine that isn't your own as long as it is accessible from your network.
                     </p>
@@ -242,6 +267,44 @@ const KernelPanel: React.FC = () => {
                   Reset options
                 </Button>
               )}
+            />
+          </Whisper>
+        }
+      />
+
+      <KeyValue
+        attributeKey="Kernel Token"
+        attributeValue={
+          <Whisper
+            placement="rightStart"
+            trigger="hover"
+            delayShow={timing.SHOW_DELAY}
+            delayHide={timing.HIDE_DELAY}
+            speaker={
+              <Popover title="Securing the Kernel">
+                <div className={css(styles.popoverContainer)}>
+                  <div className="markdown-container">
+                    <p className={css(styles.description)}>
+                      The Kernel Token can be found displayed by the Kernel Companion. Copy the token from the companion
+                      into this field to securely access the Jupyter Kernel.
+                    </p>
+                    <p className={css(styles.description)}>
+                      If you aren't using the Kernel Companion, type the token that your manually started kernel process
+                      is using.
+                    </p>
+                  </div>
+                </div>
+              </Popover>
+            }
+          >
+            <Input
+              className={css(styles.inputPicker)}
+              placeholder="Required"
+              disabled={kernelActiveIsh}
+              value={showGatewayToken ? newGatewayToken : gatewayTokenPlaceholder}
+              onFocus={onFocusToken}
+              onBlur={onBlurToken}
+              onChange={(value: string) => setNewGatewayToken(value)}
             />
           </Whisper>
         }
