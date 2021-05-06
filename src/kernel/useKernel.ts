@@ -10,25 +10,27 @@ import { _editor } from '../redux/actions';
 const useKernel = (): null => {
   const user = useSelector((state: ReduxState) => state.auth.user);
   const autoConnectToKernel = useSelector((state: ReduxState) => state.editor.autoConnectToKernel);
-  const isEditingGatewayUri = useSelector((state: ReduxState) => state.editor.isEditingGatewayUri);
+  const isEditingGateway = useSelector((state: ReduxState) => state.editor.isEditingGateway);
   const isConnectingToKernel = useSelector((state: ReduxState) => state.editor.isConnectingToKernel);
   const gatewayUri = useSelector((state: ReduxState) => state.editor.gatewayUri);
+  const gatewayToken = useSelector((state: ReduxState) => state.editor.gatewayToken);
   const kernel = useSelector((state: ReduxState) => state.editor.kernel);
 
   const shouldConnect = React.useMemo(
     () =>
       autoConnectToKernel &&
-      !isEditingGatewayUri &&
+      !isEditingGateway &&
       gatewayUri !== '' &&
+      gatewayToken !== '' &&
       !isConnectingToKernel &&
       kernel === null &&
       user !== null,
-    [autoConnectToKernel, gatewayUri, isConnectingToKernel, isEditingGatewayUri, kernel, user]
+    [autoConnectToKernel, gatewayToken, gatewayUri, isConnectingToKernel, isEditingGateway, kernel, user]
   );
 
   const dispatch = useDispatch();
   const dispatchConnectToKernel = React.useCallback(
-    (uri: string, displayError?: boolean) => dispatch(_editor.connectToKernel(uri, displayError)),
+    (uri: string, token: string, displayError?: boolean) => dispatch(_editor.connectToKernel(uri, token, displayError)),
     [dispatch]
   );
   const dispatchDisconnectFromKernel = React.useCallback(() => dispatch(_editor.disconnectFromKernel()), [dispatch]);
@@ -43,26 +45,26 @@ const useKernel = (): null => {
       const displayError = false; // use `timeout.current === null` to only show on the first time
       const delay = timeout.current === null ? 10 : 5000;
 
-      timeout.current = setTimeout(() => dispatchConnectToKernel(gatewayUri, displayError), delay);
+      timeout.current = setTimeout(() => dispatchConnectToKernel(gatewayUri, gatewayToken, displayError), delay);
     } else {
       // Cancel timer if auto connecting is disabled
-      if (!autoConnectToKernel || isEditingGatewayUri) {
+      if (!autoConnectToKernel || isEditingGateway) {
         if (timeout.current) {
           clearTimeout(timeout.current);
           timeout.current = null;
         }
       }
     }
-  }, [autoConnectToKernel, dispatchConnectToKernel, gatewayUri, isEditingGatewayUri, shouldConnect]);
+  }, [autoConnectToKernel, dispatchConnectToKernel, gatewayToken, gatewayUri, isEditingGateway, shouldConnect]);
 
   /**
    * Automatically disconnect from the kernel if the gateway URI is edited
    */
   React.useEffect(() => {
-    if (isEditingGatewayUri) {
+    if (isEditingGateway) {
       dispatchDisconnectFromKernel();
     }
-  }, [dispatchDisconnectFromKernel, isEditingGatewayUri]);
+  }, [dispatchDisconnectFromKernel, isEditingGateway]);
 
   /**
    * Handle unmount

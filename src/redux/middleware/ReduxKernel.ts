@@ -51,7 +51,7 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
           baseUrl: action.uri,
           wsUrl: httpToWebSocket(action.uri),
           appUrl: process.env.REACT_APP_BASE_URL,
-          token: process.env.NODE_ENV === 'development' ? 'dev' : 'prod',
+          token: action.token,
           appendToken: true,
         });
 
@@ -179,7 +179,7 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
        */
       case KERNEL.DISCONNECT.START: {
         if (kernel === null) {
-          console.error('Not connected to a kernel');
+          console.log('Not connected to a kernel');
           return; // Cancel the action
         }
 
