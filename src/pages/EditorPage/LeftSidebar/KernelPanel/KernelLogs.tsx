@@ -1,10 +1,11 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import { Icon, Timeline } from 'rsuite';
+import { Button, Icon, Timeline } from 'rsuite';
 
 import { ReduxState } from '../../../../types/redux';
 import { palette, spacing } from '../../../../constants/theme';
+import { openCompanionDownloadsPage } from '../../../../utils/redirect';
 
 const styles = StyleSheet.create({
   keyText: {
@@ -39,6 +40,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     lineHeight: '18px',
   },
+  downloadContainer: {
+    marginTop: spacing.DEFAULT / 4,
+    marginBottom: spacing.DEFAULT / 2,
+  },
+  description: {
+    marginTop: spacing.DEFAULT / 4,
+    marginBottom: spacing.DEFAULT / 2,
+    fontSize: 12,
+  },
 });
 
 /**
@@ -49,30 +59,54 @@ const KernelLogs: React.FC = () => {
 
   return (
     <React.Fragment>
-      <p className={css(styles.keyText)}>Kernel Logs</p>
-      <pre className={css(styles.output)}>
-        <div className={css(styles.outputScrollContainer)}>
-          <Timeline className="icon-timeline">
-            {logs.map((log) => (
-              <Timeline.Item
-                key={log.id}
-                dot={
-                  log.status === 'Success' ? (
-                    <Icon icon="check" style={{ background: palette.SUCCESS, color: palette.BASE }} />
-                  ) : log.status === 'Warning' ? (
-                    <Icon icon="exclamation" style={{ background: palette.WARNING, color: palette.BASE }} />
-                  ) : log.status === 'Error' ? (
-                    <Icon icon="close" style={{ background: palette.ERROR, color: palette.BASE }} />
-                  ) : undefined
-                }
+      <p className={css(styles.keyText)}>Kernel</p>
+      {logs.size > 0 ? (
+        <pre className={css(styles.output)}>
+          <div className={css(styles.outputScrollContainer)}>
+            <Timeline className="icon-timeline">
+              {logs.map((log) => (
+                <Timeline.Item
+                  key={log.id}
+                  dot={
+                    log.status === 'Success' ? (
+                      <Icon icon="check" style={{ background: palette.SUCCESS, color: palette.BASE }} />
+                    ) : log.status === 'Warning' ? (
+                      <Icon icon="exclamation" style={{ background: palette.WARNING, color: palette.BASE }} />
+                    ) : log.status === 'Error' ? (
+                      <Icon icon="close" style={{ background: palette.ERROR, color: palette.BASE }} />
+                    ) : undefined
+                  }
+                >
+                  <p className={css(styles.bold)}>{log.dateString}</p>
+                  <p>{log.message}</p>
+                </Timeline.Item>
+              ))}
+            </Timeline>
+          </div>
+        </pre>
+      ) : (
+        <React.Fragment>
+          <div className={css(styles.downloadContainer)}>
+            <Button appearance="primary" block onClick={() => openCompanionDownloadsPage()}>
+              <Icon icon="download2" style={{ marginRight: spacing.DEFAULT / 2 }} />
+              Download Companion
+            </Button>
+
+            <p className={css(styles.description)}>
+              Our Companion application manages the Jupyter Kernel process automatically, allowing you to run code
+              locally quickly and securely. If we don't support your OS,{' '}
+              <a
+                href="https://github.com/actually-colab/desktop-launcher#starting-the-kernel-manually"
+                target="_blank"
+                rel="noreferrer"
               >
-                <p className={css(styles.bold)}>{log.dateString}</p>
-                <p>{log.message}</p>
-              </Timeline.Item>
-            ))}
-          </Timeline>
-        </div>
-      </pre>
+                read more here
+              </a>
+              .
+            </p>
+          </div>
+        </React.Fragment>
+      )}
     </React.Fragment>
   );
 };
