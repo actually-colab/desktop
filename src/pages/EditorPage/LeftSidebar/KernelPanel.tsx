@@ -88,6 +88,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  requiredText: {
+    marginLeft: spacing.DEFAULT / 2,
+    color: palette.ERROR,
+  },
 });
 
 /**
@@ -239,9 +243,9 @@ const KernelPanel: React.FC = () => {
                 <div className={css(styles.popoverContainer)}>
                   <div className="markdown-container">
                     <p className={css(styles.description)}>
-                      The Kernel URI is usually the IP of the machine running the Jupyter Kernel. This could be a
-                      machine using our Kernel Companion or one running it via the terminal. You can even point to an IP
-                      of a machine that isn't your own as long as it is accessible from your network.
+                      The Kernel URI is usually port 8888 on the IP of the machine running the Jupyter Kernel. This
+                      could be a machine using our Kernel Companion or one running it via the terminal. You can even
+                      point to an IP of a machine that isn't your own as long as it is accessible from your computer.
                     </p>
                     <p className={css(styles.description)}>
                       If you want to change the Kernel URI, you must first disconnect from a kernel if you have one.
@@ -273,7 +277,11 @@ const KernelPanel: React.FC = () => {
       />
 
       <KeyValue
-        attributeKey="Kernel Token"
+        attributeKey={
+          <React.Fragment>
+            Kernel Token <span className={css(styles.requiredText)}>Required</span>
+          </React.Fragment>
+        }
         attributeValue={
           <Whisper
             placement="rightStart"
@@ -300,7 +308,7 @@ const KernelPanel: React.FC = () => {
           >
             <Input
               className={css(styles.inputPicker)}
-              placeholder="Required"
+              placeholder="required"
               disabled={kernelActiveIsh}
               value={showGatewayToken ? newGatewayToken : gatewayTokenPlaceholder}
               onFocus={onFocusToken}
