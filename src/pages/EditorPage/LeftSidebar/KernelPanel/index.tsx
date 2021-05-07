@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import { Button, Icon, Input, InputPicker, Popover, Timeline, Toggle, Whisper } from 'rsuite';
+import { Button, Icon, Input, InputPicker, Popover, Toggle, Whisper } from 'rsuite';
 
 import { ReduxState } from '../../../../types/redux';
 import { _editor } from '../../../../redux/actions';
@@ -11,6 +11,7 @@ import { openCompanionDownloadsPage } from '../../../../utils/redirect';
 import { RecentKernelGatewaysStorage } from '../../../../utils/storage';
 import useKernelStatus from '../../../../kernel/useKernelStatus';
 import { BorderContainer, StatusIndicator } from '../../../../components';
+import KernelLogs from './KernelLogs';
 
 const styles = StyleSheet.create({
   container: {
@@ -55,29 +56,6 @@ const styles = StyleSheet.create({
   inputPicker: {
     width: '100%',
   },
-  output: {
-    flex: 1,
-    marginTop: spacing.DEFAULT / 8,
-    paddingBottom: spacing.DEFAULT / 4,
-    paddingTop: spacing.DEFAULT / 2,
-    paddingLeft: spacing.DEFAULT / 2,
-    paddingRight: spacing.DEFAULT / 4,
-    borderRadius: 4,
-    color: palette.ALMOST_BLACK,
-    overflowX: 'auto',
-    overflowY: 'auto',
-    fontSize: 12,
-    lineHeight: '12px',
-    whiteSpace: 'pre-wrap',
-    wordBreak: 'break-word',
-    display: 'flex',
-    flexDirection: 'column-reverse',
-  },
-  outputScrollContainer: {},
-  bold: {
-    fontWeight: 'bold',
-    lineHeight: '18px',
-  },
   connectionContainer: {
     marginBottom: spacing.DEFAULT / 2,
   },
@@ -119,7 +97,6 @@ const KernelPanel: React.FC = () => {
   const isEditingGateway = useSelector((state: ReduxState) => state.editor.isEditingGateway);
   const gatewayUri = useSelector((state: ReduxState) => state.editor.gatewayUri);
   const gatewayToken = useSelector((state: ReduxState) => state.editor.gatewayToken);
-  const logs = useSelector((state: ReduxState) => state.editor.logs);
 
   const [newGatewayUri, setNewGatewayUri] = React.useState<string>('');
   const [recentGatewayUris, setRecentGatewayUris] = React.useState<string[]>(RecentKernelGatewaysStorage.values());
@@ -363,30 +340,7 @@ const KernelPanel: React.FC = () => {
         </div>
       </Whisper>
 
-      <p className={css(styles.keyText)}>Kernel Logs</p>
-      <pre className={css(styles.output)}>
-        <div className={css(styles.outputScrollContainer)}>
-          <Timeline className="icon-timeline">
-            {logs.map((log) => (
-              <Timeline.Item
-                key={log.id}
-                dot={
-                  log.status === 'Success' ? (
-                    <Icon icon="check" style={{ background: palette.SUCCESS, color: palette.BASE }} />
-                  ) : log.status === 'Warning' ? (
-                    <Icon icon="exclamation" style={{ background: palette.WARNING, color: palette.BASE }} />
-                  ) : log.status === 'Error' ? (
-                    <Icon icon="close" style={{ background: palette.ERROR, color: palette.BASE }} />
-                  ) : undefined
-                }
-              >
-                <p className={css(styles.bold)}>{log.dateString}</p>
-                <p>{log.message}</p>
-              </Timeline.Item>
-            ))}
-          </Timeline>
-        </div>
-      </pre>
+      <KernelLogs />
 
       <div className={css(styles.connectionContainer)}>
         <div className={css(styles.autoConnectContainer)}>
