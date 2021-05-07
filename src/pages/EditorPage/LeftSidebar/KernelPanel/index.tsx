@@ -10,7 +10,8 @@ import { DEFAULT_GATEWAY_URI } from '../../../../constants/jupyter';
 import { openCompanionDownloadsPage } from '../../../../utils/redirect';
 import { RecentKernelGatewaysStorage } from '../../../../utils/storage';
 import useKernelStatus from '../../../../kernel/useKernelStatus';
-import { BorderContainer, StatusIndicator } from '../../../../components';
+import { BorderContainer, KeyValue } from '../../../../components';
+import KernelStatus from './KernelStatus';
 import KernelLogs from './KernelLogs';
 
 const styles = StyleSheet.create({
@@ -28,27 +29,6 @@ const styles = StyleSheet.create({
     marginTop: spacing.DEFAULT / 4,
     marginBottom: spacing.DEFAULT / 2,
     fontSize: 12,
-  },
-  keyValue: {
-    width: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    marginBottom: spacing.DEFAULT / 2,
-  },
-  keyText: {
-    width: '100%',
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
-    fontSize: 10,
-  },
-  valueText: {
-    width: '100%',
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
   },
   popoverContainer: {
     maxWidth: 400,
@@ -73,25 +53,10 @@ const styles = StyleSheet.create({
 });
 
 /**
- * A key value pair component
- */
-const KeyValue: React.FC<{ attributeKey: string | React.ReactNode; attributeValue: string | React.ReactNode }> = ({
-  attributeKey,
-  attributeValue,
-}) => {
-  return (
-    <div className={css(styles.keyValue)}>
-      <span className={css(styles.keyText)}>{attributeKey}</span>
-      <span className={css(styles.valueText)}>{attributeValue}</span>
-    </div>
-  );
-};
-
-/**
  * The kernel panel of the left sidebar of the editor page
  */
 const KernelPanel: React.FC = () => {
-  const { kernelStatus, kernelStatusColor } = useKernelStatus();
+  const { kernelStatus } = useKernelStatus();
 
   const autoConnectToKernel = useSelector((state: ReduxState) => state.editor.autoConnectToKernel);
   const isEditingGateway = useSelector((state: ReduxState) => state.editor.isEditingGateway);
@@ -296,49 +261,7 @@ const KernelPanel: React.FC = () => {
         }
       />
 
-      <Whisper
-        placement="rightStart"
-        trigger="hover"
-        delayShow={timing.SHOW_DELAY}
-        delayHide={timing.HIDE_DELAY}
-        speaker={
-          <Popover title="Understanding the status">
-            <div className={css(styles.popoverContainer)}>
-              <div className="markdown-container">
-                <p className={css(styles.description)}>
-                  <code>Offline</code> The kernel is not connected so you cannot run your code. We will automatically
-                  try connecting to the kernel periodically.
-                </p>
-                <p className={css(styles.description)}>
-                  <code>Connecting</code> We are trying to connect to the kernel.
-                </p>
-                <p className={css(styles.description)}>
-                  <code>Reconnecting</code> The kernel connection was lost and we are trying to reestablish it. If
-                  successful, it'll be like nothing happened. If we aren't, you'll need a new connection.
-                </p>
-                <p className={css(styles.description)}>
-                  <code>Busy</code> The kernel is running your code, some jobs take longer to finish than others.
-                </p>
-                <p className={css(styles.description)}>
-                  <code>Idle</code> The kernel is ready for you to use.
-                </p>
-              </div>
-            </div>
-          </Popover>
-        }
-      >
-        <div>
-          <KeyValue
-            attributeKey="Kernel Status"
-            attributeValue={
-              <React.Fragment>
-                <StatusIndicator textPlacement="right" color={kernelStatusColor} />
-                {kernelStatus === 'Connecting' ? 'Offline' : kernelStatus}
-              </React.Fragment>
-            }
-          />
-        </div>
-      </Whisper>
+      <KernelStatus />
 
       <KernelLogs />
 
