@@ -3,6 +3,7 @@ import ColoredIconButton from './ColoredIconButton';
 import GoogleSignInButton from './GoogleSignInButton';
 import Header from './Header';
 import IconTextButton from './IconTextButton';
+import KeyValue from './KeyValue';
 import NotebookCell from './NotebookCell';
 import PopoverDropdown from './PopoverDropdown';
 import RegularIconButton from './RegularIconButton';
@@ -16,6 +17,7 @@ export {
   GoogleSignInButton,
   Header,
   IconTextButton,
+  KeyValue,
   NotebookCell,
   PopoverDropdown,
   RegularIconButton,
