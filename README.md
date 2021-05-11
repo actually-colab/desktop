@@ -1,4 +1,4 @@
-<img src=".readme/img/header.png" width="100%" />
+<img src="https://raw.githubusercontent.com/actually-colab/graphics/master/header/header.png" width="100%" />
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/8dd233ec-aeab-42f6-b94c-8966c12d2ce7/deploy-status)](https://app.netlify.com/sites/actually-colab-app/deploys) [![Validation](https://github.com/actually-colab/desktop/actions/workflows/validation.yml/badge.svg)](https://github.com/actually-colab/desktop/actions/workflows/validation.yml) [![Bundle Reporter](https://github.com/actually-colab/desktop/actions/workflows/bundle-reporter.yml/badge.svg)](https://github.com/actually-colab/desktop/actions/workflows/bundle-reporter.yml)
 
