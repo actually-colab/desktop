@@ -44,10 +44,19 @@ export const connectToKernel = async (
     console.log('Error fetching kernel specs');
     console.error(error);
 
+    if (error.message === 'Forbidden') {
+      return {
+        success: false,
+        error: {
+          message: 'Kernel token was incorrect!',
+        },
+      };
+    }
+
     return {
       success: false,
       error: {
-        message: error?.xhr?.statusText?.message ?? error.message ?? `Could not connect to gateway ${settings.baseUrl}`,
+        message: error.xhr?.statusText?.message ?? error.message ?? `Could not connect to gateway ${settings.baseUrl}`,
       },
     };
   }

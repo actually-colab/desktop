@@ -42,7 +42,7 @@ const useKernel = (): null => {
    */
   React.useEffect(() => {
     if (shouldConnect) {
-      const displayError = false; // use `timeout.current === null` to only show on the first time
+      const displayError = timeout.current === null;
       const delay = timeout.current === null ? 10 : 5000;
 
       timeout.current = setTimeout(() => dispatchConnectToKernel(gatewayUri, gatewayToken, displayError), delay);

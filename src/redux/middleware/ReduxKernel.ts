@@ -57,6 +57,9 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
 
         kernelManager = new KernelManager({
           serverSettings: settings,
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          standby: true,
         });
 
         (async () => {
@@ -158,6 +161,14 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
               })
             );
           } else {
+            try {
+              kernelManager.dispose();
+            } catch (error) {
+              console.error(error);
+            }
+
+            kernelManager = null;
+
             if (action.displayError) {
               store.dispatch(
                 _ui.notify({
