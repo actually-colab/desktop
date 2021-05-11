@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     whiteSpace: 'pre-wrap',
     wordBreak: 'break-word',
     display: 'flex',
-    flexDirection: 'column-reverse',
+    flexDirection: 'column',
   },
   outputScrollContainer: {},
   bold: {
@@ -59,12 +59,12 @@ const KernelLogs: React.FC = () => {
 
   return (
     <React.Fragment>
-      <p className={css(styles.keyText)}>Kernel</p>
+      <p className={css(styles.keyText)}>Kernel Details</p>
       {logs.size > 0 ? (
         <pre className={css(styles.output)}>
           <div className={css(styles.outputScrollContainer)}>
             <Timeline className="icon-timeline">
-              {logs.map((log) => (
+              {logs.reverse().map((log) => (
                 <Timeline.Item
                   key={log.id}
                   dot={
