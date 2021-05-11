@@ -294,13 +294,9 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
             let kernelOutput: KernelOutput | null = null;
 
             try {
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              if (message.content.execution_count !== undefined && runIndex === -1) {
+              if ('execution_count' in message.content && message.content.execution_count != null && runIndex === -1) {
                 // execution metadata
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                runIndex = message.content.execution_count as number;
+                runIndex = message.content.execution_count;
 
                 // Update the current run
                 store.dispatch(_editor.updateRunIndex(action.cell.cell_id, runIndex));
@@ -329,7 +325,7 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
                   kernelOutput = {
                     ...baseKernelOutput,
                     output: {
-                      ...((message.content as unknown) as IpynbOutput),
+                      ...message.content,
                       output_type: message.header.msg_type,
                     } as IpynbOutput,
                   };
