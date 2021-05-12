@@ -176,7 +176,7 @@ const CellToolbar: React.FC<{
           trigger="click"
           placement="autoVerticalEnd"
           speaker={
-            <Popover full>
+            <Popover full style={{ border: '1px solid #ddd' }}>
               <Dropdown.Menu>
                 <Dropdown.Item
                   eventKey="delete"
