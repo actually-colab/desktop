@@ -42,7 +42,7 @@ import {
   reduceNotebookContents,
   sortOutputByMessageIndex,
 } from '../utils/notebook';
-import { RecentKernelGatewaysStorage } from '../utils/storage';
+import { KernelAutoConnectStorage, RecentKernelGatewaysStorage } from '../utils/storage';
 import { ReduxActions } from './actions';
 
 /**
@@ -250,7 +250,7 @@ const initialState: EditorState = {
 
   contacts: [],
 
-  autoConnectToKernel: process.env.REACT_APP_KERNEL_AUTO_CONNECT !== 'off',
+  autoConnectToKernel: process.env.REACT_APP_KERNEL_AUTO_CONNECT !== 'off' && KernelAutoConnectStorage.get() !== 'off',
   isEditingGateway: false,
 
   isConnectingToKernel: false,
