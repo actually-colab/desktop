@@ -8,6 +8,7 @@ import { palette, timing } from '../constants/theme';
  */
 export type ColoredIconButtonProps = {
   icon: IconProps['icon'];
+  style?: React.CSSProperties;
   size?: ButtonProps['size'];
   color?: string;
   tooltipText?: string;
@@ -15,6 +16,7 @@ export type ColoredIconButtonProps = {
   active?: boolean;
   disabled?: boolean;
   loading?: boolean;
+  container?: WhisperProps['container'];
   onClick(): void;
 };
 
@@ -23,6 +25,7 @@ export type ColoredIconButtonProps = {
  */
 const ColoredIconButton: React.FC<ColoredIconButtonProps> = ({
   icon,
+  style,
   tooltipText = '',
   tooltipDirection,
   size = 'lg',
@@ -30,13 +33,14 @@ const ColoredIconButton: React.FC<ColoredIconButtonProps> = ({
   active = false,
   disabled = false,
   loading = false,
+  container,
   onClick,
 }) => {
   const ButtonContent = (
     <IconButton
       appearance="subtle"
       size={size}
-      style={{ borderRadius: 0 }}
+      style={style}
       icon={
         <Icon
           icon={icon}
@@ -68,6 +72,7 @@ const ColoredIconButton: React.FC<ColoredIconButtonProps> = ({
 
   return (
     <Whisper
+      container={container}
       placement={tooltipDirection}
       trigger="hover"
       delayShow={timing.SHOW_DELAY}

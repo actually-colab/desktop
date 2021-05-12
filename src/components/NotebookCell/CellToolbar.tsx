@@ -1,12 +1,14 @@
 import React from 'react';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import { Icon } from 'rsuite';
+import { Button, Dropdown, Icon, IconButton, Modal, Popover, Whisper } from 'rsuite';
+import { WhisperInstance } from 'rsuite/lib/Whisper';
 
 import { ReduxState } from '../../types/redux';
 import { EditorCell } from '../../types/notebook';
 import { _editor } from '../../redux/actions';
 import { palette } from '../../constants/theme';
+import ContainerContext from '../../contexts/ContainerContext';
 import useKernelStatus from '../../kernel/useKernelStatus';
 import ColoredIconButton from '../ColoredIconButton';
 import IconTextButton from '../IconTextButton';
@@ -14,6 +16,7 @@ import Timer from '../Timer';
 
 const styles = StyleSheet.create({
   cellToolbar: {
+    position: 'relative',
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -47,6 +50,9 @@ const styles = StyleSheet.create({
 const CellToolbar: React.FC<{
   cell_id: EditorCell['cell_id'];
 }> = ({ cell_id }) => {
+  const { container } = React.useContext(ContainerContext);
+  const menuRef = React.useRef<WhisperInstance | null>(null);
+
   const { kernelIsConnected } = useKernelStatus();
 
   const uid = useSelector((state: ReduxState) => state.auth.user?.uid);
@@ -73,16 +79,18 @@ const CellToolbar: React.FC<{
         : state.editor.outputsMetadata.get(cell_id)?.get(state.editor.selectedOutputsUid)?.runIndex) ?? -1,
     shallowEqual
   );
+  const isDeletingCell = useSelector((state: ReduxState) => state.editor.isDeletingCell);
   const isLocking = useSelector((state: ReduxState) => state.editor.lockingCellId === cell_id, shallowEqual);
   const isUnlocking = useSelector((state: ReduxState) => state.editor.unlockingCellId === cell_id, shallowEqual);
   const isRunning = useSelector((state: ReduxState) => state.editor.runningCellId === cell_id, shallowEqual);
+
+  const [showDeleteCell, setShowDeleteCell] = React.useState<boolean>(false);
 
   const ownsCell = React.useMemo(() => lockOwner?.uid === uid, [lockOwner?.uid, uid]);
   const canLock = React.useMemo(() => lockOwner === null, [lockOwner]);
   const canEdit = React.useMemo(() => accessLevel?.access_level === 'Full Access', [accessLevel?.access_level]);
 
   const dispatch = useDispatch();
-
   const onClickLock = React.useCallback(() => {
     if (!canEdit) return;
 
@@ -111,11 +119,13 @@ const CellToolbar: React.FC<{
     dispatch(_editor.selectCell(cell_id));
     dispatch(_editor.selectNextCell());
   }, [cell_id, dispatch, language, rendered]);
+  const dispatchDeleteCell = React.useCallback(() => dispatch(_editor.deleteCell(cell_id)), [cell_id, dispatch]);
 
   return (
     <div className={css(styles.cellToolbar)}>
       <div className={css(styles.cellToolbarStart)}>
         <ColoredIconButton
+          container={container}
           icon="play"
           color={palette.SUCCESS}
           size="xs"
@@ -129,9 +139,9 @@ const CellToolbar: React.FC<{
 
         {ownsCell ? (
           <IconTextButton
+            container={container}
             icon="unlock-alt"
             text={isUnlocking ? 'Unlocking...' : 'Unlock'}
-            bgColor="transparent"
             tooltipText="Allow others to edit"
             tooltipDirection="bottom"
             color={palette.PRIMARY}
@@ -145,9 +155,9 @@ const CellToolbar: React.FC<{
           </div>
         ) : (
           <IconTextButton
+            container={container}
             icon="lock"
             text={isLocking ? 'Locking...' : 'Lock'}
-            bgColor="transparent"
             tooltipText="Lock for editing"
             tooltipDirection="bottom"
             color={palette.GRAY}
@@ -159,7 +169,48 @@ const CellToolbar: React.FC<{
 
       <div className={css(styles.cellToolbarEnd)}>
         <Timer active={isRunning} alwaysRender={runIndex !== -1} nonce={runIndex} />
+
+        <Whisper
+          ref={menuRef}
+          container={container}
+          trigger="click"
+          placement="autoVerticalEnd"
+          speaker={
+            <Popover full>
+              <Dropdown.Menu>
+                <Dropdown.Item
+                  eventKey="delete"
+                  disabled={isDeletingCell}
+                  onSelect={() => {
+                    setShowDeleteCell(true);
+                    menuRef.current?.close();
+                  }}
+                >
+                  <Icon icon="trash-o" style={{ color: palette.ERROR }} />
+                  <span style={{ color: palette.ERROR }}>Delete</span>
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Popover>
+          }
+        >
+          <IconButton size="xs" appearance="subtle" icon={<Icon icon="bars" />} />
+        </Whisper>
       </div>
+
+      <Modal size="xs" show={showDeleteCell} onHide={() => !isDeletingCell && setShowDeleteCell(false)}>
+        <Modal.Header>
+          <Modal.Title>Are you sure you want to delete the cell?</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>You cannot undo this action</Modal.Body>
+        <Modal.Footer>
+          <Button appearance="subtle" disabled={isDeletingCell} onClick={() => setShowDeleteCell(false)}>
+            Cancel
+          </Button>
+          <Button appearance="primary" loading={isDeletingCell} onClick={dispatchDeleteCell}>
+            Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
