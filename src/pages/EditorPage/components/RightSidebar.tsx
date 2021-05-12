@@ -72,6 +72,7 @@ const RightSidebar: React.FC = () => {
           {MENU_OPTIONS.filter((menu) => !menu.disabled).map((menu) => (
             <ColoredIconButton
               key={menu.menuKey}
+              style={{ borderRadius: 0 }}
               active={visibleMenu === menu.menuKey}
               icon={menu.icon}
               tooltipText={menu.menuKey}

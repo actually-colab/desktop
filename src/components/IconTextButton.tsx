@@ -16,6 +16,7 @@ export type IconTextButtonProps = {
   tooltipDirection?: WhisperProps['placement'];
   loading?: boolean;
   disabled?: boolean;
+  container?: WhisperProps['container'];
   onClick(): void;
 };
 
@@ -32,6 +33,7 @@ const IconTextButton: React.FC<IconTextButtonProps> = ({
   tooltipDirection,
   loading = false,
   disabled = false,
+  container,
   onClick,
 }) => {
   const ButtonContent = (
@@ -54,6 +56,7 @@ const IconTextButton: React.FC<IconTextButtonProps> = ({
 
   return (
     <Whisper
+      container={container}
       placement={tooltipDirection}
       trigger="hover"
       delayShow={timing.SHOW_DELAY}
