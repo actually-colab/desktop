@@ -7,6 +7,7 @@ import { ReduxState } from '../../types/redux';
 import { EditorCell } from '../../types/notebook';
 import { _editor } from '../../redux/actions';
 import { palette } from '../../constants/theme';
+import ContainerContext from '../../contexts/ContainerContext';
 import useKernelStatus from '../../kernel/useKernelStatus';
 import ColoredIconButton from '../ColoredIconButton';
 import IconTextButton from '../IconTextButton';
@@ -14,6 +15,7 @@ import Timer from '../Timer';
 
 const styles = StyleSheet.create({
   cellToolbar: {
+    position: 'relative',
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -47,6 +49,8 @@ const styles = StyleSheet.create({
 const CellToolbar: React.FC<{
   cell_id: EditorCell['cell_id'];
 }> = ({ cell_id }) => {
+  const { container } = React.useContext(ContainerContext);
+
   const { kernelIsConnected } = useKernelStatus();
 
   const uid = useSelector((state: ReduxState) => state.auth.user?.uid);
@@ -116,6 +120,7 @@ const CellToolbar: React.FC<{
     <div className={css(styles.cellToolbar)}>
       <div className={css(styles.cellToolbarStart)}>
         <ColoredIconButton
+          container={container}
           icon="play"
           color={palette.SUCCESS}
           size="xs"
@@ -129,9 +134,9 @@ const CellToolbar: React.FC<{
 
         {ownsCell ? (
           <IconTextButton
+            container={container}
             icon="unlock-alt"
             text={isUnlocking ? 'Unlocking...' : 'Unlock'}
-            bgColor="transparent"
             tooltipText="Allow others to edit"
             tooltipDirection="bottom"
             color={palette.PRIMARY}
@@ -145,9 +150,9 @@ const CellToolbar: React.FC<{
           </div>
         ) : (
           <IconTextButton
+            container={container}
             icon="lock"
             text={isLocking ? 'Locking...' : 'Lock'}
-            bgColor="transparent"
             tooltipText="Lock for editing"
             tooltipDirection="bottom"
             color={palette.GRAY}
