@@ -1,17 +1,19 @@
+import { Notebook } from '@actually-colab/editor-types';
+
 import { DEFAULT_GATEWAY_URI } from '../constants/jupyter';
 
 /**
  * Make a storage object with CRUD functions
  */
-export const buildLocalStorage = (
+export const buildLocalStorage = <T extends string>(
   key: string
 ): {
-  get: () => string | null;
-  set: (value: string) => void;
+  get: () => T | null;
+  set: (value: T) => void;
   remove: () => void;
 } => ({
-  get: () => localStorage.getItem(key),
-  set: (value: string) => localStorage.setItem(key, value),
+  get: (): T | null => localStorage.getItem(key) as T | null,
+  set: (value: T) => localStorage.setItem(key, value),
   remove: () => localStorage.removeItem(key),
 });
 
@@ -127,12 +129,12 @@ class LocalStorageSet {
 /**
  * Store the session token
  */
-export const SessionTokenStorage = buildLocalStorage('auth.sessionToken');
+export const SessionTokenStorage = buildLocalStorage<string>('auth.sessionToken');
 
 /**
  * Store the most recently opened notebook
  */
-export const LatestNotebookIdStorage = buildLocalStorage('editor.notebook.latest.nb_id');
+export const LatestNotebookIdStorage = buildLocalStorage<Notebook['nb_id']>('editor.notebook.latest.nb_id');
 
 /**
  * Store the recent contacts
@@ -145,3 +147,8 @@ export const RecentUsersStorage = new LocalStorageSet('editor.contacts.recent');
 export const RecentKernelGatewaysStorage = new LocalStorageSet('editor.kernel.gatewayUris.recent', [
   DEFAULT_GATEWAY_URI,
 ]);
+
+/**
+ * Store the user's preference on if auto connect is enabled
+ */
+export const KernelAutoConnectStorage = buildLocalStorage<'on' | 'off'>('editor.kernel.autoConnect');

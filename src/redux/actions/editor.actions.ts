@@ -25,7 +25,7 @@ import {
 import { EditorCell, EditorCellMeta, KernelOutput } from '../../types/notebook';
 import { Kernel, KernelLog } from '../../types/kernel';
 import { ImmutableEditorCell } from '../../immutable';
-import { RecentUsersStorage } from '../../utils/storage';
+import { KernelAutoConnectStorage, RecentUsersStorage } from '../../utils/storage';
 
 /**
  * Started connecting to the client socket
@@ -119,10 +119,14 @@ export const editKernelGateway = (editing: boolean): EditorActionTypes => ({
 /**
  * Enable or disable connecting to the kernel automatically
  */
-export const connectToKernelAuto = (enable: boolean): EditorActionTypes => ({
-  type: KERNEL.CONNECT.AUTO,
-  enable,
-});
+export const connectToKernelAuto = (enable: boolean): EditorActionTypes => {
+  KernelAutoConnectStorage.set(enable ? 'on' : 'off');
+
+  return {
+    type: KERNEL.CONNECT.AUTO,
+    enable,
+  };
+};
 
 const connectToKernelStart = (uri: string, token: string, displayError: boolean): EditorActionTypes => ({
   type: KERNEL.CONNECT.START,
