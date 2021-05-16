@@ -6,6 +6,7 @@ import { EditorCell } from '../../../../../types/notebook';
 import { ReduxState } from '../../../../../types/redux';
 import { _editor } from '../../../../../redux/actions';
 import { PopoverDropdown, RegularIconButton } from '../../../../../components';
+import { palette } from '../../../../../constants/theme';
 
 const CellButtons: React.FC = () => {
   const user = useSelector((state: ReduxState) => state.auth.user);
@@ -101,6 +102,14 @@ const CellButtons: React.FC = () => {
       <RegularIconButton
         size="sm"
         icon="trash2"
+        iconStyle={{
+          enabled: {
+            color: palette.ERROR,
+          },
+          disabled: {
+            color: `${palette.ERROR}50`,
+          },
+        }}
         tooltipText="Delete the current cell"
         tooltipDirection="bottom"
         loading={isDeletingCell}

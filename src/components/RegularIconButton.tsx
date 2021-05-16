@@ -8,6 +8,10 @@ import { timing } from '../constants/theme';
  */
 export type RegularIconButtonProps = {
   icon: IconProps['icon'];
+  iconStyle?: {
+    enabled: React.CSSProperties;
+    disabled: React.CSSProperties;
+  };
   size?: ButtonProps['size'];
   tooltipText?: string;
   tooltipDirection?: WhisperProps['placement'];
@@ -22,6 +26,7 @@ export type RegularIconButtonProps = {
  */
 const RegularIconButton: React.FC<RegularIconButtonProps> = ({
   icon,
+  iconStyle,
   tooltipText = '',
   tooltipDirection,
   size = 'md',
@@ -32,7 +37,7 @@ const RegularIconButton: React.FC<RegularIconButtonProps> = ({
   const ButtonContent = (
     <IconButton
       size={size}
-      icon={<Icon icon={icon} />}
+      icon={<Icon icon={icon} style={disabled ? iconStyle?.disabled : iconStyle?.enabled} />}
       disabled={disabled || loading}
       loading={loading}
       onClick={onClick}
