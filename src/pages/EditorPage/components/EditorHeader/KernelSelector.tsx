@@ -8,12 +8,11 @@ import { spacing } from '../../../../constants/theme';
 import { ReduxState } from '../../../../types/redux';
 import { _editor } from '../../../../redux/actions';
 import useKernelStatus from '../../../../kernel/useKernelStatus';
-import { PopoverDropdown } from '../../../../components';
+import { PopoverDropdown, StatusIndicator } from '../../../../components';
 
 const styles = StyleSheet.create({
   kernelIconContainer: {
     position: 'relative',
-    marginTop: 3,
     marginRight: spacing.DEFAULT / 2,
   },
 });
@@ -52,29 +51,28 @@ const KernelSelector: React.FC = () => {
     <PopoverDropdown
       placement="bottomEnd"
       activeKey={selectedOutputsUid}
+      appearance={selectedOutputsUid === '' ? 'default' : 'ghost'}
+      size="sm"
       buttonContent={
         <React.Fragment>
           <div className={css(styles.kernelIconContainer)}>
-            <Icon
-              icon="related-map"
-              size="lg"
-              style={selectedOutputsUid === '' ? { color: kernelStatusColor } : undefined}
-            />
+            {selectedOutputsUid === '' ? <StatusIndicator color={kernelStatusColor} /> : <Icon icon="eye" />}
           </div>
-          {`Viewing: ${selectedOutputsUid === '' ? user?.email : selectedOutputsEmail}`}
+
+          {selectedOutputsUid === '' ? 'Configured Kernel' : selectedOutputsEmail}
         </React.Fragment>
       }
       onSelect={handleKernelSelect}
     >
       <Dropdown.Item eventKey="" disabled={kernelStatus === 'Busy'}>
-        {`${user?.email} (you)`}
+        <Icon icon="related-map" /> {`Configured Kernel`}
       </Dropdown.Item>
 
       {notebookUsers
         ?.filter((availableUser) => availableUser.uid !== user?.uid)
         .map((availableUser) => (
           <Dropdown.Item key={availableUser.uid} eventKey={availableUser.uid} disabled={kernelStatus === 'Busy'}>
-            {availableUser.email}
+            <Icon icon={selectedOutputsUid === availableUser.uid ? 'user' : 'user-o'} /> {availableUser.email}
           </Dropdown.Item>
         ))}
     </PopoverDropdown>
