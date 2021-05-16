@@ -8,9 +8,10 @@ import { spacing } from '../../../../constants/theme';
 import { ReduxState } from '../../../../types/redux';
 import { _editor } from '../../../../redux/actions';
 import useKernelStatus from '../../../../kernel/useKernelStatus';
-import { Header, PopoverDropdown, UserAvatar } from '../../../../components';
+import { Header, PopoverDropdown } from '../../../../components';
 import CollaboratorsPopover from './CollaboratorsPopover';
 import ActionButtons from './ActionButtons';
+import UserAvatarList from './UserAvatarList';
 
 const styles = StyleSheet.create({
   header: {
@@ -53,7 +54,6 @@ const EditorHeader: React.FC = () => {
 
   const user = useSelector((state: ReduxState) => state.auth.user);
   const notebookUsers = useSelector((state: ReduxState) => state.editor.notebook?.users);
-  const users = useSelector((state: ReduxState) => state.editor.users);
   const selectedOutputsUid = useSelector((state: ReduxState) => state.editor.selectedOutputsUid);
 
   const selectedOutputsEmail = React.useMemo<DUser['uid']>(
@@ -82,13 +82,7 @@ const EditorHeader: React.FC = () => {
         <ActionButtons />
 
         <div className={css(styles.headerNoDrag)}>
-          <div className={css(styles.avatarsContainer)}>
-            {users.map((activeUser) => (
-              <div className={css(styles.avatar)} key={activeUser.uid}>
-                <UserAvatar placement="bottomEnd" user={activeUser} />
-              </div>
-            ))}
-          </div>
+          <UserAvatarList />
 
           <PopoverDropdown
             placement="bottomEnd"
