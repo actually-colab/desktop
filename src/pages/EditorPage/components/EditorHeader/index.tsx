@@ -1,17 +1,12 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import { Dropdown, Icon } from 'rsuite';
-import { DUser } from '@actually-colab/editor-types';
 
 import { spacing } from '../../../../constants/theme';
-import { ReduxState } from '../../../../types/redux';
-import { _editor } from '../../../../redux/actions';
-import useKernelStatus from '../../../../kernel/useKernelStatus';
-import { Header, PopoverDropdown } from '../../../../components';
+import { Header } from '../../../../components';
 import CollaboratorsPopover from './CollaboratorsPopover';
 import ActionButtons from './ActionButtons';
 import UserAvatarList from './UserAvatarList';
+import KernelSelector from './KernelSelector';
 
 const styles = StyleSheet.create({
   header: {
@@ -28,21 +23,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  avatarsContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  avatar: {
-    marginRight: spacing.DEFAULT / 2,
-  },
   padLeft: {
     marginLeft: spacing.DEFAULT / 2,
-  },
-  kernelIconContainer: {
-    position: 'relative',
-    marginTop: 3,
-    marginRight: spacing.DEFAULT / 2,
   },
 });
 
@@ -50,32 +32,6 @@ const styles = StyleSheet.create({
  * The header for the editor page
  */
 const EditorHeader: React.FC = () => {
-  const { kernelStatus, kernelStatusColor } = useKernelStatus();
-
-  const user = useSelector((state: ReduxState) => state.auth.user);
-  const notebookUsers = useSelector((state: ReduxState) => state.editor.notebook?.users);
-  const selectedOutputsUid = useSelector((state: ReduxState) => state.editor.selectedOutputsUid);
-
-  const selectedOutputsEmail = React.useMemo<DUser['uid']>(
-    () =>
-      (selectedOutputsUid === ''
-        ? user?.email
-        : notebookUsers?.find((_user) => _user.uid === selectedOutputsUid)?.email) ?? '',
-    [notebookUsers, selectedOutputsUid, user?.email]
-  );
-
-  const dispatch = useDispatch();
-  const dispatchSelectOutputUser = React.useCallback((uid: DUser['uid']) => dispatch(_editor.selectOutputUser(uid)), [
-    dispatch,
-  ]);
-
-  const handleKernelSelect = React.useCallback(
-    (eventKey: string) => {
-      dispatchSelectOutputUser(eventKey);
-    },
-    [dispatchSelectOutputUser]
-  );
-
   return (
     <Header>
       <div className={css(styles.header)}>
@@ -83,36 +39,7 @@ const EditorHeader: React.FC = () => {
 
         <div className={css(styles.headerNoDrag)}>
           <UserAvatarList />
-
-          <PopoverDropdown
-            placement="bottomEnd"
-            activeKey={selectedOutputsUid}
-            buttonContent={
-              <React.Fragment>
-                <div className={css(styles.kernelIconContainer)}>
-                  <Icon
-                    icon="related-map"
-                    size="lg"
-                    style={selectedOutputsUid === '' ? { color: kernelStatusColor } : undefined}
-                  />
-                </div>
-                {`Viewing: ${selectedOutputsUid === '' ? user?.email : selectedOutputsEmail}`}
-              </React.Fragment>
-            }
-            onSelect={handleKernelSelect}
-          >
-            <Dropdown.Item eventKey="" disabled={kernelStatus === 'Busy'}>
-              {`${user?.email} (you)`}
-            </Dropdown.Item>
-
-            {notebookUsers
-              ?.filter((availableUser) => availableUser.uid !== user?.uid)
-              .map((availableUser) => (
-                <Dropdown.Item key={availableUser.uid} eventKey={availableUser.uid} disabled={kernelStatus === 'Busy'}>
-                  {availableUser.email}
-                </Dropdown.Item>
-              ))}
-          </PopoverDropdown>
+          <KernelSelector />
 
           <div className={css(styles.padLeft)}>
             <CollaboratorsPopover />
