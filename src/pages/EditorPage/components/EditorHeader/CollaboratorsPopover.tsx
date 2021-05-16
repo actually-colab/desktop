@@ -21,12 +21,12 @@ import {
 import { FormInstance } from 'rsuite/lib/Form';
 import { NotebookAccessLevelType, WorkshopAccessLevelType } from '@actually-colab/editor-types';
 
-import { palette, spacing } from '../../../constants/theme';
-import { RIGHT_SIDEBAR_PANEL_WIDTH } from '../../../constants/dimensions';
-import { ReduxState } from '../../../types/redux';
-import { _editor } from '../../../redux/actions';
-import { EMAILS_REGEX } from '../../../utils/regex';
-import { UserAvatar } from '../../../components';
+import { palette, spacing } from '../../../../constants/theme';
+import { RIGHT_SIDEBAR_PANEL_WIDTH } from '../../../../constants/dimensions';
+import { ReduxState } from '../../../../types/redux';
+import { _editor } from '../../../../redux/actions';
+import { EMAILS_REGEX } from '../../../../utils/regex';
+import { UserAvatar } from '../../../../components';
 
 type ShareNotebookFormValue = {
   emails: string;
