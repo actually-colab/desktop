@@ -28,6 +28,7 @@ const styles = StyleSheet.create({
 export type PopoverDropdownProps = {
   placement: WhisperProps['placement'];
   appearance?: ButtonProps['appearance'];
+  size?: ButtonProps['size'];
   activeKey?: string;
   buttonContent: React.ReactNode;
   buttonProps?: ButtonProps;
@@ -40,6 +41,7 @@ export type PopoverDropdownProps = {
 const PopoverDropdown: React.FC<PopoverDropdownProps> = ({
   placement = 'bottomEnd',
   appearance,
+  size = 'sm',
   activeKey,
   buttonContent,
   buttonProps = {},
@@ -73,8 +75,10 @@ const PopoverDropdown: React.FC<PopoverDropdownProps> = ({
         <Button
           {...{
             appearance,
-            size: 'sm',
-            style: { alignSelf: 'flex-start' },
+            size,
+            style: {
+              alignSelf: 'flex-start',
+            },
             ...buttonProps,
           }}
         >
