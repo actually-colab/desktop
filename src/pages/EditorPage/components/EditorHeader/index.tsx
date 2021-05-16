@@ -4,13 +4,13 @@ import { StyleSheet, css } from 'aphrodite';
 import { Button, Divider, Dropdown, Icon, Modal } from 'rsuite';
 import { DUser } from '@actually-colab/editor-types';
 
-import { spacing } from '../../../constants/theme';
-import { ReduxState } from '../../../types/redux';
-import { _editor } from '../../../redux/actions';
-import { EditorCell } from '../../../types/notebook';
-import useKernelStatus from '../../../kernel/useKernelStatus';
-import { Header, PopoverDropdown, RegularIconButton, UserAvatar } from '../../../components';
-import { CollaboratorsPopover } from '../Header';
+import { spacing } from '../../../../constants/theme';
+import { EditorCell } from '../../../../types/notebook';
+import { ReduxState } from '../../../../types/redux';
+import { _editor } from '../../../../redux/actions';
+import useKernelStatus from '../../../../kernel/useKernelStatus';
+import { Header, PopoverDropdown, RegularIconButton, UserAvatar } from '../../../../components';
+import { CollaboratorsPopover } from '../../Header';
 
 const styles = StyleSheet.create({
   header: {
