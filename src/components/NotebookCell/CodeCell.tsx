@@ -235,8 +235,8 @@ const CodeCell: React.FC<{
       >
         <MonacoEditor
           id={cell_id}
-          contentRef={cell_id}
-          theme="vscode"
+          contentRef="actually-colab"
+          theme="xcode"
           language={language ?? 'python'}
           lineNumbers
           value={contents ?? ''}

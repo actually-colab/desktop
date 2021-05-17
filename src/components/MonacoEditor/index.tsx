@@ -4,6 +4,9 @@ import debounce from 'lodash.debounce';
 
 import { EditorCell } from '../../types/notebook';
 import { DocumentUri } from './documentUri';
+import { Xcode } from './themes/xcode';
+
+monaco.editor.defineTheme('xcode', Xcode);
 
 export type IModelContentChangedEvent = monaco.editor.IModelContentChangedEvent;
 
@@ -218,6 +221,7 @@ export default class MonacoEditor extends React.Component<IMonacoProps> {
         theme: this.props.theme,
         value: this.props.value,
         folding: false,
+        autoDetectHighContrast: false,
         // Apply custom settings from configuration
         ...this.props.options,
       });
