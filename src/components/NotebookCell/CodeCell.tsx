@@ -1,7 +1,7 @@
 import React from 'react';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import * as monaco from 'monaco-editor';
+import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { DCell } from '@actually-colab/editor-types';
 
 import { ReduxState } from '../../types/redux';

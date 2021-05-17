@@ -1,5 +1,5 @@
-import { Uri } from 'monaco-editor';
-import * as monaco from 'monaco-editor';
+import { Uri } from 'monaco-editor/esm/vs/editor/editor.api';
+import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
 /**
  * Common Uri identifiers
