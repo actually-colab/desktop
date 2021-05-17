@@ -24,7 +24,7 @@ export class DocumentUri {
    */
   static isDocument(uri: Uri): boolean {
     // Remove file extension if it exists and then check if uri path ends with the notebook marker.
-    const path = uri.path.replace(/\.[^\/.]+$/, '');
+    const path = uri.path.replace(/\.[^/.]+$/, '');
     return !!(path && path.endsWith(`/${Identifiers.notebookUriMarker}`));
   }
 
@@ -34,7 +34,7 @@ export class DocumentUri {
    */
   static isCell(uri: Uri): boolean {
     // Remove file extension if it exists and then check if uri path ends with the cell marker.
-    const path = uri.path.replace(/\.[^\/.]+$/, '');
+    const path = uri.path.replace(/\.[^/.]+$/, '');
     return !!(path && path.endsWith(`/${Identifiers.cellUriMarker}`));
   }
 

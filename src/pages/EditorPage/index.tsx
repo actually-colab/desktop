@@ -1,7 +1,6 @@
 import React from 'react';
 import { StyleSheet, css } from 'aphrodite';
 
-import AceImports from '../../utils/AceImports';
 import { palette } from '../../constants/theme';
 import useKernel from '../../kernel/useKernel';
 
@@ -77,17 +76,4 @@ const EditorPage: React.FC = () => {
   );
 };
 
-/**
- * The editor page with the Ace Imports included
- */
-const EditorPageWithImports: React.FC = () => {
-  return (
-    <React.Fragment>
-      {AceImports}
-
-      <EditorPage />
-    </React.Fragment>
-  );
-};
-
-export default EditorPageWithImports;
+export default EditorPage;
