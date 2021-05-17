@@ -1,20 +1,21 @@
 import React from 'react';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import AceEditor, { IMarker } from 'react-ace';
+import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { DCell } from '@actually-colab/editor-types';
 
 import { ReduxState } from '../../types/redux';
 import { EditorCell } from '../../types/notebook';
 import { _editor } from '../../redux/actions';
 import { randomColor } from '../../utils/color';
-import { editorOptionsActive, editorOptionsInactive } from '../../constants/editorOptions';
 import { palette } from '../../constants/theme';
+import MonacoEditor from '../MonacoEditor';
 
 const styles = StyleSheet.create({
   codeContainer: {
     pointerEvents: 'auto',
     opacity: 1,
+    width: '100%',
   },
   codeContainerLockInUse: {
     opacity: 0.5,
@@ -41,7 +42,8 @@ const styles = StyleSheet.create({
 const CodeCell: React.FC<{
   cell_id: EditorCell['cell_id'];
 }> = ({ cell_id }) => {
-  const editorRef = React.useRef<AceEditor | null>(null);
+  const editorRef = React.useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const decorationsRef = React.useRef<string[]>([]);
   const cursorTimer = React.useRef<NodeJS.Timeout | null>(null);
 
   const uid = useSelector((state: ReduxState) => state.auth.user?.uid);
@@ -91,24 +93,6 @@ const CodeCell: React.FC<{
   );
   const lockedByOtherUser = React.useMemo(() => !!lock_held_by && lock_held_by !== uid, [lock_held_by, uid]);
   const canLock = React.useMemo(() => !lock_held_by, [lock_held_by]);
-  const aceOptions = React.useMemo(() => (ownsLock ? editorOptionsActive : editorOptionsInactive), [ownsLock]);
-  const wrapEnabled = React.useMemo(() => language === 'markdown', [language]);
-  const markers = React.useMemo<IMarker[]>(() => {
-    if (ownsLock || cursor.row === null || cursor.col === null) {
-      return [];
-    }
-
-    return [
-      {
-        className: showCursorLabel ? 'user-marker' : 'user-marker-blank',
-        type: 'text',
-        startRow: cursor.row,
-        startCol: cursor.col,
-        endRow: cursor.row,
-        endCol: cursor.col + 1,
-      },
-    ];
-  }, [cursor.col, cursor.row, ownsLock, showCursorLabel]);
   const markerStyle = React.useMemo<React.CSSProperties>(
     () => ({
       '--user-marker-label': showCursorLabel ? `"${lockOwner}"` : '""',
@@ -154,16 +138,33 @@ const CodeCell: React.FC<{
   );
 
   const handleCursorChange = React.useCallback(
-    (selection: { cursor: { row: number; column: number } }) => {
-      if (!ownsLock) return;
+    (selection: monaco.ISelection | null) => {
+      if (!ownsLock || !selection) return;
 
       onChange({
-        cursor_col: selection.cursor.column,
-        cursor_row: selection.cursor.row,
+        cursor_col: selection.positionColumn,
+        cursor_row: selection.positionLineNumber,
       });
     },
     [onChange, ownsLock]
   );
+
+  const replaceDecorations = React.useCallback((className?: string, row?: number, col?: number) => {
+    decorationsRef.current =
+      editorRef.current?.deltaDecorations(
+        decorationsRef.current,
+        className && row != null && col != null
+          ? [
+              {
+                range: new monaco.Range(row, col - 1, row, col),
+                options: {
+                  afterContentClassName: className,
+                },
+              },
+            ]
+          : []
+      ) ?? [];
+  }, []);
 
   /**
    * Set the cursor position on initial focus.
@@ -171,12 +172,14 @@ const CodeCell: React.FC<{
    * This cannot be done in the onFocus event because the cell is not necessarily editable at that point
    */
   React.useEffect(() => {
-    if (ownsLock && cursorShouldUpdate && editorRef.current?.editor.isFocused()) {
-      const cursor_pos = editorRef.current?.editor.getCursorPosition();
+    if (!ownsLock || !cursorShouldUpdate) return;
 
+    const cursor_pos = editorRef.current?.getPosition();
+
+    if (cursor_pos) {
       onChange({
-        cursor_col: cursor_pos.column,
-        cursor_row: cursor_pos.row,
+        cursor_col: cursor_pos?.column,
+        cursor_row: cursor_pos?.lineNumber,
       });
     }
   }, [cursorShouldUpdate, onChange, ownsLock]);
@@ -194,9 +197,18 @@ const CodeCell: React.FC<{
         setShowCursorLabel(true);
       }
 
+      // Render with a label
+      replaceDecorations('user-marker', cursor.row, cursor.col);
+
       // Hide the cursor after 2 seconds if no change
       cursorTimer.current = setTimeout(() => {
         setShowCursorLabel(false);
+
+        if (cursor.row !== null && cursor.col !== null) {
+          // Render without a label
+          replaceDecorations('user-marker-blank', cursor.row, cursor.col);
+        }
+
         cursorTimer.current = null;
       }, 3000);
     } else {
@@ -205,8 +217,11 @@ const CodeCell: React.FC<{
         clearTimeout(cursorTimer.current);
         cursorTimer.current = null;
       }
+
+      // Clear the decorations
+      replaceDecorations();
     }
-  }, [cursor.col, cursor.row, ownsLock]);
+  }, [cursor.col, cursor.row, ownsLock, replaceDecorations]);
 
   // Do not render if markdown is rendered
   if (language === 'markdown' && rendered) {
@@ -231,21 +246,18 @@ const CodeCell: React.FC<{
         )}
         style={markerStyle}
       >
-        <AceEditor
-          ref={editorRef}
-          style={{ width: '100%' }}
-          name={cell_id}
-          mode={language ?? 'python'}
+        <MonacoEditor
+          id={cell_id}
+          onDidCreateEditor={(editor) => (editorRef.current = editor)}
+          contentRef="actually-colab"
           theme="xcode"
-          setOptions={aceOptions}
-          minLines={1}
-          maxLines={Infinity}
-          value={contents}
-          onFocus={onFocusEditor}
+          language={language ?? 'python'}
+          lineNumbers
+          value={contents ?? ''}
+          readOnly={!ownsLock}
+          onFocusChange={(focused) => focused && onFocusEditor()}
           onChange={handleChange}
-          onCursorChange={handleCursorChange}
-          wrapEnabled={wrapEnabled}
-          markers={markers}
+          onCursorPositionChange={handleCursorChange}
         />
       </div>
     </div>

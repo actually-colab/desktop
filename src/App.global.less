@@ -55,30 +55,23 @@ body {
   margin-left: 4px;
 }
 
-.ace_hidden-cursors {
-  opacity: 0;
+.monaco-container .monaco-editor {
+  width: inherit !important;
 }
 
-.ace_hidpi {
-  .ace_text-layer,
-  .ace_gutter-layer,
-  .ace_content,
-  .ace_gutter {
-    will-change: auto !important;
-  }
+.monaco-container .monaco-editor .overflow-guard {
+  width: inherit !important;
 }
 
-.ace_marker-layer {
-  z-index: 2;
-}
-
-.ace_selection {
-  background: #b5d5ff60 !important;
+/* 26px is the left margin for .monaco-scrollable-element  */
+.monaco-container .monaco-editor .monaco-scrollable-element.editor-scrollable.vs {
+  width: calc(100% - 26px) !important;
 }
 
 .user-marker {
   position: absolute;
   width: 2px !important;
+  height: 100%;
   background-color: var(--user-marker-color, @primary);
 }
 
@@ -90,12 +83,14 @@ body {
   top: -90%;
   padding-left: 2px;
   padding-right: 2px;
+  white-space: nowrap;
   background-color: var(--user-marker-color, @primary);
 }
 
 .user-marker-blank {
   position: absolute;
   width: 2px !important;
+  height: 100%;
   background-color: var(--user-marker-color, @primary);
 }
 

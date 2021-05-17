@@ -12,6 +12,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     flex: 1,
     padding: spacing.DEFAULT,
+    overflowX: 'hidden',
     overflowY: 'auto',
   },
 });

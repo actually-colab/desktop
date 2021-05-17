@@ -2,6 +2,67 @@
 export type IpynbCell = IpynbRawCell | IpynbMarkdownCell | IpynbCodeCell;
 export type IpynbOutput = IpynbExecuteResult | IpynbDisplayData | IpynbStream | IpynbError;
 
+// Source: @nteract
+export interface MediaBundle {
+  'text/plain'?: string;
+  'text/html'?: string;
+  'text/latex'?: string;
+  'text/markdown'?: string;
+  'application/javascript'?: string;
+  'image/png'?: string;
+  'image/jpeg'?: string;
+  'image/gif'?: string;
+  'image/svg+xml'?: string;
+  'application/json'?: {
+    [key: string]: any;
+  };
+  'application/vdom.v1+json'?: {
+    [key: string]: any;
+  };
+  'application/vnd.dataresource+json'?: {
+    [key: string]: any;
+  };
+  'text/vnd.plotly.v1+html'?:
+    | string
+    | {
+        [key: string]: any;
+      };
+  'application/vnd.plotly.v1+json'?: {
+    [key: string]: any;
+  };
+  'application/geo+json'?: {
+    [key: string]: any;
+  };
+  'application/x-nteract-model-debug+json'?: {
+    [key: string]: any;
+  };
+  'application/vnd.vega.v2+json'?: {
+    [key: string]: any;
+  };
+  'application/vnd.vega.v3+json'?: {
+    [key: string]: any;
+  };
+  'application/vnd.vega.v4+json'?: {
+    [key: string]: any;
+  };
+  'application/vnd.vega.v5+json'?: {
+    [key: string]: any;
+  };
+  'application/vnd.vegalite.v1+json'?: {
+    [key: string]: any;
+  };
+  'application/vnd.vegalite.v2+json'?: {
+    [key: string]: any;
+  };
+  'application/vnd.vegalite.v3+json'?: {
+    [key: string]: any;
+  };
+  'application/vnd.vegalite.v4+json'?: {
+    [key: string]: any;
+  };
+  [key: string]: string | string[] | Record<string, unknown> | undefined;
+}
+
 /**
  * Jupyter Notebook v4.2 JSON schema.
  */
@@ -249,12 +310,7 @@ export interface IpynbExecuteResult {
   /**
    * A mime-type keyed dictionary of data
    */
-  data: {
-    /**
-     * mimetype output (e.g. text/plain), represented as either an array of strings or a string.
-     */
-    [k: string]: string | string[];
-  };
+  data: Readonly<MediaBundle>;
   /**
    * Cell output metadata.
    */
@@ -273,12 +329,7 @@ export interface IpynbDisplayData {
   /**
    * A mime-type keyed dictionary of data
    */
-  data: {
-    /**
-     * mimetype output (e.g. text/plain), represented as either an array of strings or a string.
-     */
-    [k: string]: string | string[];
-  };
+  data: Readonly<MediaBundle>;
   /**
    * Cell output metadata.
    */
@@ -297,7 +348,7 @@ export interface IpynbStream {
   /**
    * The name of the stream (stdout, stderr).
    */
-  name: string;
+  name: 'stdout' | 'stderr';
   /**
    * The stream's text output, represented as an array of strings.
    */
