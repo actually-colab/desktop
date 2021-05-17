@@ -3,8 +3,9 @@ import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import debounce from 'lodash.debounce';
 
 import { EditorCell } from '../../types/notebook';
-import { DocumentUri } from './documentUri';
 import { Xcode } from './themes/xcode';
+import { DocumentUri } from './documentUri';
+import { completionProvider } from './completionProvider';
 
 monaco.editor.defineTheme('xcode', Xcode);
 
@@ -440,6 +441,17 @@ export default class MonacoEditor extends React.Component<IMonacoProps> {
     );
   }
 
+  /**
+   * Register default kernel-based completion provider.
+   * @param language Language
+   */
+  registerDefaultCompletionProvider(language: string): void {
+    // onLanguage event is emitted only once per language when language is first time needed.
+    monaco.languages.onLanguage(language, () => {
+      monaco.languages.registerCompletionItemProvider(language, completionProvider);
+    });
+  }
+
   private onFocus() {
     if (this.props.onFocusChange) {
       this.props.onFocusChange(true);
@@ -497,10 +509,11 @@ export default class MonacoEditor extends React.Component<IMonacoProps> {
   private registerCompletionProvider() {
     const { enableCompletion, language, onRegisterCompletionProvider, shouldRegisterDefaultCompletion } = this.props;
 
-    if (enableCompletion && language) {
+    if (enableCompletion && language === 'python') {
       if (onRegisterCompletionProvider) {
         onRegisterCompletionProvider(language);
       } else if (shouldRegisterDefaultCompletion) {
+        this.registerDefaultCompletionProvider(language);
       }
     }
   }
