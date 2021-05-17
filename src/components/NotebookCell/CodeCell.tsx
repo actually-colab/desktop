@@ -156,7 +156,7 @@ const CodeCell: React.FC<{
         className && row != null && col != null
           ? [
               {
-                range: new monaco.Range(row, col, row, col + 1),
+                range: new monaco.Range(row, col - 1, row, col),
                 options: {
                   afterContentClassName: className,
                 },
