@@ -68,9 +68,12 @@ const CodeCell: React.FC<{
     (state: ReduxState) => !state.editor.lockedCells.find((lock) => lock.uid === uid),
     shallowEqual
   );
-  const language = useSelector((state: ReduxState) => state.editor.cells.get(cell_id)?.language);
-  const rendered = useSelector((state: ReduxState) => state.editor.cells.get(cell_id)?.rendered);
-  const contents = useSelector((state: ReduxState) => state.editor.cells.get(cell_id)?.contents);
+  const language = useSelector(
+    (state: ReduxState) => state.editor.cells.get(cell_id)?.language ?? 'python',
+    shallowEqual
+  );
+  const rendered = useSelector((state: ReduxState) => state.editor.cells.get(cell_id)?.rendered, shallowEqual);
+  const contents = useSelector((state: ReduxState) => state.editor.cells.get(cell_id)?.contents ?? '');
   const cursor = useSelector((state: ReduxState) => {
     const cell = state.editor.cells.get(cell_id);
 
@@ -102,6 +105,7 @@ const CodeCell: React.FC<{
     [lockOwner, showCursorLabel, userColor]
   );
   const cursorShouldUpdate = React.useMemo(() => cursor.row === null || cursor.col === null, [cursor.col, cursor.row]);
+  const readOnly = React.useMemo(() => !ownsLock, [ownsLock]);
 
   const dispatch = useDispatch();
 
@@ -149,6 +153,20 @@ const CodeCell: React.FC<{
     [onChange, ownsLock]
   );
 
+  const handleEditorCreated = React.useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
+    editorRef.current = editor;
+  }, []);
+
+  const handleFocusChange = React.useCallback(
+    (focused: boolean) => {
+      if (focused) onFocusEditor();
+    },
+    [onFocusEditor]
+  );
+
+  /**
+   * Change the decorations for the current editor instance
+   */
   const replaceDecorations = React.useCallback((className?: string, row?: number, col?: number) => {
     decorationsRef.current =
       editorRef.current?.deltaDecorations(
@@ -248,14 +266,14 @@ const CodeCell: React.FC<{
       >
         <MonacoEditor
           id={cell_id}
-          onDidCreateEditor={(editor) => (editorRef.current = editor)}
+          onDidCreateEditor={handleEditorCreated}
           contentRef="actually-colab"
           theme="xcode"
-          language={language ?? 'python'}
+          language={language}
           lineNumbers
-          value={contents ?? ''}
-          readOnly={!ownsLock}
-          onFocusChange={(focused) => focused && onFocusEditor()}
+          value={contents}
+          readOnly={readOnly}
+          onFocusChange={handleFocusChange}
           onChange={handleChange}
           onCursorPositionChange={handleCursorChange}
         />
