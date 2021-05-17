@@ -40,8 +40,8 @@ export interface IMonacoShortCutProps {
  */
 export interface IMonacoComponentProps {
   id: EditorCell['cell_id'];
-  contentRef: EditorCell['cell_id'];
-  theme: string;
+  contentRef: string;
+  theme: 'vscode' | 'xcode';
   readOnly?: boolean;
   channels?: 'shell' | 'iopub' | 'stdin' | undefined;
   value: string;
