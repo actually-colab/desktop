@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import { Dropdown, Icon } from 'rsuite';
+import { Dropdown, HelpBlock, Icon } from 'rsuite';
 import { DUser } from '@actually-colab/editor-types';
 
 import { spacing } from '../../../../constants/theme';
@@ -15,6 +15,34 @@ const styles = StyleSheet.create({
     position: 'relative',
     marginRight: spacing.DEFAULT / 2,
   },
+  helperContent: {
+    ...spacing.pad({
+      top: spacing.DEFAULT / 2,
+    }),
+    maxWidth: 318,
+  },
+  kernelContent: {
+    paddingLeft: spacing.DEFAULT / 2,
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  kernelIcon: {
+    width: 16,
+  },
+  kernelTextContainer: {
+    marginLeft: spacing.DEFAULT,
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  kernelTitle: {
+    fontSize: 13,
+    fontWeight: 'bold',
+  },
+  kernelSubtitle: {
+    fontSize: 11,
+    fontWeight: 'normal',
+  },
 });
 
 /**
@@ -26,6 +54,7 @@ const KernelSelector: React.FC = () => {
   const user = useSelector((state: ReduxState) => state.auth.user);
   const notebookUsers = useSelector((state: ReduxState) => state.editor.notebook?.users);
   const selectedOutputsUid = useSelector((state: ReduxState) => state.editor.selectedOutputsUid);
+  const gatewayUri = useSelector((state: ReduxState) => state.editor.gatewayUri);
 
   const selectedOutputsEmail = React.useMemo<DUser['uid']>(
     () =>
@@ -64,15 +93,43 @@ const KernelSelector: React.FC = () => {
       }
       onSelect={handleKernelSelect}
     >
+      <div className={css(styles.helperContent)}>
+        <h6>Connect to a collaborator</h6>
+        <HelpBlock>
+          You can view the outputs from any active collaborator. You can only run cells when your configured kernel is
+          selected.
+        </HelpBlock>
+      </div>
+
       <Dropdown.Item eventKey="" disabled={kernelStatus === 'Busy'}>
-        <Icon icon="related-map" /> {`Configured Kernel`}
+        <div className={css(styles.kernelContent)}>
+          <Icon className={css(styles.kernelIcon)} icon="related-map" size="lg" />
+
+          <div className={css(styles.kernelTextContainer)}>
+            <span className={css(styles.kernelTitle)}>Configured Kernel</span>
+            <span className={css(styles.kernelSubtitle)}>
+              {kernelStatus !== 'Offline' ? gatewayUri : 'Not Connected'}
+            </span>
+          </div>
+        </div>
       </Dropdown.Item>
 
       {notebookUsers
         ?.filter((availableUser) => availableUser.uid !== user?.uid)
         .map((availableUser) => (
           <Dropdown.Item key={availableUser.uid} eventKey={availableUser.uid} disabled={kernelStatus === 'Busy'}>
-            <Icon icon={selectedOutputsUid === availableUser.uid ? 'user' : 'user-o'} /> {availableUser.email}
+            <div className={css(styles.kernelContent)}>
+              <Icon
+                className={css(styles.kernelIcon)}
+                icon={selectedOutputsUid === availableUser.uid ? 'user' : 'user-o'}
+                size="lg"
+              />
+
+              <div className={css(styles.kernelTextContainer)}>
+                <span className={css(styles.kernelTitle)}>{availableUser.email}</span>
+                <span className={css(styles.kernelSubtitle)}>View Only</span>
+              </div>
+            </div>
           </Dropdown.Item>
         ))}
     </PopoverDropdown>
