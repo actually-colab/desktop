@@ -12,13 +12,14 @@ import { syncSleep } from '../../utils/sleep';
 import { httpToWebSocket } from '../../utils/request';
 import { ReduxActions, _editor, _ui } from '../actions';
 
+export let settings: ServerConnection.ISettings | null = null;
+export let kernelManager: KernelManager | null = null;
+export let kernel: IKernelConnection | null = null;
+
 /**
  * A redux middleware to manage the Jupyter Kernel
  */
 const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => {
-  let settings: ServerConnection.ISettings | null = null;
-  let kernelManager: KernelManager | null = null;
-  let kernel: IKernelConnection | null = null;
   let kernelUri: string = '';
 
   /**
@@ -185,6 +186,7 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
         })();
         break;
       }
+
       /**
        * Started disconnecting from the kernel
        */
@@ -225,6 +227,7 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
         })();
         break;
       }
+
       /**
        * Started restarting the kernel
        */
@@ -247,6 +250,7 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
         })();
         break;
       }
+
       /**
        * A cell is added to the queue
        */
@@ -270,6 +274,7 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
         }
         break;
       }
+
       /**
        * Started executing code on the kernel
        */
@@ -403,6 +408,7 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
         })();
         break;
       }
+
       /**
        * Finished executing code successfully
        */
@@ -421,6 +427,7 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
         }
         break;
       }
+
       /**
        * Started interrupting the kernel execution
        */

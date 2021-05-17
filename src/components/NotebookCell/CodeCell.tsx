@@ -271,6 +271,8 @@ const CodeCell: React.FC<{
           theme="xcode"
           language={language}
           lineNumbers
+          enableCompletion
+          shouldRegisterDefaultCompletion
           value={contents}
           readOnly={readOnly}
           onFocusChange={handleFocusChange}
