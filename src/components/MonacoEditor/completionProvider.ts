@@ -49,8 +49,6 @@ class CompletionItemProvider implements monaco.languages.CompletionItemProvider 
           cursor_pos: cursorPos,
         });
 
-        console.log(completions);
-
         if (completions.content.status === 'ok') {
           items = this.adaptToMonacoCompletions(completions.content, model);
         }
