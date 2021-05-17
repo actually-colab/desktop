@@ -1,4 +1,3 @@
-import { Uri } from 'monaco-editor/esm/vs/editor/editor.api';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
 /**
@@ -22,7 +21,7 @@ export class DocumentUri {
    * Checks if uri represents a document.
    * @param uri Uri to validate.
    */
-  static isDocument(uri: Uri): boolean {
+  static isDocument(uri: monaco.Uri): boolean {
     // Remove file extension if it exists and then check if uri path ends with the notebook marker.
     const path = uri.path.replace(/\.[^/.]+$/, '');
     return !!(path && path.endsWith(`/${Identifiers.notebookUriMarker}`));
@@ -32,7 +31,7 @@ export class DocumentUri {
    * Checks if uri represents a cell.
    * @param uri Uri to validate.
    */
-  static isCell(uri: Uri): boolean {
+  static isCell(uri: monaco.Uri): boolean {
     // Remove file extension if it exists and then check if uri path ends with the cell marker.
     const path = uri.path.replace(/\.[^/.]+$/, '');
     return !!(path && path.endsWith(`/${Identifiers.cellUriMarker}`));
@@ -42,7 +41,7 @@ export class DocumentUri {
    * Get document id from document uri.
    * @param uri Uri of cell.
    */
-  static getDocumentIdFromDocumentUri(uri: Uri): string | undefined {
+  static getDocumentIdFromDocumentUri(uri: monaco.Uri): string | undefined {
     if (DocumentUri.isDocument(uri)) {
       const tokens = uri.path.split('/');
 
@@ -59,7 +58,7 @@ export class DocumentUri {
    * Get document id from cell uri.
    * @param uri Uri of cell.
    */
-  static getDocumentIdFromCellUri(uri: Uri): string | undefined {
+  static getDocumentIdFromCellUri(uri: monaco.Uri): string | undefined {
     if (DocumentUri.isCell(uri)) {
       const tokens = uri.path.split('/');
 
@@ -76,7 +75,7 @@ export class DocumentUri {
    * Get cell id from cell uri.
    * @param uri Uri of cell.
    */
-  static getCellIdFromCellUri(uri: Uri): string | undefined {
+  static getCellIdFromCellUri(uri: monaco.Uri): string | undefined {
     if (DocumentUri.isCell(uri)) {
       const tokens = uri.path.split('/');
 
@@ -93,9 +92,9 @@ export class DocumentUri {
    * Create a document uri.
    * @param id Document id.
    */
-  static createDocumentUri(id: string, languageId: string): Uri {
+  static createDocumentUri(id: string, languageId: string): monaco.Uri {
     const fileExtension = DocumentUri.getFileExtension(languageId);
-    return Uri.file(`${id}/${Identifiers.notebookUriMarker}${fileExtension}`);
+    return monaco.Uri.file(`${id}/${Identifiers.notebookUriMarker}${fileExtension}`);
   }
 
   /**
@@ -103,9 +102,9 @@ export class DocumentUri {
    * @param documentId Document id.
    * @param cellId Cell id.
    */
-  static createCellUri(documentId: string, cellId: string, languageId: string): Uri {
+  static createCellUri(documentId: string, cellId: string, languageId: string): monaco.Uri {
     const fileExtension = DocumentUri.getFileExtension(languageId);
-    return Uri.file(`${documentId}/${cellId}/${Identifiers.cellUriMarker}${fileExtension}`);
+    return monaco.Uri.file(`${documentId}/${cellId}/${Identifiers.cellUriMarker}${fileExtension}`);
   }
 
   /**

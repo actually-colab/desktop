@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { StyleSheet, css } from 'aphrodite';
 import { Button, ButtonProps, Dropdown, Icon, Popover, Whisper, WhisperProps } from 'rsuite';
 import { WhisperInstance } from 'rsuite/lib/Whisper';

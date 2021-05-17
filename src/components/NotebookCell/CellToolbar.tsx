@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import { Button, Dropdown, Icon, IconButton, Modal, Popover, Whisper } from 'rsuite';

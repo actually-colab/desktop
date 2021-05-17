@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { StyleSheet, css } from 'aphrodite';
 import { Avatar, Badge, Popover, Whisper, WhisperProps } from 'rsuite';
 import type { DUser } from '@actually-colab/editor-types';

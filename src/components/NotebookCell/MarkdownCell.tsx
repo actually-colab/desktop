@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import MarkdownRender from '@nteract/markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';

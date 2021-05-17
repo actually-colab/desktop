@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { Provider, useDispatch, useSelector } from 'react-redux';
 import { BrowserRouter as Router, Switch, Route, useHistory, useLocation } from 'react-router-dom';
 import { StyleSheet, css } from 'aphrodite';

@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { StyleSheet, css } from 'aphrodite';
 
 import { palette } from '../../constants/theme';

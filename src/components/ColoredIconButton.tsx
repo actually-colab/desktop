@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { ButtonProps, Icon, IconButton, IconProps, Tooltip, Whisper, WhisperProps } from 'rsuite';
 
 import { palette, timing } from '../constants/theme';

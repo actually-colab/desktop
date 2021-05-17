@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { Badge, Tooltip, Whisper, WhisperProps } from 'rsuite';
 
 import { timing } from '../constants/theme';

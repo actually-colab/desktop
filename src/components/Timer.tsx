@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 
 const MILLISECONDS_PER_HOUR = 3600000;
 const MILLISECONDS_PER_MINUTE = 60000;
