@@ -10,11 +10,13 @@ import { _editor } from '../../redux/actions';
 import { randomColor } from '../../utils/color';
 import { editorOptionsActive, editorOptionsInactive } from '../../constants/editorOptions';
 import { palette } from '../../constants/theme';
+import MonacoEditor from '../MonacoEditor';
 
 const styles = StyleSheet.create({
   codeContainer: {
     pointerEvents: 'auto',
     opacity: 1,
+    width: '100%',
   },
   codeContainerLockInUse: {
     opacity: 0.5,
@@ -231,7 +233,17 @@ const CodeCell: React.FC<{
         )}
         style={markerStyle}
       >
-        <AceEditor
+        <MonacoEditor
+          id={cell_id}
+          contentRef={cell_id}
+          theme="vscode"
+          language={language ?? 'python'}
+          lineNumbers
+          value={contents ?? ''}
+          onFocusChange={(focused) => focused && onFocusEditor()}
+          onChange={handleChange}
+        />
+        {/* <AceEditor
           ref={editorRef}
           style={{ width: '100%' }}
           name={cell_id}
@@ -246,7 +258,7 @@ const CodeCell: React.FC<{
           onCursorChange={handleCursorChange}
           wrapEnabled={wrapEnabled}
           markers={markers}
-        />
+        /> */}
       </div>
     </div>
   );

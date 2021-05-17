@@ -76,6 +76,19 @@ body {
   background: #b5d5ff60 !important;
 }
 
+.monaco-container .monaco-editor {
+  width: inherit !important;
+}
+
+.monaco-container .monaco-editor .overflow-guard {
+  width: inherit !important;
+}
+
+/* 26px is the left margin for .monaco-scrollable-element  */
+.monaco-container .monaco-editor .monaco-scrollable-element.editor-scrollable.vs {
+  width: calc(100% - 26px) !important;
+}
+
 .user-marker {
   position: absolute;
   width: 2px !important;
