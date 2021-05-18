@@ -6,6 +6,7 @@ import { ReduxState } from '../../types/redux';
 import { KERNEL } from '../../types/redux/editor';
 import { KernelApi } from '../../api';
 import { BaseKernelOutput, KernelOutput } from '../../types/notebook';
+import { KernelLog } from '../../types/kernel';
 import { IpynbOutput } from '../../types/ipynb';
 import { LOG_LEVEL } from '../../constants/logging';
 import { syncSleep } from '../../utils/sleep';
@@ -391,9 +392,14 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
 
           await future.done;
 
+          let status: KernelLog['status'] = 'Success';
+          if (threwError) {
+            status = 'Error';
+          }
+
           store.dispatch(
             _editor.appendKernelLog({
-              status: threwError ? 'Error' : 'Success',
+              status,
               message: `Finished run #${runIndex} on cell ${action.cell.cell_id} in ${
                 (Date.now() - startTimestamp) / 1000
               }s`,
