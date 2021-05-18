@@ -44,9 +44,7 @@ export interface IMonacoComponentProps {
   contentRef: string;
   theme: 'vscode' | 'xcode';
   readOnly?: boolean;
-  channels?: 'shell' | 'iopub' | 'stdin' | undefined;
   value: string;
-  editorType?: string;
   editorFocused?: boolean;
   onChange?: (value: string, event?: any) => void;
   onFocusChange?: (focus: boolean) => void;
@@ -320,24 +318,24 @@ export default class MonacoEditor extends React.Component<IMonacoProps> {
     }
   }
 
-  componentDidUpdate(): void {
+  componentDidUpdate(prevProps: IMonacoProps): void {
     if (!this.editor) {
       return;
     }
 
     const { value, language, contentRef, id, editorFocused, theme } = this.props;
 
-    if (this.props.cursorPositionHandler) {
-      this.props.cursorPositionHandler(this.editor, this.props);
+    if (this.props.cursorPositionHandler !== prevProps.cursorPositionHandler) {
+      this.props.cursorPositionHandler?.(this.editor, this.props);
     }
 
     // Handle custom commands
-    if (this.editor && this.props.commandHandler) {
-      this.props.commandHandler(this.editor);
+    if (this.editor && this.props.commandHandler !== prevProps.commandHandler) {
+      this.props.commandHandler?.(this.editor);
     }
 
     // Ensures that the source contents of the editor (value) is consistent with the state of the editor
-    if (this.editor.getValue() !== this.props.value) {
+    if (this.props.value !== prevProps.value && this.editor.getValue() !== this.props.value) {
       this.editor.setValue(this.props.value);
     }
 
@@ -346,7 +344,7 @@ export default class MonacoEditor extends React.Component<IMonacoProps> {
 
     // Apply new model to the editor when the language is changed.
     const model = this.editor.getModel();
-    if (model && language && model.getModeId() !== language) {
+    if (model && language !== prevProps.language && model.getModeId() !== language) {
       // Get a reference to the current editor
       const editor = this.editor;
 
@@ -381,14 +379,17 @@ export default class MonacoEditor extends React.Component<IMonacoProps> {
       }, 0);
     }
 
-    const monacoUpdateOptions: monaco.editor.IEditorOptions & monaco.editor.IGlobalEditorOptions = {
-      readOnly: this.props.readOnly,
-    };
-    if (theme) {
-      monacoUpdateOptions.theme = theme;
-    }
+    if (this.props.readOnly !== prevProps.readOnly || theme !== prevProps.theme) {
+      const monacoUpdateOptions: monaco.editor.IEditorOptions & monaco.editor.IGlobalEditorOptions = {
+        readOnly: this.props.readOnly,
+      };
 
-    this.editor.updateOptions(monacoUpdateOptions);
+      if (theme) {
+        monacoUpdateOptions.theme = theme;
+      }
+
+      this.editor.updateOptions(monacoUpdateOptions);
+    }
 
     // In the multi-tabs scenario, when the notebook is hidden by setting "display:none",
     // Any state update propagated here would cause a UI re-layout, monaco-editor will then recalculate
@@ -401,7 +402,7 @@ export default class MonacoEditor extends React.Component<IMonacoProps> {
     }
 
     // Set focus
-    if (editorFocused && !this.editor.hasTextFocus()) {
+    if (editorFocused && editorFocused !== prevProps.editorFocused && !this.editor.hasTextFocus()) {
       this.editor.focus();
     }
 
@@ -425,9 +426,11 @@ export default class MonacoEditor extends React.Component<IMonacoProps> {
         console.error(`Error occurs in disposing editor: ${JSON.stringify(err)}`);
       }
     }
+
     if (this.blurEditorWidgetListener) {
       this.blurEditorWidgetListener.dispose();
     }
+
     if (this.mouseMoveListener) {
       this.mouseMoveListener.dispose();
     }
