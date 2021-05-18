@@ -46,6 +46,7 @@ export type ReceivableKernelOutputPayload = {
     nb_id: Notebook['nb_id'];
     cell_id: EditorCell['cell_id'];
     runIndex: number;
+    running: boolean;
   };
   messages: KernelOutput[];
 };
@@ -54,9 +55,7 @@ export type ReceivableKernelOutputPayload = {
  * A payload containing metadata and an array of minimal outputs to send to the client
  */
 export type SendableKernelOutputPayload = {
-  metadata: {
-    runIndex: number;
-  };
+  metadata: OutputMetadata;
   messages: MinimalKernelOutput[];
 };
 

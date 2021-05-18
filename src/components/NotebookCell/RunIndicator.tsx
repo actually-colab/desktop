@@ -29,7 +29,13 @@ const styles = StyleSheet.create({
  */
 const RunIndicator: React.FC<{ cell_id: EditorCell['cell_id'] }> = ({ cell_id }) => {
   const language = useSelector((state: ReduxState) => state.editor.cells.get(cell_id)?.language);
-  const isRunning = useSelector((state: ReduxState) => state.editor.runningCellId === cell_id, shallowEqual);
+  const isRunning = useSelector(
+    (state: ReduxState) =>
+      state.editor.selectedOutputsUid === ''
+        ? state.editor.runningCellId === cell_id
+        : state.editor.outputsMetadata.get(cell_id)?.get(state.editor.selectedOutputsUid)?.running ?? false,
+    shallowEqual
+  );
   const queueIndex = useSelector(
     (state: ReduxState) => state.editor.runQueue.findIndex((next_cell_id) => next_cell_id === cell_id),
     shallowEqual
