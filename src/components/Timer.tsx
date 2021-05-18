@@ -7,8 +7,9 @@ const MILLISECONDS_PER_SECOND = 1000;
 /**
  * A basic timer component that counts from 0 up and renders hours, minutes, and seconds
  */
-const Timer: React.FC<{ active: boolean; alwaysRender?: boolean; nonce: string | number }> = ({
+const Timer: React.FC<{ active: boolean; hidden?: boolean; alwaysRender?: boolean; nonce: string | number }> = ({
   active,
+  hidden = false,
   alwaysRender = true,
   nonce,
 }) => {
@@ -77,6 +78,10 @@ const Timer: React.FC<{ active: boolean; alwaysRender?: boolean; nonce: string |
       }
     };
   }, []);
+
+  if (hidden) {
+    return null;
+  }
 
   return (
     <code>

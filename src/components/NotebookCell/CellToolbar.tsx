@@ -72,13 +72,7 @@ const CellToolbar: React.FC<{
   const language = useSelector((state: ReduxState) => state.editor.cells.get(cell_id)?.language);
   const rendered = useSelector((state: ReduxState) => state.editor.cells.get(cell_id)?.rendered);
   const selectedOutputsUid = useSelector((state: ReduxState) => state.editor.selectedOutputsUid);
-  const runIndex = useSelector(
-    (state: ReduxState) =>
-      (state.editor.selectedOutputsUid === ''
-        ? state.editor.cells.get(cell_id)?.runIndex
-        : state.editor.outputsMetadata.get(cell_id)?.get(state.editor.selectedOutputsUid)?.runIndex) ?? -1,
-    shallowEqual
-  );
+  const runIndex = useSelector((state: ReduxState) => state.editor.cells.get(cell_id)?.runIndex ?? -1, shallowEqual);
   const isDeletingCell = useSelector((state: ReduxState) => state.editor.isDeletingCell);
   const isLocking = useSelector((state: ReduxState) => state.editor.lockingCellId === cell_id, shallowEqual);
   const isUnlocking = useSelector((state: ReduxState) => state.editor.unlockingCellId === cell_id, shallowEqual);
@@ -168,7 +162,7 @@ const CellToolbar: React.FC<{
       </div>
 
       <div className={css(styles.cellToolbarEnd)}>
-        <Timer active={isRunning} alwaysRender={runIndex !== -1} nonce={runIndex} />
+        <Timer active={isRunning} hidden={selectedOutputsUid !== ''} alwaysRender={runIndex !== -1} nonce={runIndex} />
 
         <Whisper
           ref={menuRef}
