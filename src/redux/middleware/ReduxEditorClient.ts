@@ -143,7 +143,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           // Restart the kernel
           const kernel = store.getState().editor.kernel;
 
-          if (kernel !== null) {
+          if (kernel !== null && store.getState().editor.executionCount > 0) {
+            // Only restart the kernel if the kernel was used
             store.dispatch(_editor.restartKernel(kernel.uri, kernel));
           }
         });
