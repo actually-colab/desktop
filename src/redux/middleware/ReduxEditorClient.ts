@@ -812,6 +812,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           convertSendablePayloadToOutputString({
             metadata: {
               runIndex: action.runIndex,
+              running: true,
             },
             messages: [],
           })
@@ -853,6 +854,49 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           convertSendablePayloadToOutputString({
             metadata: {
               runIndex: action.runIndex,
+              running: true,
+            },
+            messages: allMessages,
+          })
+        );
+        break;
+      }
+
+      /**
+       * Finished receiving messages from kernel
+       */
+      case KERNEL.EXECUTE.SUCCESS: {
+        const notebook = store.getState().editor.notebook;
+        if (notebook === null) {
+          console.error('Notebook was null');
+          return;
+        }
+
+        if (store.getState().editor.clientConnectionStatus !== 'Connected') {
+          console.error('Tried to use socket before connected');
+          return;
+        }
+
+        next(action);
+
+        // Get all the existing messages plus the new ones
+        const allMessages =
+          store
+            .getState()
+            .editor.outputs.get(action.cell_id)
+            ?.get('')
+            ?.get(action.runIndex.toString())
+            ?.toArray()
+            .map((message) => message.toObject())
+            .sort(sortOutputByMessageIndex) ?? [];
+
+        socketClient?.updateOutput(
+          notebook.nb_id,
+          action.cell_id,
+          convertSendablePayloadToOutputString({
+            metadata: {
+              runIndex: action.runIndex,
+              running: false,
             },
             messages: allMessages,
           })

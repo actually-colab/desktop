@@ -994,7 +994,7 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
               action.output.uid,
               new ImmutableOutputMetadataFactory({
                 runIndex: metadata.runIndex,
-                running: false,
+                running: metadata.running,
               })
             )
         ),
