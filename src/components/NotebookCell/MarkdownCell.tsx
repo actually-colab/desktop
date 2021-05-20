@@ -56,7 +56,7 @@ const MarkdownCell: React.FC<{ cell_id: EditorCell['cell_id'] }> = ({ cell_id })
 
   return (
     <div className="markdown-container" onDoubleClick={dispatchEditMarkdownCell}>
-      <MarkdownRender renderers={renderers} source={contents} escapeHtml={false} />
+      <MarkdownRender renderers={renderers} source={contents} escapeHtml />
     </div>
   );
 };
