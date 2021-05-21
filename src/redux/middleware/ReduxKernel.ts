@@ -10,6 +10,7 @@ import { IpynbOutput } from '../../types/ipynb';
 import { LOG_LEVEL } from '../../constants/logging';
 import { syncSleep } from '../../utils/sleep';
 import { httpToWebSocket } from '../../utils/request';
+import { KernelTokenStorage } from '../../utils/storage';
 import { ReduxActions, _editor, _ui } from '../actions';
 
 export let settings: ServerConnection.ISettings | null = null;
@@ -72,6 +73,9 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
 
             // Kernel needs to be shutdown on close
             window.addEventListener('beforeunload', shutdownOnUnmount);
+
+            // Remember the token in local storage
+            KernelTokenStorage.set(action.token);
 
             store.dispatch(
               _editor.connectToKernelSuccess({

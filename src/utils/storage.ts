@@ -149,6 +149,11 @@ export const RecentKernelGatewaysStorage = new LocalStorageSet('editor.kernel.ga
 ]);
 
 /**
+ * Store the last used kernel token
+ */
+export const KernelTokenStorage = buildLocalStorage<string>('editor.kernel.token');
+
+/**
  * Store the user's preference on if auto connect is enabled
  */
 export const KernelAutoConnectStorage = buildLocalStorage<'on' | 'off'>('editor.kernel.autoConnect');

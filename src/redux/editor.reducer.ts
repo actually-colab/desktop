@@ -42,7 +42,7 @@ import {
   reduceNotebookContents,
   sortOutputByMessageIndex,
 } from '../utils/notebook';
-import { KernelAutoConnectStorage, RecentKernelGatewaysStorage } from '../utils/storage';
+import { KernelAutoConnectStorage, KernelTokenStorage, RecentKernelGatewaysStorage } from '../utils/storage';
 import { ReduxActions } from './actions';
 
 /**
@@ -286,7 +286,7 @@ const initialState: EditorState = {
   runQueue: ImmutableList(),
 
   gatewayUri: RecentKernelGatewaysStorage.last() ?? DEFAULT_GATEWAY_URI,
-  gatewayToken: '',
+  gatewayToken: KernelTokenStorage.get() ?? '',
   kernel: null,
 
   notebooks: ImmutableMap() as ImmutableMapOf<Notebook['nb_id'], ImmutableNotebook>,
