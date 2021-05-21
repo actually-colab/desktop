@@ -336,7 +336,21 @@ export default class MonacoEditor extends React.Component<IMonacoProps> {
 
     // Ensures that the source contents of the editor (value) is consistent with the state of the editor
     if (this.props.value !== prevProps.value && this.editor.getValue() !== this.props.value) {
-      this.editor.setValue(this.props.value);
+      this.editor.getModel()?.applyEdits([
+        {
+          range: {
+            startLineNumber: 1,
+            endLineNumber: this.editor.getModel()?.getLineCount() ?? 1,
+            startColumn: 0,
+            endColumn: Infinity,
+          },
+          text: this.props.value,
+        },
+      ]);
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      this.editor.getModel()?.forceTokenization(this.editor.getModel()?.getLineCount());
     }
 
     // Register Jupyter completion provider if needed
