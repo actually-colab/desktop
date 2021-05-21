@@ -121,8 +121,8 @@ const CodeCell: React.FC<{
     const shadow = `inset 0 0 3px ${ownsLock ? palette.PRIMARY : userColor}`;
 
     return {
-      '-moz-box-shadow': shadow,
-      '-webkit-box-shadow': shadow,
+      MozBoxShadow: shadow,
+      WebkitBoxShadow: shadow,
       boxShadow: shadow,
     };
   }, [ownsLock, userColor]);
