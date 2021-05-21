@@ -24,6 +24,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   container: {
+    position: 'relative',
     width: '100%',
     borderStyle: 'solid',
     borderWidth: 1,
@@ -33,6 +34,14 @@ const styles = StyleSheet.create({
   },
   containerFocused: {
     borderColor: palette.PRIMARY,
+  },
+  shadow: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    pointerEvents: 'none',
   },
 });
 
@@ -104,6 +113,19 @@ const CodeCell: React.FC<{
     }),
     [lockOwner, showCursorLabel, userColor]
   );
+  const shadowStyle = React.useMemo<React.CSSProperties | undefined>(() => {
+    if (!ownsLock && userColor === '') {
+      return undefined;
+    }
+
+    const shadow = `inset 0 0 3px ${ownsLock ? palette.PRIMARY : userColor}`;
+
+    return {
+      '-moz-box-shadow': shadow,
+      '-webkit-box-shadow': shadow,
+      boxShadow: shadow,
+    };
+  }, [ownsLock, userColor]);
   const cursorShouldUpdate = React.useMemo(() => cursor.row === null || cursor.col === null, [cursor.col, cursor.row]);
   const readOnly = React.useMemo(() => !ownsLock, [ownsLock]);
 
@@ -279,6 +301,8 @@ const CodeCell: React.FC<{
           onChange={handleChange}
           onCursorPositionChange={handleCursorChange}
         />
+
+        <div className={css(styles.shadow)} style={shadowStyle} />
       </div>
     </div>
   );
