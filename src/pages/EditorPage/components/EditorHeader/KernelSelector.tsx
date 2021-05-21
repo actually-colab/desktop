@@ -4,11 +4,13 @@ import { StyleSheet, css } from 'aphrodite';
 import { Dropdown, HelpBlock, Icon } from 'rsuite';
 import { DUser } from '@actually-colab/editor-types';
 
-import { spacing } from '../../../../constants/theme';
+import { palette, spacing } from '../../../../constants/theme';
 import { ReduxState } from '../../../../types/redux';
 import { _editor } from '../../../../redux/actions';
+import { sortUsersByName } from '../../../../utils/notebook';
 import useKernelStatus from '../../../../kernel/useKernelStatus';
 import { PopoverDropdown, StatusIndicator } from '../../../../components';
+import { ImmutableNotebookAccessLevel, ImmutableUser } from '../../../../immutable';
 
 const styles = StyleSheet.create({
   kernelIconContainer: {
@@ -42,6 +44,8 @@ const styles = StyleSheet.create({
   kernelSubtitle: {
     fontSize: 11,
     fontWeight: 'normal',
+    display: 'flex',
+    flexDirection: 'row',
   },
 });
 
@@ -52,9 +56,24 @@ const KernelSelector: React.FC = () => {
   const { kernelStatus, kernelStatusColor } = useKernelStatus();
 
   const user = useSelector((state: ReduxState) => state.auth.user);
+  const users = useSelector((state: ReduxState) => state.editor.users);
   const notebookUsers = useSelector((state: ReduxState) => state.editor.notebook?.users);
   const selectedOutputsUid = useSelector((state: ReduxState) => state.editor.selectedOutputsUid);
   const gatewayUri = useSelector((state: ReduxState) => state.editor.gatewayUri);
+
+  const activeUsers = React.useMemo(() => users.filter((_user) => _user.uid !== user?.uid).sort(sortUsersByName), [
+    user?.uid,
+    users,
+  ]);
+  const inactiveUsers = React.useMemo(
+    () =>
+      notebookUsers
+        ?.filter(
+          (_user) => _user.uid !== user?.uid && users.findIndex((activeUser) => activeUser.uid === _user.uid) === -1
+        )
+        .sort(sortUsersByName),
+    [notebookUsers, user?.uid, users]
+  );
 
   const selectedOutputsEmail = React.useMemo<DUser['uid']>(
     () =>
@@ -74,6 +93,28 @@ const KernelSelector: React.FC = () => {
       dispatchSelectOutputUser(eventKey);
     },
     [dispatchSelectOutputUser]
+  );
+
+  const renderUser = React.useCallback(
+    (active: boolean) => (_user: ImmutableUser | ImmutableNotebookAccessLevel) => (
+      <Dropdown.Item key={_user.uid} eventKey={_user.uid} disabled={kernelStatus === 'Busy'}>
+        <div className={css(styles.kernelContent)}>
+          <Icon
+            className={css(styles.kernelIcon)}
+            icon={selectedOutputsUid === _user.uid ? 'user' : 'user-o'}
+            size="lg"
+          />
+
+          <div className={css(styles.kernelTextContainer)}>
+            <span className={css(styles.kernelTitle)}>{_user.email}</span>
+            <span className={css(styles.kernelSubtitle)}>
+              <StatusIndicator color={active ? palette.SUCCESS : palette.GRAY} textPlacement="right" /> View Only
+            </span>
+          </div>
+        </div>
+      </Dropdown.Item>
+    ),
+    [kernelStatus, selectedOutputsUid]
   );
 
   return (
@@ -108,30 +149,15 @@ const KernelSelector: React.FC = () => {
           <div className={css(styles.kernelTextContainer)}>
             <span className={css(styles.kernelTitle)}>Configured Kernel</span>
             <span className={css(styles.kernelSubtitle)}>
+              <StatusIndicator color={kernelStatusColor} textPlacement="right" />
               {kernelStatus !== 'Offline' ? gatewayUri : 'Not Connected'}
             </span>
           </div>
         </div>
       </Dropdown.Item>
 
-      {notebookUsers
-        ?.filter((availableUser) => availableUser.uid !== user?.uid)
-        .map((availableUser) => (
-          <Dropdown.Item key={availableUser.uid} eventKey={availableUser.uid} disabled={kernelStatus === 'Busy'}>
-            <div className={css(styles.kernelContent)}>
-              <Icon
-                className={css(styles.kernelIcon)}
-                icon={selectedOutputsUid === availableUser.uid ? 'user' : 'user-o'}
-                size="lg"
-              />
-
-              <div className={css(styles.kernelTextContainer)}>
-                <span className={css(styles.kernelTitle)}>{availableUser.email}</span>
-                <span className={css(styles.kernelSubtitle)}>View Only</span>
-              </div>
-            </div>
-          </Dropdown.Item>
-        ))}
+      {activeUsers.map(renderUser(true))}
+      {inactiveUsers?.map(renderUser(false))}
     </PopoverDropdown>
   );
 };
