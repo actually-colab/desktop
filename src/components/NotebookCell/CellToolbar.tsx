@@ -113,6 +113,15 @@ const CellToolbar: React.FC<{
     dispatch(_editor.selectCell(cell_id));
     dispatch(_editor.selectNextCell());
   }, [cell_id, dispatch, language, rendered]);
+  const dispatchToggleRendered = React.useCallback(() => {
+    dispatch(
+      _editor.editCell(cell_id, {
+        metaChanges: {
+          rendered: !rendered,
+        },
+      })
+    );
+  }, [cell_id, dispatch, rendered]);
   const dispatchDeleteCell = React.useCallback(() => dispatch(_editor.deleteCell(cell_id)), [cell_id, dispatch]);
 
   return (
@@ -172,12 +181,44 @@ const CellToolbar: React.FC<{
           speaker={
             <Popover full style={{ border: '1px solid #ddd' }}>
               <Dropdown.Menu>
+                {language === 'markdown' ? (
+                  <Dropdown.Item
+                    eventKey="toggle-render"
+                    onSelect={() => {
+                      menuRef.current?.close();
+                      dispatchToggleRendered();
+                    }}
+                  >
+                    <Icon icon={rendered ? 'code' : 'eye'} />
+                    <span>{rendered ? 'Show code' : 'Render markdown'}</span>
+                  </Dropdown.Item>
+                ) : (
+                  <Dropdown.Item
+                    eventKey="run-cell"
+                    disabled={!kernelIsConnected || selectedOutputsUid !== '' || isRunning}
+                    onSelect={() => {
+                      menuRef.current?.close();
+                      onClickPlay();
+                    }}
+                  >
+                    <Icon icon="play" />
+                    <span>
+                      {selectedOutputsUid !== ''
+                        ? 'Viewing another user'
+                        : !kernelIsConnected
+                        ? 'No kernel connected'
+                        : isRunning
+                        ? 'Running'
+                        : 'Run cell'}
+                    </span>
+                  </Dropdown.Item>
+                )}
                 <Dropdown.Item
                   eventKey="delete"
                   disabled={isDeletingCell}
                   onSelect={() => {
-                    setShowDeleteCell(true);
                     menuRef.current?.close();
+                    setShowDeleteCell(true);
                   }}
                 >
                   <Icon icon="trash-o" style={{ color: palette.ERROR }} />
