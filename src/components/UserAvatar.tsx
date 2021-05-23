@@ -4,7 +4,7 @@ import { Avatar, Badge, Popover, Whisper, WhisperProps } from 'rsuite';
 import type { DUser } from '@actually-colab/editor-types';
 
 import type { ImmutableNotebookAccessLevel, ImmutableUser, ImmutableWorkshopAccessLevel } from '../immutable';
-import { randomColor } from '../utils/color';
+import { getUserColor } from '../utils/color';
 
 const styles = StyleSheet.create({
   container: {
@@ -35,13 +35,7 @@ const UserAvatar: React.FC<{
     return `${piecesOfName[0][0]}${piecesOfName[1][0]}`.toUpperCase();
   }, [user.name]);
 
-  const userColor = React.useMemo(
-    () =>
-      randomColor({
-        seed: user.uid,
-      }),
-    [user.uid]
-  );
+  const userColor = React.useMemo(() => getUserColor(user.uid), [user.uid]);
 
   const CoreAvatar = (
     <div className={css(styles.container)}>
