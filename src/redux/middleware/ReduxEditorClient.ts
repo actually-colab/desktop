@@ -35,6 +35,11 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
   let shouldReconnect: boolean = process.env.NODE_ENV !== 'development';
 
   /**
+   * If the middleware is reconnecting to the socket client
+   */
+  let isReconnecting: boolean = false;
+
+  /**
    * Attempt to close the websocket on page exit
    */
   const closeOnUnmount = () => {
@@ -99,15 +104,28 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           console.log('Connected to AC socket');
 
           window.addEventListener('beforeunload', closeOnUnmount);
+
           store.dispatch(_editor.connectToClientSuccess());
 
-          const notebook = store.getState().editor.notebook;
+          if (isReconnecting) {
+            const notebook = store.getState().editor.notebook;
 
-          if (notebook) {
-            // If connected and already had an open notebook, open again
-            console.log('Reopening notebook', notebook.nb_id);
+            if (notebook) {
+              // Force reopen the notebook if possible
+              console.log('Reopening notebook', notebook.nb_id);
+              store.dispatch(_editor.openNotebook(notebook.nb_id, true));
+            }
 
-            store.dispatch(_editor.openNotebook(notebook.nb_id, true));
+            isReconnecting = false;
+          }
+
+          // Refresh notebooks and workshops
+          if (!store.getState().editor.isGettingNotebooks) {
+            store.dispatch(_editor.getNotebooks());
+          }
+
+          if (!store.getState().editor.isGettingWorkshops) {
+            store.dispatch(_editor.getWorkshops());
           }
         });
 
@@ -129,6 +147,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
             const token = store.getState().auth.sessionToken;
 
             if (user && token) {
+              isReconnecting = true;
+
               // Attempt to open a new socket connection
               store.dispatch(_auth.signInSuccess(user, token));
             } else {
@@ -169,6 +189,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           // Remember the most recently opened notebook
           LatestNotebookIdStorage.set(notebook.nb_id);
 
+          const lastNotebook = store.getState().editor.notebook;
+
           store.dispatch(
             _editor.openNotebookSuccess(
               notebook,
@@ -179,8 +201,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
           // Restart the kernel
           const kernel = store.getState().editor.kernel;
 
-          if (kernel !== null && store.getState().editor.executionCount > 0) {
-            // Only restart the kernel if the kernel was used
+          if (kernel !== null && store.getState().editor.executionCount > 0 && lastNotebook?.nb_id !== notebook.nb_id) {
+            // Only restart the kernel if the kernel was used and the notebook changed
             store.dispatch(_editor.restartKernel(kernel.uri, kernel));
           }
         });
@@ -410,7 +432,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
                 if (demoNotebookId) {
                   store.dispatch(_editor.openNotebook(demoNotebookId));
                 }
-              } else if (notebooks.find((notebook) => notebook.nb_id === mostRecentNotebookId)) {
+              } else if (notebooks.findIndex((notebook) => notebook.nb_id === mostRecentNotebookId) !== -1) {
                 store.dispatch(_editor.openNotebook(mostRecentNotebookId));
               }
             }
@@ -454,7 +476,7 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
 
               if (
                 mostRecentNotebookId &&
-                workshops.find((workshop) => workshop.main_notebook.nb_id === mostRecentNotebookId)
+                workshops.findIndex((workshop) => workshop.main_notebook.nb_id === mostRecentNotebookId) !== -1
               ) {
                 store.dispatch(_editor.openNotebook(mostRecentNotebookId));
               }

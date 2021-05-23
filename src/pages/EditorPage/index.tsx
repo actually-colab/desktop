@@ -8,7 +8,6 @@ import { palette } from '../../constants/theme';
 import useKernel from '../../kernel/useKernel';
 
 import { EditorBody, EditorHeader, LeftSidebar, RightSidebar } from './components';
-import useNotebooks from './hooks/useNotebooks';
 
 const styles = StyleSheet.create({
   container: {
@@ -47,8 +46,6 @@ const styles = StyleSheet.create({
 const Helpers: React.FC = () => {
   // Include the kernel manager once
   useKernel();
-  // Include the notebooks
-  useNotebooks();
 
   return null;
 };
