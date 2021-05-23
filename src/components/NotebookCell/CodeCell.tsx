@@ -7,7 +7,7 @@ import { DCell } from '@actually-colab/editor-types';
 import { ReduxState } from '../../types/redux';
 import { EditorCell } from '../../types/notebook';
 import { _editor } from '../../redux/actions';
-import { randomColor } from '../../utils/color';
+import { getUserColor } from '../../utils/color';
 import { palette } from '../../constants/theme';
 import MonacoEditor from '../MonacoEditor';
 
@@ -94,15 +94,7 @@ const CodeCell: React.FC<{
 
   const [showCursorLabel, setShowCursorLabel] = React.useState<boolean>(false);
 
-  const userColor = React.useMemo(
-    () =>
-      lock_held_by
-        ? randomColor({
-            seed: lock_held_by ?? undefined,
-          })
-        : '',
-    [lock_held_by]
-  );
+  const userColor = React.useMemo(() => (lock_held_by ? getUserColor(lock_held_by) : ''), [lock_held_by]);
   const lockedByOtherUser = React.useMemo(() => !!lock_held_by && lock_held_by !== uid, [lock_held_by, uid]);
   const canLock = React.useMemo(() => !lock_held_by, [lock_held_by]);
   const markerStyle = React.useMemo<React.CSSProperties>(
