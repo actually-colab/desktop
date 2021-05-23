@@ -345,9 +345,10 @@ export const createWorkshop = (
   dispatch(createWorkshopStart(name, description, cells));
 };
 
-const openNotebookStart = (nb_id: Notebook['nb_id']): EditorActionTypes => ({
+const openNotebookStart = (nb_id: Notebook['nb_id'], force: boolean): EditorActionTypes => ({
   type: NOTEBOOKS.OPEN.START,
   nb_id,
+  force,
 });
 
 /**
@@ -372,8 +373,10 @@ export const openNotebookFailure = (errorMessage: string = 'Unknown Error'): Edi
 /**
  * Open the notebook with the given id
  */
-export const openNotebook = (nb_id: Notebook['nb_id']): EditorAsyncActionTypes => async (dispatch) => {
-  dispatch(openNotebookStart(nb_id));
+export const openNotebook = (nb_id: Notebook['nb_id'], force: boolean = false): EditorAsyncActionTypes => async (
+  dispatch
+) => {
+  dispatch(openNotebookStart(nb_id, force));
 };
 
 /**

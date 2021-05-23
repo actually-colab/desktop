@@ -28,10 +28,21 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
   let socketClient: ActuallyColabSocketClient | null = null;
 
   /**
+   * If the middleware should attempt to reconnect after a disconnect.
+   *
+   * Reconnect is not supported locally
+   */
+  let shouldReconnect: boolean = process.env.NODE_ENV !== 'development';
+
+  /**
    * Attempt to close the websocket on page exit
    */
   const closeOnUnmount = () => {
     try {
+      // Prevent reconnecting on disconnect since it is intentional
+      shouldReconnect = false;
+
+      // Disconnect
       socketClient?.disconnectAndRemoveAllListeners();
       syncSleep(250);
     } catch (error) {}
@@ -89,6 +100,15 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
 
           window.addEventListener('beforeunload', closeOnUnmount);
           store.dispatch(_editor.connectToClientSuccess());
+
+          const notebook = store.getState().editor.notebook;
+
+          if (notebook) {
+            // If connected and already had an open notebook, open again
+            console.log('Reopening notebook', notebook.nb_id);
+
+            store.dispatch(_editor.openNotebook(notebook.nb_id, true));
+          }
         });
 
         /**
@@ -99,6 +119,22 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
 
           window.removeEventListener('beforeunload', closeOnUnmount);
           store.dispatch(_editor.connectToClientFailure());
+
+          // Clean up listeners
+          socketClient?.removeAllListeners();
+          socketClient = null;
+
+          if (shouldReconnect) {
+            const user = store.getState().auth.user;
+            const token = store.getState().auth.sessionToken;
+
+            if (user && token) {
+              // Attempt to open a new socket connection
+              store.dispatch(_auth.signInSuccess(user, token));
+            } else {
+              store.dispatch(_auth.signOut());
+            }
+          }
         });
 
         /**
@@ -520,8 +556,8 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
 
         const notebook = store.getState().editor.notebook;
 
-        // Don't reopen the currently open notebook
-        if (notebook?.nb_id === action.nb_id) {
+        // Don't reopen the currently open notebook unless forced (for instance on reconnecting)
+        if (notebook?.nb_id === action.nb_id && !action.force) {
           return;
         }
 
