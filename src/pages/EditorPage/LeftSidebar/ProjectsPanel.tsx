@@ -69,8 +69,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   sortText: {},
+  dividerContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   dividerText: {
     color: palette.GRAY,
+    marginRight: spacing.DEFAULT,
   },
   descriptionText: {
     color: palette.GRAY,
@@ -419,9 +425,10 @@ const ProjectsPanel: React.FC = () => {
         />
       </div>
 
-      <Divider>
+      <div className={css(styles.dividerContainer)}>
         <span className={css(styles.dividerText)}>Notebooks</span>
-      </Divider>
+        <Divider style={{ flex: 1 }} />
+      </div>
 
       {sortedNotebooks.map((project) => {
         const active = project.nb_id === notebookIds?.nb_id;
@@ -447,9 +454,10 @@ const ProjectsPanel: React.FC = () => {
         </p>
       )}
 
-      <Divider>
+      <div className={css(styles.dividerContainer)}>
         <span className={css(styles.dividerText)}>Workshops</span>
-      </Divider>
+        <Divider style={{ flex: 1 }} />
+      </div>
 
       {sortedWorkshops.map((project) => {
         const isOpen = openWorkshopIds.has(project.ws_id);
