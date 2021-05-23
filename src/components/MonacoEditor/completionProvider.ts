@@ -1,3 +1,6 @@
+/**
+ * Based on @nteract/monaco-editor
+ */
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { kernel } from '../../redux/middleware/ReduxKernel';
 import { CompletionMatch, CompletionResults, js_idx_to_char_idx } from '../../utils/completions';

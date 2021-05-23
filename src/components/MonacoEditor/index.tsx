@@ -1,3 +1,6 @@
+/**
+ * Based on @nteract/monaco-editor
+ */
 import * as React from 'react';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import debounce from 'lodash.debounce';
