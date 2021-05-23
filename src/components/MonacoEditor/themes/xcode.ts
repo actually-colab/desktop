@@ -96,5 +96,7 @@ export const Xcode: monaco.editor.IStandaloneThemeData = {
     'editor.lineHighlightBackground': '#00000012',
     'editorCursor.foreground': '#000000',
     'editorWhitespace.foreground': '#BFBFBF',
+    'editorLineNumber.foreground': '#8C8A93',
+    'editorLineNumber.activeForeground': '#1E1E24',
   },
 };
