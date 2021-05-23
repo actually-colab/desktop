@@ -327,6 +327,7 @@ type CreateWorkshopFailureAction = {
 type NotebooksOpenStartAction = {
   type: typeof NOTEBOOKS.OPEN.START;
   nb_id: Notebook['nb_id'];
+  force: boolean;
 };
 
 type NotebooksOpenSuccessAction = {
