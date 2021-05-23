@@ -1,6 +1,9 @@
 import * as React from 'react';
+import { useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
+import { Modal } from 'rsuite';
 
+import { ReduxState } from '../../types/redux';
 import { palette } from '../../constants/theme';
 import useKernel from '../../kernel/useKernel';
 
@@ -51,6 +54,35 @@ const Helpers: React.FC = () => {
 };
 
 /**
+ * An overlay that prevents interaction while connecting to the server
+ */
+const ConnectionOverlay: React.FC = () => {
+  const clientConnectionStatus = useSelector((state: ReduxState) => state.editor.clientConnectionStatus);
+
+  const [isFirstLoad, setIsFirstLoad] = React.useState<boolean>(true);
+
+  /**
+   * Don't show modal unless it is a reconnect
+   */
+  React.useEffect(() => {
+    if (clientConnectionStatus === 'Connected') {
+      setIsFirstLoad(false);
+    }
+  }, [clientConnectionStatus]);
+
+  if (isFirstLoad) {
+    return null;
+  }
+
+  return (
+    <Modal show={clientConnectionStatus !== 'Connected'} backdrop="static" size="xs" keyboard={false}>
+      <Modal.Title>Reconnecting...</Modal.Title>
+      <Modal.Body>Thanks for being patient while we connect to our servers, this may take a moment!</Modal.Body>
+    </Modal>
+  );
+};
+
+/**
  * The editor page
  */
 const EditorPage: React.FC = () => {
@@ -72,6 +104,8 @@ const EditorPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <ConnectionOverlay />
     </div>
   );
 };
