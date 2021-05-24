@@ -18,6 +18,8 @@ const styles = StyleSheet.create({
   },
   popoverContainer: {
     padding: spacing.DEFAULT,
+    maxHeight: 300,
+    overflow: 'auto',
   },
   userListItem: {
     display: 'flex',
