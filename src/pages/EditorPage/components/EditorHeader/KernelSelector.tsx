@@ -9,7 +9,7 @@ import { ReduxState } from '../../../../types/redux';
 import { _editor } from '../../../../redux/actions';
 import { sortUsersByName } from '../../../../utils/notebook';
 import useKernelStatus from '../../../../kernel/useKernelStatus';
-import { PopoverDropdown, StatusIndicator } from '../../../../components';
+import { PopoverDropdown, StatusIndicator, UserAvatar } from '../../../../components';
 import { ImmutableNotebookAccessLevel, ImmutableUser } from '../../../../immutable';
 
 const styles = StyleSheet.create({
@@ -24,13 +24,16 @@ const styles = StyleSheet.create({
     maxWidth: 318,
   },
   kernelContent: {
-    paddingLeft: spacing.DEFAULT / 2,
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
   },
   kernelIcon: {
-    width: 16,
+    width: 30,
+    height: 30,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   kernelTextContainer: {
     marginLeft: spacing.DEFAULT,
@@ -75,12 +78,12 @@ const KernelSelector: React.FC = () => {
     [notebookUsers, user?.uid, users]
   );
 
-  const selectedOutputsEmail = React.useMemo<DUser['uid']>(
+  const selectedOutputsName = React.useMemo<DUser['uid']>(
     () =>
       (selectedOutputsUid === ''
-        ? user?.email
-        : notebookUsers?.find((_user) => _user.uid === selectedOutputsUid)?.email) ?? '',
-    [notebookUsers, selectedOutputsUid, user?.email]
+        ? user?.name
+        : notebookUsers?.find((_user) => _user.uid === selectedOutputsUid)?.name) ?? '',
+    [notebookUsers, selectedOutputsUid, user?.name]
   );
 
   const dispatch = useDispatch();
@@ -99,14 +102,10 @@ const KernelSelector: React.FC = () => {
     (active: boolean) => (_user: ImmutableUser | ImmutableNotebookAccessLevel) => (
       <Dropdown.Item key={_user.uid} eventKey={_user.uid} disabled={kernelStatus === 'Busy'}>
         <div className={css(styles.kernelContent)}>
-          <Icon
-            className={css(styles.kernelIcon)}
-            icon={selectedOutputsUid === _user.uid ? 'user' : 'user-o'}
-            size="lg"
-          />
+          <UserAvatar user={_user} hover={false} />
 
           <div className={css(styles.kernelTextContainer)}>
-            <span className={css(styles.kernelTitle)}>{_user.email}</span>
+            <span className={css(styles.kernelTitle)}>{_user.name}</span>
             <span className={css(styles.kernelSubtitle)}>
               <StatusIndicator color={active ? palette.SUCCESS : palette.GRAY} textPlacement="right" /> View Only
             </span>
@@ -114,7 +113,7 @@ const KernelSelector: React.FC = () => {
         </div>
       </Dropdown.Item>
     ),
-    [kernelStatus, selectedOutputsUid]
+    [kernelStatus]
   );
 
   return (
@@ -129,7 +128,7 @@ const KernelSelector: React.FC = () => {
             {selectedOutputsUid === '' ? <StatusIndicator color={kernelStatusColor} /> : <Icon icon="eye" />}
           </div>
 
-          {selectedOutputsUid === '' ? 'Configured Kernel' : selectedOutputsEmail}
+          {selectedOutputsUid === '' ? 'Configured Kernel' : selectedOutputsName}
         </React.Fragment>
       }
       onSelect={handleKernelSelect}
@@ -144,7 +143,7 @@ const KernelSelector: React.FC = () => {
 
       <Dropdown.Item eventKey="" disabled={kernelStatus === 'Busy'}>
         <div className={css(styles.kernelContent)}>
-          <Icon className={css(styles.kernelIcon)} icon="related-map" size="lg" />
+          <Icon className={css(styles.kernelIcon)} icon="related-map" size="2x" />
 
           <div className={css(styles.kernelTextContainer)}>
             <span className={css(styles.kernelTitle)}>Configured Kernel</span>
