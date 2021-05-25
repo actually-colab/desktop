@@ -7,7 +7,7 @@ import { ReduxState } from '../../../types/redux';
 import { _auth } from '../../../redux/actions';
 import { palette, spacing, timing } from '../../../constants/theme';
 import { HEADER_HEIGHT, LEFT_SIDEBAR_PANEL_WIDTH, LEFT_SIDEBAR_TRAY_WIDTH } from '../../../constants/dimensions';
-import { openCompanion, openGithub } from '../../../utils/redirect';
+import { openCompanion } from '../../../utils/redirect';
 import { UserAvatar } from '../../../components';
 
 import { KernelPanel, ProjectsPanel } from '../LeftSidebar';
@@ -126,11 +126,10 @@ const CategoryButton: React.FC<{
   );
 };
 
-type MenuOption = '' | 'Projects' | 'Kernel' | 'Contacts' | 'Settings';
+type MenuOption = '' | 'Projects' | 'Kernel';
 
 const MENU_OPTIONS: { menuKey: MenuOption; icon: IconProps['icon']; disabled?: boolean }[] = [
   { menuKey: 'Projects', icon: 'edit' },
-  { menuKey: 'Contacts', icon: 'peoples' },
   { menuKey: 'Kernel', icon: 'related-map' },
 ];
 
@@ -201,20 +200,6 @@ const LeftSidebar: React.FC = () => {
           </div>
 
           <div className={css(styles.endPanelCategories)}>
-            <IconButton
-              size="lg"
-              appearance="subtle"
-              icon={<Icon icon="github" style={{ color: palette.CHARCOAL, fontSize: 20 }} />}
-              onClick={() => openGithub()}
-            />
-            <CategoryButton
-              icon="gear"
-              tooltipText="Settings"
-              menuKey="Settings"
-              activeMenuKey={activeMenuKey}
-              onSelect={handleCategorySelect}
-            />
-
             {user !== null && (
               <UserAvatar
                 placement="rightEnd"
@@ -230,7 +215,6 @@ const LeftSidebar: React.FC = () => {
                       appearance="subtle"
                       icon={<Icon icon="pencil" />}
                       disabled
-                      onClick={() => setActiveMenuKey('Settings')}
                     />
                   </div>
                 }
@@ -249,9 +233,7 @@ const LeftSidebar: React.FC = () => {
 
         <div className={css(styles.bodyContainer)}>
           {activeMenuKey === 'Projects' && <ProjectsPanel />}
-          {activeMenuKey === 'Contacts' && <p>Coming soon</p>}
           {activeMenuKey === 'Kernel' && <KernelPanel />}
-          {activeMenuKey === 'Settings' && <p>Coming soon</p>}
         </div>
       </div>
     </div>
