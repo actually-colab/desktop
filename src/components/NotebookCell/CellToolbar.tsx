@@ -228,7 +228,7 @@ const CellToolbar: React.FC<{
             </Popover>
           }
         >
-          <IconButton size="xs" appearance="subtle" icon={<Icon icon="bars" />} />
+          <IconButton size="xs" appearance="subtle" icon={<Icon icon="ellipsis-h" />} />
         </Whisper>
       </div>
 
