@@ -8,6 +8,7 @@ import { ReduxState } from '../../types/redux';
 import { EditorCell } from '../../types/notebook';
 import { _editor } from '../../redux/actions';
 import { palette } from '../../constants/theme';
+import { getUserColor } from '../../utils/color';
 import ContainerContext from '../../contexts/ContainerContext';
 import useKernelStatus from '../../kernel/useKernelStatus';
 import ColoredIconButton from '../ColoredIconButton';
@@ -36,7 +37,6 @@ const styles = StyleSheet.create({
   },
   lockOwnerContainer: {
     paddingLeft: 8,
-    color: palette.GRAY,
   },
   lockOwnerText: {
     marginLeft: 4,
@@ -83,6 +83,9 @@ const CellToolbar: React.FC<{
   const ownsCell = React.useMemo(() => lockOwner?.uid === uid, [lockOwner?.uid, uid]);
   const canLock = React.useMemo(() => lockOwner === null, [lockOwner]);
   const canEdit = React.useMemo(() => accessLevel?.access_level === 'Full Access', [accessLevel?.access_level]);
+  const userColor = React.useMemo(() => (lockOwner?.uid ? getUserColor(lockOwner.uid) : palette.GRAY), [
+    lockOwner?.uid,
+  ]);
 
   const dispatch = useDispatch();
   const onClickLock = React.useCallback(() => {
@@ -152,7 +155,7 @@ const CellToolbar: React.FC<{
             onClick={onClickUnlock}
           />
         ) : lockOwner !== null ? (
-          <div className={css(styles.lockOwnerContainer)}>
+          <div className={css(styles.lockOwnerContainer)} style={{ color: userColor }}>
             <Icon icon="pencil" />
             <span className={css(styles.lockOwnerText)}>{lockOwner.name}</span>
           </div>
