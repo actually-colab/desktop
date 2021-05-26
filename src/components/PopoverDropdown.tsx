@@ -32,6 +32,7 @@ export type PopoverDropdownProps = {
   activeKey?: string;
   buttonContent: React.ReactNode;
   buttonProps?: ButtonProps;
+  menuStyle?: React.CSSProperties;
   onSelect?(eventKey: string): void;
 };
 
@@ -45,6 +46,7 @@ const PopoverDropdown: React.FC<PopoverDropdownProps> = ({
   activeKey,
   buttonContent,
   buttonProps = {},
+  menuStyle,
   onSelect,
   children,
 }) => {
@@ -61,12 +63,12 @@ const PopoverDropdown: React.FC<PopoverDropdownProps> = ({
   return (
     <div>
       <Whisper
+        ref={whisperRef}
         trigger="click"
         placement={placement}
-        ref={whisperRef}
         speaker={
           <Popover full style={{ border: '1px solid #ddd' }}>
-            <Dropdown.Menu activeKey={activeKey} onSelect={handleSelect}>
+            <Dropdown.Menu activeKey={activeKey} onSelect={handleSelect} style={menuStyle}>
               {children}
             </Dropdown.Menu>
           </Popover>

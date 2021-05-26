@@ -3,9 +3,9 @@ import { useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import { Button, Icon, Timeline } from 'rsuite';
 
-import { ReduxState } from '../../../../types/redux';
-import { palette, spacing } from '../../../../constants/theme';
-import { openCompanionDownloadsPage } from '../../../../utils/redirect';
+import { ReduxState } from '../../../../../types/redux';
+import { palette, spacing } from '../../../../../constants/theme';
+import { openCompanionDownloadsPage } from '../../../../../utils/redirect';
 
 const styles = StyleSheet.create({
   keyText: {
@@ -18,6 +18,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
   },
   output: {
+    maxHeight: 150,
     flex: 1,
     marginTop: spacing.DEFAULT / 8,
     paddingBottom: spacing.DEFAULT / 4,

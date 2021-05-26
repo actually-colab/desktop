@@ -3,13 +3,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
 import { Button, Icon, Input, InputPicker, Popover, Toggle, Whisper } from 'rsuite';
 
-import { ReduxState } from '../../../../types/redux';
-import { _editor } from '../../../../redux/actions';
-import { palette, spacing, timing } from '../../../../constants/theme';
-import { DEFAULT_GATEWAY_URI } from '../../../../constants/jupyter';
-import { RecentKernelGatewaysStorage } from '../../../../utils/storage';
-import useKernelStatus from '../../../../kernel/useKernelStatus';
-import { KeyValue } from '../../../../components';
+import { ReduxState } from '../../../../../types/redux';
+import { _editor } from '../../../../../redux/actions';
+import { palette, spacing, timing } from '../../../../../constants/theme';
+import { DEFAULT_GATEWAY_URI } from '../../../../../constants/jupyter';
+import { RecentKernelGatewaysStorage } from '../../../../../utils/storage';
+import useKernelStatus from '../../../../../kernel/useKernelStatus';
+import { KeyValue } from '../../../../../components';
 
 const styles = StyleSheet.create({
   description: {

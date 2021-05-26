@@ -2,9 +2,9 @@ import * as React from 'react';
 import { StyleSheet, css } from 'aphrodite';
 import { Popover, Whisper } from 'rsuite';
 
-import { spacing, timing } from '../../../../constants/theme';
-import useKernelStatus from '../../../../kernel/useKernelStatus';
-import { KeyValue, StatusIndicator } from '../../../../components';
+import { spacing, timing } from '../../../../../constants/theme';
+import useKernelStatus from '../../../../../kernel/useKernelStatus';
+import { KeyValue, StatusIndicator } from '../../../../../components';
 
 const styles = StyleSheet.create({
   popoverContainer: {
