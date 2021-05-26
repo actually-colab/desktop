@@ -1,27 +1,37 @@
 import * as React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import { Dropdown, HelpBlock, Icon } from 'rsuite';
+import { Button, Dropdown, HelpBlock, Icon, Modal } from 'rsuite';
 import { DUser } from '@actually-colab/editor-types';
 
 import { palette, spacing } from '../../../../constants/theme';
 import { ReduxState } from '../../../../types/redux';
 import { _editor } from '../../../../redux/actions';
 import { sortUsersByName } from '../../../../utils/notebook';
+import { COMPANION_DOWNLOADS_URI } from '../../../../utils/redirect';
+import { ImmutableNotebookAccessLevel, ImmutableUser } from '../../../../immutable';
 import useKernelStatus from '../../../../kernel/useKernelStatus';
 import { PopoverDropdown, StatusIndicator, UserAvatar } from '../../../../components';
-import { ImmutableNotebookAccessLevel, ImmutableUser } from '../../../../immutable';
+import KernelConnector from './KernelConfig/KernelConnector';
+import KernelStatus from './KernelConfig/KernelStatus';
+import KernelLogs from './KernelConfig/KernelLogs';
 
 const styles = StyleSheet.create({
-  kernelIconContainer: {
-    position: 'relative',
-    marginRight: spacing.DEFAULT / 2,
-  },
   helperContent: {
     ...spacing.pad({
       top: spacing.DEFAULT / 2,
     }),
     maxWidth: 318,
+  },
+  helperTitleWithButton: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  kernelIconContainer: {
+    position: 'relative',
+    marginRight: spacing.DEFAULT / 2,
   },
   kernelContent: {
     display: 'flex',
@@ -63,6 +73,8 @@ const KernelSelector: React.FC = () => {
   const notebookUsers = useSelector((state: ReduxState) => state.editor.notebook?.users);
   const selectedOutputsUid = useSelector((state: ReduxState) => state.editor.selectedOutputsUid);
   const gatewayUri = useSelector((state: ReduxState) => state.editor.gatewayUri);
+
+  const [showingKernelConfig, setShowingKernelConfig] = React.useState<boolean>(false);
 
   const activeUsers = React.useMemo(() => users.filter((_user) => _user.uid !== user?.uid).sort(sortUsersByName), [
     user?.uid,
@@ -117,47 +129,90 @@ const KernelSelector: React.FC = () => {
   );
 
   return (
-    <PopoverDropdown
-      placement="bottomEnd"
-      activeKey={selectedOutputsUid}
-      appearance={selectedOutputsUid === '' ? 'default' : 'ghost'}
-      size="sm"
-      buttonContent={
-        <React.Fragment>
-          <div className={css(styles.kernelIconContainer)}>
-            {selectedOutputsUid === '' ? <StatusIndicator color={kernelStatusColor} /> : <Icon icon="eye" />}
+    <React.Fragment>
+      <PopoverDropdown
+        placement="bottomEnd"
+        activeKey={selectedOutputsUid}
+        appearance={selectedOutputsUid === '' ? 'default' : 'ghost'}
+        size="sm"
+        buttonContent={
+          <React.Fragment>
+            <div className={css(styles.kernelIconContainer)}>
+              {selectedOutputsUid === '' ? <StatusIndicator color={kernelStatusColor} /> : <Icon icon="eye" />}
+            </div>
+
+            {selectedOutputsUid === '' ? 'Configured Kernel' : selectedOutputsName}
+          </React.Fragment>
+        }
+        menuStyle={{
+          maxHeight: 400,
+          overflowY: 'auto',
+        }}
+        onSelect={handleKernelSelect}
+      >
+        <div className={css(styles.helperContent)}>
+          <div className={css(styles.helperTitleWithButton)}>
+            <h6>Connect to a kernel</h6>
+            <Button appearance="primary" size="xs" onClick={() => setShowingKernelConfig(true)}>
+              <Icon icon="cog" />
+              &nbsp;&nbsp;Configure
+            </Button>
           </div>
 
-          {selectedOutputsUid === '' ? 'Configured Kernel' : selectedOutputsName}
-        </React.Fragment>
-      }
-      onSelect={handleKernelSelect}
-    >
-      <div className={css(styles.helperContent)}>
-        <h6>Connect to a collaborator</h6>
-        <HelpBlock>
-          You can view the outputs from any active collaborator. You can only run cells when your configured kernel is
-          selected.
-        </HelpBlock>
-      </div>
-
-      <Dropdown.Item eventKey="" disabled={kernelStatus === 'Busy'}>
-        <div className={css(styles.kernelContent)}>
-          <Icon className={css(styles.kernelIcon)} icon="related-map" size="2x" />
-
-          <div className={css(styles.kernelTextContainer)}>
-            <span className={css(styles.kernelTitle)}>Configured Kernel</span>
-            <span className={css(styles.kernelSubtitle)}>
-              <StatusIndicator color={kernelStatusColor} textPlacement="right" />
-              {kernelStatus !== 'Offline' ? gatewayUri : 'Not Connected'}
-            </span>
-          </div>
+          <HelpBlock>
+            Our&nbsp;
+            <a href={COMPANION_DOWNLOADS_URI} target="_blank" rel="noreferrer">
+              Companion app
+            </a>
+            &nbsp;manages the Jupyter Kernel automatically, so you can run code locally quickly and securely.
+          </HelpBlock>
         </div>
-      </Dropdown.Item>
 
-      {activeUsers.map(renderUser(true))}
-      {inactiveUsers?.map(renderUser(false))}
-    </PopoverDropdown>
+        <Dropdown.Item eventKey="" disabled={kernelStatus === 'Busy'}>
+          <div className={css(styles.kernelContent)}>
+            <Icon className={css(styles.kernelIcon)} icon="related-map" size="2x" />
+
+            <div className={css(styles.kernelTextContainer)}>
+              <span className={css(styles.kernelTitle)}>Configured Kernel</span>
+              <span className={css(styles.kernelSubtitle)}>
+                <StatusIndicator color={kernelStatusColor} textPlacement="right" />
+                {kernelStatus !== 'Offline' ? gatewayUri : 'Not Connected'}
+              </span>
+            </div>
+          </div>
+        </Dropdown.Item>
+
+        <div className={css(styles.helperContent)} style={{ marginTop: spacing.DEFAULT / 2 }}>
+          <h6>Connect to a collaborator</h6>
+
+          <HelpBlock>
+            You can view the outputs from any active collaborator. You can only run cells when your configured kernel is
+            selected.
+          </HelpBlock>
+        </div>
+
+        {(notebookUsers?.size ?? 0) <= 1 && (
+          <div className={css(styles.helperContent)}>
+            <HelpBlock>Share the notebook to add collaborators</HelpBlock>
+          </div>
+        )}
+
+        {activeUsers.map(renderUser(true))}
+        {inactiveUsers?.map(renderUser(false))}
+      </PopoverDropdown>
+
+      <Modal show={showingKernelConfig} size="xs" onHide={() => setShowingKernelConfig(false)}>
+        <KernelConnector />
+        <KernelStatus />
+        <KernelLogs />
+
+        <Modal.Footer>
+          <Button onClick={() => setShowingKernelConfig(false)} appearance="primary">
+            Done
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </React.Fragment>
   );
 };
 
