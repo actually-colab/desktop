@@ -1,14 +1,10 @@
 import * as React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import { Button, Icon, IconButton, IconProps, Tooltip, Whisper } from 'rsuite';
+import { Icon, IconButton, IconProps, Tooltip, Whisper } from 'rsuite';
 
-import { ReduxState } from '../../../types/redux';
-import { _auth } from '../../../redux/actions';
 import { palette, spacing, timing } from '../../../constants/theme';
 import { HEADER_HEIGHT, LEFT_SIDEBAR_PANEL_WIDTH, LEFT_SIDEBAR_TRAY_WIDTH } from '../../../constants/dimensions';
 import { openCompanion } from '../../../utils/redirect';
-import { UserAvatar } from '../../../components';
 
 import { KernelPanel, ProjectsPanel } from '../LeftSidebar';
 
@@ -57,11 +53,6 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
   },
-  endPanelCategories: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
   category: {
     marginBottom: spacing.DEFAULT / 2,
     borderLeftStyle: 'solid',
@@ -70,15 +61,6 @@ const styles = StyleSheet.create({
   },
   categoryActive: {
     borderLeftColor: palette.PRIMARY,
-  },
-  profilePopoverTitle: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  profilePopoverContent: {
-    display: 'flex',
-    flexDirection: 'column',
   },
   bodyContainer: {
     width: LEFT_SIDEBAR_PANEL_WIDTH,
@@ -137,23 +119,7 @@ const MENU_OPTIONS: { menuKey: MenuOption; icon: IconProps['icon']; disabled?: b
  * The left sidebar for the editor page
  */
 const LeftSidebar: React.FC = () => {
-  const user = useSelector((state: ReduxState) => state.auth.user);
-  const clientConnectionStatus = useSelector((state: ReduxState) => state.editor.clientConnectionStatus);
-
   const [activeMenuKey, setActiveMenuKey] = React.useState<MenuOption>('Projects');
-
-  const connectionColor = React.useMemo(
-    () =>
-      clientConnectionStatus === 'Connected'
-        ? palette.SUCCESS
-        : clientConnectionStatus === 'Connecting'
-        ? palette.WARNING
-        : palette.GRAY,
-    [clientConnectionStatus]
-  );
-
-  const dispatch = useDispatch();
-  const dispatchSignOut = React.useCallback(() => dispatch(_auth.signOut()), [dispatch]);
 
   const handleCategorySelect = React.useCallback(
     (menuKey: typeof activeMenuKey) => {
@@ -197,37 +163,6 @@ const LeftSidebar: React.FC = () => {
                 onClick={() => openCompanion()}
               />
             </Whisper>
-          </div>
-
-          <div className={css(styles.endPanelCategories)}>
-            {user !== null && (
-              <UserAvatar
-                placement="rightEnd"
-                user={user}
-                defaultColor={palette.CHARCOAL}
-                statusColor={connectionColor}
-                title={
-                  <div className={css(styles.profilePopoverTitle)}>
-                    <span>{user.name}</span>
-
-                    <IconButton
-                      style={{ marginLeft: spacing.DEFAULT }}
-                      appearance="subtle"
-                      icon={<Icon icon="pencil" />}
-                      disabled
-                    />
-                  </div>
-                }
-              >
-                <div className={css(styles.profilePopoverContent)}>
-                  <span>{user.email}</span>
-
-                  <Button style={{ marginTop: spacing.DEFAULT }} onClick={dispatchSignOut}>
-                    <Icon icon="sign-out" /> Logout
-                  </Button>
-                </div>
-              </UserAvatar>
-            )}
           </div>
         </div>
 
