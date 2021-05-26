@@ -7,6 +7,7 @@ import CollaboratorsPopover from './CollaboratorsPopover';
 import ActionButtons from './ActionButtons';
 import UserAvatarList from './UserAvatarList';
 import KernelSelector from './KernelSelector';
+import ProfileButton from './ProfileButton';
 
 const styles = StyleSheet.create({
   header: {
@@ -44,6 +45,8 @@ const EditorHeader: React.FC = () => {
           <div className={css(styles.padLeft)}>
             <CollaboratorsPopover />
           </div>
+
+          <ProfileButton />
         </div>
       </div>
     </Header>

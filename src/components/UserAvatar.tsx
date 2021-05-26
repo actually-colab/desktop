@@ -41,16 +41,12 @@ const UserAvatar: React.FC<{
     <div className={css(styles.container)}>
       {user.image_url ? (
         <Avatar
-          style={
-            defaultColor === undefined
-              ? {
-                  borderRadius: '50%',
-                  borderStyle: 'solid',
-                  borderWidth: 2,
-                  borderColor: userColor,
-                }
-              : undefined
-          }
+          style={{
+            borderRadius: '50%',
+            borderStyle: 'solid',
+            borderWidth: 2,
+            borderColor: defaultColor ?? userColor,
+          }}
           size="sm"
           circle
           src={user.image_url}
