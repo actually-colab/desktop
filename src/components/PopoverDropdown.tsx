@@ -63,9 +63,9 @@ const PopoverDropdown: React.FC<PopoverDropdownProps> = ({
   return (
     <div>
       <Whisper
+        ref={whisperRef}
         trigger="click"
         placement={placement}
-        ref={whisperRef}
         speaker={
           <Popover full style={{ border: '1px solid #ddd' }}>
             <Dropdown.Menu activeKey={activeKey} onSelect={handleSelect} style={menuStyle}>

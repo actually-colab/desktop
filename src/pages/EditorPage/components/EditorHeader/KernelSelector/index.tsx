@@ -1,27 +1,42 @@
 import * as React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, css } from 'aphrodite';
-import { Button, Dropdown, HelpBlock, Icon, Modal } from 'rsuite';
+import { Button, Dropdown, HelpBlock, Icon, Modal, Popover, Whisper } from 'rsuite';
+import { WhisperInstance } from 'rsuite/lib/Whisper';
 import { DUser } from '@actually-colab/editor-types';
 
-import { palette, spacing } from '../../../../constants/theme';
-import { ReduxState } from '../../../../types/redux';
-import { _editor } from '../../../../redux/actions';
-import { sortUsersByName } from '../../../../utils/notebook';
-import { COMPANION_DOWNLOADS_URI } from '../../../../utils/redirect';
-import { ImmutableNotebookAccessLevel, ImmutableUser } from '../../../../immutable';
-import useKernelStatus from '../../../../kernel/useKernelStatus';
-import { PopoverDropdown, StatusIndicator, UserAvatar } from '../../../../components';
-import KernelConnector from './KernelConfig/KernelConnector';
-import KernelStatus from './KernelConfig/KernelStatus';
-import KernelLogs from './KernelConfig/KernelLogs';
+import { palette, spacing } from '../../../../../constants/theme';
+import { ReduxState } from '../../../../../types/redux';
+import { _editor } from '../../../../../redux/actions';
+import { sortUsersByName } from '../../../../../utils/notebook';
+import { COMPANION_DOWNLOADS_URI } from '../../../../../utils/redirect';
+import { ImmutableNotebookAccessLevel, ImmutableUser } from '../../../../../immutable';
+import useKernelStatus from '../../../../../kernel/useKernelStatus';
+import { StatusIndicator, UserAvatar } from '../../../../../components';
+import KernelConnector from './KernelConnector';
+import KernelStatus from './KernelStatus';
+import KernelLogs from './KernelLogs';
 
 const styles = StyleSheet.create({
+  buttonContentContainer: {
+    display: 'inline-block',
+    width: '100%',
+  },
+  buttonContent: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  dropdownIcon: {
+    marginLeft: spacing.DEFAULT / 2,
+  },
   helperContent: {
     ...spacing.pad({
       top: spacing.DEFAULT / 2,
     }),
-    maxWidth: 318,
+    width: '100%',
   },
   helperTitleWithButton: {
     display: 'flex',
@@ -63,9 +78,12 @@ const styles = StyleSheet.create({
 });
 
 /**
- * Component allowing user to select which users' kernel to view outputs from
+ * The main content of the kernel selector popover
  */
-const KernelSelector: React.FC = () => {
+const KernelSelectorPanel: React.FC<{ closeWhisper(): void; showKernelConfig(show: boolean): void }> = ({
+  closeWhisper,
+  showKernelConfig,
+}) => {
   const { kernelStatus, kernelStatusColor } = useKernelStatus();
 
   const user = useSelector((state: ReduxState) => state.auth.user);
@@ -73,8 +91,6 @@ const KernelSelector: React.FC = () => {
   const notebookUsers = useSelector((state: ReduxState) => state.editor.notebook?.users);
   const selectedOutputsUid = useSelector((state: ReduxState) => state.editor.selectedOutputsUid);
   const gatewayUri = useSelector((state: ReduxState) => state.editor.gatewayUri);
-
-  const [showingKernelConfig, setShowingKernelConfig] = React.useState<boolean>(false);
 
   const activeUsers = React.useMemo(() => users.filter((_user) => _user.uid !== user?.uid).sort(sortUsersByName), [
     user?.uid,
@@ -90,14 +106,6 @@ const KernelSelector: React.FC = () => {
     [notebookUsers, user?.uid, users]
   );
 
-  const selectedOutputsName = React.useMemo<DUser['uid']>(
-    () =>
-      (selectedOutputsUid === ''
-        ? user?.name
-        : notebookUsers?.find((_user) => _user.uid === selectedOutputsUid)?.name) ?? '',
-    [notebookUsers, selectedOutputsUid, user?.name]
-  );
-
   const dispatch = useDispatch();
   const dispatchSelectOutputUser = React.useCallback((uid: DUser['uid']) => dispatch(_editor.selectOutputUser(uid)), [
     dispatch,
@@ -105,10 +113,16 @@ const KernelSelector: React.FC = () => {
 
   const handleKernelSelect = React.useCallback(
     (eventKey: string) => {
+      closeWhisper();
       dispatchSelectOutputUser(eventKey);
     },
-    [dispatchSelectOutputUser]
+    [closeWhisper, dispatchSelectOutputUser]
   );
+
+  const onClickConfigure = React.useCallback(() => {
+    closeWhisper();
+    showKernelConfig(true);
+  }, [closeWhisper, showKernelConfig]);
 
   const renderUser = React.useCallback(
     (active: boolean) => (_user: ImmutableUser | ImmutableNotebookAccessLevel) => (
@@ -130,30 +144,19 @@ const KernelSelector: React.FC = () => {
 
   return (
     <React.Fragment>
-      <PopoverDropdown
-        placement="bottomEnd"
-        activeKey={selectedOutputsUid}
-        appearance={selectedOutputsUid === '' ? 'default' : 'ghost'}
-        size="sm"
-        buttonContent={
-          <React.Fragment>
-            <div className={css(styles.kernelIconContainer)}>
-              {selectedOutputsUid === '' ? <StatusIndicator color={kernelStatusColor} /> : <Icon icon="eye" />}
-            </div>
-
-            {selectedOutputsUid === '' ? 'Configured Kernel' : selectedOutputsName}
-          </React.Fragment>
-        }
-        menuStyle={{
+      <Dropdown.Menu
+        style={{
+          width: 316,
           maxHeight: 400,
           overflowY: 'auto',
         }}
+        activeKey={selectedOutputsUid}
         onSelect={handleKernelSelect}
       >
         <div className={css(styles.helperContent)}>
           <div className={css(styles.helperTitleWithButton)}>
             <h6>Connect to a kernel</h6>
-            <Button appearance="primary" size="xs" onClick={() => setShowingKernelConfig(true)}>
+            <Button appearance="primary" size="xs" onClick={onClickConfigure}>
               <Icon icon="cog" />
               &nbsp;&nbsp;Configure
             </Button>
@@ -199,15 +202,94 @@ const KernelSelector: React.FC = () => {
 
         {activeUsers.map(renderUser(true))}
         {inactiveUsers?.map(renderUser(false))}
-      </PopoverDropdown>
+      </Dropdown.Menu>
+    </React.Fragment>
+  );
+};
 
-      <Modal show={showingKernelConfig} size="xs" onHide={() => setShowingKernelConfig(false)}>
+/**
+ * Content of the kernel selector button
+ */
+const KernelSelectorButton: React.FC = () => {
+  const { kernelStatusColor } = useKernelStatus();
+
+  const user = useSelector((state: ReduxState) => state.auth.user);
+  const notebookUsers = useSelector((state: ReduxState) => state.editor.notebook?.users);
+  const selectedOutputsUid = useSelector((state: ReduxState) => state.editor.selectedOutputsUid);
+
+  const selectedOutputsName = React.useMemo<DUser['uid']>(
+    () =>
+      (selectedOutputsUid === ''
+        ? user?.name
+        : notebookUsers?.find((_user) => _user.uid === selectedOutputsUid)?.name) ?? '',
+    [notebookUsers, selectedOutputsUid, user?.name]
+  );
+
+  return (
+    <div className={css(styles.buttonContentContainer)}>
+      <div className={css(styles.buttonContent)}>
+        <div className={css(styles.kernelIconContainer)}>
+          {selectedOutputsUid === '' ? <StatusIndicator color={kernelStatusColor} /> : <Icon icon="eye" />}
+        </div>
+
+        {selectedOutputsUid === '' ? 'Configured Kernel' : selectedOutputsName}
+
+        <div className={css(styles.dropdownIcon)}>
+          <Icon icon="arrow-down-line" />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/**
+ * Component allowing user to select which users' kernel to view outputs from
+ */
+const KernelSelector: React.FC = () => {
+  const whisperRef = React.useRef<WhisperInstance | null>(null);
+
+  const selectedOutputsUid = useSelector((state: ReduxState) => state.editor.selectedOutputsUid);
+
+  const [showingKernelConfig, setShowingKernelConfig] = React.useState<boolean>(false);
+
+  const closeWhisper = React.useCallback(() => {
+    whisperRef.current?.close();
+  }, []);
+
+  const showKernelConfig = React.useCallback((show: boolean) => {
+    setShowingKernelConfig(show);
+  }, []);
+
+  const onHideKernelConfig = React.useCallback(() => showKernelConfig(false), [showKernelConfig]);
+
+  return (
+    <React.Fragment>
+      <Whisper
+        ref={whisperRef}
+        trigger="click"
+        placement="bottomEnd"
+        speaker={
+          <Popover full style={{ border: '1px solid #ddd' }}>
+            <KernelSelectorPanel closeWhisper={closeWhisper} showKernelConfig={showKernelConfig} />
+          </Popover>
+        }
+      >
+        <Button
+          size="sm"
+          appearance={selectedOutputsUid === '' ? 'default' : 'ghost'}
+          style={{ alignSelf: 'flex-start' }}
+        >
+          <KernelSelectorButton />
+        </Button>
+      </Whisper>
+
+      <Modal show={showingKernelConfig} size="xs" onHide={onHideKernelConfig}>
         <KernelConnector />
         <KernelStatus />
         <KernelLogs />
 
         <Modal.Footer>
-          <Button onClick={() => setShowingKernelConfig(false)} appearance="primary">
+          <Button onClick={onHideKernelConfig} appearance="primary">
             Done
           </Button>
         </Modal.Footer>
