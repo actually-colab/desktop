@@ -27,18 +27,23 @@ jobs:
           node-version: 12
 
       - name: Install local client
+        working-directory: ./desktop
         run: 'yarn install:client:dev'
 
       - name: Install dependencies
+        working-directory: ./desktop
         run: yarn install --frozen-lockfile
 
       - name: Validation
+        working-directory: ./desktop
         run: yarn validate
 
       - name: Build site
+        working-directory: ./desktop
         run: yarn build
 
       - name: Deploy
+        working-directory: ./desktop
         run: yarn netlify deploy --prod
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
