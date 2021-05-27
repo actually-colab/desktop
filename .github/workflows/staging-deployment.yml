@@ -1,0 +1,45 @@
+name: Actually Colab Staging Deployment
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  staging:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+        with:
+          path: desktop
+
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+        with:
+          repository: actually-colab/editor
+          path: editor
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+
+      - name: Install local client
+        run: 'yarn install:client:dev'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Validation
+        run: yarn validate
+
+      - name: Build site
+        run: yarn build
+
+      - name: Deploy
+        run: yarn netlify deploy --prod
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.STAGING_NETLIFY_SITE_ID }}
