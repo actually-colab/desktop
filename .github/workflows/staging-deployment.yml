@@ -38,6 +38,17 @@ jobs:
         working-directory: ./desktop
         run: yarn validate
 
+      - name: Make .env.production.local file
+        uses: actually-colab/github-action-create-env-file@v2.3
+        with:
+          envkey_REACT_APP_BASE_URL: ${{ secrets.STAGING_REACT_APP_BASE_URL }}
+          envkey_REACT_APP_GOOGLE_CLIENT_ID: ${{ secrets.STAGING_REACT_APP_GOOGLE_CLIENT_ID }}
+          envkey_REACT_APP_AC_API_URI: ${{ secrets.STAGING_REACT_APP_AC_API_URI }}
+          envkey_REACT_APP_AC_WS_URI: ${{ secrets.STAGING_REACT_APP_AC_WS_URI }}
+
+          directory: ./desktop
+          file_name: .env.production.local
+
       - name: Build site
         working-directory: ./desktop
         run: yarn build
