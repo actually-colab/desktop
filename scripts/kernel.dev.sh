@@ -12,6 +12,6 @@ trap clean_up EXIT
 clean_up || true
 
 # Start the kernel
-jupyter notebook --NotebookApp.open_browser=False --NotebookApp.allow_origin=http://localhost:4000 --NotebookApp.token=dev &
+jupyter notebook --NotebookApp.open_browser=False --NotebookApp.allow_origin_pat="^http:\/\/localhost:4000$|^https:\/\/staging\.actuallycolab\.org$" --NotebookApp.token=dev &
 
 wait
