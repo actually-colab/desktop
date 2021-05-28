@@ -5,7 +5,7 @@ import { Button, Icon, Timeline } from 'rsuite';
 
 import { ReduxState } from '../../../../../types/redux';
 import { palette, spacing } from '../../../../../constants/theme';
-import { openCompanionDownloadsPage } from '../../../../../utils/redirect';
+import { openCompanion, openCompanionDownloadsPage } from '../../../../../utils/redirect';
 
 const styles = StyleSheet.create({
   keyText: {
@@ -44,6 +44,15 @@ const styles = StyleSheet.create({
   downloadContainer: {
     marginTop: spacing.DEFAULT / 4,
     marginBottom: spacing.DEFAULT / 2,
+  },
+  companionContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  downloadButton: {
+    flex: 1,
+    marginRight: spacing.DEFAULT,
   },
   description: {
     marginTop: spacing.DEFAULT / 4,
@@ -88,10 +97,20 @@ const KernelLogs: React.FC = () => {
       ) : (
         <React.Fragment>
           <div className={css(styles.downloadContainer)}>
-            <Button appearance="primary" block onClick={() => openCompanionDownloadsPage()}>
-              <Icon icon="download2" style={{ marginRight: spacing.DEFAULT / 2 }} />
-              Download Companion
-            </Button>
+            <div className={css(styles.companionContainer)}>
+              <Button
+                className={css(styles.downloadButton)}
+                appearance="primary"
+                onClick={() => openCompanionDownloadsPage()}
+              >
+                <Icon icon="download2" style={{ marginRight: spacing.DEFAULT / 2 }} />
+                Download Companion
+              </Button>
+              <Button onClick={() => openCompanion()}>
+                <Icon icon="related-map" style={{ marginRight: spacing.DEFAULT / 2 }} />
+                Launch
+              </Button>
+            </div>
 
             <p className={css(styles.description)}>
               Our Companion application manages the Jupyter Kernel process automatically, allowing you to run code
