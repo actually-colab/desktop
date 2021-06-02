@@ -3,7 +3,7 @@ import { KernelManager, ServerConnection } from '@jupyterlab/services';
 import { IKernelConnection } from '@jupyterlab/services/lib/kernel/kernel';
 
 import { ReduxState } from '../../types/redux';
-import { KERNEL } from '../../types/redux/editor';
+import { KERNEL, NOTEBOOKS } from '../../types/redux/editor';
 import { KernelApi } from '../../api';
 import { BaseKernelOutput, KernelOutput } from '../../types/notebook';
 import { IpynbOutput } from '../../types/ipynb';
@@ -12,16 +12,33 @@ import { syncSleep } from '../../utils/sleep';
 import { httpToWebSocket } from '../../utils/request';
 import { KernelTokenStorage } from '../../utils/storage';
 import { ReduxActions, _editor, _ui } from '../actions';
+import { connectToKernelIfReady } from './helpers/ReduxKernel';
 
 export let settings: ServerConnection.ISettings | null = null;
 export let kernelManager: KernelManager | null = null;
 export let kernel: IKernelConnection | null = null;
 
 /**
+ * Safely dispose of the kernel manager
+ */
+const disposeOfKernelManager = (): void => {
+  try {
+    if (!kernelManager?.isDisposed && kernelManager?.isReady) {
+      kernelManager.dispose();
+    }
+  } catch (error) {
+    console.error(error);
+  }
+
+  kernelManager = null;
+};
+
+/**
  * A redux middleware to manage the Jupyter Kernel
  */
 const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => {
   let kernelUri: string = '';
+  let connectionTimeout: NodeJS.Timeout | null = null;
 
   /**
    * Attempt to shutdown the kernel on page exit
@@ -35,16 +52,89 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
     } catch (error) {}
   };
 
+  /**
+   * Clear the connection timeout
+   */
+  const clearConnectionTimeout = (): void => {
+    if (connectionTimeout !== null) {
+      clearTimeout(connectionTimeout);
+      connectionTimeout = null;
+    }
+  };
+
   return (store) => (next) => (action: ReduxActions) => {
     switch (action.type) {
+      /**
+       * The user opened a notebook successfully
+       */
+      case NOTEBOOKS.OPEN.SUCCESS: {
+        next(action);
+
+        clearConnectionTimeout();
+
+        // Attempt to connect to a kernel if auto connect enabled
+        if (store.getState().editor.autoConnectToKernel) {
+          connectToKernelIfReady(store, true);
+        }
+        return;
+      }
+
+      /**
+       * Changed editing the kernel connection
+       */
+      case KERNEL.GATEWAY.EDIT: {
+        next(action);
+
+        // Cancel the connection timeout
+        clearConnectionTimeout();
+
+        if (action.editing) {
+          // Disconnect from a kernel if there is one
+          if (kernel !== null) {
+            store.dispatch(_editor.disconnectFromKernel());
+          }
+        } else {
+          // Attempt to connect to a kernel if auto connect enabled
+          if (store.getState().editor.autoConnectToKernel) {
+            connectToKernelIfReady(store, true);
+          }
+        }
+        return;
+      }
+
+      /**
+       * The user toggled auto connect
+       */
+      case KERNEL.CONNECT.AUTO: {
+        next(action);
+
+        if (action.enable) {
+          connectToKernelIfReady(store, true);
+        } else {
+          clearConnectionTimeout();
+        }
+        return;
+      }
+
       /**
        * Started connecting to the kernel
        */
       case KERNEL.CONNECT.START: {
-        if (kernel !== null) {
-          console.error('Already connected to kernel');
+        if (kernel !== null || kernelManager !== null) {
+          if (LOG_LEVEL === 'verbose') {
+            console.error('Already connected to kernel');
+          }
           return; // Cancel the action
         }
+
+        if (store.getState().editor.isEditingGateway) {
+          if (LOG_LEVEL === 'verbose') {
+            console.error('Cannot connect while editing the kernel gateway');
+          }
+          return; // Cancel the action
+        }
+
+        clearConnectionTimeout();
 
         next(action);
 
@@ -134,6 +224,8 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
                 kernel = null;
                 kernelUri = '';
 
+                disposeOfKernelManager();
+
                 store.dispatch(_editor.disconnectFromKernelSuccess());
               } else if (newKernel.status === 'idle' || newKernel.status === 'busy') {
                 if (disconnected) {
@@ -166,13 +258,7 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
               })
             );
           } else {
-            try {
-              kernelManager.dispose();
-            } catch (error) {
-              console.error(error);
-            }
-
-            kernelManager = null;
+            disposeOfKernelManager();
 
             if (action.displayError) {
               store.dispatch(
@@ -186,6 +272,11 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
             }
 
             store.dispatch(_editor.connectToKernelFailure(res.error.message));
+
+            // Refresh the timeout if auto connect is enabled
+            if (store.getState().editor.autoConnectToKernel && connectionTimeout === null) {
+              connectionTimeout = setTimeout(() => connectToKernelIfReady(store), 5000);
+            }
           }
         })();
         break;
@@ -196,7 +287,9 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
        */
       case KERNEL.DISCONNECT.START: {
         if (kernel === null) {
-          console.log('Not connected to a kernel');
+          if (LOG_LEVEL === 'verbose') {
+            console.log('Not connected to a kernel');
+          }
           return; // Cancel the action
         }
 
@@ -213,6 +306,8 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
             kernel.dispose();
           }
 
+          disposeOfKernelManager();
+
           // Kernel does not need to be shutdown on close
           window.removeEventListener('beforeunload', shutdownOnUnmount);
 
@@ -228,6 +323,11 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
           kernelUri = '';
 
           store.dispatch(_editor.disconnectFromKernelSuccess());
+
+          // Auto connect if enabled
+          if (store.getState().editor.autoConnectToKernel && connectionTimeout === null) {
+            connectionTimeout = setTimeout(() => connectToKernelIfReady(store), 5000);
+          }
         })();
         break;
       }
@@ -245,7 +345,10 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
           try {
             await kernel.restart();
 
-            console.log('Kernel was restarted');
+            if (LOG_LEVEL === 'verbose') {
+              console.log('Kernel was restarted');
+            }
+
             store.dispatch(_editor.restartKernelSuccess());
           } catch (error) {
             console.error(error);
@@ -437,12 +540,16 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
        */
       case KERNEL.INTERRUPT.START: {
         if (kernel === null) {
-          console.error('Not connected to a kernel');
+          if (LOG_LEVEL === 'verbose') {
+            console.error('Not connected to a kernel');
+          }
           return; // Cancel the action
         }
 
         if (!store.getState().editor.isExecutingCode) {
-          console.log('No cell to interrupt');
+          if (LOG_LEVEL === 'verbose') {
+            console.log('No cell to interrupt');
+          }
           return; // Cancel the action
         }
 
@@ -452,7 +559,10 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
           try {
             await kernel.interrupt();
 
-            console.log('Kernel was interrupted');
+            if (LOG_LEVEL === 'verbose') {
+              console.log('Kernel was interrupted');
+            }
+
             store.dispatch(_editor.interruptKernelSuccess(action.cell_id));
           } catch (error) {
             console.error(error);

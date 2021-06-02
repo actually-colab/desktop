@@ -5,7 +5,6 @@ import { Modal } from 'rsuite';
 
 import { ReduxState } from '../../types/redux';
 import { palette } from '../../constants/theme';
-import useKernel from '../../kernel/useKernel';
 
 import { EditorBody, EditorHeader, LeftSidebar, RightSidebar } from './components';
 
@@ -39,16 +38,6 @@ const styles = StyleSheet.create({
     display: 'flex',
   },
 });
-
-/**
- * Attach high level helpers that shouldn't trigger re-renders
- */
-const Helpers: React.FC = () => {
-  // Include the kernel manager once
-  useKernel();
-
-  return null;
-};
 
 /**
  * An overlay that prevents interaction while connecting to the server
@@ -85,7 +74,6 @@ const ConnectionOverlay: React.FC = () => {
 const EditorPage: React.FC = () => {
   return (
     <div className={css(styles.container)}>
-      <Helpers />
       <LeftSidebar />
 
       <div className={css(styles.pageContainer)}>
