@@ -112,7 +112,10 @@ const ReduxEditorClient = (): Middleware<Record<string, unknown>, ReduxState, an
 
             if (notebook) {
               // Force reopen the notebook if possible
-              console.log('Reopening notebook', notebook.nb_id);
+              if (LOG_LEVEL === 'verbose') {
+                console.log('Reopening notebook', notebook.nb_id);
+              }
+
               store.dispatch(_editor.openNotebook(notebook.nb_id, true));
             }
 

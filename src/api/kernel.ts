@@ -2,6 +2,7 @@ import { KernelManager, KernelSpecAPI, ServerConnection } from '@jupyterlab/serv
 import { IKernelConnection } from '@jupyterlab/services/lib/kernel/kernel';
 
 import { GATEWAY_BASE_URI } from '../constants/jupyter';
+import { LOG_LEVEL } from '../constants/logging';
 
 const GATEWAY_STEM = `${GATEWAY_BASE_URI}:`;
 
@@ -41,8 +42,10 @@ export const connectToKernel = async (
   try {
     kernelSpecs = await KernelSpecAPI.getSpecs(settings);
   } catch (error) {
-    console.log('Error fetching kernel specs');
-    console.error(error);
+    if (LOG_LEVEL === 'verbose') {
+      console.log('Error fetching kernel specs');
+      console.error(error);
+    }
 
     if (error.message === 'Forbidden') {
       return {
@@ -61,21 +64,27 @@ export const connectToKernel = async (
     };
   }
 
-  console.log('Available kernelspecs', kernelSpecs);
+  if (LOG_LEVEL === 'verbose') {
+    console.log('Available kernelspecs', kernelSpecs);
+  }
 
   try {
     const kernel = await kernelManager.startNew({
       name: 'python3',
     });
 
-    console.log('Kernel started');
+    if (LOG_LEVEL === 'verbose') {
+      console.log('Kernel started');
+    }
     return {
       success: true,
       kernel,
     };
   } catch (error) {
-    console.log('Error starting new kernel');
-    console.error(error);
+    if (LOG_LEVEL === 'verbose') {
+      console.log('Error starting new kernel');
+      console.error(error);
+    }
 
     return {
       success: false,

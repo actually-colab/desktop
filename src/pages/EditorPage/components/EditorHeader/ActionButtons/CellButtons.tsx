@@ -5,8 +5,9 @@ import { Button, Divider, Dropdown, Modal } from 'rsuite';
 import { EditorCell } from '../../../../../types/notebook';
 import { ReduxState } from '../../../../../types/redux';
 import { _editor } from '../../../../../redux/actions';
-import { PopoverDropdown, RegularIconButton } from '../../../../../components';
 import { palette } from '../../../../../constants/theme';
+import { LOG_LEVEL } from '../../../../../constants/logging';
+import { PopoverDropdown, RegularIconButton } from '../../../../../components';
 
 const CellButtons: React.FC = () => {
   const user = useSelector((state: ReduxState) => state.auth.user);
@@ -88,7 +89,11 @@ const CellButtons: React.FC = () => {
         tooltipDirection="bottom"
         loading={false}
         disabled={true}
-        onClick={() => console.log('TODO')}
+        onClick={() => {
+          if (LOG_LEVEL === 'verbose') {
+            console.log('TODO');
+          }
+        }}
       />
       <RegularIconButton
         size="sm"
@@ -97,7 +102,11 @@ const CellButtons: React.FC = () => {
         tooltipDirection="bottom"
         loading={false}
         disabled={true}
-        onClick={() => console.log('TODO')}
+        onClick={() => {
+          if (LOG_LEVEL === 'verbose') {
+            console.log('TODO');
+          }
+        }}
       />
       <RegularIconButton
         size="sm"
