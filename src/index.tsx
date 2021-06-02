@@ -2,12 +2,16 @@ import * as React from 'react';
 import ReactDOM from 'react-dom';
 import * as Sentry from '@sentry/react';
 
+import { LOG_LEVEL } from './constants/logging';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
 if (process.env.NODE_ENV === 'production' && process.env.REACT_APP_SENTRY_DSN && process.env.REACT_APP_SENTRY_RELEASE) {
   // Initialize Sentry
-  console.log('Initializing Sentry', { release: process.env.REACT_APP_SENTRY_RELEASE });
+  if (LOG_LEVEL === 'verbose') {
+    console.log('Initializing Sentry', { release: process.env.REACT_APP_SENTRY_RELEASE });
+  }
+
   Sentry.init({
     dsn: process.env.REACT_APP_SENTRY_DSN,
     release: process.env.REACT_APP_SENTRY_RELEASE,

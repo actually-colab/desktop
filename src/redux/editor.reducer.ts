@@ -7,6 +7,7 @@ import { ImmutableMapOf } from '../types/immutable';
 import { ClientConnectionStatus } from '../types/client';
 import { EditorCell } from '../types/notebook';
 import { Kernel } from '../types/kernel';
+import { LOG_LEVEL } from '../constants/logging';
 import { DEFAULT_GATEWAY_URI } from '../constants/jupyter';
 import {
   ImmutableChatMessage,
@@ -1102,7 +1103,10 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
      */
     case CELL.ADD.SUCCESS: {
       if (state.notebook === null) {
-        console.error('Notebook was null');
+        if (LOG_LEVEL === 'verbose') {
+          console.error('Notebook was null');
+        }
+
         return state;
       }
 
@@ -1144,7 +1148,10 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
      */
     case CELL.DELETE.SUCCESS: {
       if (state.notebook === null) {
-        console.error('Notebook was null');
+        if (LOG_LEVEL === 'verbose') {
+          console.error('Notebook was null');
+        }
+
         return state;
       }
 
@@ -1300,7 +1307,10 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
      */
     case CELL.SELECT.NEXT: {
       if (state.notebook === null) {
-        console.error('Notebook was null');
+        if (LOG_LEVEL === 'verbose') {
+          console.error('Notebook was null');
+        }
+
         return state;
       }
 
@@ -1360,7 +1370,10 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
      */
     case KERNEL.EXECUTE.START: {
       if (state.runningCellId !== '') {
-        console.error('Attempted to run a cell when one is already running!');
+        if (LOG_LEVEL === 'verbose') {
+          console.error('Attempted to run a cell when one is already running!');
+        }
+
         return state;
       }
 

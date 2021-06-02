@@ -2,6 +2,7 @@
  * Based on @nteract/monaco-editor
  */
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import { LOG_LEVEL } from '../../constants/logging';
 import { kernel } from '../../redux/middleware/ReduxKernel';
 import { CompletionMatch, CompletionResults, js_idx_to_char_idx } from '../../utils/completions';
 
@@ -56,7 +57,9 @@ class CompletionItemProvider implements monaco.languages.CompletionItemProvider 
           items = this.adaptToMonacoCompletions(completions.content, model);
         }
       } catch (error) {
-        console.error(error);
+        if (LOG_LEVEL === 'verbose') {
+          console.error(error);
+        }
       }
     }
 

@@ -337,7 +337,9 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
        */
       case KERNEL.RESTART.START: {
         if (kernel === null) {
-          console.error('Not connected to a kernel');
+          if (LOG_LEVEL === 'verbose') {
+            console.error('Not connected to a kernel');
+          }
           return; // Cancel the action
         }
 
@@ -387,12 +389,16 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
        */
       case KERNEL.EXECUTE.START: {
         if (kernel === null) {
-          console.error('Not connected to a kernel');
+          if (LOG_LEVEL === 'verbose') {
+            console.error('Not connected to a kernel');
+          }
           return; // Cancel the action
         }
 
         if (store.getState().editor.isExecutingCode) {
-          console.error('Already executing code');
+          if (LOG_LEVEL === 'verbose') {
+            console.error('Already executing code');
+          }
           return; // Cancel the action
         }
 
