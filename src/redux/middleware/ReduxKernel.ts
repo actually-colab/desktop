@@ -167,14 +167,6 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
             // Remember the token in local storage
             KernelTokenStorage.set(action.token);
 
-            store.dispatch(
-              _editor.connectToKernelSuccess({
-                uri: action.uri,
-                id: kernel.id,
-                status: 'Idle',
-              })
-            );
-
             // Allows us to track if the kernel was in the disconnect state before this message
             let disconnected = false;
 
@@ -250,6 +242,23 @@ const ReduxKernel = (): Middleware<Record<string, unknown>, ReduxState, any> => 
                 }
               }
             });
+
+            store.dispatch(
+              _ui.notify({
+                level: 'success',
+                title: 'Connected to kernel',
+                message: 'The kernel is connected and ready to use!',
+                duration: 3000,
+              })
+            );
+
+            store.dispatch(
+              _editor.connectToKernelSuccess({
+                uri: action.uri,
+                id: kernel.id,
+                status: 'Idle',
+              })
+            );
 
             store.dispatch(
               _editor.appendKernelLog({
