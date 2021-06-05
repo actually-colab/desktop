@@ -1342,6 +1342,11 @@ const reducer = (state = initialState, action: ReduxActions): EditorState => {
      * Add a cell to the execution queue
      */
     case KERNEL.EXECUTE.QUEUE: {
+      // Do not add to queue if no kernel is connected, viewing another user, or not python
+      if ((state.kernel?.status !== 'Idle' && state.kernel?.status !== 'Busy') || state.selectedOutputsUid !== '') {
+        return state;
+      }
+
       // Do not add the currently running cell to the queue
       if (state.runningCellId === action.cell_id) {
         return state;
