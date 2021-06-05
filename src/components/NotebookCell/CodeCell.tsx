@@ -92,6 +92,7 @@ const CodeCell: React.FC<{
     };
   }, shallowEqual);
 
+  const [editorNonce, setEditorNonce] = React.useState<number>(-1);
   const [showCursorLabel, setShowCursorLabel] = React.useState<boolean>(false);
 
   const userColor = React.useMemo(() => (lock_held_by ? getUserColor(lock_held_by) : ''), [lock_held_by]);
@@ -167,8 +168,26 @@ const CodeCell: React.FC<{
     [onChange, ownsLock]
   );
 
+  const addRunCommand = React.useCallback(() => {
+    editorRef.current?.addCommand(monaco.KeyMod.WinCtrl | monaco.KeyCode.Enter, () => {
+      if (language === 'python') {
+        dispatch(_editor.addCellToQueue(cell_id));
+      } else {
+        dispatch(
+          _editor.editCell(cell_id, {
+            metaChanges: {
+              rendered: true,
+            },
+          })
+        );
+      }
+    });
+  }, [cell_id, dispatch, language]);
+
   const handleEditorCreated = React.useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
     editorRef.current = editor;
+
+    setEditorNonce(Date.now());
   }, []);
 
   const handleFocusChange = React.useCallback(
@@ -254,6 +273,15 @@ const CodeCell: React.FC<{
       replaceDecorations();
     }
   }, [cursor.col, cursor.row, ownsLock, replaceDecorations]);
+
+  /**
+   * Add the run cell command shortcut when editor is ready
+   */
+  React.useEffect(() => {
+    if (editorNonce) {
+      addRunCommand();
+    }
+  }, [addRunCommand, editorNonce]);
 
   // Do not render if markdown is rendered
   if (language === 'markdown' && rendered) {
