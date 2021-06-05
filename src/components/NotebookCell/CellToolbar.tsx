@@ -174,7 +174,12 @@ const CellToolbar: React.FC<{
       </div>
 
       <div className={css(styles.cellToolbarEnd)}>
-        <Timer active={isRunning} hidden={selectedOutputsUid !== ''} alwaysRender={runIndex !== -1} nonce={runIndex} />
+        <Timer
+          active={isRunning}
+          hidden={selectedOutputsUid !== '' || language !== 'python'}
+          alwaysRender={runIndex !== -1}
+          nonce={runIndex}
+        />
 
         <Whisper
           ref={menuRef}
