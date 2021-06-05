@@ -36,6 +36,14 @@ const OutputCell: React.FC<{ cell_id: EditorCell['cell_id'] }> = ({ cell_id }) =
       state.editor.outputs.get(cell_id)?.get(selectedOutputsUid)?.get(runIndex.toString()) ??
       ImmutableList<ImmutableKernelOutput>()
   );
+  const language = useSelector(
+    (state: ReduxState) => state.editor.cells.get(cell_id)?.language ?? 'python',
+    shallowEqual
+  );
+
+  if (language !== 'python') {
+    return null;
+  }
 
   return (
     <div className={css(styles.container)}>
