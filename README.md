@@ -205,7 +205,7 @@ Become a sponsor and we'll add your logo to our README and link to you on our we
 
 ## Maintainers
 
-- [Jeff TC](https://github.com/jeffrey-tc)
+- [Jeff TC](https://github.com/jtaylorchang)
 - [Bailey Tincher](https://github.com/baileytincher)
 
 ## License
